@@ -29,7 +29,288 @@ const createScene = () => {
     0.68,
     0.82,
     0.93
+  ); 
+    // MAP GAME - Alpha 0.0.5 touch controls add-on
+// Paste this into your current working game.js after your sidebar/shop UI is created.
+
+// =========================================================
+// TOUCH CONTROLS
+// =========================================================
+
+const touchControls = document.createElement("div");
+
+touchControls.style.cssText = `
+  position:absolute;
+  right:18px;
+  bottom:18px;
+
+  display:grid;
+  grid-template-columns:54px 54px 54px;
+  grid-template-rows:54px 54px 54px;
+  gap:6px;
+
+  z-index:70;
+`;
+
+document.body.appendChild(touchControls);
+
+function makeTouchButton(text, col, row) {
+  const button = document.createElement("button");
+
+  button.innerText = text;
+
+  button.style.cssText = `
+    grid-column:${col};
+    grid-row:${row};
+
+    width:54px;
+    height:54px;
+
+    border-radius:13px;
+
+    border:
+      1px solid
+      rgba(90,215,255,0.42);
+
+    background:
+      rgba(5,14,25,0.82);
+
+    box-shadow:
+      0 0 15px
+      rgba(0,170,255,0.12);
+
+    color:white;
+
+    font-size:22px;
+    font-weight:bold;
+
+    touch-action:none;
+    user-select:none;
+
+    cursor:pointer;
+  `;
+
+  touchControls.appendChild(button);
+
+  return button;
+}
+
+const touchUp =
+  makeTouchButton("▲", 2, 1);
+
+const touchLeft =
+  makeTouchButton("◀", 1, 2);
+
+const touchRight =
+  makeTouchButton("▶", 3, 2);
+
+const touchDown =
+  makeTouchButton("▼", 2, 3);
+
+const touchMove = {
+  up: false,
+  down: false,
+  left: false,
+  right: false
+};
+
+function bindHoldButton(button, direction) {
+  button.addEventListener(
+    "pointerdown",
+    (event) => {
+      event.preventDefault();
+
+      touchMove[direction] = true;
+
+      button.style.background =
+        "rgba(30,150,220,0.9)";
+
+      try {
+        button.setPointerCapture(
+          event.pointerId
+        );
+      } catch {}
+    }
   );
+
+  function stop() {
+    touchMove[direction] = false;
+
+    button.style.background =
+      "rgba(5,14,25,0.82)";
+  }
+
+  button.addEventListener(
+    "pointerup",
+    stop
+  );
+
+  button.addEventListener(
+    "pointercancel",
+    stop
+  );
+
+  button.addEventListener(
+    "lostpointercapture",
+    stop
+  );
+}
+
+bindHoldButton(
+  touchUp,
+  "up"
+);
+
+bindHoldButton(
+  touchDown,
+  "down"
+);
+
+bindHoldButton(
+  touchLeft,
+  "left"
+);
+
+bindHoldButton(
+  touchRight,
+  "right"
+);
+
+// =========================================================
+// TOUCH CONSTRUCTION ACTION BUTTONS
+// =========================================================
+
+const touchActions =
+  document.createElement("div");
+
+touchActions.style.cssText = `
+  position:absolute;
+
+  right:18px;
+  bottom:190px;
+
+  display:none;
+  flex-direction:column;
+  gap:8px;
+
+  z-index:70;
+`;
+
+document.body.appendChild(
+  touchActions
+);
+
+function makeActionButton(text) {
+  const button =
+    document.createElement("button");
+
+  button.innerText = text;
+
+  button.style.cssText = `
+    min-width:110px;
+
+    padding:
+      10px 14px;
+
+    border-radius:9px;
+
+    border:
+      1px solid
+      rgba(80,210,255,0.4);
+
+    background:
+      rgba(6,15,27,0.9);
+
+    color:white;
+
+    font-weight:bold;
+
+    touch-action:none;
+
+    cursor:pointer;
+  `;
+
+  touchActions.appendChild(
+    button
+  );
+
+  return button;
+}
+
+const rotateTouchButton =
+  makeActionButton(
+    "ROTATE"
+  );
+
+const cancelTouchButton =
+  makeActionButton(
+    "CANCEL"
+  );
+
+// =========================================================
+// CAMERA MOVEMENT PATCH
+// Replace your old camera movement checks with these.
+// =========================================================
+
+/*
+if (
+  keys["w"] ||
+  keys["arrowup"] ||
+  touchMove.up
+) {
+  camera.target.z += speed;
+}
+
+if (
+  keys["s"] ||
+  keys["arrowdown"] ||
+  touchMove.down
+) {
+  camera.target.z -= speed;
+}
+
+if (
+  keys["a"] ||
+  keys["arrowleft"] ||
+  touchMove.left
+) {
+  camera.target.x -= speed;
+}
+
+if (
+  keys["d"] ||
+  keys["arrowright"] ||
+  touchMove.right
+) {
+  camera.target.x += speed;
+}
+*/
+
+// =========================================================
+// WHEN BUILD MODE STARTS
+// =========================================================
+
+/*
+touchActions.style.display = "flex";
+*/
+
+// =========================================================
+// WHEN BUILD MODE ENDS
+// =========================================================
+
+/*
+touchActions.style.display = "none";
+*/
+
+// =========================================================
+// CLEANUP
+// Add these lines to your scene cleanup section.
+// =========================================================
+
+/*
+touchControls.remove();
+touchActions.remove();
+*/
 
   // =========================================================
   // CAMERA
