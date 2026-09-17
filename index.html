@@ -1,29 +1,76 @@
-
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+
+  <meta
+    name="theme-color"
+    content="#07101a"
+  />
+
+  <meta
+    name="description"
+    content="Map Game - 3D civilization strategy game"
   />
 
   <title>Map Game</title>
 
-  <link
-    rel="stylesheet"
-    href="styles.css"
+  <!-- Prevent aggressive caching while developing -->
+  <meta
+    http-equiv="Cache-Control"
+    content="no-cache, no-store, must-revalidate"
   />
 
-  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <meta
+    http-equiv="Pragma"
+    content="no-cache"
+  />
+
+  <meta
+    http-equiv="Expires"
+    content="0"
+  />
+
+  <link
+    rel="stylesheet"
+    href="styles.css?v=101"
+  />
+
+  <!-- Babylon.js -->
+  <script
+    src="https://cdn.babylonjs.com/babylon.js"
+    defer
+  ></script>
+
+  <!-- Your game -->
+  <script
+    src="game.js?v=101"
+    defer
+  ></script>
 </head>
 
 <body>
 
-  <canvas id="gameCanvas"></canvas>
+  <div id="loadingScreen">
+    <div class="loading-title">
+      MAP GAME
+    </div>
 
-  <script src="game.js"></script>
+    <div class="loading-subtitle">
+      Loading civilization world...
+    </div>
+  </div>
+
+  <canvas
+    id="gameCanvas"
+    tabindex="0"
+    aria-label="Map Game 3D world"
+  ></canvas>
 
 </body>
 </html>
