@@ -1,6 +1,6 @@
 // ============================================================
-// MAP GAME — Alpha 0.0.6
-// WORLD EXPANSION + UI POLISH
+// MAP GAME — Alpha 0.0.7
+// CONSTRUCTION CORE + CENTRAL WORLD HOME
 //
 // Goal:
 // - Make the "Basic" preset look genuinely good.
@@ -10,6 +10,7 @@
 // - Improve the entire HUD / panel language so it feels like one game.
 //
 // Replace your current game.js with this file.
+// Build 0.0.7: Central World home + real construction placement.
 // Your existing index.html + styles.css can stay the same.
 // ============================================================
 
@@ -61,7 +62,21 @@ const createScene = () => {
   let townHallLevel = 1;
 
   const SAVE_KEY =
-    "mapGame_alpha006_world_ui";
+    "mapGame_alpha007_construction";
+
+  // Gameplay data stays separate from Babylon meshes.
+  // That makes future Basic / Regular / Deep / Hyper switching much safer.
+  let placedBuildings = [];
+  let nextBuildingId = 1;
+
+  let buildMode = null;
+  let buildGhost = null;
+  let buildGhostValid = false;
+  let buildRotation = 0;
+
+  // Planned account-level cap for player-created PRIVATE worlds.
+  // This is only a UI/design constant for now; the real server will enforce it later.
+  const PRIVATE_WORLD_LIMIT = 3;
 
   // =========================================================
   // GRAPHICS TARGET
@@ -1084,6 +1099,7 @@ const createScene = () => {
       interactiveType:
         type,
       displayName,
+      blocksConstruction: true,
       ...data
     };
 
@@ -2217,7 +2233,7 @@ const createScene = () => {
             opacity:0.48;
           "
         >
-          ALPHA 0.0.6 • BASIC VISUAL TARGET
+          ALPHA 0.0.7 • CONSTRUCTION CORE
         </div>
       </div>
     </div>
@@ -3185,6 +3201,87 @@ const createScene = () => {
     );
   }
 
+
+  // =========================================================
+  // BUILD MODE ACTION CONTROLS
+  // =========================================================
+
+  const buildActionControls =
+    document.createElement(
+      "div"
+    );
+
+  buildActionControls.style.cssText = `
+    position:absolute;
+    right:18px;
+    bottom:248px;
+
+    display:none;
+    flex-direction:column;
+    gap:7px;
+
+    z-index:96;
+  `;
+
+  document.body.appendChild(
+    buildActionControls
+  );
+
+  function createBuildActionButton(
+    label
+  ) {
+    const button =
+      document.createElement(
+        "button"
+      );
+
+    button.innerText =
+      label;
+
+    button.style.cssText = `
+      min-width:112px;
+
+      padding:
+        9px 12px;
+
+      border:
+        1px solid
+        rgba(90,215,255,0.30);
+
+      border-radius:9px;
+
+      background:
+        rgba(5,14,25,0.88);
+
+      color:white;
+
+      font-size:11px;
+      font-weight:bold;
+
+      cursor:pointer;
+      touch-action:none;
+
+      backdrop-filter:
+        blur(6px);
+    `;
+
+    buildActionControls.appendChild(
+      button
+    );
+
+    return button;
+  }
+
+  const rotateBuildButton =
+    createBuildActionButton(
+      "↻ ROTATE"
+    );
+
+  const cancelBuildButton =
+    createBuildActionButton(
+      "✕ CANCEL"
+    );
+
   // =========================================================
   // CONSTRUCTION TERMINAL
   // =========================================================
@@ -3230,6 +3327,8 @@ const createScene = () => {
       {
         name:
           "Iron Mine",
+        buildType:
+          "ironMine",
         type:
           "RESOURCE EXTRACTION",
         cost: 750,
@@ -3243,6 +3342,8 @@ const createScene = () => {
       {
         name:
           "Steel Mill",
+        buildType:
+          "steelMill",
         type:
           "HEAVY INDUSTRY",
         cost: 1200,
@@ -3256,6 +3357,8 @@ const createScene = () => {
       {
         name:
           "Fabrication Plant",
+        buildType:
+          "fabricationPlant",
         type:
           "MANUFACTURING",
         cost: 1800,
@@ -3269,6 +3372,8 @@ const createScene = () => {
       {
         name:
           "Warehouse",
+        buildType:
+          "warehouse",
         type:
           "STORAGE",
         cost: 650,
@@ -3285,6 +3390,8 @@ const createScene = () => {
       {
         name:
           "Residential Block",
+        buildType:
+          "residential",
         type:
           "RESIDENTIAL",
         cost: 500,
@@ -3298,6 +3405,8 @@ const createScene = () => {
       {
         name:
           "Commercial Center",
+        buildType:
+          "commercial",
         type:
           "COMMERCIAL",
         cost: 900,
@@ -3330,6 +3439,8 @@ const createScene = () => {
       {
         name:
           "Power Plant",
+        buildType:
+          "powerPlant",
         type:
           "ENERGY",
         cost: 950,
@@ -3343,6 +3454,8 @@ const createScene = () => {
       {
         name:
           "Grid Substation",
+        buildType:
+          "substation",
         type:
           "POWER GRID",
         cost: 700,
@@ -3385,6 +3498,8 @@ const createScene = () => {
       {
         name:
           "Power Pylon",
+        buildType:
+          "pylon",
         type:
           "UTILITIES",
         cost: 220,
@@ -3397,6 +3512,1083 @@ const createScene = () => {
       }
     ]
   };
+
+
+  // =========================================================
+  // CONSTRUCTION CORE
+  // =========================================================
+
+  const buildingDefinitions = {
+    ironMine: {
+      name: "Iron Mine",
+      width: 28,
+      depth: 24,
+      height: 8,
+      cost: 750,
+      production: "+3 Iron / cycle",
+      consumption: "-1 Power"
+    },
+
+    steelMill: {
+      name: "Steel Mill",
+      width: 36,
+      depth: 28,
+      height: 11,
+      cost: 1200,
+      production: "+1 Steel / cycle",
+      consumption: "-3 Iron, -2 Power"
+    },
+
+    fabricationPlant: {
+      name: "Fabrication Plant",
+      width: 30,
+      depth: 24,
+      height: 9,
+      cost: 1800,
+      production: "Advanced manufacturing",
+      consumption: "-4 Power"
+    },
+
+    warehouse: {
+      name: "Warehouse",
+      width: 28,
+      depth: 22,
+      height: 8,
+      cost: 650,
+      production: "Storage infrastructure"
+    },
+
+    residential: {
+      name: "Residential Block",
+      width: 18,
+      depth: 18,
+      height: 14,
+      cost: 500,
+      production: "+500 population capacity"
+    },
+
+    commercial: {
+      name: "Commercial Center",
+      width: 22,
+      depth: 20,
+      height: 17,
+      cost: 900,
+      production: "Commercial income"
+    },
+
+    powerPlant: {
+      name: "Power Plant",
+      width: 34,
+      depth: 28,
+      height: 11,
+      cost: 950,
+      production: "+8 Power / cycle"
+    },
+
+    substation: {
+      name: "Grid Substation",
+      width: 22,
+      depth: 18,
+      height: 6,
+      cost: 700,
+      production: "Power-grid infrastructure"
+    },
+
+    pylon: {
+      name: "Power Pylon",
+      width: 10,
+      depth: 10,
+      height: 20,
+      cost: 220,
+      production: "Power-grid infrastructure"
+    }
+  };
+
+  const ghostGoodMat =
+    new BABYLON.StandardMaterial(
+      "ghostGoodMat",
+      scene
+    );
+
+  ghostGoodMat.diffuseColor =
+    new BABYLON.Color3(
+      0.10,
+      0.92,
+      0.48
+    );
+
+  ghostGoodMat.emissiveColor =
+    new BABYLON.Color3(
+      0.03,
+      0.32,
+      0.13
+    );
+
+  ghostGoodMat.alpha = 0.44;
+
+  const ghostBadMat =
+    new BABYLON.StandardMaterial(
+      "ghostBadMat",
+      scene
+    );
+
+  ghostBadMat.diffuseColor =
+    new BABYLON.Color3(
+      0.95,
+      0.13,
+      0.16
+    );
+
+  ghostBadMat.emissiveColor =
+    new BABYLON.Color3(
+      0.32,
+      0.02,
+      0.03
+    );
+
+  ghostBadMat.alpha = 0.44;
+
+  const blockedInfrastructureZones = [
+    // Main roads
+    { x: 0, z: -70, width: 20, depth: 475, rotation: 0 },
+    { x: 0, z: -65, width: 505, depth: 20, rotation: 0 },
+    { x: 285, z: -115, width: 18, depth: 275, rotation: 0 },
+    { x: -280, z: 25, width: 18, depth: 285, rotation: 0 },
+    { x: 0, z: 285, width: 505, depth: 19, rotation: 0 },
+    { x: -250, z: -230, width: 18, depth: 245, rotation: -Math.PI / 7 },
+    { x: 310, z: 270, width: 18, depth: 265, rotation: -Math.PI / 12 },
+
+    // River and lake
+    { x: -270, z: 125, width: 305, depth: 48, rotation: Math.PI / 20 },
+    { x: 0, z: 150, width: 335, depth: 52, rotation: -Math.PI / 28 },
+    { x: 300, z: 175, width: 315, depth: 48, rotation: Math.PI / 18 },
+    { x: -365, z: 330, width: 158, depth: 108, rotation: Math.PI / 10 }
+  ];
+
+  function getRotatedFootprint(
+    definition,
+    rotation
+  ) {
+    const turns =
+      Math.round(
+        rotation /
+        (Math.PI / 2)
+      );
+
+    const odd =
+      Math.abs(turns % 2) === 1;
+
+    return odd
+      ? {
+          width: definition.depth,
+          depth: definition.width
+        }
+      : {
+          width: definition.width,
+          depth: definition.depth
+        };
+  }
+
+  function pointInRotatedRectangle(
+    px,
+    pz,
+    cx,
+    cz,
+    width,
+    depth,
+    rotation
+  ) {
+    const dx = px - cx;
+    const dz = pz - cz;
+
+    const cos =
+      Math.cos(-rotation);
+
+    const sin =
+      Math.sin(-rotation);
+
+    const localX =
+      dx * cos -
+      dz * sin;
+
+    const localZ =
+      dx * sin +
+      dz * cos;
+
+    return (
+      Math.abs(localX) <=
+        width / 2 &&
+      Math.abs(localZ) <=
+        depth / 2
+    );
+  }
+
+  function footprintHitsBlockedZone(
+    x,
+    z,
+    width,
+    depth
+  ) {
+    const points = [
+      [x, z],
+      [x - width / 2, z - depth / 2],
+      [x + width / 2, z - depth / 2],
+      [x - width / 2, z + depth / 2],
+      [x + width / 2, z + depth / 2]
+    ];
+
+    return blockedInfrastructureZones.some(
+      zone =>
+        points.some(
+          point =>
+            pointInRotatedRectangle(
+              point[0],
+              point[1],
+              zone.x,
+              zone.z,
+              zone.width,
+              zone.depth,
+              zone.rotation
+            )
+        )
+    );
+  }
+
+  function rectangleOverlap(
+    ax,
+    az,
+    aw,
+    ad,
+    bx,
+    bz,
+    bw,
+    bd,
+    padding = 3
+  ) {
+    return (
+      Math.abs(ax - bx) <
+        (aw + bw) / 2 +
+          padding &&
+      Math.abs(az - bz) <
+        (ad + bd) / 2 +
+          padding
+    );
+  }
+
+  function overlapsExistingStructure(
+    x,
+    z,
+    width,
+    depth
+  ) {
+    for (
+      const building of placedBuildings
+    ) {
+      const definition =
+        buildingDefinitions[
+          building.type
+        ];
+
+      if (!definition) {
+        continue;
+      }
+
+      const fp =
+        getRotatedFootprint(
+          definition,
+          building.rotation || 0
+        );
+
+      if (
+        rectangleOverlap(
+          x,
+          z,
+          width,
+          depth,
+          building.x,
+          building.z,
+          fp.width,
+          fp.depth,
+          4
+        )
+      ) {
+        return true;
+      }
+    }
+
+    for (
+      const mesh of scene.meshes
+    ) {
+      if (
+        !mesh.metadata ||
+        !mesh.metadata
+          .blocksConstruction ||
+        mesh.metadata
+          .placedBuildingId
+      ) {
+        continue;
+      }
+
+      const info =
+        mesh.getBoundingInfo();
+
+      if (!info) {
+        continue;
+      }
+
+      const bounds =
+        info.boundingBox;
+
+      const min =
+        bounds.minimumWorld;
+
+      const max =
+        bounds.maximumWorld;
+
+      const meshWidth =
+        Math.max(
+          1,
+          max.x - min.x
+        );
+
+      const meshDepth =
+        Math.max(
+          1,
+          max.z - min.z
+        );
+
+      const centerX =
+        (min.x + max.x) / 2;
+
+      const centerZ =
+        (min.z + max.z) / 2;
+
+      if (
+        rectangleOverlap(
+          x,
+          z,
+          width,
+          depth,
+          centerX,
+          centerZ,
+          meshWidth,
+          meshDepth,
+          4
+        )
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function isPlacementValid(
+    x,
+    z,
+    type,
+    rotation
+  ) {
+    const definition =
+      buildingDefinitions[
+        type
+      ];
+
+    if (!definition) {
+      return false;
+    }
+
+    const fp =
+      getRotatedFootprint(
+        definition,
+        rotation
+      );
+
+    if (
+      Math.abs(x) +
+        fp.width / 2 >
+        WORLD_LIMIT ||
+      Math.abs(z) +
+        fp.depth / 2 >
+        WORLD_LIMIT
+    ) {
+      return false;
+    }
+
+    if (
+      money <
+      definition.cost
+    ) {
+      return false;
+    }
+
+    if (
+      footprintHitsBlockedZone(
+        x,
+        z,
+        fp.width,
+        fp.depth
+      )
+    ) {
+      return false;
+    }
+
+    if (
+      overlapsExistingStructure(
+        x,
+        z,
+        fp.width,
+        fp.depth
+      )
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
+  function createGhost(
+    type
+  ) {
+    const definition =
+      buildingDefinitions[
+        type
+      ];
+
+    if (!definition) {
+      return null;
+    }
+
+    const ghost =
+      BABYLON.MeshBuilder.CreateBox(
+        "buildGhost",
+        {
+          width:
+            definition.width,
+          height:
+            definition.height,
+          depth:
+            definition.depth
+        },
+        scene
+      );
+
+    ghost.material =
+      ghostBadMat;
+
+    ghost.isPickable =
+      false;
+
+    ghost.renderingGroupId = 2;
+
+    return ghost;
+  }
+
+  function createPlacedBuildingVisual(
+    data
+  ) {
+    const definition =
+      buildingDefinitions[
+        data.type
+      ];
+
+    if (!definition) {
+      return null;
+    }
+
+    const root =
+      new BABYLON.TransformNode(
+        "playerBuildingRoot_" +
+          data.id,
+        scene
+      );
+
+    root.position =
+      new BABYLON.Vector3(
+        data.x,
+        data.y || 0,
+        data.z
+      );
+
+    root.rotation.y =
+      data.rotation || 0;
+
+    let bodyMaterial =
+      concreteMat;
+
+    if (
+      data.type ===
+      "ironMine"
+    ) {
+      bodyMaterial =
+        mineMat;
+    }
+
+    if (
+      data.type ===
+        "steelMill" ||
+      data.type ===
+        "fabricationPlant" ||
+      data.type ===
+        "warehouse" ||
+      data.type ===
+        "substation"
+    ) {
+      bodyMaterial =
+        industrialMat;
+    }
+
+    if (
+      data.type ===
+      "powerPlant"
+    ) {
+      bodyMaterial =
+        powerMat;
+    }
+
+    if (
+      data.type ===
+      "pylon"
+    ) {
+      bodyMaterial =
+        pylonMat;
+    }
+
+    const body =
+      BABYLON.MeshBuilder.CreateBox(
+        "playerBuilding_" +
+          data.id,
+        {
+          width:
+            definition.width,
+          height:
+            definition.height,
+          depth:
+            definition.depth
+        },
+        scene
+      );
+
+    body.parent = root;
+
+    body.position.y =
+      definition.height / 2;
+
+    body.material =
+      bodyMaterial;
+
+    shadowGenerator.addShadowCaster(
+      body
+    );
+
+    markInteractive(
+      body,
+      data.type,
+      definition.name,
+      {
+        level:
+          data.level || 1,
+        production:
+          definition.production,
+        consumption:
+          definition.consumption,
+        placedBuildingId:
+          data.id
+      }
+    );
+
+    body.metadata
+      .blocksConstruction =
+      true;
+
+    if (
+      data.type ===
+        "residential" ||
+      data.type ===
+        "commercial"
+    ) {
+      const glass =
+        BABYLON.MeshBuilder.CreateBox(
+          "playerGlass_" +
+            data.id,
+          {
+            width:
+              definition.width *
+              0.68,
+            height:
+              definition.height *
+              0.58,
+            depth: 0.25
+          },
+          scene
+        );
+
+      glass.parent = root;
+
+      glass.position =
+        new BABYLON.Vector3(
+          0,
+          definition.height *
+            0.52,
+          -definition.depth /
+            2 -
+            0.14
+        );
+
+      glass.material =
+        glassMat;
+
+      glass.isPickable =
+        false;
+
+      const roof =
+        BABYLON.MeshBuilder.CreateBox(
+          "playerRoof_" +
+            data.id,
+          {
+            width:
+              definition.width +
+              0.8,
+            height: 0.7,
+            depth:
+              definition.depth +
+              0.8
+          },
+          scene
+        );
+
+      roof.parent = root;
+
+      roof.position.y =
+        definition.height +
+        0.35;
+
+      roof.material =
+        darkMat;
+
+      roof.isPickable =
+        false;
+    }
+
+    if (
+      data.type ===
+      "ironMine"
+    ) {
+      const tower =
+        BABYLON.MeshBuilder.CreateCylinder(
+          "playerMineTower_" +
+            data.id,
+          {
+            diameter:
+              definition.width *
+              0.34,
+            height:
+              definition.height *
+              1.7,
+            tessellation: 8
+          },
+          scene
+        );
+
+      tower.parent =
+        root;
+
+      tower.position.y =
+        definition.height +
+        3;
+
+      tower.material =
+        darkMat;
+
+      tower.isPickable =
+        false;
+    }
+
+    if (
+      data.type ===
+        "steelMill" ||
+      data.type ===
+        "fabricationPlant"
+    ) {
+      for (
+        let i = 0;
+        i < 3;
+        i++
+      ) {
+        const stack =
+          BABYLON.MeshBuilder.CreateCylinder(
+            "playerStack_" +
+              data.id +
+              "_" +
+              i,
+            {
+              diameter: 2.5,
+              height:
+                definition.height *
+                1.7,
+              tessellation: 12
+            },
+            scene
+          );
+
+        stack.parent =
+          root;
+
+        stack.position =
+          new BABYLON.Vector3(
+            -definition.width *
+              0.28 +
+              i * 7,
+            definition.height +
+              4,
+            -definition.depth *
+              0.22
+          );
+
+        stack.material =
+          darkMat;
+
+        stack.isPickable =
+          false;
+      }
+    }
+
+    if (
+      data.type ===
+      "powerPlant"
+    ) {
+      for (
+        let i = 0;
+        i < 2;
+        i++
+      ) {
+        const tower =
+          BABYLON.MeshBuilder.CreateCylinder(
+            "playerCooling_" +
+              data.id +
+              "_" +
+              i,
+            {
+              diameterTop: 6,
+              diameterBottom: 9,
+              height: 15,
+              tessellation: 16
+            },
+            scene
+          );
+
+        tower.parent =
+          root;
+
+        tower.position =
+          new BABYLON.Vector3(
+            -8 + i * 16,
+            12,
+            0
+          );
+
+        tower.material =
+          concreteMat;
+
+        tower.isPickable =
+          false;
+      }
+    }
+
+    if (
+      data.type ===
+      "pylon"
+    ) {
+      body.scaling.x =
+        0.24;
+
+      body.scaling.z =
+        0.24;
+
+      const arm =
+        BABYLON.MeshBuilder.CreateBox(
+          "playerPylonArm_" +
+            data.id,
+          {
+            width: 9,
+            height: 1,
+            depth: 1
+          },
+          scene
+        );
+
+      arm.parent =
+        root;
+
+      arm.position.y =
+        definition.height *
+        0.72;
+
+      arm.material =
+        pylonMat;
+
+      arm.isPickable =
+        false;
+    }
+
+    return {
+      root,
+      body
+    };
+  }
+
+  function beginBuildMode(
+    type
+  ) {
+    const definition =
+      buildingDefinitions[
+        type
+      ];
+
+    if (!definition) {
+      showToast(
+        "This structure is not placeable yet.",
+        "warning"
+      );
+
+      return;
+    }
+
+    cancelBuildMode(
+      false
+    );
+
+    buildMode = {
+      type
+    };
+
+    buildRotation = 0;
+
+    buildGhost =
+      createGhost(
+        type
+      );
+
+    buildActionControls
+      .style.display =
+      "flex";
+
+    setBottomStatus(
+      "<b>" +
+        definition.name +
+        "</b> • " +
+        formatMoney(
+          definition.cost
+        ) +
+        " • Click/tap to place • R rotate • Esc cancel"
+    );
+
+    showToast(
+      definition.name +
+        " ready to place",
+      "info"
+    );
+  }
+
+  function cancelBuildMode(
+    notify = true
+  ) {
+    if (
+      buildGhost
+    ) {
+      buildGhost.dispose();
+      buildGhost = null;
+    }
+
+    buildMode = null;
+
+    buildGhostValid =
+      false;
+
+    buildActionControls
+      .style.display =
+      "none";
+
+    if (notify) {
+      setBottomStatus(
+        "Construction cancelled • choose another building or continue exploring"
+      );
+    }
+  }
+
+  function rotateBuildGhost() {
+    if (
+      !buildMode ||
+      !buildGhost
+    ) {
+      return;
+    }
+
+    buildRotation +=
+      Math.PI / 2;
+
+    if (
+      buildRotation >=
+      Math.PI * 2
+    ) {
+      buildRotation = 0;
+    }
+
+    buildGhost.rotation.y =
+      buildRotation;
+  }
+
+  function updateBuildGhost() {
+    if (
+      !buildMode ||
+      !buildGhost
+    ) {
+      return;
+    }
+
+    const pick =
+      scene.pick(
+        scene.pointerX,
+        scene.pointerY,
+        mesh =>
+          mesh === ground
+      );
+
+    if (
+      !pick ||
+      !pick.hit ||
+      !pick.pickedPoint
+    ) {
+      buildGhost.setEnabled(
+        false
+      );
+
+      buildGhostValid =
+        false;
+
+      return;
+    }
+
+    const point =
+      pick.pickedPoint;
+
+    buildGhost.setEnabled(
+      true
+    );
+
+    const definition =
+      buildingDefinitions[
+        buildMode.type
+      ];
+
+    buildGhost.position =
+      new BABYLON.Vector3(
+        point.x,
+        point.y +
+          definition.height /
+            2,
+        point.z
+      );
+
+    buildGhost.rotation.y =
+      buildRotation;
+
+    buildGhostValid =
+      isPlacementValid(
+        point.x,
+        point.z,
+        buildMode.type,
+        buildRotation
+      );
+
+    buildGhost.material =
+      buildGhostValid
+        ? ghostGoodMat
+        : ghostBadMat;
+  }
+
+  function placeCurrentBuilding() {
+    if (
+      !buildMode ||
+      !buildGhost ||
+      !buildGhostValid
+    ) {
+      showToast(
+        "That location is blocked.",
+        "warning"
+      );
+
+      return;
+    }
+
+    const definition =
+      buildingDefinitions[
+        buildMode.type
+      ];
+
+    if (
+      money <
+      definition.cost
+    ) {
+      showToast(
+        "Not enough credits.",
+        "warning"
+      );
+
+      return;
+    }
+
+    const id =
+      "building_" +
+      nextBuildingId++;
+
+    const data = {
+      id,
+      type:
+        buildMode.type,
+      x:
+        buildGhost.position.x,
+      y:
+        buildGhost.position.y -
+        definition.height / 2,
+      z:
+        buildGhost.position.z,
+      rotation:
+        buildRotation,
+      level: 1
+    };
+
+    money -=
+      definition.cost;
+
+    placedBuildings.push(
+      data
+    );
+
+    createPlacedBuildingVisual(
+      data
+    );
+
+    updateHUD();
+    saveGame();
+
+    showToast(
+      definition.name +
+        " constructed",
+      "success"
+    );
+
+    // Keep placing the same type until cancelled, like a real strategy game.
+    updateBuildGhost();
+  }
+
+  rotateBuildButton.onclick =
+    rotateBuildGhost;
+
+  cancelBuildButton.onclick =
+    () => {
+      cancelBuildMode();
+    };
 
   function shopCard(
     item,
@@ -3750,15 +4942,20 @@ const createScene = () => {
             shop.style.display =
               "none";
 
-            setBottomStatus(
-              item.name +
-                " selected • placement system is the next construction update"
-            );
+            if (
+              item.buildType
+            ) {
+              beginBuildMode(
+                item.buildType
+              );
+
+              return;
+            }
 
             showToast(
               item.name +
-                " selected",
-              "info"
+                " is not placeable yet.",
+              "warning"
             );
           };
       }
@@ -4147,16 +5344,39 @@ const createScene = () => {
     };
 
   // =========================================================
-  // CLICK / TAP INSPECTION
+  // CLICK / TAP INSPECTION + CONSTRUCTION
   // =========================================================
 
   scene.onPointerObservable.add(
     pointerInfo => {
       if (
+        pointerInfo.type ===
+        BABYLON.PointerEventTypes
+          .POINTERMOVE
+      ) {
+        updateBuildGhost();
+        return;
+      }
+
+      if (
         pointerInfo.type !==
         BABYLON.PointerEventTypes
           .POINTERPICK
       ) {
+        return;
+      }
+
+      if (
+        buildMode
+      ) {
+        updateBuildGhost();
+
+        if (
+          buildGhostValid
+        ) {
+          placeCurrentBuilding();
+        }
+
         return;
       }
 
@@ -4392,9 +5612,26 @@ const createScene = () => {
   window.addEventListener(
     "keydown",
     event => {
+      const key =
+        event.key.toLowerCase();
+
       keys[
-        event.key.toLowerCase()
+        key
       ] = true;
+
+      if (
+        key === "r" &&
+        buildMode
+      ) {
+        rotateBuildGhost();
+      }
+
+      if (
+        key === "escape" &&
+        buildMode
+      ) {
+        cancelBuildMode();
+      }
     }
   );
 
@@ -4482,6 +5719,8 @@ const createScene = () => {
       energy,
       population,
       townHallLevel,
+      placedBuildings,
+      nextBuildingId,
       lastSaved:
         Date.now()
     };
@@ -4533,6 +5772,28 @@ const createScene = () => {
       townHallLevel =
         data.townHallLevel ??
         townHallLevel;
+
+      placedBuildings =
+        Array.isArray(
+          data.placedBuildings
+        )
+          ? data.placedBuildings
+          : [];
+
+      nextBuildingId =
+        data.nextBuildingId ??
+        (
+          placedBuildings.length +
+          1
+        );
+
+      for (
+        const building of placedBuildings
+      ) {
+        createPlacedBuildingVisual(
+          building
+        );
+      }
 
       const lastSaved =
         data.lastSaved ??
@@ -4593,30 +5854,583 @@ const createScene = () => {
   const productionTimer =
     setInterval(
       () => {
-        energy += 8;
+        const playerPowerPlants =
+          placedBuildings.filter(
+            building =>
+              building.type ===
+              "powerPlant"
+          ).length;
 
-        if (
-          energy >= 1
+        const playerMines =
+          placedBuildings.filter(
+            building =>
+              building.type ===
+              "ironMine"
+          ).length;
+
+        const playerMills =
+          placedBuildings.filter(
+            building =>
+              building.type ===
+              "steelMill"
+          ).length;
+
+        const playerCommercial =
+          placedBuildings.filter(
+            building =>
+              building.type ===
+              "commercial"
+          ).length;
+
+        const playerResidential =
+          placedBuildings.filter(
+            building =>
+              building.type ===
+              "residential"
+          ).length;
+
+        energy +=
+          8 +
+          playerPowerPlants *
+          8;
+
+        const mineCount =
+          1 +
+          playerMines;
+
+        for (
+          let i = 0;
+          i < mineCount;
+          i++
         ) {
-          energy -= 1;
-          iron += 3;
+          if (
+            energy >= 1
+          ) {
+            energy -= 1;
+            iron += 3;
+          }
         }
 
-        if (
-          iron >= 3 &&
-          energy >= 2
-        ) {
-          iron -= 3;
-          energy -= 2;
+        const millCount =
+          1 +
+          playerMills;
 
-          steel += 1;
-          money += 75;
+        for (
+          let i = 0;
+          i < millCount;
+          i++
+        ) {
+          if (
+            iron >= 3 &&
+            energy >= 2
+          ) {
+            iron -= 3;
+            energy -= 2;
+
+            steel += 1;
+            money += 75;
+          }
         }
+
+        money +=
+          playerCommercial *
+          18;
+
+        population =
+          Math.max(
+            population,
+            3800 +
+              playerResidential *
+              500
+          );
 
         updateHUD();
       },
       2000
     );
+
+
+  // =========================================================
+  // HOME SCREEN — CENTRAL WORLD
+  // =========================================================
+
+  const homeScreen =
+    document.createElement(
+      "div"
+    );
+
+  homeScreen.style.cssText = `
+    position:fixed;
+    inset:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:24px;
+
+    background:
+      radial-gradient(
+        circle at 50% 35%,
+        rgba(16,57,83,0.78),
+        rgba(3,9,17,0.96) 64%
+      );
+
+    color:white;
+
+    font-family:
+      Arial,
+      sans-serif;
+
+    z-index:500;
+  `;
+
+  homeScreen.innerHTML = `
+    <div
+      style="
+        width:min(880px, 94vw);
+
+        border:
+          1px solid
+          rgba(92,218,255,0.26);
+
+        border-radius:20px;
+
+        background:
+          linear-gradient(
+            180deg,
+            rgba(7,17,30,0.96),
+            rgba(5,12,23,0.96)
+          );
+
+        box-shadow:
+          0 30px 90px
+          rgba(0,0,0,0.45),
+          0 0 60px
+          rgba(0,160,255,0.08);
+
+        overflow:hidden;
+      "
+    >
+      <div
+        style="
+          padding:30px 30px 20px 30px;
+
+          border-bottom:
+            1px solid
+            rgba(255,255,255,0.06);
+        "
+      >
+        <div
+          style="
+            color:#84eaff;
+            font-size:12px;
+            font-weight:bold;
+            letter-spacing:2px;
+          "
+        >
+          MAP GAME
+        </div>
+
+        <div
+          style="
+            margin-top:7px;
+
+            font-size:
+              clamp(
+                30px,
+                5vw,
+                54px
+              );
+
+            font-weight:900;
+
+            letter-spacing:-1.5px;
+          "
+        >
+          BUILD A CIVILIZATION.
+        </div>
+
+        <div
+          style="
+            margin-top:8px;
+            max-width:650px;
+            line-height:1.6;
+            font-size:13px;
+            opacity:0.64;
+          "
+        >
+          Join the official shared world, build your territory,
+          develop industry, and prepare for the future multiplayer
+          economy, diplomacy, attack, and defense systems.
+        </div>
+      </div>
+
+      <div
+        style="
+          padding:24px 30px 30px 30px;
+
+          display:grid;
+          grid-template-columns:
+            minmax(0, 1.45fr)
+            minmax(240px, 0.75fr);
+          gap:16px;
+        "
+      >
+        <div
+          style="
+            padding:20px;
+
+            border:
+              1px solid
+              rgba(87,217,255,0.24);
+
+            border-radius:14px;
+
+            background:
+              linear-gradient(
+                145deg,
+                rgba(23,112,164,0.15),
+                rgba(255,255,255,0.025)
+              );
+          "
+        >
+          <div
+            style="
+              display:flex;
+              align-items:center;
+              justify-content:space-between;
+              gap:12px;
+            "
+          >
+            <div>
+              <div
+                style="
+                  font-size:10px;
+                  color:#82eaff;
+                  letter-spacing:1px;
+                  font-weight:bold;
+                "
+              >
+                OFFICIAL WORLD
+              </div>
+
+              <div
+                style="
+                  margin-top:4px;
+                  font-size:25px;
+                  font-weight:850;
+                "
+              >
+                Central World
+              </div>
+            </div>
+
+            <div
+              style="
+                padding:6px 9px;
+
+                border-radius:999px;
+
+                background:
+                  rgba(112,227,157,0.10);
+
+                border:
+                  1px solid
+                  rgba(112,227,157,0.18);
+
+                color:#8debae;
+
+                font-size:10px;
+                font-weight:bold;
+              "
+            >
+              OPEN
+            </div>
+          </div>
+
+          <div
+            style="
+              margin-top:14px;
+              display:grid;
+              grid-template-columns:
+                repeat(3, 1fr);
+              gap:8px;
+            "
+          >
+            <div
+              style="
+                padding:9px;
+                border-radius:8px;
+                background:
+                  rgba(255,255,255,0.035);
+              "
+            >
+              <div
+                style="
+                  font-size:8px;
+                  opacity:0.45;
+                "
+              >
+                RULESET
+              </div>
+
+              <b
+                style="
+                  font-size:11px;
+                "
+              >
+                Official
+              </b>
+            </div>
+
+            <div
+              style="
+                padding:9px;
+                border-radius:8px;
+                background:
+                  rgba(255,255,255,0.035);
+              "
+            >
+              <div
+                style="
+                  font-size:8px;
+                  opacity:0.45;
+                "
+              >
+                MODS
+              </div>
+
+              <b
+                style="
+                  font-size:11px;
+                "
+              >
+                Disabled
+              </b>
+            </div>
+
+            <div
+              style="
+                padding:9px;
+                border-radius:8px;
+                background:
+                  rgba(255,255,255,0.035);
+              "
+            >
+              <div
+                style="
+                  font-size:8px;
+                  opacity:0.45;
+                "
+              >
+                ADMISSION
+              </div>
+
+              <b
+                style="
+                  font-size:11px;
+                "
+              >
+                Performance-managed
+              </b>
+            </div>
+          </div>
+
+          <button
+            id="joinCentralWorld"
+            style="
+              width:100%;
+
+              margin-top:15px;
+
+              padding:13px;
+
+              border:
+                1px solid
+                rgba(99,226,255,0.40);
+
+              border-radius:10px;
+
+              background:
+                linear-gradient(
+                  180deg,
+                  #208fcf,
+                  #1168a7
+                );
+
+              color:white;
+
+              font-size:13px;
+              font-weight:850;
+
+              cursor:pointer;
+
+              box-shadow:
+                0 7px 22px
+                rgba(0,136,210,0.18);
+            "
+          >
+            JOIN CENTRAL WORLD
+          </button>
+        </div>
+
+        <div
+          style="
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+          "
+        >
+          <div
+            style="
+              padding:14px;
+
+              border-radius:12px;
+
+              background:
+                rgba(255,255,255,0.025);
+
+              border:
+                1px solid
+                rgba(255,255,255,0.06);
+            "
+          >
+            <div
+              style="
+                font-size:11px;
+                font-weight:bold;
+              "
+            >
+              PRIVATE WORLDS
+            </div>
+
+            <div
+              style="
+                margin-top:5px;
+                font-size:10px;
+                line-height:1.5;
+                opacity:0.52;
+              "
+            >
+              Planned limit:
+              <b style="color:#8beaff;">
+                ${PRIVATE_WORLD_LIMIT}
+              </b>
+              created worlds per account to reduce abandoned servers
+              and unnecessary server load.
+            </div>
+
+            <button
+              disabled
+
+              style="
+                width:100%;
+
+                margin-top:10px;
+
+                padding:9px;
+
+                border:
+                  1px solid
+                  rgba(255,255,255,0.06);
+
+                border-radius:8px;
+
+                background:
+                  rgba(255,255,255,0.03);
+
+                color:
+                  rgba(255,255,255,0.38);
+              "
+            >
+              COMING LATER
+            </button>
+          </div>
+
+          <div
+            style="
+              padding:14px;
+
+              border-radius:12px;
+
+              background:
+                rgba(255,255,255,0.025);
+
+              border:
+                1px solid
+                rgba(255,255,255,0.06);
+            "
+          >
+            <div
+              style="
+                font-size:11px;
+                font-weight:bold;
+              "
+            >
+              SINGLEPLAYER
+            </div>
+
+            <div
+              style="
+                margin-top:5px;
+                font-size:10px;
+                line-height:1.5;
+                opacity:0.52;
+              "
+            >
+              Custom rules, mods, custom buildings, and textures
+              will live here later without affecting official Worlds.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(
+    homeScreen
+  );
+
+  canvas.style.pointerEvents =
+    "none";
+
+  const joinCentralWorldButton =
+    document.getElementById(
+      "joinCentralWorld"
+    );
+
+  if (
+    joinCentralWorldButton instanceof
+    HTMLButtonElement
+  ) {
+    joinCentralWorldButton.onclick =
+      () => {
+        homeScreen.style.opacity =
+          "0";
+
+        homeScreen.style.transition =
+          "opacity 0.18s ease";
+
+        setTimeout(
+          () => {
+            homeScreen.style.display =
+              "none";
+
+            canvas.style.pointerEvents =
+              "auto";
+
+            canvas.focus();
+
+            showToast(
+              "Joined Central World",
+              "success"
+            );
+          },
+          190
+        );
+      };
+  }
 
   // =========================================================
   // START
@@ -4659,6 +6473,8 @@ const createScene = () => {
         toastHost.remove();
         shop.remove();
         touchControls.remove();
+        buildActionControls.remove();
+        homeScreen.remove();
       }
     );
 
