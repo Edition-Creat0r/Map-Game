@@ -1,6 +1,6 @@
 // ============================================================
-// MAP GAME — Alpha 0.0.7
-// CONSTRUCTION CORE + CENTRAL WORLD HOME
+// MAP GAME — Alpha 0.0.8
+// WORLD MAP + DAY/NIGHT + GRAPHICS PUSH
 //
 // Goal:
 // - Make the "Basic" preset look genuinely good.
@@ -10,7 +10,7 @@
 // - Improve the entire HUD / panel language so it feels like one game.
 //
 // Replace your current game.js with this file.
-// Build 0.0.7: Central World home + real construction placement.
+// Build 0.0.8: graphics push, day/night lighting, strategic world map, zoning foundation.
 // Your existing index.html + styles.css can stay the same.
 // ============================================================
 
@@ -77,6 +77,20 @@ const createScene = () => {
   // Planned account-level cap for player-created PRIVATE worlds.
   // This is only a UI/design constant for now; the real server will enforce it later.
   const PRIVATE_WORLD_LIMIT = 3;
+
+  // Day/night cycle: 0.00 = midnight, 0.25 = sunrise, 0.50 = noon, 0.75 = sunset.
+  let worldTime = 0.34;
+  const DAY_LENGTH_SECONDS = 720;
+
+  // Strategic zoning foundation. Zones are intentionally lightweight data objects.
+  // Detailed buildings inside a zone will be generated visually later rather than all
+  // becoming expensive simulation objects.
+  let strategicZones = [
+    { id: "zone_capital", name: "Nova Core", type: "capital", x: 0, z: -65, radius: 92, attention: 3, level: 3 },
+    { id: "zone_southbank", name: "Southbank Growth Zone", type: "residential", x: 0, z: 285, radius: 105, attention: 2, level: 2 },
+    { id: "zone_forge", name: "Forge Industrial Zone", type: "industrial", x: 330, z: -115, radius: 95, attention: 2, level: 2 }
+  ];
+  let nextZoneId = 1;
 
   // =========================================================
   // GRAPHICS TARGET
@@ -284,6 +298,185 @@ const createScene = () => {
     true;
 
   shadowGenerator.blurKernel = 12;
+
+
+  // =========================================================
+  // SKY + DAY / NIGHT GRAPHICS
+  // =========================================================
+
+  const moon =
+    new BABYLON.DirectionalLight(
+      "moon",
+      new BABYLON.Vector3(
+        0.45,
+        -1,
+        0.25
+      ),
+      scene
+    );
+
+  moon.position =
+    new BABYLON.Vector3(
+      -220,
+      260,
+      -170
+    );
+
+  moon.diffuse =
+    new BABYLON.Color3(
+      0.38,
+      0.48,
+      0.70
+    );
+
+  moon.intensity = 0;
+
+  const skySphere =
+    BABYLON.MeshBuilder.CreateSphere(
+      "skySphere",
+      {
+        diameter: 1500,
+        segments: 16
+      },
+      scene
+    );
+
+  skySphere.infiniteDistance = true;
+  skySphere.isPickable = false;
+
+  const skyMat =
+    new BABYLON.StandardMaterial(
+      "skyMat",
+      scene
+    );
+
+  skyMat.backFaceCulling = false;
+  skyMat.disableLighting = true;
+  skyMat.emissiveColor =
+    new BABYLON.Color3(
+      0.48,
+      0.67,
+      0.87
+    );
+
+  skySphere.material = skyMat;
+
+  // Subtle glow is mostly visible at night and makes windows / street lights pop.
+  const glowLayer =
+    new BABYLON.GlowLayer(
+      "nightGlow",
+      scene,
+      {
+        blurKernelSize: 16
+      }
+    );
+
+  glowLayer.intensity = 0.12;
+
+  const streetLampMat =
+    new BABYLON.StandardMaterial(
+      "streetLampMat",
+      scene
+    );
+
+  streetLampMat.diffuseColor =
+    new BABYLON.Color3(
+      0.62,
+      0.56,
+      0.30
+    );
+
+  streetLampMat.emissiveColor =
+    new BABYLON.Color3(
+      0,
+      0,
+      0
+    );
+
+  const nightPointLights = [];
+
+  function createStreetLamp(
+    x,
+    z,
+    height = 6
+  ) {
+    const pole =
+      BABYLON.MeshBuilder.CreateCylinder(
+        "streetLampPole",
+        {
+          diameter: 0.35,
+          height,
+          tessellation: 8
+        },
+        scene
+      );
+
+    pole.position =
+      new BABYLON.Vector3(
+        x,
+        height / 2,
+        z
+      );
+
+    pole.material = darkMat;
+    pole.isPickable = false;
+
+    const lamp =
+      BABYLON.MeshBuilder.CreateSphere(
+        "streetLampBulb",
+        {
+          diameter: 0.75,
+          segments: 6
+        },
+        scene
+      );
+
+    lamp.position =
+      new BABYLON.Vector3(
+        x,
+        height + 0.1,
+        z
+      );
+
+    lamp.material = streetLampMat;
+    lamp.isPickable = false;
+  }
+
+  // Only a few real point lights are used. The rest are emissive meshes.
+  // This keeps the night scene attractive without creating hundreds of expensive lights.
+  [
+    [-70, -65],
+    [70, -65],
+    [0, 25],
+    [0, -145]
+  ].forEach(
+    ([x, z], index) => {
+      const light =
+        new BABYLON.PointLight(
+          "nightPointLight_" + index,
+          new BABYLON.Vector3(
+            x,
+            11,
+            z
+          ),
+          scene
+        );
+
+      light.diffuse =
+        new BABYLON.Color3(
+          1.0,
+          0.72,
+          0.38
+        );
+
+      light.range = 52;
+      light.intensity = 0;
+
+      nightPointLights.push(
+        light
+      );
+    }
+  );
 
   // =========================================================
   // MATERIAL HELPERS
@@ -986,6 +1179,49 @@ const createScene = () => {
       8,
       0.7,
       roadLineWhiteMat
+    );
+  }
+
+
+  // =========================================================
+  // STREET LIGHTS
+  // =========================================================
+
+  for (
+    let z = -250;
+    z <= 100;
+    z += 36
+  ) {
+    createStreetLamp(
+      -10,
+      z
+    );
+
+    createStreetLamp(
+      10,
+      z
+    );
+  }
+
+  for (
+    let x = -210;
+    x <= 210;
+    x += 40
+  ) {
+    createStreetLamp(
+      x,
+      -77
+    );
+  }
+
+  for (
+    let x = -210;
+    x <= 210;
+    x += 46
+  ) {
+    createStreetLamp(
+      x,
+      297
     );
   }
 
@@ -2233,7 +2469,7 @@ const createScene = () => {
             opacity:0.48;
           "
         >
-          ALPHA 0.0.7 • CONSTRUCTION CORE
+          ALPHA 0.0.8 • WORLD MAP + DAY/NIGHT
         </div>
       </div>
     </div>
@@ -2301,7 +2537,70 @@ const createScene = () => {
           incomePerMinute +
           "/m",
         "#7ee5a2"
+      ) +
+      resourceChip(
+        "TIME",
+        formatWorldTime(),
+        "#d6dcff"
       );
+  }
+
+
+  function formatWorldTime() {
+    const totalMinutes =
+      Math.floor(
+        worldTime *
+        24 *
+        60
+      ) %
+      (24 * 60);
+
+    let hours =
+      Math.floor(
+        totalMinutes / 60
+      );
+
+    const minutes =
+      totalMinutes % 60;
+
+    const suffix =
+      hours >= 12
+        ? "PM"
+        : "AM";
+
+    let displayHour =
+      hours % 12;
+
+    if (
+      displayHour === 0
+    ) {
+      displayHour = 12;
+    }
+
+    return (
+      displayHour +
+      ":" +
+      String(minutes).padStart(
+        2,
+        "0"
+      ) +
+      " " +
+      suffix
+    );
+  }
+
+  function getNightAmount() {
+    const daylight =
+      Math.max(
+        0,
+        Math.sin(
+          (worldTime - 0.25) *
+          Math.PI *
+          2
+        )
+      );
+
+    return 1 - daylight;
   }
 
   // =========================================================
@@ -4978,6 +5277,905 @@ const createScene = () => {
       }
     };
 
+
+  // =========================================================
+  // STRATEGIC WORLD MAP + ZONING FOUNDATION
+  // =========================================================
+
+  const worldMapOverlay =
+    document.createElement(
+      "div"
+    );
+
+  worldMapOverlay.style.cssText = `
+    position:absolute;
+    inset:74px 18px 20px 86px;
+
+    display:none;
+
+    background:
+      linear-gradient(
+        180deg,
+        rgba(5,12,23,0.985),
+        rgba(6,16,27,0.98)
+      );
+
+    border:
+      1px solid
+      rgba(90,218,255,0.28);
+
+    border-radius:16px;
+
+    box-shadow:
+      0 18px 55px
+      rgba(0,0,0,0.35);
+
+    overflow:hidden;
+
+    z-index:130;
+  `;
+
+  document.body.appendChild(
+    worldMapOverlay
+  );
+
+  worldMapOverlay.innerHTML = `
+    <div
+      style="
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:14px;
+        padding:13px 16px;
+        border-bottom:
+          1px solid
+          rgba(255,255,255,0.06);
+      "
+    >
+      <div>
+        <div
+          style="
+            color:#87eaff;
+            font-size:18px;
+            font-weight:850;
+          "
+        >
+          STRATEGIC WORLD MAP
+        </div>
+
+        <div
+          style="
+            margin-top:2px;
+            font-size:9px;
+            opacity:0.48;
+            letter-spacing:0.7px;
+          "
+        >
+          TERRITORY • CITIES • REGIONS • ZONES
+        </div>
+      </div>
+
+      <div
+        style="
+          display:flex;
+          align-items:center;
+          gap:7px;
+        "
+      >
+        <select
+          id="zoneTypeSelect"
+          style="
+            padding:8px;
+            border-radius:8px;
+            border:
+              1px solid
+              rgba(255,255,255,0.08);
+            background:#0b1724;
+            color:white;
+          "
+        >
+          <option value="residential">Residential Zone</option>
+          <option value="industrial">Industrial Zone</option>
+          <option value="tourism">Tourism Zone</option>
+          <option value="military">Military Zone</option>
+        </select>
+
+        <button
+          id="armZonePlacement"
+          style="
+            padding:8px 11px;
+            border-radius:8px;
+            border:
+              1px solid
+              rgba(90,218,255,0.28);
+            background:
+              rgba(27,132,194,0.62);
+            color:white;
+            font-weight:bold;
+            cursor:pointer;
+          "
+        >
+          + CREATE ZONE
+        </button>
+
+        <button
+          id="closeWorldMap"
+          style="
+            width:36px;
+            height:36px;
+            border:none;
+            border-radius:8px;
+            background:
+              rgba(255,255,255,0.035);
+            color:white;
+            font-size:17px;
+            cursor:pointer;
+          "
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <div
+      style="
+        display:grid;
+        grid-template-columns:
+          minmax(0, 1fr)
+          250px;
+        height:
+          calc(100% - 63px);
+      "
+    >
+      <div
+        style="
+          position:relative;
+          min-width:0;
+          min-height:0;
+          padding:14px;
+        "
+      >
+        <canvas
+          id="worldMapCanvas"
+          width="900"
+          height="620"
+          style="
+            width:100%;
+            height:100%;
+            display:block;
+            border-radius:11px;
+            background:#10251d;
+            cursor:crosshair;
+          "
+        ></canvas>
+      </div>
+
+      <div
+        id="worldMapInfo"
+        style="
+          border-left:
+            1px solid
+            rgba(255,255,255,0.06);
+          padding:14px;
+          overflow-y:auto;
+          font-family:Arial,sans-serif;
+          color:white;
+        "
+      ></div>
+    </div>
+  `;
+
+  let zonePlacementArmed = false;
+
+  const worldMapCanvas =
+    document.getElementById(
+      "worldMapCanvas"
+    );
+
+  const worldMapInfo =
+    document.getElementById(
+      "worldMapInfo"
+    );
+
+  function worldToMapX(
+    x,
+    width
+  ) {
+    return (
+      (x + MAP_HALF) /
+      MAP_SIZE *
+      width
+    );
+  }
+
+  function worldToMapY(
+    z,
+    height
+  ) {
+    return (
+      (z + MAP_HALF) /
+      MAP_SIZE *
+      height
+    );
+  }
+
+  function mapToWorldX(
+    x,
+    width
+  ) {
+    return (
+      x / width *
+      MAP_SIZE -
+      MAP_HALF
+    );
+  }
+
+  function mapToWorldZ(
+    y,
+    height
+  ) {
+    return (
+      y / height *
+      MAP_SIZE -
+      MAP_HALF
+    );
+  }
+
+  function zoneColor(
+    type
+  ) {
+    if (
+      type === "residential"
+    ) return "#77dca2";
+
+    if (
+      type === "industrial"
+    ) return "#799fbb";
+
+    if (
+      type === "tourism"
+    ) return "#e6c66e";
+
+    if (
+      type === "military"
+    ) return "#d26f72";
+
+    return "#77dcff";
+  }
+
+  function renderWorldMap() {
+    if (
+      !(worldMapCanvas instanceof HTMLCanvasElement)
+    ) {
+      return;
+    }
+
+    const ctx =
+      worldMapCanvas.getContext(
+        "2d"
+      );
+
+    if (!ctx) {
+      return;
+    }
+
+    const w =
+      worldMapCanvas.width;
+
+    const h =
+      worldMapCanvas.height;
+
+    ctx.clearRect(
+      0,
+      0,
+      w,
+      h
+    );
+
+    // Terrain background
+    const gradient =
+      ctx.createLinearGradient(
+        0,
+        0,
+        0,
+        h
+      );
+
+    gradient.addColorStop(
+      0,
+      "#193226"
+    );
+
+    gradient.addColorStop(
+      1,
+      "#243b24"
+    );
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(
+      0,
+      0,
+      w,
+      h
+    );
+
+    // Your current singleplayer/private-style territory preview.
+    ctx.fillStyle =
+      "rgba(76,168,222,0.08)";
+
+    ctx.strokeStyle =
+      "rgba(105,216,255,0.72)";
+
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+
+    const border = [
+      [-475, -430],
+      [-165, -505],
+      [165, -470],
+      [485, -320],
+      [500, 35],
+      [455, 405],
+      [120, 505],
+      [-245, 490],
+      [-500, 290],
+      [-515, -55]
+    ];
+
+    border.forEach(
+      (point, index) => {
+        const x =
+          worldToMapX(
+            point[0],
+            w
+          );
+
+        const y =
+          worldToMapY(
+            point[1],
+            h
+          );
+
+        if (
+          index === 0
+        ) {
+          ctx.moveTo(
+            x,
+            y
+          );
+        } else {
+          ctx.lineTo(
+            x,
+            y
+          );
+        }
+      }
+    );
+
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // River
+    ctx.strokeStyle =
+      "rgba(72,156,220,0.92)";
+
+    ctx.lineWidth = 18;
+    ctx.lineCap = "round";
+
+    ctx.beginPath();
+    ctx.moveTo(
+      worldToMapX(-500, w),
+      worldToMapY(95, h)
+    );
+    ctx.bezierCurveTo(
+      worldToMapX(-250, w),
+      worldToMapY(115, h),
+      worldToMapX(70, w),
+      worldToMapY(165, h),
+      worldToMapX(500, w),
+      worldToMapY(190, h)
+    );
+    ctx.stroke();
+
+    // Major roads
+    ctx.strokeStyle =
+      "rgba(225,225,225,0.36)";
+    ctx.lineWidth = 4;
+
+    const roads = [
+      [[0,-300],[0,325]],
+      [[-260,-65],[380,-65]],
+      [[-250,285],[350,285]],
+      [[-330,-285],[0,-65]],
+      [[0,-65],[330,-115]]
+    ];
+
+    roads.forEach(
+      road => {
+        ctx.beginPath();
+        ctx.moveTo(
+          worldToMapX(
+            road[0][0],
+            w
+          ),
+          worldToMapY(
+            road[0][1],
+            h
+          )
+        );
+        ctx.lineTo(
+          worldToMapX(
+            road[1][0],
+            w
+          ),
+          worldToMapY(
+            road[1][1],
+            h
+          )
+        );
+        ctx.stroke();
+      }
+    );
+
+    // Strategic regions
+    regions.forEach(
+      region => {
+        const x =
+          worldToMapX(
+            region.x,
+            w
+          );
+
+        const y =
+          worldToMapY(
+            region.z,
+            h
+          );
+
+        const radius =
+          region.radius /
+          MAP_SIZE *
+          w *
+          0.42;
+
+        ctx.beginPath();
+        ctx.arc(
+          x,
+          y,
+          Math.max(
+            14,
+            radius
+          ),
+          0,
+          Math.PI * 2
+        );
+
+        ctx.fillStyle =
+          region.color + "18";
+        ctx.fill();
+
+        ctx.strokeStyle =
+          region.color + "66";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    );
+
+    // Zones
+    strategicZones.forEach(
+      zone => {
+        const x =
+          worldToMapX(
+            zone.x,
+            w
+          );
+
+        const y =
+          worldToMapY(
+            zone.z,
+            h
+          );
+
+        const radius =
+          Math.max(
+            13,
+            zone.radius /
+            MAP_SIZE *
+            w
+          );
+
+        const color =
+          zoneColor(
+            zone.type
+          );
+
+        ctx.beginPath();
+        ctx.arc(
+          x,
+          y,
+          radius,
+          0,
+          Math.PI * 2
+        );
+
+        ctx.fillStyle =
+          color + "26";
+        ctx.fill();
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth =
+          1.5 +
+          Math.min(
+            3,
+            zone.attention *
+            0.45
+          );
+        ctx.stroke();
+      }
+    );
+
+    // City markers
+    const cities = [
+      { name: "NOVA", x: 0, z: -65, capital: true },
+      { name: "SOUTHBANK", x: 0, z: 285 },
+      { name: "FORGE CITY", x: 330, z: -115 }
+    ];
+
+    cities.forEach(
+      city => {
+        const x =
+          worldToMapX(
+            city.x,
+            w
+          );
+
+        const y =
+          worldToMapY(
+            city.z,
+            h
+          );
+
+        ctx.beginPath();
+        ctx.arc(
+          x,
+          y,
+          city.capital
+            ? 8
+            : 6,
+          0,
+          Math.PI * 2
+        );
+
+        ctx.fillStyle =
+          city.capital
+            ? "#fff0a1"
+            : "#e7edf2";
+        ctx.fill();
+
+        ctx.fillStyle = "white";
+        ctx.font =
+          city.capital
+            ? "bold 12px Arial"
+            : "11px Arial";
+        ctx.fillText(
+          city.capital
+            ? "★ " + city.name
+            : city.name,
+          x + 11,
+          y - 8
+        );
+      }
+    );
+
+    if (
+      worldMapInfo instanceof HTMLElement
+    ) {
+      const averageAttention =
+        strategicZones.length
+          ? (
+              strategicZones.reduce(
+                (sum, zone) =>
+                  sum +
+                  zone.attention,
+                0
+              ) /
+              strategicZones.length
+            ).toFixed(1)
+          : "0.0";
+
+      worldMapInfo.innerHTML = `
+        <div
+          style="
+            color:#88eaff;
+            font-size:14px;
+            font-weight:bold;
+          "
+        >
+          NOVA CIVILIZATION
+        </div>
+
+        <div
+          style="
+            margin-top:3px;
+            font-size:9px;
+            opacity:0.45;
+          "
+        >
+          STRATEGIC OVERVIEW
+        </div>
+
+        <div
+          style="
+            margin-top:12px;
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:7px;
+          "
+        >
+          <div style="padding:8px;background:rgba(255,255,255,.035);border-radius:8px;">
+            <div style="font-size:8px;opacity:.45;">CITIES</div>
+            <b>3</b>
+          </div>
+          <div style="padding:8px;background:rgba(255,255,255,.035);border-radius:8px;">
+            <div style="font-size:8px;opacity:.45;">ZONES</div>
+            <b>${strategicZones.length}</b>
+          </div>
+          <div style="padding:8px;background:rgba(255,255,255,.035);border-radius:8px;">
+            <div style="font-size:8px;opacity:.45;">AVG FOCUS</div>
+            <b>${averageAttention}</b>
+          </div>
+          <div style="padding:8px;background:rgba(255,255,255,.035);border-radius:8px;">
+            <div style="font-size:8px;opacity:.45;">CAPITAL</div>
+            <b>Nova</b>
+          </div>
+        </div>
+
+        <div
+          style="
+            margin-top:13px;
+            font-size:10px;
+            line-height:1.55;
+            opacity:.62;
+          "
+        >
+          Click the map to move the camera. Arm zone placement first to create a new strategic zone instead.
+          Higher attention will later make zones grow faster and visually denser.
+        </div>
+
+        <div
+          style="
+            margin-top:12px;
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+          "
+        >
+          ${strategicZones.map(zone => `
+            <button
+              class="zoneFocusButton"
+              data-zone-id="${zone.id}"
+              style="
+                padding:8px;
+                text-align:left;
+                border-radius:8px;
+                border:1px solid rgba(255,255,255,.06);
+                background:rgba(255,255,255,.025);
+                color:white;
+                cursor:pointer;
+              "
+            >
+              <b style="color:${zoneColor(zone.type)};">${zone.name}</b>
+              <div style="margin-top:2px;font-size:9px;opacity:.48;">
+                ${zone.type.toUpperCase()} • Level ${zone.level} • Attention ${zone.attention}
+              </div>
+            </button>
+          `).join("")}
+        </div>
+      `;
+
+      worldMapInfo
+        .querySelectorAll(
+          ".zoneFocusButton"
+        )
+        .forEach(
+          button => {
+            if (
+              !(button instanceof HTMLButtonElement)
+            ) return;
+
+            button.onclick = () => {
+              const id =
+                button.dataset.zoneId;
+
+              const zone =
+                strategicZones.find(
+                  item =>
+                    item.id === id
+                );
+
+              if (!zone) return;
+
+              zone.attention =
+                Math.min(
+                  10,
+                  zone.attention + 1
+                );
+
+              zone.level =
+                Math.max(
+                  zone.level,
+                  Math.ceil(
+                    zone.attention / 2
+                  )
+                );
+
+              showToast(
+                zone.name +
+                  " attention increased",
+                "success"
+              );
+
+              saveGame();
+              renderWorldMap();
+            };
+          }
+        );
+    }
+  }
+
+  function openWorldMap() {
+    worldMapOverlay.style.display =
+      "block";
+
+    renderWorldMap();
+  }
+
+  const closeWorldMapButton =
+    document.getElementById(
+      "closeWorldMap"
+    );
+
+  if (
+    closeWorldMapButton instanceof
+    HTMLButtonElement
+  ) {
+    closeWorldMapButton.onclick =
+      () => {
+        worldMapOverlay.style.display =
+          "none";
+        zonePlacementArmed = false;
+      };
+  }
+
+  const armZonePlacementButton =
+    document.getElementById(
+      "armZonePlacement"
+    );
+
+  if (
+    armZonePlacementButton instanceof
+    HTMLButtonElement
+  ) {
+    armZonePlacementButton.onclick =
+      () => {
+        zonePlacementArmed =
+          !zonePlacementArmed;
+
+        armZonePlacementButton.innerText =
+          zonePlacementArmed
+            ? "CLICK MAP TO PLACE"
+            : "+ CREATE ZONE";
+      };
+  }
+
+  if (
+    worldMapCanvas instanceof
+    HTMLCanvasElement
+  ) {
+    worldMapCanvas.addEventListener(
+      "click",
+      event => {
+        const rect =
+          worldMapCanvas.getBoundingClientRect();
+
+        const mapX =
+          (event.clientX - rect.left) /
+          rect.width *
+          worldMapCanvas.width;
+
+        const mapY =
+          (event.clientY - rect.top) /
+          rect.height *
+          worldMapCanvas.height;
+
+        const worldX =
+          mapToWorldX(
+            mapX,
+            worldMapCanvas.width
+          );
+
+        const worldZ =
+          mapToWorldZ(
+            mapY,
+            worldMapCanvas.height
+          );
+
+        if (
+          zonePlacementArmed
+        ) {
+          const select =
+            document.getElementById(
+              "zoneTypeSelect"
+            );
+
+          const type =
+            select instanceof HTMLSelectElement
+              ? select.value
+              : "residential";
+
+          strategicZones.push({
+            id:
+              "zone_custom_" +
+              nextZoneId++,
+            name:
+              type.charAt(0).toUpperCase() +
+              type.slice(1) +
+              " Zone " +
+              nextZoneId,
+            type,
+            x: worldX,
+            z: worldZ,
+            radius: 65,
+            attention: 1,
+            level: 1
+          });
+
+          zonePlacementArmed = false;
+
+          if (
+            armZonePlacementButton instanceof
+            HTMLButtonElement
+          ) {
+            armZonePlacementButton.innerText =
+              "+ CREATE ZONE";
+          }
+
+          showToast(
+            "New " +
+              type +
+              " zone created",
+            "success"
+          );
+
+          saveGame();
+          renderWorldMap();
+          return;
+        }
+
+        camera.target.x =
+          BABYLON.Scalar.Clamp(
+            worldX,
+            -WORLD_LIMIT,
+            WORLD_LIMIT
+          );
+
+        camera.target.z =
+          BABYLON.Scalar.Clamp(
+            worldZ,
+            -WORLD_LIMIT,
+            WORLD_LIMIT
+          );
+
+        camera.radius = 170;
+
+        worldMapOverlay.style.display =
+          "none";
+      }
+    );
+  }
+
   // =========================================================
   // WORLD OVERVIEW
   // =========================================================
@@ -5111,7 +6309,7 @@ const createScene = () => {
   }
 
   worldButton.onclick =
-    showWorldOverview;
+    openWorldMap;
 
   regionButton.onclick =
     showWorldOverview;
@@ -5707,6 +6905,199 @@ const createScene = () => {
       }
     );
 
+
+  // =========================================================
+  // LIVE DAY / NIGHT CYCLE
+  // =========================================================
+
+  let lastHudMinute = -1;
+
+  scene
+    .onBeforeRenderObservable
+    .add(
+      () => {
+        const dt =
+          Math.min(
+            0.05,
+            engine.getDeltaTime() /
+            1000
+          );
+
+        worldTime +=
+          dt /
+          DAY_LENGTH_SECONDS;
+
+        if (
+          worldTime >= 1
+        ) {
+          worldTime -= 1;
+        }
+
+        const angle =
+          (worldTime - 0.25) *
+          Math.PI *
+          2;
+
+        const sunHeight =
+          Math.sin(angle);
+
+        const daylight =
+          BABYLON.Scalar.Clamp(
+            sunHeight * 1.35 +
+            0.08,
+            0,
+            1
+          );
+
+        const twilight =
+          BABYLON.Scalar.Clamp(
+            1 -
+            Math.abs(sunHeight) *
+            4,
+            0,
+            1
+          );
+
+        const night =
+          1 - daylight;
+
+        const sunDirection =
+          new BABYLON.Vector3(
+            Math.cos(angle),
+            -Math.max(
+              0.08,
+              sunHeight
+            ),
+            Math.sin(angle) *
+            0.55
+          );
+
+        sun.direction =
+          sunDirection.normalize();
+
+        sun.intensity =
+          0.08 +
+          daylight * 0.98;
+
+        moon.intensity =
+          night * 0.22;
+
+        hemi.intensity =
+          0.14 +
+          daylight * 0.48;
+
+        const daySky =
+          new BABYLON.Color3(
+            0.48,
+            0.68,
+            0.90
+          );
+
+        const nightSky =
+          new BABYLON.Color3(
+            0.015,
+            0.025,
+            0.075
+          );
+
+        const sunsetSky =
+          new BABYLON.Color3(
+            0.92,
+            0.39,
+            0.19
+          );
+
+        let skyColor =
+          BABYLON.Color3.Lerp(
+            nightSky,
+            daySky,
+            daylight
+          );
+
+        skyColor =
+          BABYLON.Color3.Lerp(
+            skyColor,
+            sunsetSky,
+            twilight * 0.34
+          );
+
+        skyMat.emissiveColor =
+          skyColor;
+
+        scene.clearColor =
+          new BABYLON.Color4(
+            skyColor.r,
+            skyColor.g,
+            skyColor.b,
+            1
+          );
+
+        scene.fogColor =
+          BABYLON.Color3.Lerp(
+            new BABYLON.Color3(
+              0.025,
+              0.04,
+              0.08
+            ),
+            new BABYLON.Color3(
+              0.66,
+              0.79,
+              0.91
+            ),
+            daylight
+          );
+
+        // Glass becomes city light at night.
+        glassMat.emissiveColor =
+          new BABYLON.Color3(
+            0.12 * night,
+            0.20 * night,
+            0.28 * night
+          );
+
+        darkGlassMat.emissiveColor =
+          new BABYLON.Color3(
+            0.10 * night,
+            0.17 * night,
+            0.24 * night
+          );
+
+        streetLampMat.emissiveColor =
+          new BABYLON.Color3(
+            1.0 * night,
+            0.62 * night,
+            0.18 * night
+          );
+
+        glowLayer.intensity =
+          0.08 +
+          night * 0.34;
+
+        nightPointLights.forEach(
+          light => {
+            light.intensity =
+              night * 0.62;
+          }
+        );
+
+        const hudMinute =
+          Math.floor(
+            worldTime *
+            24 *
+            60
+          );
+
+        if (
+          hudMinute !==
+          lastHudMinute
+        ) {
+          lastHudMinute =
+            hudMinute;
+          updateHUD();
+        }
+      }
+    );
+
   // =========================================================
   // SAVE / LOAD
   // =========================================================
@@ -5721,6 +7112,9 @@ const createScene = () => {
       townHallLevel,
       placedBuildings,
       nextBuildingId,
+      worldTime,
+      strategicZones,
+      nextZoneId,
       lastSaved:
         Date.now()
     };
@@ -5786,6 +7180,22 @@ const createScene = () => {
           placedBuildings.length +
           1
         );
+
+      worldTime =
+        typeof data.worldTime === "number"
+          ? data.worldTime
+          : worldTime;
+
+      strategicZones =
+        Array.isArray(
+          data.strategicZones
+        )
+          ? data.strategicZones
+          : strategicZones;
+
+      nextZoneId =
+        data.nextZoneId ??
+        nextZoneId;
 
       for (
         const building of placedBuildings
@@ -5908,6 +7318,7 @@ const createScene = () => {
           ) {
             energy -= 1;
             iron += 3;
+            money += 24;
           }
         }
 
@@ -5943,6 +7354,14 @@ const createScene = () => {
               playerResidential *
               500
           );
+
+        // Approximate UI income rate. Mines are now a real cash source too,
+        // not merely raw-resource producers.
+        incomePerMinute =
+          60 +
+          (1 + playerMines) * 72 +
+          playerCommercial * 54 +
+          (1 + playerMills) * 45;
 
         updateHUD();
       },
@@ -6474,6 +7893,7 @@ const createScene = () => {
         shop.remove();
         touchControls.remove();
         buildActionControls.remove();
+        worldMapOverlay.remove();
         homeScreen.remove();
       }
     );
