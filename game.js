@@ -1,6 +1,6 @@
 // ============================================================
-// MAP GAME — Alpha 0.0.8
-// WORLD MAP + DAY/NIGHT + GRAPHICS PUSH
+// MAP GAME — Alpha 0.0.9
+// ACCOUNTS + LOGIN SCREEN
 //
 // Goal:
 // - Make the "Basic" preset look genuinely good.
@@ -10,7 +10,7 @@
 // - Improve the entire HUD / panel language so it feels like one game.
 //
 // Replace your current game.js with this file.
-// Build 0.0.8: graphics push, day/night lighting, strategic world map, zoning foundation.
+// Build 0.0.9: Supabase account UI, email verification gate, and singleplayer access.
 // Your existing index.html + styles.css can stay the same.
 // ============================================================
 
@@ -7370,486 +7370,991 @@ const createScene = () => {
 
 
   // =========================================================
-  // HOME SCREEN — CENTRAL WORLD
+  // HOME SCREEN — ACCOUNTS + CENTRAL WORLD
   // =========================================================
 
-  const homeScreen =
-    document.createElement(
-      "div"
-    );
+  const homeScreen = document.createElement("div");
 
   homeScreen.style.cssText = `
     position:fixed;
     inset:0;
-
     display:flex;
     align-items:center;
     justify-content:center;
-
     padding:24px;
-
     background:
-      radial-gradient(
-        circle at 50% 35%,
-        rgba(16,57,83,0.78),
-        rgba(3,9,17,0.96) 64%
-      );
-
+      radial-gradient(circle at 50% 25%, rgba(17,71,104,0.78), rgba(3,9,17,0.97) 64%);
     color:white;
-
-    font-family:
-      Arial,
-      sans-serif;
-
+    font-family:Arial,sans-serif;
     z-index:500;
+    overflow:auto;
   `;
 
   homeScreen.innerHTML = `
-    <div
-      style="
-        width:min(880px, 94vw);
-
-        border:
-          1px solid
-          rgba(92,218,255,0.26);
-
-        border-radius:20px;
-
-        background:
-          linear-gradient(
-            180deg,
-            rgba(7,17,30,0.96),
-            rgba(5,12,23,0.96)
-          );
-
-        box-shadow:
-          0 30px 90px
-          rgba(0,0,0,0.45),
-          0 0 60px
-          rgba(0,160,255,0.08);
-
-        overflow:hidden;
-      "
-    >
-      <div
-        style="
-          padding:30px 30px 20px 30px;
-
-          border-bottom:
-            1px solid
-            rgba(255,255,255,0.06);
-        "
-      >
-        <div
-          style="
-            color:#84eaff;
-            font-size:12px;
-            font-weight:bold;
-            letter-spacing:2px;
-          "
-        >
-          MAP GAME
-        </div>
-
-        <div
-          style="
+    <div style="
+      width:min(920px,94vw);
+      border:1px solid rgba(92,218,255,0.24);
+      border-radius:20px;
+      background:linear-gradient(180deg,rgba(7,17,30,0.97),rgba(5,12,23,0.97));
+      box-shadow:0 30px 90px rgba(0,0,0,0.48),0 0 70px rgba(0,160,255,0.08);
+      overflow:hidden;
+    ">
+      <div style="
+        padding:26px 28px 18px;
+        border-bottom:1px solid rgba(255,255,255,0.06);
+        display:flex;
+        align-items:flex-start;
+        justify-content:space-between;
+        gap:18px;
+        flex-wrap:wrap;
+      ">
+        <div>
+          <div style="color:#84eaff;font-size:12px;font-weight:bold;letter-spacing:2px;">
+            MAP GAME
+          </div>
+          <div style="
             margin-top:7px;
-
-            font-size:
-              clamp(
-                30px,
-                5vw,
-                54px
-              );
-
+            font-size:clamp(30px,5vw,52px);
             font-weight:900;
-
             letter-spacing:-1.5px;
-          "
-        >
-          BUILD A CIVILIZATION.
-        </div>
-
-        <div
-          style="
+          ">
+            BUILD A CIVILIZATION.
+          </div>
+          <div style="
             margin-top:8px;
             max-width:650px;
-            line-height:1.6;
+            line-height:1.55;
             font-size:13px;
             opacity:0.64;
-          "
-        >
-          Join the official shared world, build your territory,
-          develop industry, and prepare for the future multiplayer
-          economy, diplomacy, attack, and defense systems.
+          ">
+            Build cities, develop territory, grow zones, manage resources,
+            and prepare your civilization for the shared Central World.
+          </div>
+        </div>
+
+        <div id="accountSummary" style="
+          min-width:210px;
+          padding:11px 13px;
+          border-radius:12px;
+          border:1px solid rgba(255,255,255,0.08);
+          background:rgba(255,255,255,0.035);
+          font-size:11px;
+          line-height:1.5;
+        ">
+          <div style="opacity:.5;font-size:9px;letter-spacing:1px;">ACCOUNT</div>
+          <div id="accountSummaryText" style="margin-top:3px;font-weight:800;">Checking...</div>
+          <button id="accountActionButton" style="
+            margin-top:8px;
+            width:100%;
+            padding:7px 9px;
+            border-radius:8px;
+            border:1px solid rgba(112,223,255,0.18);
+            background:rgba(61,174,226,0.09);
+            color:#a9efff;
+            font-size:10px;
+            font-weight:800;
+            cursor:pointer;
+          ">ACCOUNT</button>
         </div>
       </div>
 
-      <div
-        style="
-          padding:24px 30px 30px 30px;
-
-          display:grid;
-          grid-template-columns:
-            minmax(0, 1.45fr)
-            minmax(240px, 0.75fr);
-          gap:16px;
-        "
-      >
-        <div
-          style="
-            padding:20px;
-
-            border:
-              1px solid
-              rgba(87,217,255,0.24);
-
-            border-radius:14px;
-
-            background:
-              linear-gradient(
-                145deg,
-                rgba(23,112,164,0.15),
-                rgba(255,255,255,0.025)
-              );
-          "
-        >
-          <div
-            style="
-              display:flex;
-              align-items:center;
-              justify-content:space-between;
-              gap:12px;
-            "
-          >
+      <div style="
+        padding:22px 28px 28px;
+        display:grid;
+        grid-template-columns:minmax(0,1.45fr) minmax(240px,.75fr);
+        gap:16px;
+      ">
+        <div style="
+          padding:20px;
+          border:1px solid rgba(87,217,255,0.24);
+          border-radius:14px;
+          background:linear-gradient(145deg,rgba(23,112,164,0.16),rgba(255,255,255,0.025));
+        ">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
             <div>
-              <div
-                style="
-                  font-size:10px;
-                  color:#82eaff;
-                  letter-spacing:1px;
-                  font-weight:bold;
-                "
-              >
+              <div style="font-size:10px;color:#82eaff;letter-spacing:1px;font-weight:bold;">
                 OFFICIAL WORLD
               </div>
-
-              <div
-                style="
-                  margin-top:4px;
-                  font-size:25px;
-                  font-weight:850;
-                "
-              >
+              <div style="margin-top:4px;font-size:25px;font-weight:850;">
                 Central World
               </div>
             </div>
 
-            <div
-              style="
-                padding:6px 9px;
+            <div id="centralWorldStatusBadge" style="
+              padding:6px 9px;
+              border-radius:999px;
+              background:rgba(112,227,157,0.10);
+              border:1px solid rgba(112,227,157,0.18);
+              color:#8debae;
+              font-size:10px;
+              font-weight:bold;
+            ">ACCOUNT REQUIRED</div>
+          </div>
 
-                border-radius:999px;
-
-                background:
-                  rgba(112,227,157,0.10);
-
-                border:
-                  1px solid
-                  rgba(112,227,157,0.18);
-
-                color:#8debae;
-
-                font-size:10px;
-                font-weight:bold;
-              "
-            >
-              OPEN
+          <div style="
+            margin-top:14px;
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:8px;
+          ">
+            <div style="padding:9px;border-radius:8px;background:rgba(255,255,255,0.035);">
+              <div style="font-size:8px;opacity:.45;">RULESET</div>
+              <b style="font-size:11px;">Official</b>
+            </div>
+            <div style="padding:9px;border-radius:8px;background:rgba(255,255,255,0.035);">
+              <div style="font-size:8px;opacity:.45;">MODS</div>
+              <b style="font-size:11px;">Disabled</b>
+            </div>
+            <div style="padding:9px;border-radius:8px;background:rgba(255,255,255,0.035);">
+              <div style="font-size:8px;opacity:.45;">EMAIL</div>
+              <b id="centralEmailStatus" style="font-size:11px;">Required</b>
             </div>
           </div>
 
-          <div
-            style="
-              margin-top:14px;
-              display:grid;
-              grid-template-columns:
-                repeat(3, 1fr);
-              gap:8px;
-            "
-          >
-            <div
-              style="
-                padding:9px;
-                border-radius:8px;
-                background:
-                  rgba(255,255,255,0.035);
-              "
-            >
-              <div
-                style="
-                  font-size:8px;
-                  opacity:0.45;
-                "
-              >
-                RULESET
-              </div>
-
-              <b
-                style="
-                  font-size:11px;
-                "
-              >
-                Official
-              </b>
-            </div>
-
-            <div
-              style="
-                padding:9px;
-                border-radius:8px;
-                background:
-                  rgba(255,255,255,0.035);
-              "
-            >
-              <div
-                style="
-                  font-size:8px;
-                  opacity:0.45;
-                "
-              >
-                MODS
-              </div>
-
-              <b
-                style="
-                  font-size:11px;
-                "
-              >
-                Disabled
-              </b>
-            </div>
-
-            <div
-              style="
-                padding:9px;
-                border-radius:8px;
-                background:
-                  rgba(255,255,255,0.035);
-              "
-            >
-              <div
-                style="
-                  font-size:8px;
-                  opacity:0.45;
-                "
-              >
-                ADMISSION
-              </div>
-
-              <b
-                style="
-                  font-size:11px;
-                "
-              >
-                Performance-managed
-              </b>
-            </div>
+          <div id="centralWorldMessage" style="
+            margin-top:13px;
+            min-height:32px;
+            padding:9px 10px;
+            border-radius:8px;
+            background:rgba(0,0,0,0.16);
+            font-size:10px;
+            line-height:1.45;
+            opacity:.72;
+          ">
+            Sign in with a verified email to enter multiplayer.
           </div>
 
-          <button
-            id="joinCentralWorld"
-            style="
-              width:100%;
-
-              margin-top:15px;
-
-              padding:13px;
-
-              border:
-                1px solid
-                rgba(99,226,255,0.40);
-
-              border-radius:10px;
-
-              background:
-                linear-gradient(
-                  180deg,
-                  #208fcf,
-                  #1168a7
-                );
-
-              color:white;
-
-              font-size:13px;
-              font-weight:850;
-
-              cursor:pointer;
-
-              box-shadow:
-                0 7px 22px
-                rgba(0,136,210,0.18);
-            "
-          >
-            JOIN CENTRAL WORLD
+          <button id="joinCentralWorld" style="
+            width:100%;
+            margin-top:12px;
+            padding:13px;
+            border:1px solid rgba(99,226,255,0.40);
+            border-radius:10px;
+            background:linear-gradient(180deg,#208fcf,#1168a7);
+            color:white;
+            font-size:13px;
+            font-weight:850;
+            cursor:pointer;
+            box-shadow:0 7px 22px rgba(0,136,210,0.18);
+          ">
+            SIGN IN TO JOIN
           </button>
         </div>
 
-        <div
-          style="
-            display:flex;
-            flex-direction:column;
-            gap:10px;
-          "
-        >
-          <div
-            style="
-              padding:14px;
-
-              border-radius:12px;
-
-              background:
-                rgba(255,255,255,0.025);
-
-              border:
-                1px solid
-                rgba(255,255,255,0.06);
-            "
-          >
-            <div
-              style="
-                font-size:11px;
-                font-weight:bold;
-              "
-            >
-              PRIVATE WORLDS
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="
+            padding:14px;
+            border-radius:12px;
+            background:rgba(255,255,255,0.025);
+            border:1px solid rgba(255,255,255,0.06);
+          ">
+            <div style="font-size:11px;font-weight:bold;">SINGLEPLAYER</div>
+            <div style="margin-top:5px;font-size:10px;line-height:1.5;opacity:.52;">
+              Play locally without an account. Your current browser save continues to work.
             </div>
-
-            <div
-              style="
-                margin-top:5px;
-                font-size:10px;
-                line-height:1.5;
-                opacity:0.52;
-              "
-            >
-              Planned limit:
-              <b style="color:#8beaff;">
-                ${PRIVATE_WORLD_LIMIT}
-              </b>
-              created worlds per account to reduce abandoned servers
-              and unnecessary server load.
-            </div>
-
-            <button
-              disabled
-
-              style="
-                width:100%;
-
-                margin-top:10px;
-
-                padding:9px;
-
-                border:
-                  1px solid
-                  rgba(255,255,255,0.06);
-
-                border-radius:8px;
-
-                background:
-                  rgba(255,255,255,0.03);
-
-                color:
-                  rgba(255,255,255,0.38);
-              "
-            >
-              COMING LATER
-            </button>
+            <button id="playSingleplayer" style="
+              width:100%;
+              margin-top:10px;
+              padding:9px;
+              border:1px solid rgba(255,255,255,0.12);
+              border-radius:8px;
+              background:rgba(255,255,255,0.055);
+              color:white;
+              font-size:10px;
+              font-weight:800;
+              cursor:pointer;
+            ">PLAY SINGLEPLAYER</button>
           </div>
 
-          <div
-            style="
-              padding:14px;
+          <div style="
+            padding:14px;
+            border-radius:12px;
+            background:rgba(255,255,255,0.025);
+            border:1px solid rgba(255,255,255,0.06);
+          ">
+            <div style="font-size:11px;font-weight:bold;">PRIVATE WORLDS</div>
+            <div style="margin-top:5px;font-size:10px;line-height:1.5;opacity:.52;">
+              Planned ownership limit:
+              <b style="color:#8beaff;">${PRIVATE_WORLD_LIMIT}</b>
+              worlds per account. Multiplayer support comes after account testing.
+            </div>
+            <button disabled style="
+              width:100%;
+              margin-top:10px;
+              padding:9px;
+              border:1px solid rgba(255,255,255,0.06);
+              border-radius:8px;
+              background:rgba(255,255,255,0.03);
+              color:rgba(255,255,255,0.38);
+            ">COMING LATER</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-              border-radius:12px;
+    <div id="authModal" style="
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(1,5,10,0.78);
+      backdrop-filter:blur(8px);
+      z-index:10;
+    ">
+      <div style="
+        width:min(430px,94vw);
+        border:1px solid rgba(112,226,255,.24);
+        border-radius:16px;
+        background:linear-gradient(180deg,#0a1725,#07111d);
+        box-shadow:0 24px 80px rgba(0,0,0,.55);
+        overflow:hidden;
+      ">
+        <div style="
+          padding:18px 20px 14px;
+          border-bottom:1px solid rgba(255,255,255,.06);
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:12px;
+        ">
+          <div>
+            <div style="font-size:10px;color:#83e9ff;letter-spacing:1.5px;font-weight:800;">
+              MAP GAME ACCOUNT
+            </div>
+            <div id="authModalTitle" style="margin-top:4px;font-size:23px;font-weight:900;">
+              Sign in
+            </div>
+          </div>
+          <button id="closeAuthModal" aria-label="Close account window" style="
+            width:34px;height:34px;
+            border-radius:9px;
+            border:1px solid rgba(255,255,255,.08);
+            background:rgba(255,255,255,.04);
+            color:white;
+            font-size:18px;
+            cursor:pointer;
+          ">×</button>
+        </div>
 
-              background:
-                rgba(255,255,255,0.025);
+        <div style="padding:18px 20px 20px;">
+          <div id="authTabs" style="display:flex;gap:8px;margin-bottom:14px;">
+            <button id="showSignIn" style="
+              flex:1;padding:9px;border-radius:8px;border:1px solid rgba(94,220,255,.28);
+              background:rgba(37,151,202,.16);color:white;font-weight:800;cursor:pointer;
+            ">SIGN IN</button>
+            <button id="showCreateAccount" style="
+              flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.08);
+              background:rgba(255,255,255,.035);color:white;font-weight:800;cursor:pointer;
+            ">CREATE ACCOUNT</button>
+          </div>
 
-              border:
-                1px solid
-                rgba(255,255,255,0.06);
-            "
-          >
-            <div
-              style="
-                font-size:11px;
-                font-weight:bold;
-              "
-            >
-              SINGLEPLAYER
+          <form id="authForm">
+            <div id="usernameField" style="display:none;margin-bottom:10px;">
+              <label style="font-size:10px;opacity:.65;">USERNAME</label>
+              <input id="authUsername" autocomplete="username" maxlength="20" style="
+                box-sizing:border-box;width:100%;margin-top:5px;padding:11px 12px;
+                border-radius:8px;border:1px solid rgba(255,255,255,.10);
+                background:#07101a;color:white;outline:none;font-size:14px;
+              " placeholder="3–20 characters" />
             </div>
 
-            <div
-              style="
-                margin-top:5px;
-                font-size:10px;
-                line-height:1.5;
-                opacity:0.52;
-              "
-            >
-              Custom rules, mods, custom buildings, and textures
-              will live here later without affecting official Worlds.
+            <div style="margin-bottom:10px;">
+              <label style="font-size:10px;opacity:.65;">EMAIL</label>
+              <input id="authEmail" type="email" autocomplete="email" required style="
+                box-sizing:border-box;width:100%;margin-top:5px;padding:11px 12px;
+                border-radius:8px;border:1px solid rgba(255,255,255,.10);
+                background:#07101a;color:white;outline:none;font-size:14px;
+              " placeholder="you@example.com" />
             </div>
+
+            <div id="passwordField">
+              <label style="font-size:10px;opacity:.65;">PASSWORD</label>
+              <input id="authPassword" type="password" autocomplete="current-password" required style="
+                box-sizing:border-box;width:100%;margin-top:5px;padding:11px 12px;
+                border-radius:8px;border:1px solid rgba(255,255,255,.10);
+                background:#07101a;color:white;outline:none;font-size:14px;
+              " placeholder="At least 8 characters" />
+            </div>
+
+            <div id="authMessage" role="status" aria-live="polite" style="
+              min-height:34px;
+              margin-top:12px;
+              padding:9px 10px;
+              border-radius:8px;
+              background:rgba(255,255,255,.035);
+              font-size:10px;
+              line-height:1.45;
+              color:rgba(255,255,255,.72);
+            ">
+              Sign in to your Map Game account.
+            </div>
+
+            <button id="authSubmit" type="submit" style="
+              width:100%;margin-top:12px;padding:12px;border-radius:9px;
+              border:1px solid rgba(94,220,255,.34);
+              background:linear-gradient(180deg,#218fce,#1267a4);
+              color:white;font-weight:900;cursor:pointer;
+            ">SIGN IN</button>
+          </form>
+
+          <div id="verificationActions" style="display:none;margin-top:10px;gap:8px;">
+            <button id="resendVerification" type="button" style="
+              flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.09);
+              background:rgba(255,255,255,.04);color:white;font-size:10px;font-weight:800;cursor:pointer;
+            ">RESEND EMAIL</button>
+            <button id="verificationDone" type="button" style="
+              flex:1;padding:9px;border-radius:8px;border:1px solid rgba(94,220,255,.20);
+              background:rgba(31,141,191,.12);color:#a8efff;font-size:10px;font-weight:800;cursor:pointer;
+            ">I VERIFIED</button>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;gap:10px;margin-top:12px;flex-wrap:wrap;">
+            <button id="forgotPassword" type="button" style="
+              border:0;background:none;color:#8feaff;font-size:10px;cursor:pointer;padding:4px 0;
+            ">Forgot password?</button>
+
+            <button id="signOutInsideModal" type="button" style="
+              display:none;border:0;background:none;color:#ffb8b8;font-size:10px;cursor:pointer;padding:4px 0;
+            ">Sign out</button>
           </div>
         </div>
       </div>
     </div>
   `;
 
-  document.body.appendChild(
-    homeScreen
-  );
+  document.body.appendChild(homeScreen);
+  canvas.style.pointerEvents = "none";
 
-  canvas.style.pointerEvents =
-    "none";
+  const joinCentralWorldButton = document.getElementById("joinCentralWorld");
+  const playSingleplayerButton = document.getElementById("playSingleplayer");
+  const accountActionButton = document.getElementById("accountActionButton");
+  const accountSummaryText = document.getElementById("accountSummaryText");
+  const centralWorldStatusBadge = document.getElementById("centralWorldStatusBadge");
+  const centralEmailStatus = document.getElementById("centralEmailStatus");
+  const centralWorldMessage = document.getElementById("centralWorldMessage");
 
-  const joinCentralWorldButton =
-    document.getElementById(
-      "joinCentralWorld"
+  const authModal = document.getElementById("authModal");
+  const authModalTitle = document.getElementById("authModalTitle");
+  const closeAuthModal = document.getElementById("closeAuthModal");
+  const showSignIn = document.getElementById("showSignIn");
+  const showCreateAccount = document.getElementById("showCreateAccount");
+  const authForm = document.getElementById("authForm");
+  const usernameField = document.getElementById("usernameField");
+  const authUsername = document.getElementById("authUsername");
+  const authEmail = document.getElementById("authEmail");
+  const authPassword = document.getElementById("authPassword");
+  const authMessage = document.getElementById("authMessage");
+  const authSubmit = document.getElementById("authSubmit");
+  const verificationActions = document.getElementById("verificationActions");
+  const resendVerification = document.getElementById("resendVerification");
+  const verificationDone = document.getElementById("verificationDone");
+  const forgotPassword = document.getElementById("forgotPassword");
+  const signOutInsideModal = document.getElementById("signOutInsideModal");
+
+  let authMode = "signin";
+  let currentAccountUser = null;
+  let lastSignupEmail = "";
+
+  function usernameFromUser(user) {
+    if (!user) return "";
+    const metaName =
+      user.user_metadata &&
+      typeof user.user_metadata.username === "string"
+        ? user.user_metadata.username.trim()
+        : "";
+
+    if (metaName) return metaName;
+
+    if (typeof user.email === "string" && user.email.includes("@")) {
+      return user.email.split("@")[0];
+    }
+
+    return "Player";
+  }
+
+  function userEmailVerified(user) {
+    if (!user) return false;
+
+    if (
+      window.mapGameAuth &&
+      typeof window.mapGameAuth.isVerified === "function"
+    ) {
+      return window.mapGameAuth.isVerified(user);
+    }
+
+    return Boolean(user.email_confirmed_at || user.confirmed_at);
+  }
+
+  function setAuthMessage(message, type = "info") {
+    if (!(authMessage instanceof HTMLElement)) return;
+
+    authMessage.textContent = message;
+
+    if (type === "error") {
+      authMessage.style.color = "#ffb4b4";
+      authMessage.style.background = "rgba(207,70,70,.08)";
+    } else if (type === "success") {
+      authMessage.style.color = "#a7efbd";
+      authMessage.style.background = "rgba(78,184,117,.08)";
+    } else {
+      authMessage.style.color = "rgba(255,255,255,.72)";
+      authMessage.style.background = "rgba(255,255,255,.035)";
+    }
+  }
+
+  function setAuthMode(mode) {
+    authMode = mode;
+
+    const creating = mode === "signup";
+
+    if (authModalTitle instanceof HTMLElement) {
+      authModalTitle.textContent =
+        creating ? "Create account" : "Sign in";
+    }
+
+    if (usernameField instanceof HTMLElement) {
+      usernameField.style.display =
+        creating ? "block" : "none";
+    }
+
+    if (authSubmit instanceof HTMLButtonElement) {
+      authSubmit.textContent =
+        creating ? "CREATE ACCOUNT" : "SIGN IN";
+    }
+
+    if (authPassword instanceof HTMLInputElement) {
+      authPassword.autocomplete =
+        creating ? "new-password" : "current-password";
+    }
+
+    if (showSignIn instanceof HTMLButtonElement) {
+      showSignIn.style.background =
+        creating
+          ? "rgba(255,255,255,.035)"
+          : "rgba(37,151,202,.16)";
+    }
+
+    if (showCreateAccount instanceof HTMLButtonElement) {
+      showCreateAccount.style.background =
+        creating
+          ? "rgba(37,151,202,.16)"
+          : "rgba(255,255,255,.035)";
+    }
+
+    if (verificationActions instanceof HTMLElement) {
+      verificationActions.style.display = "none";
+    }
+
+    setAuthMessage(
+      creating
+        ? "Create an account. We will email you a verification link."
+        : "Sign in to your Map Game account."
     );
+  }
 
-  if (
-    joinCentralWorldButton instanceof
-    HTMLButtonElement
-  ) {
-    joinCentralWorldButton.onclick =
-      () => {
-        homeScreen.style.opacity =
-          "0";
+  function openAuthModal(mode = "signin") {
+    setAuthMode(mode);
 
-        homeScreen.style.transition =
-          "opacity 0.18s ease";
+    if (authModal instanceof HTMLElement) {
+      authModal.style.display = "flex";
+    }
 
-        setTimeout(
-          () => {
-            homeScreen.style.display =
-              "none";
+    if (currentAccountUser && signOutInsideModal instanceof HTMLElement) {
+      signOutInsideModal.style.display = "inline-block";
+    }
+  }
 
-            canvas.style.pointerEvents =
-              "auto";
+  function closeAuth() {
+    if (authModal instanceof HTMLElement) {
+      authModal.style.display = "none";
+    }
+  }
 
-            canvas.focus();
+  function enterGame(label) {
+    homeScreen.style.opacity = "0";
+    homeScreen.style.transition = "opacity .18s ease";
 
-            showToast(
-              "Joined Central World",
+    setTimeout(() => {
+      homeScreen.style.display = "none";
+      canvas.style.pointerEvents = "auto";
+      canvas.focus();
+
+      showToast(label, "success");
+    }, 190);
+  }
+
+  function refreshHomeAccountUI(user) {
+    currentAccountUser = user || null;
+
+    const verified = userEmailVerified(user);
+
+    if (!user) {
+      if (accountSummaryText instanceof HTMLElement) {
+        accountSummaryText.textContent = "Not signed in";
+      }
+
+      if (accountActionButton instanceof HTMLButtonElement) {
+        accountActionButton.textContent = "SIGN IN / CREATE";
+      }
+
+      if (centralWorldStatusBadge instanceof HTMLElement) {
+        centralWorldStatusBadge.textContent = "ACCOUNT REQUIRED";
+        centralWorldStatusBadge.style.color = "#ffd69a";
+      }
+
+      if (centralEmailStatus instanceof HTMLElement) {
+        centralEmailStatus.textContent = "Required";
+      }
+
+      if (centralWorldMessage instanceof HTMLElement) {
+        centralWorldMessage.textContent =
+          "Create an account or sign in with a verified email to enter Central World.";
+      }
+
+      if (joinCentralWorldButton instanceof HTMLButtonElement) {
+        joinCentralWorldButton.textContent = "SIGN IN TO JOIN";
+      }
+
+      if (signOutInsideModal instanceof HTMLElement) {
+        signOutInsideModal.style.display = "none";
+      }
+
+      return;
+    }
+
+    const name = usernameFromUser(user);
+
+    if (accountSummaryText instanceof HTMLElement) {
+      accountSummaryText.textContent =
+        `${name} · ${verified ? "Verified" : "Email not verified"}`;
+    }
+
+    if (accountActionButton instanceof HTMLButtonElement) {
+      accountActionButton.textContent = "ACCOUNT";
+    }
+
+    if (signOutInsideModal instanceof HTMLElement) {
+      signOutInsideModal.style.display = "inline-block";
+    }
+
+    if (verified) {
+      if (centralWorldStatusBadge instanceof HTMLElement) {
+        centralWorldStatusBadge.textContent = "READY";
+        centralWorldStatusBadge.style.color = "#8debae";
+      }
+
+      if (centralEmailStatus instanceof HTMLElement) {
+        centralEmailStatus.textContent = "Verified";
+      }
+
+      if (centralWorldMessage instanceof HTMLElement) {
+        centralWorldMessage.textContent =
+          `Signed in as ${name}. Your account is ready for Central World.`;
+      }
+
+      if (joinCentralWorldButton instanceof HTMLButtonElement) {
+        joinCentralWorldButton.textContent = "JOIN CENTRAL WORLD";
+      }
+    } else {
+      if (centralWorldStatusBadge instanceof HTMLElement) {
+        centralWorldStatusBadge.textContent = "VERIFY EMAIL";
+        centralWorldStatusBadge.style.color = "#ffd69a";
+      }
+
+      if (centralEmailStatus instanceof HTMLElement) {
+        centralEmailStatus.textContent = "Not verified";
+      }
+
+      if (centralWorldMessage instanceof HTMLElement) {
+        centralWorldMessage.textContent =
+          "Your account exists, but Central World stays locked until your email is verified.";
+      }
+
+      if (joinCentralWorldButton instanceof HTMLButtonElement) {
+        joinCentralWorldButton.textContent = "VERIFY EMAIL";
+      }
+    }
+  }
+
+  async function loadCurrentAccount() {
+    if (
+      !window.mapGameAuth ||
+      typeof window.mapGameAuth.getCurrentUser !== "function"
+    ) {
+      refreshHomeAccountUI(null);
+
+      if (accountSummaryText instanceof HTMLElement) {
+        accountSummaryText.textContent = "Account service unavailable";
+      }
+
+      return;
+    }
+
+    try {
+      const user = await window.mapGameAuth.getCurrentUser();
+      refreshHomeAccountUI(user);
+    } catch (error) {
+      console.error("Map Game auth check failed:", error);
+      refreshHomeAccountUI(null);
+    }
+  }
+
+  if (showSignIn instanceof HTMLButtonElement) {
+    showSignIn.addEventListener("click", () => {
+      setAuthMode("signin");
+    });
+  }
+
+  if (showCreateAccount instanceof HTMLButtonElement) {
+    showCreateAccount.addEventListener("click", () => {
+      setAuthMode("signup");
+    });
+  }
+
+  if (closeAuthModal instanceof HTMLButtonElement) {
+    closeAuthModal.addEventListener("click", closeAuth);
+  }
+
+  if (accountActionButton instanceof HTMLButtonElement) {
+    accountActionButton.addEventListener("click", () => {
+      openAuthModal(currentAccountUser ? "signin" : "signin");
+
+      if (currentAccountUser) {
+        setAuthMessage(
+          `${usernameFromUser(currentAccountUser)} is currently signed in${userEmailVerified(currentAccountUser) ? " and verified." : ", but the email is not verified yet."}`,
+          userEmailVerified(currentAccountUser) ? "success" : "info"
+        );
+
+        if (
+          !userEmailVerified(currentAccountUser) &&
+          verificationActions instanceof HTMLElement
+        ) {
+          verificationActions.style.display = "flex";
+        }
+      }
+    });
+  }
+
+  if (authForm instanceof HTMLFormElement) {
+    authForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (!window.mapGameAuth) {
+        setAuthMessage(
+          "The account service did not load. Check auth.js and the Supabase script.",
+          "error"
+        );
+        return;
+      }
+
+      const email =
+        authEmail instanceof HTMLInputElement
+          ? authEmail.value.trim()
+          : "";
+
+      const password =
+        authPassword instanceof HTMLInputElement
+          ? authPassword.value
+          : "";
+
+      if (!email || !email.includes("@")) {
+        setAuthMessage("Enter a valid email address.", "error");
+        return;
+      }
+
+      if (password.length < 8) {
+        setAuthMessage(
+          "Use a password with at least 8 characters.",
+          "error"
+        );
+        return;
+      }
+
+      if (authSubmit instanceof HTMLButtonElement) {
+        authSubmit.disabled = true;
+        authSubmit.style.opacity = ".62";
+      }
+
+      try {
+        if (authMode === "signup") {
+          const username =
+            authUsername instanceof HTMLInputElement
+              ? authUsername.value.trim()
+              : "";
+
+          if (
+            username.length < 3 ||
+            username.length > 20
+          ) {
+            throw new Error(
+              "Username must be between 3 and 20 characters."
+            );
+          }
+
+          if (!/^[A-Za-z0-9_-]+$/.test(username)) {
+            throw new Error(
+              "Username can use letters, numbers, _ and - only."
+            );
+          }
+
+          await window.mapGameAuth.signUp(
+            email,
+            password,
+            username
+          );
+
+          lastSignupEmail = email;
+
+          setAuthMessage(
+            `Account created. Check ${email} and click the verification link.`,
+            "success"
+          );
+
+          if (verificationActions instanceof HTMLElement) {
+            verificationActions.style.display = "flex";
+          }
+        } else {
+          await window.mapGameAuth.signIn(
+            email,
+            password
+          );
+
+          const user =
+            await window.mapGameAuth.getCurrentUser();
+
+          refreshHomeAccountUI(user);
+
+          if (userEmailVerified(user)) {
+            setAuthMessage(
+              `Signed in as ${usernameFromUser(user)}.`,
               "success"
             );
-          },
-          190
-        );
-      };
+
+            setTimeout(closeAuth, 450);
+          } else {
+            lastSignupEmail = email;
+
+            setAuthMessage(
+              "Signed in, but this email still needs verification.",
+              "info"
+            );
+
+            if (verificationActions instanceof HTMLElement) {
+              verificationActions.style.display = "flex";
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Map Game auth error:", error);
+
+        const rawMessage =
+          error && typeof error.message === "string"
+            ? error.message
+            : "Account request failed.";
+
+        let friendlyMessage = rawMessage;
+
+        if (
+          rawMessage.toLowerCase().includes("invalid login")
+        ) {
+          friendlyMessage =
+            "Incorrect email or password.";
+        } else if (
+          rawMessage.toLowerCase().includes("email not confirmed")
+        ) {
+          friendlyMessage =
+            "Your password is correct, but your email still needs verification.";
+          lastSignupEmail = email;
+
+          if (verificationActions instanceof HTMLElement) {
+            verificationActions.style.display = "flex";
+          }
+        }
+
+        setAuthMessage(friendlyMessage, "error");
+      } finally {
+        if (authSubmit instanceof HTMLButtonElement) {
+          authSubmit.disabled = false;
+          authSubmit.style.opacity = "1";
+        }
+      }
+    });
   }
+
+  if (resendVerification instanceof HTMLButtonElement) {
+    resendVerification.addEventListener("click", async () => {
+      const email =
+        lastSignupEmail ||
+        (
+          authEmail instanceof HTMLInputElement
+            ? authEmail.value.trim()
+            : ""
+        );
+
+      if (!email) {
+        setAuthMessage(
+          "Enter the email address you used for the account first.",
+          "error"
+        );
+        return;
+      }
+
+      try {
+        await window.mapGameAuth.resendVerification(email);
+
+        setAuthMessage(
+          `Another verification email was sent to ${email}.`,
+          "success"
+        );
+      } catch (error) {
+        setAuthMessage(
+          error && error.message
+            ? error.message
+            : "Could not resend the verification email.",
+          "error"
+        );
+      }
+    });
+  }
+
+  if (verificationDone instanceof HTMLButtonElement) {
+    verificationDone.addEventListener("click", async () => {
+      try {
+        const user =
+          await window.mapGameAuth.refreshUser();
+
+        refreshHomeAccountUI(user);
+
+        if (userEmailVerified(user)) {
+          setAuthMessage(
+            "Email verified. Central World is unlocked.",
+            "success"
+          );
+          setTimeout(closeAuth, 500);
+        } else {
+          setAuthMessage(
+            "Verification is not showing yet. If you verified in another tab, sign in again.",
+            "info"
+          );
+        }
+      } catch (error) {
+        setAuthMessage(
+          "Sign in again after clicking the verification link.",
+          "info"
+        );
+      }
+    });
+  }
+
+  if (forgotPassword instanceof HTMLButtonElement) {
+    forgotPassword.addEventListener("click", async () => {
+      const email =
+        authEmail instanceof HTMLInputElement
+          ? authEmail.value.trim()
+          : "";
+
+      if (!email || !email.includes("@")) {
+        setAuthMessage(
+          "Enter your account email above first.",
+          "error"
+        );
+        return;
+      }
+
+      try {
+        await window.mapGameAuth.resetPassword(email);
+
+        setAuthMessage(
+          `Password reset instructions were sent to ${email}.`,
+          "success"
+        );
+      } catch (error) {
+        setAuthMessage(
+          error && error.message
+            ? error.message
+            : "Could not send the password reset email.",
+          "error"
+        );
+      }
+    });
+  }
+
+  if (signOutInsideModal instanceof HTMLButtonElement) {
+    signOutInsideModal.addEventListener("click", async () => {
+      try {
+        await window.mapGameAuth.signOut();
+        refreshHomeAccountUI(null);
+        setAuthMessage("Signed out.", "success");
+      } catch (error) {
+        setAuthMessage(
+          error && error.message
+            ? error.message
+            : "Could not sign out.",
+          "error"
+        );
+      }
+    });
+  }
+
+  if (joinCentralWorldButton instanceof HTMLButtonElement) {
+    joinCentralWorldButton.addEventListener("click", async () => {
+      if (!currentAccountUser) {
+        openAuthModal("signin");
+        return;
+      }
+
+      if (!userEmailVerified(currentAccountUser)) {
+        openAuthModal("signin");
+
+        setAuthMessage(
+          "Verify your email before entering Central World.",
+          "info"
+        );
+
+        if (verificationActions instanceof HTMLElement) {
+          verificationActions.style.display = "flex";
+        }
+
+        return;
+      }
+
+      // This is still local gameplay for now.
+      // A future multiplayer server will independently verify the Supabase token.
+      enterGame("Joined Central World");
+    });
+  }
+
+  if (playSingleplayerButton instanceof HTMLButtonElement) {
+    playSingleplayerButton.addEventListener("click", () => {
+      enterGame("Singleplayer started");
+    });
+  }
+
+  if (
+    window.mapGameAuth &&
+    typeof window.mapGameAuth.onAuthChange === "function"
+  ) {
+    window.mapGameAuth.onAuthChange((event, session) => {
+      const user =
+        session && session.user
+          ? session.user
+          : null;
+
+      refreshHomeAccountUI(user);
+
+      if (event === "PASSWORD_RECOVERY") {
+        openAuthModal("signin");
+        setAuthMessage(
+          "Password recovery link accepted. Password-changing UI is the next account step.",
+          "success"
+        );
+      }
+    });
+  }
+
+  loadCurrentAccount();
 
   // =========================================================
   // START

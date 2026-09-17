@@ -1,101 +1,222 @@
-// MAP GAME - Supabase Authentication
+// ============================================================
+// MAP GAME — auth.js
+// Supabase email/password authentication
+// Browser-safe public credentials only.
+// ============================================================
 
-const SUPABASE_URL = "https://vjwvhtsjdsbcorszzldk.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY =
-  "sb_publishable_bDQFgJtpYdOmwgUoSr_JCA_37U9AE6D";
+(() => {
+  "use strict";
 
-const MAP_GAME_URL =
-  "https://edition-creat0r.github.io/Map-Game/";
+  const SUPABASE_URL =
+    "https://vjwvhtsjdsbcorszzldk.supabase.co";
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY
-);
+  const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_bDQFgJtpYdOmwgUoSr_JCA_37U9AE6D";
 
-window.mapGameAuth = {
-  async signUp(email, password, username) {
-    const { data, error } = await supabaseClient.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: MAP_GAME_URL,
-        data: {
-          username: username
+  const MAP_GAME_URL =
+    "https://edition-creat0r.github.io/Map-Game/";
+
+  if (
+    !window.supabase ||
+    typeof window.supabase.createClient !== "function"
+  ) {
+    console.error(
+      "Map Game auth: Supabase library did not load."
+    );
+    return;
+  }
+
+  const client =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY,
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
         }
       }
-    });
+    );
 
-    if (error) {
-      throw error;
-    }
-
-    return data;
-  },
-
-  async signIn(email, password) {
-    const { data, error } =
-      await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
-
-    if (error) {
-      throw error;
-    }
-
-    return data;
-  },
-
-  async signOut() {
-    const { error } = await supabaseClient.auth.signOut();
-
-    if (error) {
-      throw error;
-    }
-  },
-
-  async getCurrentUser() {
-    const {
-      data: { user },
-      error
-    } = await supabaseClient.auth.getUser();
-
-    if (error) {
-      return null;
-    }
-
-    return user;
-  },
-
-  async resetPassword(email) {
-    const { error } =
-      await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: MAP_GAME_URL
-      });
-
-    if (error) {
-      throw error;
-    }
-  },
-
-  async updatePassword(newPassword) {
-    const { data, error } =
-      await supabaseClient.auth.updateUser({
-        password: newPassword
-      });
-
-    if (error) {
-      throw error;
-    }
-
-    return data;
-  },
-
-  onAuthChange(callback) {
-    return supabaseClient.auth.onAuthStateChange(
-      (event, session) => {
-        callback(event, session);
-      }
+  function isVerified(user) {
+    return Boolean(
+      user &&
+      (
+        user.email_confirmed_at ||
+        user.confirmed_at
+      )
     );
   }
-};
+
+  window.mapGameAuth = {
+    client,
+
+    isVerified,
+
+    async signUp(
+      email,
+      password,
+      username
+    ) {
+      const {
+        data,
+        error
+      } =
+        await client.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo:
+              MAP_GAME_URL,
+            data: {
+              username
+            }
+          }
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+
+    async signIn(
+      email,
+      password
+    ) {
+      const {
+        data,
+        error
+      } =
+        await client.auth.signInWithPassword({
+          email,
+          password
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+
+    async signOut() {
+      const {
+        error
+      } =
+        await client.auth.signOut();
+
+      if (error) {
+        throw error;
+      }
+    },
+
+    async getCurrentUser() {
+      const {
+        data,
+        error
+      } =
+        await client.auth.getUser();
+
+      if (error) {
+        return null;
+      }
+
+      return data.user || null;
+    },
+
+    async refreshUser() {
+      const {
+        data,
+        error
+      } =
+        await client.auth.getUser();
+
+      if (error) {
+        throw error;
+      }
+
+      return data.user || null;
+    },
+
+    async resendVerification(email) {
+      const {
+        data,
+        error
+      } =
+        await client.auth.resend({
+          type: "signup",
+          email,
+          options: {
+            emailRedirectTo:
+              MAP_GAME_URL
+          }
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+
+    async resetPassword(email) {
+      const {
+        data,
+        error
+      } =
+        await client.auth.resetPasswordForEmail(
+          email,
+          {
+            redirectTo:
+              MAP_GAME_URL
+          }
+        );
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+
+    async updatePassword(
+      newPassword
+    ) {
+      const {
+        data,
+        error
+      } =
+        await client.auth.updateUser({
+          password:
+            newPassword
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+
+    onAuthChange(callback) {
+      return client.auth.onAuthStateChange(
+        (
+          event,
+          session
+        ) => {
+          callback(
+            event,
+            session
+          );
+        }
+      );
+    }
+  };
+
+  console.log(
+    "Map Game auth ready."
+  );
+})();
