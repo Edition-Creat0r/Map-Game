@@ -1788,6 +1788,15 @@ engine.runRenderLoop(() => {
   scene.render();
 });
 
+const loadingScreen =
+  document.getElementById(
+    "loadingScreen"
+  );
+
+if (loadingScreen) {
+  loadingScreen.remove();
+}
+
 window.addEventListener(
   "resize",
   () => {
