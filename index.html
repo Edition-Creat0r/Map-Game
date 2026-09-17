@@ -3,37 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#07111c" />
-  <meta name="description" content="Map Game - browser-based 3D civilization strategy game" />
+  <meta name="theme-color" content="#07101a" />
+  <meta name="description" content="Map Game - 3D civilization strategy game" />
 
-  <title>Map Game 0.0.7</title>
+  <title>Map Game</title>
 
-  <!-- Development cache-busting -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
+  <link rel="stylesheet" href="styles.css?v=1091" />
 
-  <link rel="stylesheet" href="styles.css?v=1072" />
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="auth.js?v=1091" defer></script>
   <script src="https://cdn.babylonjs.com/babylon.js" defer></script>
-  <script src="game.js?v=1072" defer></script>
+  <script src="game.js?v=1091" defer></script>
 </head>
-<body>
-  <div id="backgroundGlow" aria-hidden="true"></div>
 
+<body>
   <div id="loadingScreen">
     <div class="loading-card">
-      <div class="loading-kicker">MAP GAME</div>
-      <div class="loading-title">Central World</div>
-      <div class="loading-subtitle">Preparing Alpha 0.0.7...</div>
-      <div class="loading-line"><span></span></div>
+      <div class="loading-title">MAP GAME</div>
+      <div class="loading-subtitle">Loading civilization world...</div>
+
+      <div class="loading-bar">
+        <div class="loading-bar-fill"></div>
+      </div>
     </div>
   </div>
 
   <canvas
     id="gameCanvas"
     tabindex="0"
-    aria-label="Map Game 3D world"
-  ></canvas>
+    aria-label="Map Game 3D world">
+  </canvas>
 </body>
 </html>
