@@ -1,6 +1,6 @@
 // ============================================================
-// MAP GAME — Alpha 0.1
-// MULTIPLAYER FOUNDATION
+// MAP GAME — Alpha 0.1.1
+// WORLD SCALE + GRAPHICS FOUNDATION
 //
 // Goal:
 // - Make the "Basic" preset look genuinely good.
@@ -10,7 +10,7 @@
 // - Improve the entire HUD / panel language so it feels like one game.
 //
 // Replace your current game.js with this file.
-// Build 0.1: first multiplayer foundation using Supabase Realtime, shared presence, and persistent world state.
+// Build 0.1.1: expanded world scale, coastline/deep ocean, world border, and live Basic/Regular graphics toggle.
 // Your existing index.html + styles.css can stay the same.
 // ============================================================
 
@@ -96,19 +96,36 @@ const createScene = () => {
   // GRAPHICS TARGET
   // =========================================================
 
-  // For now this build is our polished BASIC target.
-  // Later we can make REGULAR swap in better materials/models.
-  const GRAPHICS_PRESET = "BASIC";
+  let currentGraphicsPreset =
+    localStorage.getItem("mapGameGraphicsPreset") === "REGULAR"
+      ? "REGULAR"
+      : "BASIC";
 
   // =========================================================
   // WORLD
   // =========================================================
 
-  const MAP_SIZE = 1100;
+  const MAP_SIZE = 4200;
   const MAP_HALF = MAP_SIZE / 2;
+  const PLAYABLE_LAND_RADIUS = 1560;
+  const SHALLOW_WATER_RADIUS = 1810;
+  const WORLD_BORDER_RADIUS = 2040;
+  const WORLD_LIMIT = WORLD_BORDER_RADIUS - 34;
 
-  const WORLD_LIMIT =
-    MAP_HALF - 45;
+  function coastRadiusAtAngle(angle) {
+    return PLAYABLE_LAND_RADIUS +
+      Math.sin(angle * 3.0) * 115 +
+      Math.sin(angle * 7.0 + 0.8) * 62 +
+      Math.cos(angle * 5.0 - 0.4) * 46;
+  }
+
+  function clampPointToWorld(x, z, inset = 0) {
+    const limit = Math.max(80, WORLD_LIMIT - inset);
+    const d = Math.sqrt(x*x + z*z);
+    if (d <= limit || d === 0) return {x,z};
+    const scale = limit / d;
+    return {x:x*scale, z:z*scale};
+  }
 
   const regions = [
     {
@@ -198,7 +215,11 @@ const createScene = () => {
       color: "#d7e6a2",
       description:
         "Open land ideal for agriculture, large factories, or future suburban expansion."
-    }
+    },
+    { id:"emeraldBasin", name:"Emerald Basin", type:"Forest Basin", x:980, z:-620, radius:260, color:"#77d89c", description:"A broad forest basin for future cities, parks, logging, and tourism." },
+    { id:"westernHighlands", name:"Western Highlands", type:"Mountain", x:-1080, z:-670, radius:285, color:"#c8ced6", description:"Large highland territory with steep terrain and mineral potential." },
+    { id:"meridianPlains", name:"Meridian Plains", type:"Plains", x:-850, z:900, radius:300, color:"#cfe39b", description:"A wide open region for future metropolitan expansion." },
+    { id:"azureCoast", name:"Azure Coast", type:"Coastal", x:1040, z:850, radius:280, color:"#86d9ef", description:"Long ocean-facing coastline for ports, resorts, and coastal cities." }
   ];
 
   // =========================================================
@@ -208,7 +229,7 @@ const createScene = () => {
   scene.fogMode =
     BABYLON.Scene.FOGMODE_EXP2;
 
-  scene.fogDensity = 0.00115;
+  scene.fogDensity = 0.00058;
 
   scene.fogColor =
     new BABYLON.Color3(
@@ -241,7 +262,7 @@ const createScene = () => {
   );
 
   camera.lowerRadiusLimit = 30;
-  camera.upperRadiusLimit = 440;
+  camera.upperRadiusLimit = 1280;
 
   camera.lowerBetaLimit = 0.27;
   camera.upperBetaLimit = 1.37;
@@ -335,7 +356,7 @@ const createScene = () => {
     BABYLON.MeshBuilder.CreateSphere(
       "skySphere",
       {
-        diameter: 1500,
+        diameter: 6200,
         segments: 16
       },
       scene
@@ -703,7 +724,7 @@ const createScene = () => {
       {
         width: MAP_SIZE,
         height: MAP_SIZE,
-        subdivisions: 105
+        subdivisions: 150
       },
       scene
     );
@@ -803,6 +824,21 @@ const createScene = () => {
           ) * 2.5;
       }
 
+      const worldDistance = Math.sqrt(x*x + z*z);
+      const worldAngle = Math.atan2(z,x);
+      const localCoastRadius = coastRadiusAtAngle(worldAngle);
+
+      if (worldDistance > localCoastRadius) {
+        const coastT = BABYLON.Scalar.Clamp((worldDistance-localCoastRadius)/370,0,1);
+        const shelfDepth = BABYLON.Scalar.Lerp(1.5,34,coastT*coastT);
+        height = BABYLON.Scalar.Lerp(height,-shelfDepth,coastT);
+      }
+
+      if (worldDistance > SHALLOW_WATER_RADIUS) {
+        const deepT = BABYLON.Scalar.Clamp((worldDistance-SHALLOW_WATER_RADIUS)/(WORLD_BORDER_RADIUS-SHALLOW_WATER_RADIUS),0,1);
+        height = Math.min(height,BABYLON.Scalar.Lerp(-24,-58,deepT));
+      }
+
       positions[
         i + 1
       ] = height;
@@ -876,6 +912,12 @@ const createScene = () => {
     );
   }
 
+  for (let i=0;i<34;i++) {
+    const angle=Math.random()*Math.PI*2;
+    const distance=720+Math.random()*620;
+    createMountain(Math.cos(angle)*distance,Math.sin(angle)*distance,45+Math.random()*75,70+Math.random()*125);
+  }
+
   // =========================================================
   // WATER
   // =========================================================
@@ -901,6 +943,29 @@ const createScene = () => {
       0.90,
       1.0
     );
+
+  const shallowOceanMat = new BABYLON.StandardMaterial("shallowOceanMat", scene);
+  shallowOceanMat.diffuseColor = new BABYLON.Color3(0.055,0.35,0.54);
+  shallowOceanMat.alpha = 0.84;
+  shallowOceanMat.specularColor = new BABYLON.Color3(0.72,0.90,1.0);
+
+  const deepOceanMat = new BABYLON.StandardMaterial("deepOceanMat", scene);
+  deepOceanMat.diffuseColor = new BABYLON.Color3(0.018,0.095,0.17);
+  deepOceanMat.alpha = 0.96;
+  deepOceanMat.specularColor = new BABYLON.Color3(0.34,0.48,0.62);
+
+  const deepOcean = BABYLON.MeshBuilder.CreateGround("deepOcean",{width:MAP_SIZE*1.04,height:MAP_SIZE*1.04,subdivisions:1},scene);
+  deepOcean.position.y=-4.3; deepOcean.material=deepOceanMat; deepOcean.isPickable=false;
+
+  const shallowOcean = BABYLON.MeshBuilder.CreateDisc("shallowOcean",{radius:SHALLOW_WATER_RADIUS,tessellation:96},scene);
+  shallowOcean.rotation.x=Math.PI/2; shallowOcean.position.y=-3.8; shallowOcean.material=shallowOceanMat; shallowOcean.isPickable=false;
+
+  const worldBorderMat = new BABYLON.StandardMaterial("worldBorderMat",scene);
+  worldBorderMat.diffuseColor=new BABYLON.Color3(0.08,0.20,0.27);
+  worldBorderMat.emissiveColor=new BABYLON.Color3(0.05,0.16,0.22);
+  worldBorderMat.alpha=0.42;
+  const worldBorderRing=BABYLON.MeshBuilder.CreateTorus("worldBorderRing",{diameter:WORLD_BORDER_RADIUS*2,thickness:7,tessellation:128},scene);
+  worldBorderRing.position.y=-2.7; worldBorderRing.material=worldBorderMat; worldBorderRing.isPickable=false;
 
   function createWater(
     x,
@@ -972,6 +1037,28 @@ const createScene = () => {
     100,
     Math.PI / 10
   );
+
+  function applyGraphicsPreset(preset, notify=true) {
+    currentGraphicsPreset = preset === "REGULAR" ? "REGULAR" : "BASIC";
+    localStorage.setItem("mapGameGraphicsPreset", currentGraphicsPreset);
+    const regular = currentGraphicsPreset === "REGULAR";
+    engine.setHardwareScalingLevel(regular ? 1.0 : 1.28);
+    scene.fogDensity = regular ? 0.00042 : 0.00058;
+    shadowGenerator.blurKernel = regular ? 18 : 9;
+    shallowOceanMat.specularPower = regular ? 96 : 38;
+    deepOceanMat.specularPower = regular ? 72 : 28;
+    waterMat.specularPower = regular ? 88 : 34;
+    glassMat.specularPower = regular ? 96 : 42;
+    camera.upperRadiusLimit = regular ? 1420 : 1180;
+    if (notify) showToast("Graphics switched to " + currentGraphicsPreset,"success");
+  }
+  applyGraphicsPreset(currentGraphicsPreset,false);
+
+  const graphicsQuickToggle=document.createElement("button");
+  graphicsQuickToggle.style.cssText=`position:absolute;right:18px;top:94px;z-index:91;padding:7px 10px;border-radius:9px;border:1px solid rgba(113,225,255,.15);background:rgba(5,14,24,.82);color:#b8efff;font-size:9px;font-weight:900;letter-spacing:.7px;cursor:pointer;backdrop-filter:blur(8px);`;
+  const refreshGraphicsToggle=()=>graphicsQuickToggle.textContent="GRAPHICS • "+currentGraphicsPreset;
+  graphicsQuickToggle.onclick=()=>{applyGraphicsPreset(currentGraphicsPreset==="BASIC"?"REGULAR":"BASIC");refreshGraphicsToggle();};
+  refreshGraphicsToggle(); document.body.appendChild(graphicsQuickToggle);
 
   // =========================================================
   // ROAD HELPERS
@@ -2469,7 +2556,7 @@ const createScene = () => {
             opacity:0.48;
           "
         >
-          ALPHA 0.1 • MULTIPLAYER FOUNDATION
+          ALPHA 0.1 • WORLD SCALE + GRAPHICS FOUNDATION
         </div>
       </div>
     </div>
@@ -5405,7 +5492,7 @@ const createScene = () => {
             letter-spacing:0.7px;
           "
         >
-          TERRITORY • CITIES • REGIONS • ZONES
+          CONTINENT • COAST • CITIES • REGIONS • ZONES
         </div>
       </div>
 
@@ -5626,90 +5713,25 @@ const createScene = () => {
       h
     );
 
-    // Terrain background
-    const gradient =
-      ctx.createLinearGradient(
-        0,
-        0,
-        0,
-        h
-      );
+    // Ocean-first strategic map.
+    const oceanGradient=ctx.createRadialGradient(w*.5,h*.5,Math.min(w,h)*.14,w*.5,h*.5,Math.max(w,h)*.7);
+    oceanGradient.addColorStop(0,"#0d3b52"); oceanGradient.addColorStop(.55,"#08283b"); oceanGradient.addColorStop(1,"#03131f");
+    ctx.fillStyle=oceanGradient; ctx.fillRect(0,0,w,h);
 
-    gradient.addColorStop(
-      0,
-      "#193226"
-    );
-
-    gradient.addColorStop(
-      1,
-      "#243b24"
-    );
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(
-      0,
-      0,
-      w,
-      h
-    );
-
-    // Your current singleplayer/private-style territory preview.
-    ctx.fillStyle =
-      "rgba(76,168,222,0.08)";
-
-    ctx.strokeStyle =
-      "rgba(105,216,255,0.72)";
-
-    ctx.lineWidth = 3;
-
+    // Continental shelf.
     ctx.beginPath();
+    for(let i=0;i<=120;i++){const a=i/120*Math.PI*2;const x=worldToMapX(Math.cos(a)*SHALLOW_WATER_RADIUS,w);const y=worldToMapY(Math.sin(a)*SHALLOW_WATER_RADIUS,h);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+    ctx.closePath(); ctx.fillStyle="rgba(37,137,178,.18)"; ctx.fill();
 
-    const border = [
-      [-475, -430],
-      [-165, -505],
-      [165, -470],
-      [485, -320],
-      [500, 35],
-      [455, 405],
-      [120, 505],
-      [-245, 490],
-      [-500, 290],
-      [-515, -55]
-    ];
-
-    border.forEach(
-      (point, index) => {
-        const x =
-          worldToMapX(
-            point[0],
-            w
-          );
-
-        const y =
-          worldToMapY(
-            point[1],
-            h
-          );
-
-        if (
-          index === 0
-        ) {
-          ctx.moveTo(
-            x,
-            y
-          );
-        } else {
-          ctx.lineTo(
-            x,
-            y
-          );
-        }
-      }
-    );
-
+    // Main continent.
+    ctx.beginPath();
+    for(let i=0;i<=160;i++){const a=i/160*Math.PI*2;const r=coastRadiusAtAngle(a);const x=worldToMapX(Math.cos(a)*r,w);const y=worldToMapY(Math.sin(a)*r,h);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
     ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    const landGradient=ctx.createLinearGradient(0,0,0,h);landGradient.addColorStop(0,"#1b3828");landGradient.addColorStop(1,"#2b4328");
+    ctx.fillStyle=landGradient;ctx.fill();ctx.strokeStyle="rgba(150,222,197,.50)";ctx.lineWidth=2;ctx.stroke();
+
+    // Navigation/world boundary.
+    ctx.beginPath();ctx.arc(w/2,h/2,WORLD_BORDER_RADIUS/MAP_SIZE*w,0,Math.PI*2);ctx.strokeStyle="rgba(118,221,255,.32)";ctx.lineWidth=2;ctx.setLineDash([7,9]);ctx.stroke();ctx.setLineDash([]);
 
     // River
     ctx.strokeStyle =
@@ -5739,11 +5761,13 @@ const createScene = () => {
     ctx.lineWidth = 4;
 
     const roads = [
-      [[0,-300],[0,325]],
-      [[-260,-65],[380,-65]],
-      [[-250,285],[350,285]],
-      [[-330,-285],[0,-65]],
-      [[0,-65],[330,-115]]
+      [[0,-880],[0,1020]],
+      [[-920,-65],[1120,-65]],
+      [[-760,620],[860,620]],
+      [[-1080,-670],[0,-65]],
+      [[0,-65],[980,-620]],
+      [[-850,900],[0,285]],
+      [[330,-115],[1040,850]]
     ];
 
     roads.forEach(
@@ -6208,21 +6232,10 @@ const createScene = () => {
           return;
         }
 
-        camera.target.x =
-          BABYLON.Scalar.Clamp(
-            worldX,
-            -WORLD_LIMIT,
-            WORLD_LIMIT
-          );
-
-        camera.target.z =
-          BABYLON.Scalar.Clamp(
-            worldZ,
-            -WORLD_LIMIT,
-            WORLD_LIMIT
-          );
-
-        camera.radius = 170;
+        const mapTarget = clampPointToWorld(worldX,worldZ,25);
+        camera.target.x = mapTarget.x;
+        camera.target.z = mapTarget.z;
+        camera.radius = 260;
 
         worldMapOverlay.style.display =
           "none";
@@ -6559,16 +6572,13 @@ const createScene = () => {
                 opacity:0.48;
               "
             >
-              GRAPHICS PRESET
+              GRAPHICS QUALITY
             </div>
-
-            <b
-              style="
-                color:#8beaff;
-              "
-            >
-              ${GRAPHICS_PRESET}
-            </b>
+            <div style="margin-top:8px;display:flex;gap:7px;">
+              <button id="graphicsBasicButton" style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);color:white;font-weight:850;cursor:pointer;">BASIC</button>
+              <button id="graphicsRegularButton" style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);color:white;font-weight:850;cursor:pointer;">REGULAR</button>
+            </div>
+            <div style="margin-top:7px;font-size:10px;line-height:1.45;opacity:.58;">Basic prioritizes Chromebook performance. Regular increases clarity, shadow softness, water highlights, and view depth.</div>
           </div>
 
           <div
@@ -6593,6 +6603,10 @@ const createScene = () => {
         `;
 
       wireInspectorClose();
+      const gb=document.getElementById("graphicsBasicButton");
+      const gr=document.getElementById("graphicsRegularButton");
+      if (gb) gb.onclick=()=>{applyGraphicsPreset("BASIC");refreshGraphicsToggle();settingsButton.click();};
+      if (gr) gr.onclick=()=>{applyGraphicsPreset("REGULAR");refreshGraphicsToggle();settingsButton.click();};
     };
 
   // =========================================================
@@ -6943,19 +6957,11 @@ const createScene = () => {
             speed;
         }
 
-        camera.target.x =
-          BABYLON.Scalar.Clamp(
-            camera.target.x,
-            -WORLD_LIMIT,
-            WORLD_LIMIT
-          );
-
-        camera.target.z =
-          BABYLON.Scalar.Clamp(
-            camera.target.z,
-            -WORLD_LIMIT,
-            WORLD_LIMIT
-          );
+        {
+          const clamped = clampPointToWorld(camera.target.x,camera.target.z);
+          camera.target.x = clamped.x;
+          camera.target.z = clamped.z;
+        }
       }
     );
 
