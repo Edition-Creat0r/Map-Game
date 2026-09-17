@@ -1050,11 +1050,29 @@ const createScene = () => {
     waterMat.specularPower = regular ? 88 : 34;
     glassMat.specularPower = regular ? 96 : 42;
     camera.upperRadiusLimit = regular ? 1420 : 1180;
+
+    if (window.mapGameRuntime) {
+      window.mapGameRuntime.graphicsPreset =
+        currentGraphicsPreset;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "mapgame:graphics",
+        {
+          detail: {
+            preset: currentGraphicsPreset
+          }
+        }
+      )
+    );
+
     if (notify) showToast("Graphics switched to " + currentGraphicsPreset,"success");
   }
   applyGraphicsPreset(currentGraphicsPreset,false);
 
   const graphicsQuickToggle=document.createElement("button");
+  graphicsQuickToggle.id = "mg-graphics-toggle";
   graphicsQuickToggle.style.cssText=`position:absolute;right:18px;top:94px;z-index:91;padding:7px 10px;border-radius:9px;border:1px solid rgba(113,225,255,.15);background:rgba(5,14,24,.82);color:#b8efff;font-size:9px;font-weight:900;letter-spacing:.7px;cursor:pointer;backdrop-filter:blur(8px);`;
   const refreshGraphicsToggle=()=>graphicsQuickToggle.textContent="GRAPHICS • "+currentGraphicsPreset;
   graphicsQuickToggle.onclick=()=>{applyGraphicsPreset(currentGraphicsPreset==="BASIC"?"REGULAR":"BASIC");refreshGraphicsToggle();};
@@ -2470,6 +2488,8 @@ const createScene = () => {
       "div"
     );
 
+  topBar.id = "mg-topbar";
+
   topBar.style.cssText = `
     position:absolute;
     top:0;
@@ -2556,7 +2576,7 @@ const createScene = () => {
             opacity:0.48;
           "
         >
-          ALPHA 0.1 • WORLD SCALE + GRAPHICS FOUNDATION
+          ALPHA 0.1.1 • VISUAL WORLD PASS
         </div>
       </div>
     </div>
@@ -2585,6 +2605,8 @@ const createScene = () => {
 
   const multiplayerHudBadge =
     document.createElement("div");
+
+  multiplayerHudBadge.id = "mg-multiplayer-badge";
 
   multiplayerHudBadge.style.cssText = `
     position:absolute;
@@ -2753,6 +2775,8 @@ const createScene = () => {
       "div"
     );
 
+  sideDock.id = "mg-side-dock";
+
   sideDock.style.cssText = `
     position:absolute;
 
@@ -2792,6 +2816,12 @@ const createScene = () => {
 
     button.title =
       label;
+
+    button.dataset.label =
+      label;
+
+    button.className =
+      "mg-dock-button";
 
     button.style.cssText = `
       width:44px;
@@ -2893,6 +2923,8 @@ const createScene = () => {
     document.createElement(
       "div"
     );
+
+  inspector.id = "mg-inspector";
 
   inspector.style.cssText = `
     position:absolute;
@@ -3489,6 +3521,8 @@ const createScene = () => {
       "div"
     );
 
+  bottomBar.id = "mg-bottom-bar";
+
   bottomBar.style.cssText = `
     position:absolute;
 
@@ -3730,6 +3764,8 @@ const createScene = () => {
     document.createElement(
       "div"
     );
+
+  shop.id = "mg-shop";
 
   shop.style.cssText = `
     position:absolute;
@@ -6692,6 +6728,8 @@ const createScene = () => {
       "div"
     );
 
+  touchControls.id = "mg-touch-controls";
+
   touchControls.style.cssText = `
     position:absolute;
 
@@ -8474,6 +8512,41 @@ const createScene = () => {
   window.addEventListener(
     "beforeunload",
     saveGame
+  );
+
+  // =========================================================
+  // MODULAR VISUAL/UI RUNTIME
+  // =========================================================
+
+  window.mapGameRuntime = {
+    engine,
+    scene,
+    camera,
+    sun,
+    moon,
+    hemi,
+    shadowGenerator,
+    glowLayer,
+    ground,
+    waterMaterial: waterMat,
+    shallowOceanMaterial: shallowOceanMat,
+    deepOceanMaterial: deepOceanMat,
+    glassMaterial: glassMat,
+    graphicsPreset: currentGraphicsPreset,
+    mapSize: MAP_SIZE,
+    worldBorderRadius: WORLD_BORDER_RADIUS,
+    playableLandRadius: PLAYABLE_LAND_RADIUS,
+    showToast,
+    setBottomStatus
+  };
+
+  window.dispatchEvent(
+    new CustomEvent(
+      "mapgame:runtime-ready",
+      {
+        detail: window.mapGameRuntime
+      }
+    )
   );
 
   // =========================================================
