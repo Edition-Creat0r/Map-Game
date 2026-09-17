@@ -1,24 +1,16 @@
 // ============================================================
-// MAP GAME — Alpha 0.0.5
-// WORLD + INTERFACE EXPANSION
-// Standalone GitHub Pages / Babylon.js build
+// MAP GAME — Alpha 0.0.6
+// WORLD EXPANSION + UI POLISH
 //
-// Includes:
-// - much larger world
-// - terrain regions / hills
-// - river + bridges
-// - city center + residential + industrial + power districts
-// - mining zone + forests + rocks
-// - power pylons
-// - improved top HUD
-// - left navigation bar
-// - contextual right-side panel
-// - bottom status / build bar
-// - upgraded construction terminal with working category tabs
-// - keyboard + arrow + touch movement
-// - save/load + offline cash
+// Goal:
+// - Make the "Basic" preset look genuinely good.
+// - Push visuals close to "Regular" without making the Chromebook
+//   completely hate us.
+// - Expand the world into recognizable regions and districts.
+// - Improve the entire HUD / panel language so it feels like one game.
 //
-// This file is meant to replace your current game.js.
+// Replace your current game.js with this file.
+// Your existing index.html + styles.css can stay the same.
 // ============================================================
 
 const canvas = document.getElementById("gameCanvas");
@@ -32,6 +24,15 @@ const engine = new BABYLON.Engine(
   }
 );
 
+// Slightly reduce internal resolution on weaker hardware.
+// This keeps the scene sharper than "potato mode" while helping Chromebooks.
+const deviceScale =
+  window.devicePixelRatio >= 2
+    ? 1.35
+    : 1.15;
+
+engine.setHardwareScalingLevel(deviceScale);
+
 // ============================================================
 // SCENE
 // ============================================================
@@ -41,333 +42,472 @@ const createScene = () => {
 
   scene.clearColor = new BABYLON.Color4(
     0.66,
-    0.80,
-    0.92,
+    0.79,
+    0.91,
     1
   );
 
   // =========================================================
-  // GLOBAL GAME STATE
+  // GAME STATE
   // =========================================================
 
-  let money = 25000;
-  let iron = 40;
-  let steel = 20;
-  let energy = 150;
-  let population = 2200;
-  let incomePerMinute = 120;
+  let money = 35000;
+  let iron = 60;
+  let steel = 28;
+  let energy = 220;
+  let population = 3800;
+  let incomePerMinute = 175;
 
   let townHallLevel = 1;
 
-  const SAVE_KEY = "mapGame_alpha005_world_ui";
+  const SAVE_KEY =
+    "mapGame_alpha006_world_ui";
 
   // =========================================================
-  // WORLD CONSTANTS
+  // GRAPHICS TARGET
   // =========================================================
 
-  const MAP_SIZE = 760;
+  // For now this build is our polished BASIC target.
+  // Later we can make REGULAR swap in better materials/models.
+  const GRAPHICS_PRESET = "BASIC";
+
+  // =========================================================
+  // WORLD
+  // =========================================================
+
+  const MAP_SIZE = 1100;
   const MAP_HALF = MAP_SIZE / 2;
+
+  const WORLD_LIMIT =
+    MAP_HALF - 45;
 
   const regions = [
     {
       id: "capital",
-      name: "Capital District",
-      type: "Urban",
+      name: "Nova Capital",
+      type: "Capital",
       x: 0,
-      z: -35,
-      radius: 95,
-      description: "Administrative and commercial core of your civilization."
+      z: -65,
+      radius: 135,
+      color: "#83e8ff",
+      description:
+        "Administrative, commercial, and high-density center of your civilization."
     },
     {
       id: "northForest",
-      name: "Northern Forest",
+      name: "Northwood",
       type: "Forest",
-      x: 15,
-      z: -220,
-      radius: 110,
-      description: "Dense forest and rolling hills. Good future area for lumber and expansion."
+      x: 30,
+      z: -330,
+      radius: 160,
+      color: "#91e6a5",
+      description:
+        "Dense forest, rolling hills, and future lumber or conservation development."
     },
     {
       id: "northWestMine",
-      name: "Northwest Mining Zone",
+      name: "Granite Reach",
       type: "Mining",
-      x: -220,
-      z: -185,
-      radius: 100,
-      description: "Rocky terrain with rich mineral deposits."
+      x: -330,
+      z: -285,
+      radius: 145,
+      color: "#c5cbd1",
+      description:
+        "Rugged mineral country containing the civilization's primary mining complex."
     },
     {
       id: "eastIndustry",
-      name: "Eastern Industry",
+      name: "Forge District",
       type: "Industrial",
-      x: 220,
-      z: -70,
-      radius: 110,
-      description: "Heavy industry, steel production, and future manufacturing."
+      x: 330,
+      z: -115,
+      radius: 150,
+      color: "#91bad7",
+      description:
+        "Heavy industry, refining, fabrication, and future manufacturing."
     },
     {
       id: "westPower",
-      name: "Western Power District",
+      name: "Helios Grid",
       type: "Power",
-      x: -220,
-      z: 70,
-      radius: 100,
-      description: "Power generation and grid infrastructure."
+      x: -325,
+      z: 65,
+      radius: 140,
+      color: "#ffd86a",
+      description:
+        "Power generation, substations, transmission, and utility infrastructure."
     },
     {
       id: "southResidential",
-      name: "Southern Residential Expansion",
+      name: "Southbank",
       type: "Residential",
-      x: 30,
-      z: 190,
-      radius: 125,
-      description: "Large future civilian growth area."
+      x: 0,
+      z: 285,
+      radius: 170,
+      color: "#a4ecc2",
+      description:
+        "Major residential expansion zone with parks, roads, and river access."
     },
     {
-      id: "southEastOpen",
-      name: "Southeast Development Reserve",
-      type: "Open Land",
-      x: 220,
-      z: 190,
-      radius: 120,
-      description: "Open land reserved for future military, transport, or airport development."
+      id: "southEastReserve",
+      name: "Apex Reserve",
+      type: "Development",
+      x: 330,
+      z: 285,
+      radius: 160,
+      color: "#d1c7ff",
+      description:
+        "Large open reserve for future airports, military bases, logistics, or special projects."
+    },
+    {
+      id: "southWestPlains",
+      name: "Westfield Plains",
+      type: "Plains",
+      x: -330,
+      z: 290,
+      radius: 165,
+      color: "#d7e6a2",
+      description:
+        "Open land ideal for agriculture, large factories, or future suburban expansion."
     }
   ];
 
   // =========================================================
-  // FOG
+  // SKY / FOG
   // =========================================================
 
-  scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-  scene.fogDensity = 0.00165;
+  scene.fogMode =
+    BABYLON.Scene.FOGMODE_EXP2;
 
-  scene.fogColor = new BABYLON.Color3(
-    0.66,
-    0.80,
-    0.92
-  );
+  scene.fogDensity = 0.00115;
+
+  scene.fogColor =
+    new BABYLON.Color3(
+      0.66,
+      0.79,
+      0.91
+    );
 
   // =========================================================
   // CAMERA
   // =========================================================
 
-  const camera = new BABYLON.ArcRotateCamera(
-    "camera",
-    -Math.PI / 2,
-    1.02,
-    160,
-    new BABYLON.Vector3(0, 0, 0),
-    scene
+  const camera =
+    new BABYLON.ArcRotateCamera(
+      "camera",
+      -Math.PI / 2,
+      1.01,
+      190,
+      new BABYLON.Vector3(
+        0,
+        0,
+        -30
+      ),
+      scene
+    );
+
+  camera.attachControl(
+    canvas,
+    true
   );
 
-  camera.attachControl(canvas, true);
+  camera.lowerRadiusLimit = 30;
+  camera.upperRadiusLimit = 440;
 
-  camera.lowerRadiusLimit = 28;
-  camera.upperRadiusLimit = 360;
-
-  camera.lowerBetaLimit = 0.28;
-  camera.upperBetaLimit = 1.35;
+  camera.lowerBetaLimit = 0.27;
+  camera.upperBetaLimit = 1.37;
 
   camera.wheelPrecision = 30;
   camera.inertia = 0.82;
   camera.panningInertia = 0.86;
-  camera.panningSensibility = 85;
+  camera.panningSensibility = 80;
 
   // =========================================================
   // LIGHTING
   // =========================================================
 
-  const hemi = new BABYLON.HemisphericLight(
-    "hemi",
-    new BABYLON.Vector3(0, 1, 0),
-    scene
-  );
+  const hemi =
+    new BABYLON.HemisphericLight(
+      "hemi",
+      new BABYLON.Vector3(
+        0,
+        1,
+        0
+      ),
+      scene
+    );
 
-  hemi.intensity = 0.58;
+  hemi.intensity = 0.62;
 
-  const sun = new BABYLON.DirectionalLight(
-    "sun",
-    new BABYLON.Vector3(-0.52, -1, -0.38),
-    scene
-  );
+  const sun =
+    new BABYLON.DirectionalLight(
+      "sun",
+      new BABYLON.Vector3(
+        -0.48,
+        -1,
+        -0.34
+      ),
+      scene
+    );
 
-  sun.position = new BABYLON.Vector3(
-    190,
-    260,
-    150
-  );
+  sun.position =
+    new BABYLON.Vector3(
+      260,
+      360,
+      210
+    );
 
-  sun.intensity = 1.05;
+  sun.intensity = 1.0;
 
-  const shadowGenerator = new BABYLON.ShadowGenerator(
-    1024,
-    sun
-  );
+  const shadowGenerator =
+    new BABYLON.ShadowGenerator(
+      1024,
+      sun
+    );
 
-  shadowGenerator.useBlurExponentialShadowMap = true;
-  shadowGenerator.blurKernel = 14;
+  shadowGenerator.useBlurExponentialShadowMap =
+    true;
+
+  shadowGenerator.blurKernel = 12;
 
   // =========================================================
   // MATERIAL HELPERS
   // =========================================================
 
-  function makeMaterial(name, r, g, b) {
-    const mat = new BABYLON.StandardMaterial(name, scene);
+  function makeMaterial(
+    name,
+    r,
+    g,
+    b
+  ) {
+    const mat =
+      new BABYLON.StandardMaterial(
+        name,
+        scene
+      );
 
-    mat.diffuseColor = new BABYLON.Color3(
-      r,
-      g,
-      b
-    );
+    mat.diffuseColor =
+      new BABYLON.Color3(
+        r,
+        g,
+        b
+      );
 
     return mat;
   }
 
-  const grassMat = makeMaterial(
-    "grassMat",
-    0.21,
-    0.46,
-    0.17
-  );
+  const grassMat =
+    makeMaterial(
+      "grassMat",
+      0.22,
+      0.47,
+      0.18
+    );
 
-  const dirtMat = makeMaterial(
-    "dirtMat",
-    0.36,
-    0.28,
-    0.17
-  );
+  const grassLightMat =
+    makeMaterial(
+      "grassLightMat",
+      0.30,
+      0.54,
+      0.22
+    );
 
-  const roadMat = makeMaterial(
-    "roadMat",
-    0.08,
-    0.095,
-    0.11
-  );
+  const dirtMat =
+    makeMaterial(
+      "dirtMat",
+      0.36,
+      0.28,
+      0.18
+    );
 
-  const roadEdgeMat = makeMaterial(
-    "roadEdgeMat",
-    0.34,
-    0.36,
-    0.38
-  );
+  const roadMat =
+    makeMaterial(
+      "roadMat",
+      0.075,
+      0.085,
+      0.10
+    );
 
-  const lineMat = makeMaterial(
-    "lineMat",
-    0.92,
-    0.82,
-    0.28
-  );
+  const roadEdgeMat =
+    makeMaterial(
+      "roadEdgeMat",
+      0.34,
+      0.36,
+      0.39
+    );
 
-  const concreteMat = makeMaterial(
-    "concreteMat",
-    0.56,
-    0.61,
-    0.66
-  );
+  const roadLineYellowMat =
+    makeMaterial(
+      "roadLineYellowMat",
+      0.94,
+      0.80,
+      0.24
+    );
 
-  const darkMat = makeMaterial(
-    "darkMat",
-    0.035,
-    0.045,
-    0.06
-  );
+  const roadLineWhiteMat =
+    makeMaterial(
+      "roadLineWhiteMat",
+      0.88,
+      0.90,
+      0.92
+    );
 
-  const industrialMat = makeMaterial(
-    "industrialMat",
-    0.34,
-    0.41,
-    0.47
-  );
+  const concreteMat =
+    makeMaterial(
+      "concreteMat",
+      0.57,
+      0.62,
+      0.66
+    );
 
-  const mineMat = makeMaterial(
-    "mineMat",
-    0.20,
-    0.22,
-    0.25
-  );
+  const concreteDarkMat =
+    makeMaterial(
+      "concreteDarkMat",
+      0.30,
+      0.34,
+      0.38
+    );
 
-  const powerMat = makeMaterial(
-    "powerMat",
-    0.50,
-    0.39,
-    0.11
-  );
+  const darkMat =
+    makeMaterial(
+      "darkMat",
+      0.028,
+      0.038,
+      0.052
+    );
 
-  const treeTrunkMat = makeMaterial(
-    "treeTrunkMat",
-    0.28,
-    0.14,
-    0.055
-  );
+  const industrialMat =
+    makeMaterial(
+      "industrialMat",
+      0.33,
+      0.40,
+      0.47
+    );
 
-  const treeLeafMat = makeMaterial(
-    "treeLeafMat",
-    0.085,
-    0.31,
-    0.095
-  );
+  const mineMat =
+    makeMaterial(
+      "mineMat",
+      0.19,
+      0.21,
+      0.24
+    );
 
-  const treeLeafAltMat = makeMaterial(
-    "treeLeafAltMat",
-    0.12,
-    0.39,
-    0.12
-  );
+  const powerMat =
+    makeMaterial(
+      "powerMat",
+      0.51,
+      0.39,
+      0.10
+    );
 
-  const rockMat = makeMaterial(
-    "rockMat",
-    0.29,
-    0.31,
-    0.33
-  );
+  const treeTrunkMat =
+    makeMaterial(
+      "treeTrunkMat",
+      0.27,
+      0.14,
+      0.055
+    );
 
-  const pylonMat = makeMaterial(
-    "pylonMat",
-    0.27,
-    0.30,
-    0.33
-  );
+  const treeLeafMat =
+    makeMaterial(
+      "treeLeafMat",
+      0.075,
+      0.30,
+      0.085
+    );
 
-  const glassMat = new BABYLON.StandardMaterial(
-    "glassMat",
-    scene
-  );
+  const treeLeafAltMat =
+    makeMaterial(
+      "treeLeafAltMat",
+      0.12,
+      0.38,
+      0.12
+    );
 
-  glassMat.diffuseColor = new BABYLON.Color3(
-    0.11,
-    0.43,
-    0.68
-  );
+  const rockMat =
+    makeMaterial(
+      "rockMat",
+      0.28,
+      0.30,
+      0.33
+    );
 
-  glassMat.alpha = 0.60;
+  const pylonMat =
+    makeMaterial(
+      "pylonMat",
+      0.25,
+      0.28,
+      0.31
+    );
 
-  glassMat.specularColor = new BABYLON.Color3(
-    0.8,
-    0.9,
-    1.0
-  );
+  const parkMat =
+    makeMaterial(
+      "parkMat",
+      0.19,
+      0.50,
+      0.17
+    );
+
+  const glassMat =
+    new BABYLON.StandardMaterial(
+      "glassMat",
+      scene
+    );
+
+  glassMat.diffuseColor =
+    new BABYLON.Color3(
+      0.08,
+      0.40,
+      0.67
+    );
+
+  glassMat.alpha = 0.62;
+
+  glassMat.specularColor =
+    new BABYLON.Color3(
+      0.9,
+      0.95,
+      1.0
+    );
+
+  const darkGlassMat =
+    new BABYLON.StandardMaterial(
+      "darkGlassMat",
+      scene
+    );
+
+  darkGlassMat.diffuseColor =
+    new BABYLON.Color3(
+      0.04,
+      0.18,
+      0.28
+    );
+
+  darkGlassMat.alpha = 0.78;
 
   // =========================================================
   // TERRAIN
   // =========================================================
 
-  const ground = BABYLON.MeshBuilder.CreateGround(
-    "ground",
-    {
-      width: MAP_SIZE,
-      height: MAP_SIZE,
-      subdivisions: 110
-    },
-    scene
-  );
+  const ground =
+    BABYLON.MeshBuilder.CreateGround(
+      "ground",
+      {
+        width: MAP_SIZE,
+        height: MAP_SIZE,
+        subdivisions: 105
+      },
+      scene
+    );
 
   ground.material = grassMat;
   ground.receiveShadows = true;
   ground.isPickable = true;
 
-  const positions = ground.getVerticesData(
-    BABYLON.VertexBuffer.PositionKind
-  );
+  const positions =
+    ground.getVerticesData(
+      BABYLON.VertexBuffer.PositionKind
+    );
 
   if (positions) {
     for (
@@ -379,44 +519,85 @@ const createScene = () => {
       const z = positions[i + 2];
 
       let height =
-        Math.sin(x * 0.014) * 3.2 +
-        Math.cos(z * 0.012) * 3.0 +
-        Math.sin((x + z) * 0.009) * 2.0 +
-        Math.cos((x - z) * 0.006) * 1.5;
+        Math.sin(x * 0.0105) * 4.0 +
+        Math.cos(z * 0.009) * 3.6 +
+        Math.sin((x + z) * 0.0068) * 2.5 +
+        Math.cos((x - z) * 0.0045) * 1.8;
 
-      // Capital area flatter
-      const capitalDistance = Math.sqrt(
-        x * x +
-        (z + 35) * (z + 35)
-      );
+      // Flatten capital
+      const capitalDistance =
+        Math.sqrt(
+          x * x +
+          (z + 65) *
+            (z + 65)
+        );
 
-      if (capitalDistance < 120) {
-        height *= 0.12;
+      if (
+        capitalDistance <
+        160
+      ) {
+        height *= 0.10;
       }
 
-      // Southern residential area slightly smoother
-      const southDistance = Math.sqrt(
-        (x - 30) * (x - 30) +
-        (z - 190) * (z - 190)
-      );
+      // Smooth Southbank
+      const southDistance =
+        Math.sqrt(
+          x * x +
+          (z - 285) *
+            (z - 285)
+        );
 
-      if (southDistance < 130) {
-        height *= 0.35;
+      if (
+        southDistance <
+        185
+      ) {
+        height *= 0.28;
       }
 
-      // Northwest mining zone more rugged
-      const miningDistance = Math.sqrt(
-        (x + 220) * (x + 220) +
-        (z + 185) * (z + 185)
-      );
+      // Rugged mining terrain
+      const miningDistance =
+        Math.sqrt(
+          (x + 330) *
+            (x + 330) +
+          (z + 285) *
+            (z + 285)
+        );
 
-      if (miningDistance < 120) {
+      if (
+        miningDistance <
+        175
+      ) {
         height +=
-          Math.sin(x * 0.045) * 3 +
-          Math.cos(z * 0.055) * 3;
+          Math.sin(
+            x * 0.038
+          ) * 4.5 +
+          Math.cos(
+            z * 0.043
+          ) * 4.0;
       }
 
-      positions[i + 1] = height;
+      // Northwood rolling hills
+      const forestDistance =
+        Math.sqrt(
+          (x - 30) *
+            (x - 30) +
+          (z + 330) *
+            (z + 330)
+        );
+
+      if (
+        forestDistance <
+        180
+      ) {
+        height +=
+          Math.sin(
+            z * 0.024
+          ) * 2.5;
+      }
+
+      positions[
+        i + 1
+      ] = height;
     }
 
     ground.updateVerticesData(
@@ -428,293 +609,368 @@ const createScene = () => {
   }
 
   // =========================================================
-  // RIVER
+  // LOW-POLY DISTANT RIDGES
   // =========================================================
 
-  const waterMat = new BABYLON.StandardMaterial(
-    "waterMat",
-    scene
-  );
-
-  waterMat.diffuseColor = new BABYLON.Color3(
-    0.06,
-    0.31,
-    0.52
-  );
-
-  waterMat.alpha = 0.84;
-
-  waterMat.specularColor = new BABYLON.Color3(
-    0.72,
-    0.90,
-    1.0
-  );
-
-  function createRiverSegment(
+  function createMountain(
     x,
     z,
-    width,
-    depth,
-    rotation
+    radius,
+    height
   ) {
-    const river = BABYLON.MeshBuilder.CreateGround(
-      "riverSegment",
-      {
-        width,
-        height: depth,
-        subdivisions: 1
-      },
+    const mountain =
+      BABYLON.MeshBuilder.CreateCylinder(
+        "mountain",
+        {
+          diameterTop: 0,
+          diameterBottom:
+            radius * 2,
+          height,
+          tessellation: 7
+        },
+        scene
+      );
+
+    mountain.position =
+      new BABYLON.Vector3(
+        x,
+        height / 2 - 3,
+        z
+      );
+
+    mountain.material =
+      rockMat;
+
+    mountain.isPickable =
+      false;
+
+    return mountain;
+  }
+
+  for (
+    let i = 0;
+    i < 12;
+    i++
+  ) {
+    createMountain(
+      -500 +
+        Math.random() *
+          220,
+      -470 +
+        Math.random() *
+          220,
+      35 +
+        Math.random() *
+          45,
+      45 +
+        Math.random() *
+          60
+    );
+  }
+
+  // =========================================================
+  // WATER
+  // =========================================================
+
+  const waterMat =
+    new BABYLON.StandardMaterial(
+      "waterMat",
       scene
     );
 
-    river.position = new BABYLON.Vector3(
-      x,
-      -0.32,
-      z
+  waterMat.diffuseColor =
+    new BABYLON.Color3(
+      0.055,
+      0.30,
+      0.52
     );
 
-    river.rotation.y = rotation;
-    river.material = waterMat;
-    river.isPickable = false;
+  waterMat.alpha = 0.85;
 
-    return river;
-  }
+  waterMat.specularColor =
+    new BABYLON.Color3(
+      0.75,
+      0.90,
+      1.0
+    );
 
-  createRiverSegment(
-    -150,
-    110,
-    220,
-    32,
-    Math.PI / 16
-  );
-
-  createRiverSegment(
-    50,
-    135,
-    250,
-    34,
-    -Math.PI / 20
-  );
-
-  createRiverSegment(
-    245,
-    160,
-    170,
-    30,
-    Math.PI / 14
-  );
-
-  // =========================================================
-  // ROADS
-  // =========================================================
-
-  function createRoad(
+  function createWater(
     x,
     z,
     width,
     depth,
     rotation = 0
   ) {
-    const road = BABYLON.MeshBuilder.CreateBox(
-      "road",
-      {
-        width,
-        height: 0.12,
-        depth
-      },
-      scene
-    );
+    const water =
+      BABYLON.MeshBuilder.CreateGround(
+        "water",
+        {
+          width,
+          height: depth,
+          subdivisions: 1
+        },
+        scene
+      );
 
-    road.position = new BABYLON.Vector3(
-      x,
-      0.10,
-      z
-    );
+    water.position =
+      new BABYLON.Vector3(
+        x,
+        -0.36,
+        z
+      );
 
-    road.rotation.y = rotation;
-    road.material = roadMat;
-    road.receiveShadows = true;
-    road.isPickable = false;
+    water.rotation.y =
+      rotation;
+
+    water.material =
+      waterMat;
+
+    water.isPickable =
+      false;
+
+    return water;
+  }
+
+  // Main river
+  createWater(
+    -270,
+    125,
+    300,
+    42,
+    Math.PI / 20
+  );
+
+  createWater(
+    0,
+    150,
+    330,
+    46,
+    -Math.PI / 28
+  );
+
+  createWater(
+    300,
+    175,
+    310,
+    42,
+    Math.PI / 18
+  );
+
+  // Small lake
+  createWater(
+    -365,
+    330,
+    150,
+    100,
+    Math.PI / 10
+  );
+
+  // =========================================================
+  // ROAD HELPERS
+  // =========================================================
+
+  function createRoadBase(
+    x,
+    z,
+    width,
+    depth,
+    rotation = 0
+  ) {
+    const shoulder =
+      BABYLON.MeshBuilder.CreateBox(
+        "roadShoulder",
+        {
+          width:
+            width + 5,
+          height: 0.08,
+          depth:
+            depth + 5
+        },
+        scene
+      );
+
+    shoulder.position =
+      new BABYLON.Vector3(
+        x,
+        0.055,
+        z
+      );
+
+    shoulder.rotation.y =
+      rotation;
+
+    shoulder.material =
+      roadEdgeMat;
+
+    shoulder.isPickable =
+      false;
+
+    const road =
+      BABYLON.MeshBuilder.CreateBox(
+        "road",
+        {
+          width,
+          height: 0.12,
+          depth
+        },
+        scene
+      );
+
+    road.position =
+      new BABYLON.Vector3(
+        x,
+        0.11,
+        z
+      );
+
+    road.rotation.y =
+      rotation;
+
+    road.material =
+      roadMat;
+
+    road.receiveShadows =
+      true;
+
+    road.isPickable =
+      false;
 
     return road;
   }
 
-  function createRoadEdge(
+  function createDash(
     x,
     z,
     width,
     depth,
+    material,
     rotation = 0
   ) {
-    const edge = BABYLON.MeshBuilder.CreateBox(
-      "roadEdge",
-      {
-        width,
-        height: 0.06,
-        depth
-      },
-      scene
-    );
+    const dash =
+      BABYLON.MeshBuilder.CreateBox(
+        "roadDash",
+        {
+          width,
+          height: 0.025,
+          depth
+        },
+        scene
+      );
 
-    edge.position = new BABYLON.Vector3(
-      x,
-      0.07,
-      z
-    );
+    dash.position =
+      new BABYLON.Vector3(
+        x,
+        0.185,
+        z
+      );
 
-    edge.rotation.y = rotation;
-    edge.material = roadEdgeMat;
-    edge.isPickable = false;
+    dash.rotation.y =
+      rotation;
 
-    return edge;
+    dash.material =
+      material;
+
+    dash.isPickable =
+      false;
   }
 
-  function createRoadLine(
-    x,
-    z,
-    width,
-    depth,
-    rotation = 0
-  ) {
-    const line = BABYLON.MeshBuilder.CreateBox(
-      "roadLine",
-      {
-        width,
-        height: 0.025,
-        depth
-      },
-      scene
-    );
-
-    line.position = new BABYLON.Vector3(
-      x,
-      0.17,
-      z
-    );
-
-    line.rotation.y = rotation;
-    line.material = lineMat;
-    line.isPickable = false;
-
-    return line;
-  }
-
-  // Main north/south avenue
-  createRoadEdge(
+  // Capital cross
+  createRoadBase(
     0,
-    -45,
-    18,
-    360
+    -70,
+    15,
+    470
   );
 
-  createRoad(
+  createRoadBase(
     0,
-    -45,
+    -65,
+    500,
+    15
+  );
+
+  // East industry corridor
+  createRoadBase(
+    285,
+    -115,
     13,
-    360
+    270
   );
 
-  // Main east/west avenue
-  createRoadEdge(
-    0,
-    -35,
-    390,
-    18
-  );
-
-  createRoad(
-    0,
-    -35,
-    390,
-    13
-  );
-
-  // East industrial road
-  createRoadEdge(
-    185,
-    -85,
-    16,
-    220
-  );
-
-  createRoad(
-    185,
-    -85,
-    11,
-    220
-  );
-
-  // West power road
-  createRoadEdge(
-    -190,
+  // West utility corridor
+  createRoadBase(
+    -280,
     25,
-    16,
-    210
+    13,
+    280
   );
 
-  createRoad(
-    -190,
-    25,
-    11,
-    210
+  // Southbank avenue
+  createRoadBase(
+    0,
+    285,
+    500,
+    14
   );
 
-  // Southern residential road
-  createRoadEdge(
-    10,
-    190,
-    320,
-    16
+  // Mining road
+  createRoadBase(
+    -250,
+    -230,
+    13,
+    240,
+    -Math.PI / 7
   );
 
-  createRoad(
-    10,
-    190,
-    320,
-    11
-  );
-
-  // Southeast future expansion
-  createRoadEdge(
-    215,
-    160,
-    14,
-    150,
-    -Math.PI / 12
-  );
-
-  createRoad(
-    215,
-    160,
-    10,
-    150,
+  // Southeast development road
+  createRoadBase(
+    310,
+    270,
+    13,
+    260,
     -Math.PI / 12
   );
 
   // Road markings
   for (
-    let z = -210;
-    z <= 120;
-    z += 18
+    let z = -290;
+    z <= 140;
+    z += 20
   ) {
-    createRoadLine(
+    createDash(
       0,
       z,
-      0.65,
-      7
+      0.7,
+      8,
+      roadLineYellowMat
     );
   }
 
   for (
-    let x = -185;
-    x <= 185;
-    x += 18
+    let x = -235;
+    x <= 235;
+    x += 20
   ) {
-    createRoadLine(
+    createDash(
       x,
-      -35,
-      7,
-      0.65
+      -65,
+      8,
+      0.7,
+      roadLineWhiteMat
+    );
+  }
+
+  for (
+    let x = -235;
+    x <= 235;
+    x += 22
+  ) {
+    createDash(
+      x,
+      285,
+      8,
+      0.7,
+      roadLineWhiteMat
     );
   }
 
@@ -729,75 +985,93 @@ const createScene = () => {
     depth,
     rotation = 0
   ) {
-    const bridgeBase = BABYLON.MeshBuilder.CreateBox(
-      "bridgeBase",
-      {
-        width,
-        height: 0.55,
-        depth
-      },
-      scene
-    );
+    const deck =
+      BABYLON.MeshBuilder.CreateBox(
+        "bridgeDeck",
+        {
+          width,
+          height: 0.65,
+          depth
+        },
+        scene
+      );
 
-    bridgeBase.position = new BABYLON.Vector3(
-      x,
-      1.05,
-      z
-    );
+    deck.position =
+      new BABYLON.Vector3(
+        x,
+        1.15,
+        z
+      );
 
-    bridgeBase.rotation.y = rotation;
-    bridgeBase.material = roadMat;
+    deck.rotation.y =
+      rotation;
 
-    const rail1 = BABYLON.MeshBuilder.CreateBox(
-      "bridgeRail",
-      {
-        width: 0.45,
-        height: 1.1,
-        depth
-      },
-      scene
-    );
-
-    rail1.position = new BABYLON.Vector3(
-      x - width / 2 + 0.35,
-      1.75,
-      z
-    );
-
-    rail1.rotation.y = rotation;
-    rail1.material = concreteMat;
-
-    const rail2 = rail1.clone(
-      "bridgeRail2"
-    );
-
-    rail2.position.x =
-      x + width / 2 - 0.35;
+    deck.material =
+      roadMat;
 
     shadowGenerator.addShadowCaster(
-      bridgeBase
+      deck
     );
 
-    return bridgeBase;
+    const railWidth =
+      0.45;
+
+    const rail1 =
+      BABYLON.MeshBuilder.CreateBox(
+        "bridgeRail",
+        {
+          width:
+            railWidth,
+          height: 1.15,
+          depth
+        },
+        scene
+      );
+
+    rail1.position =
+      new BABYLON.Vector3(
+        x - width / 2 +
+          0.45,
+        1.85,
+        z
+      );
+
+    rail1.rotation.y =
+      rotation;
+
+    rail1.material =
+      concreteMat;
+
+    const rail2 =
+      rail1.clone(
+        "bridgeRail2"
+      );
+
+    rail2.position.x =
+      x +
+      width / 2 -
+      0.45;
+
+    return deck;
   }
 
   createBridge(
     0,
-    115,
-    13,
-    60
+    145,
+    15,
+    78
   );
 
   createBridge(
-    190,
-    145,
-    11,
-    46,
+    305,
+    168,
+    13,
+    62,
     -Math.PI / 12
   );
 
   // =========================================================
-  // BUILDING HELPERS
+  // INTERACTIVE DATA
   // =========================================================
 
   function markInteractive(
@@ -807,13 +1081,19 @@ const createScene = () => {
     data = {}
   ) {
     mesh.metadata = {
-      interactiveType: type,
+      interactiveType:
+        type,
       displayName,
       ...data
     };
 
-    mesh.isPickable = true;
+    mesh.isPickable =
+      true;
   }
+
+  // =========================================================
+  // BASIC-PRESET MODERN BUILDING
+  // =========================================================
 
   function createModernBuilding(
     x,
@@ -821,88 +1101,137 @@ const createScene = () => {
     w,
     h,
     d,
-    glassAmount = 0.65,
-    name = "Building",
-    type = "building"
+    options = {}
   ) {
-    const body = BABYLON.MeshBuilder.CreateBox(
-      "modernBuilding",
-      {
-        width: w,
-        height: h,
-        depth: d
-      },
-      scene
-    );
+    const {
+      name =
+        "Modern Building",
+      type =
+        "building",
+      glassAmount =
+        0.66,
+      material =
+        concreteMat,
+      darkGlass =
+        false
+    } = options;
 
-    body.position = new BABYLON.Vector3(
-      x,
-      h / 2,
-      z
-    );
+    const body =
+      BABYLON.MeshBuilder.CreateBox(
+        "modernBuilding",
+        {
+          width: w,
+          height: h,
+          depth: d
+        },
+        scene
+      );
 
-    body.material = concreteMat;
+    body.position =
+      new BABYLON.Vector3(
+        x,
+        h / 2,
+        z
+      );
+
+    body.material =
+      material;
 
     shadowGenerator.addShadowCaster(
       body
     );
 
-    const glassFront = BABYLON.MeshBuilder.CreateBox(
-      "glassFront",
-      {
-        width: w * glassAmount,
-        height: h * 0.58,
-        depth: 0.3
-      },
-      scene
-    );
+    const frontGlass =
+      BABYLON.MeshBuilder.CreateBox(
+        "frontGlass",
+        {
+          width:
+            w *
+            glassAmount,
+          height:
+            h * 0.57,
+          depth: 0.25
+        },
+        scene
+      );
 
-    glassFront.position = new BABYLON.Vector3(
-      x,
-      h * 0.52,
-      z - d / 2 - 0.16
-    );
+    frontGlass.position =
+      new BABYLON.Vector3(
+        x,
+        h * 0.52,
+        z - d / 2 - 0.14
+      );
 
-    glassFront.material = glassMat;
-    glassFront.isPickable = false;
+    frontGlass.material =
+      darkGlass
+        ? darkGlassMat
+        : glassMat;
 
-    const top = BABYLON.MeshBuilder.CreateBox(
-      "buildingTop",
-      {
-        width: w + 0.8,
-        height: 0.7,
-        depth: d + 0.8
-      },
-      scene
-    );
+    frontGlass.isPickable =
+      false;
 
-    top.position = new BABYLON.Vector3(
-      x,
-      h + 0.35,
-      z
-    );
+    const roofCap =
+      BABYLON.MeshBuilder.CreateBox(
+        "roofCap",
+        {
+          width:
+            w + 0.9,
+          height: 0.65,
+          depth:
+            d + 0.9
+        },
+        scene
+      );
 
-    top.material = darkMat;
-    top.isPickable = false;
+    roofCap.position =
+      new BABYLON.Vector3(
+        x,
+        h + 0.33,
+        z
+      );
 
-    const sideStrip = BABYLON.MeshBuilder.CreateBox(
-      "sideStrip",
-      {
-        width: 0.8,
-        height: h,
-        depth: d + 0.2
-      },
-      scene
-    );
+    roofCap.material =
+      darkMat;
 
-    sideStrip.position = new BABYLON.Vector3(
-      x - w / 2 + 0.4,
-      h / 2,
-      z
-    );
+    roofCap.isPickable =
+      false;
 
-    sideStrip.material = darkMat;
-    sideStrip.isPickable = false;
+    // Black structural stripes
+    const stripeLeft =
+      BABYLON.MeshBuilder.CreateBox(
+        "stripeLeft",
+        {
+          width: 0.75,
+          height: h,
+          depth:
+            d + 0.25
+        },
+        scene
+      );
+
+    stripeLeft.position =
+      new BABYLON.Vector3(
+        x - w / 2 +
+          0.38,
+        h / 2,
+        z
+      );
+
+    stripeLeft.material =
+      darkMat;
+
+    stripeLeft.isPickable =
+      false;
+
+    const stripeRight =
+      stripeLeft.clone(
+        "stripeRight"
+      );
+
+    stripeRight.position.x =
+      x +
+      w / 2 -
+      0.38;
 
     markInteractive(
       body,
@@ -917,97 +1246,166 @@ const createScene = () => {
   }
 
   // =========================================================
-  // CAPITAL CITY
+  // CAPITAL CORE
   // =========================================================
 
   createModernBuilding(
     0,
-    -62,
-    24,
-    13,
-    20,
-    0.78,
-    "Central Administration",
-    "townHall"
-  );
-
-  createModernBuilding(
-    34,
-    -68,
-    13,
-    26,
-    13,
-    0.82,
-    "Commerce Tower",
-    "commercial"
-  );
-
-  createModernBuilding(
-    -34,
-    -66,
-    14,
-    18,
-    14,
-    0.74,
-    "Civic Offices",
-    "commercial"
-  );
-
-  createModernBuilding(
-    32,
-    -18,
+    -95,
+    28,
     15,
+    22,
+    {
+      name:
+        "Central Administration",
+      type:
+        "townHall",
+      glassAmount:
+        0.80
+    }
+  );
+
+  createModernBuilding(
+    42,
+    -102,
+    14,
+    30,
+    14,
+    {
+      name:
+        "Commerce Tower",
+      type:
+        "commercial",
+      glassAmount:
+        0.84,
+      darkGlass:
+        true
+    }
+  );
+
+  createModernBuilding(
+    -43,
+    -100,
+    15,
+    22,
+    15,
+    {
+      name:
+        "Civic Offices",
+      type:
+        "commercial",
+      glassAmount:
+        0.76
+    }
+  );
+
+  createModernBuilding(
+    42,
+    -42,
     16,
-    15,
-    0.72,
-    "Central Apartments",
-    "residential"
+    19,
+    16,
+    {
+      name:
+        "Central Residences",
+      type:
+        "residential",
+      glassAmount:
+        0.72
+    }
   );
 
   createModernBuilding(
-    -35,
-    -18,
-    14,
-    14,
-    14,
-    0.70,
-    "Central Apartments",
-    "residential"
-  );
-
-  createModernBuilding(
-    62,
-    -62,
-    12,
-    20,
-    12,
-    0.76,
-    "Tech Offices",
-    "commercial"
-  );
-
-  createModernBuilding(
-    -64,
-    -62,
-    12,
+    -44,
+    -42,
+    16,
     17,
-    12,
-    0.72,
-    "Municipal Offices",
-    "commercial"
+    16,
+    {
+      name:
+        "Central Residences",
+      type:
+        "residential",
+      glassAmount:
+        0.70
+    }
+  );
+
+  createModernBuilding(
+    78,
+    -96,
+    13,
+    22,
+    13,
+    {
+      name:
+        "Technology Center",
+      type:
+        "commercial",
+      glassAmount:
+        0.78,
+      darkGlass:
+        true
+    }
+  );
+
+  createModernBuilding(
+    -80,
+    -96,
+    13,
+    20,
+    13,
+    {
+      name:
+        "Municipal Center",
+      type:
+        "commercial",
+      glassAmount:
+        0.72
+    }
   );
 
   // =========================================================
-  // RESIDENTIAL DISTRICTS
+  // CAPITAL PARK
   // =========================================================
 
-  function createResidentialBlock(
+  const park =
+    BABYLON.MeshBuilder.CreateBox(
+      "capitalPark",
+      {
+        width: 75,
+        height: 0.16,
+        depth: 60
+      },
+      scene
+    );
+
+  park.position =
+    new BABYLON.Vector3(
+      0,
+      0.10,
+      15
+    );
+
+  park.material =
+    parkMat;
+
+  park.isPickable =
+    false;
+
+  // =========================================================
+  // RESIDENTIAL BLOCK HELPER
+  // =========================================================
+
+  function createResidentialDistrict(
     startX,
     startZ,
     columns,
     rows,
     spacingX,
-    spacingZ
+    spacingZ,
+    minHeight,
+    maxHeight
   ) {
     for (
       let row = 0;
@@ -1021,80 +1419,101 @@ const createScene = () => {
       ) {
         const x =
           startX +
-          col * spacingX;
+          col *
+            spacingX;
 
         const z =
           startZ +
-          row * spacingZ;
+          row *
+            spacingZ;
 
-        const height =
-          6 +
+        const h =
+          minHeight +
           Math.floor(
-            Math.random() * 8
+            Math.random() *
+              (
+                maxHeight -
+                minHeight +
+                1
+              )
           );
 
         createModernBuilding(
           x,
           z,
-          10,
-          height,
-          10,
-          0.58,
-          "Residential Block",
-          "residential"
+          11,
+          h,
+          11,
+          {
+            name:
+              "Residential Block",
+            type:
+              "residential",
+            glassAmount:
+              0.60
+          }
         );
       }
     }
   }
 
-  createResidentialBlock(
-    -72,
-    28,
-    5,
+  createResidentialDistrict(
+    -105,
+    55,
+    6,
     3,
-    23,
-    23
-  );
-
-  createResidentialBlock(
-    -90,
-    205,
+    35,
+    31,
     7,
-    3,
-    28,
-    26
+    14
+  );
+
+  createResidentialDistrict(
+    -150,
+    315,
+    8,
+    4,
+    42,
+    35,
+    7,
+    16
   );
 
   // =========================================================
-  // IRON MINE COMPLEX
+  // MINING COMPLEX
   // =========================================================
 
-  const mineBase = BABYLON.MeshBuilder.CreateBox(
-    "mineBase",
-    {
-      width: 28,
-      height: 7,
-      depth: 24
-    },
-    scene
-  );
+  const mineBase =
+    BABYLON.MeshBuilder.CreateBox(
+      "mineBase",
+      {
+        width: 36,
+        height: 8,
+        depth: 30
+      },
+      scene
+    );
 
-  mineBase.position = new BABYLON.Vector3(
-    -220,
-    3.5,
-    -185
-  );
+  mineBase.position =
+    new BABYLON.Vector3(
+      -330,
+      4,
+      -285
+    );
 
-  mineBase.material = mineMat;
+  mineBase.material =
+    mineMat;
 
   markInteractive(
     mineBase,
     "ironMine",
-    "Iron Mine Complex",
+    "Granite Reach Mine",
     {
       level: 1,
-      production: "+3 Iron / cycle",
-      consumption: "-1 Energy"
+      production:
+        "+3 Iron / cycle",
+      consumption:
+        "-1 Energy"
     }
   );
 
@@ -1102,74 +1521,65 @@ const createScene = () => {
     mineBase
   );
 
-  const mineTower = BABYLON.MeshBuilder.CreateCylinder(
-    "mineTower",
-    {
-      diameter: 10,
-      height: 18,
-      tessellation: 8
-    },
-    scene
-  );
+  const mineTower =
+    BABYLON.MeshBuilder.CreateCylinder(
+      "mineTower",
+      {
+        diameter: 12,
+        height: 24,
+        tessellation: 8
+      },
+      scene
+    );
 
-  mineTower.position = new BABYLON.Vector3(
-    -220,
-    12,
-    -185
-  );
+  mineTower.position =
+    new BABYLON.Vector3(
+      -330,
+      15,
+      -285
+    );
 
-  mineTower.material = darkMat;
-  mineTower.isPickable = false;
+  mineTower.material =
+    darkMat;
 
-  const mineShed = BABYLON.MeshBuilder.CreateBox(
-    "mineShed",
-    {
-      width: 18,
-      height: 5,
-      depth: 12
-    },
-    scene
-  );
-
-  mineShed.position = new BABYLON.Vector3(
-    -192,
-    2.5,
-    -195
-  );
-
-  mineShed.material = industrialMat;
-  mineShed.isPickable = false;
+  mineTower.isPickable =
+    false;
 
   // =========================================================
-  // STEEL / INDUSTRIAL DISTRICT
+  // INDUSTRIAL DISTRICT
   // =========================================================
 
-  const steelMill = BABYLON.MeshBuilder.CreateBox(
-    "steelMill",
-    {
-      width: 34,
-      height: 10,
-      depth: 26
-    },
-    scene
-  );
+  const steelMill =
+    BABYLON.MeshBuilder.CreateBox(
+      "steelMill",
+      {
+        width: 42,
+        height: 12,
+        depth: 32
+      },
+      scene
+    );
 
-  steelMill.position = new BABYLON.Vector3(
-    220,
-    5,
-    -95
-  );
+  steelMill.position =
+    new BABYLON.Vector3(
+      330,
+      6,
+      -145
+    );
 
-  steelMill.material = industrialMat;
+  steelMill.material =
+    industrialMat;
 
   markInteractive(
     steelMill,
     "steelMill",
-    "Eastern Steel Mill",
+    "Forge District Steelworks",
     {
       level: 1,
-      production: "+1 Steel / cycle",
-      consumption: "-3 Iron, -2 Energy"
+      production:
+        "+1 Steel / cycle",
+      consumption:
+        "-3 Iron, -2 Energy"
     }
   );
 
@@ -1182,55 +1592,69 @@ const createScene = () => {
     i < 4;
     i++
   ) {
-    const chimney = BABYLON.MeshBuilder.CreateCylinder(
-      "steelChimney" + i,
-      {
-        diameter: 4,
-        height: 25,
-        tessellation: 16
-      },
-      scene
-    );
+    const chimney =
+      BABYLON.MeshBuilder.CreateCylinder(
+        "steelChimney" + i,
+        {
+          diameter: 4.5,
+          height: 31,
+          tessellation: 14
+        },
+        scene
+      );
 
-    chimney.position = new BABYLON.Vector3(
-      205 + i * 11,
-      13,
-      -105
-    );
+    chimney.position =
+      new BABYLON.Vector3(
+        311 +
+          i * 13,
+        17,
+        -158
+      );
 
-    chimney.material = darkMat;
-    chimney.isPickable = false;
+    chimney.material =
+      darkMat;
+
+    chimney.isPickable =
+      false;
 
     shadowGenerator.addShadowCaster(
       chimney
     );
   }
 
-  const factory2 = BABYLON.MeshBuilder.CreateBox(
-    "factory2",
+  createModernBuilding(
+    332,
+    -88,
+    34,
+    10,
+    25,
     {
-      width: 32,
-      height: 8,
-      depth: 22
-    },
-    scene
+      name:
+        "Fabrication Plant",
+      type:
+        "factory",
+      material:
+        industrialMat,
+      glassAmount:
+        0.35
+    }
   );
 
-  factory2.position = new BABYLON.Vector3(
-    228,
-    4,
-    -45
-  );
-
-  factory2.material = industrialMat;
-
-  markInteractive(
-    factory2,
-    "factory",
-    "Industrial Fabrication Plant",
+  createModernBuilding(
+    372,
+    -88,
+    28,
+    9,
+    22,
     {
-      level: 1,
-      production: "Future manufacturing"
+      name:
+        "Industrial Warehouse",
+      type:
+        "factory",
+      material:
+        industrialMat,
+      glassAmount:
+        0.24
     }
   );
 
@@ -1238,31 +1662,35 @@ const createScene = () => {
   // POWER DISTRICT
   // =========================================================
 
-  const powerPlant = BABYLON.MeshBuilder.CreateBox(
-    "powerPlant",
-    {
-      width: 30,
-      height: 10,
-      depth: 26
-    },
-    scene
-  );
+  const powerPlant =
+    BABYLON.MeshBuilder.CreateBox(
+      "powerPlant",
+      {
+        width: 38,
+        height: 12,
+        depth: 32
+      },
+      scene
+    );
 
-  powerPlant.position = new BABYLON.Vector3(
-    -220,
-    5,
-    70
-  );
+  powerPlant.position =
+    new BABYLON.Vector3(
+      -325,
+      6,
+      65
+    );
 
-  powerPlant.material = powerMat;
+  powerPlant.material =
+    powerMat;
 
   markInteractive(
     powerPlant,
     "powerPlant",
-    "Western Power Plant",
+    "Helios Power Station",
     {
       level: 1,
-      production: "+8 Energy / cycle"
+      production:
+        "+8 Energy / cycle"
     }
   );
 
@@ -1275,25 +1703,31 @@ const createScene = () => {
     i < 2;
     i++
   ) {
-    const coolingTower = BABYLON.MeshBuilder.CreateCylinder(
-      "coolingTower" + i,
-      {
-        diameterTop: 10,
-        diameterBottom: 15,
-        height: 24,
-        tessellation: 20
-      },
-      scene
-    );
+    const coolingTower =
+      BABYLON.MeshBuilder.CreateCylinder(
+        "coolingTower" + i,
+        {
+          diameterTop: 13,
+          diameterBottom: 20,
+          height: 31,
+          tessellation: 18
+        },
+        scene
+      );
 
-    coolingTower.position = new BABYLON.Vector3(
-      -235 + i * 28,
-      14,
-      70
-    );
+    coolingTower.position =
+      new BABYLON.Vector3(
+        -348 +
+          i * 38,
+        18,
+        65
+      );
 
-    coolingTower.material = concreteMat;
-    coolingTower.isPickable = false;
+    coolingTower.material =
+      concreteMat;
+
+    coolingTower.isPickable =
+      false;
 
     shadowGenerator.addShadowCaster(
       coolingTower
@@ -1306,65 +1740,83 @@ const createScene = () => {
 
   function createPylon(
     x,
-    z
+    z,
+    scale = 1
   ) {
-    const base = BABYLON.MeshBuilder.CreateBox(
-      "pylonBase",
-      {
-        width: 2,
-        height: 16,
-        depth: 2
-      },
-      scene
-    );
+    const mast =
+      BABYLON.MeshBuilder.CreateBox(
+        "pylonMast",
+        {
+          width:
+            2.3 * scale,
+          height:
+            20 * scale,
+          depth:
+            2.3 * scale
+        },
+        scene
+      );
 
-    base.position = new BABYLON.Vector3(
-      x,
-      8,
-      z
-    );
+    mast.position =
+      new BABYLON.Vector3(
+        x,
+        10 * scale,
+        z
+      );
 
-    base.material = pylonMat;
-    base.isPickable = false;
+    mast.material =
+      pylonMat;
 
-    const arm1 = BABYLON.MeshBuilder.CreateBox(
-      "pylonArm",
-      {
-        width: 10,
-        height: 1,
-        depth: 1
-      },
-      scene
-    );
+    mast.isPickable =
+      false;
 
-    arm1.position = new BABYLON.Vector3(
-      x,
-      13,
-      z
-    );
+    const arm =
+      BABYLON.MeshBuilder.CreateBox(
+        "pylonArm",
+        {
+          width:
+            12 * scale,
+          height:
+            1.2 * scale,
+          depth:
+            1.2 * scale
+        },
+        scene
+      );
 
-    arm1.material = pylonMat;
-    arm1.isPickable = false;
+    arm.position =
+      new BABYLON.Vector3(
+        x,
+        15 * scale,
+        z
+      );
 
-    const arm2 = arm1.clone(
-      "pylonArm2"
-    );
+    arm.material =
+      pylonMat;
 
-    arm2.position.y = 10;
+    arm.isPickable =
+      false;
 
-    shadowGenerator.addShadowCaster(
-      base
-    );
+    const arm2 =
+      arm.clone(
+        "pylonArm2"
+      );
+
+    arm2.position.y =
+      11 * scale;
   }
 
   for (
     let i = 0;
-    i < 7;
+    i < 9;
     i++
   ) {
     createPylon(
-      -185 + i * 28,
-      95 + i * 5
+      -275 +
+        i * 37,
+      112 +
+        i * 4,
+      0.9
     );
   }
 
@@ -1378,52 +1830,63 @@ const createScene = () => {
     scale = 1,
     alt = false
   ) {
-    const trunk = BABYLON.MeshBuilder.CreateCylinder(
-      "treeTrunk",
-      {
-        diameter: 0.9 * scale,
-        height: 4 * scale,
-        tessellation: 8
-      },
-      scene
-    );
+    const trunk =
+      BABYLON.MeshBuilder.CreateCylinder(
+        "treeTrunk",
+        {
+          diameter:
+            0.9 * scale,
+          height:
+            4.2 * scale,
+          tessellation: 7
+        },
+        scene
+      );
 
-    trunk.position = new BABYLON.Vector3(
-      x,
-      2 * scale,
-      z
-    );
+    trunk.position =
+      new BABYLON.Vector3(
+        x,
+        2.1 * scale,
+        z
+      );
 
-    trunk.material = treeTrunkMat;
-    trunk.isPickable = false;
+    trunk.material =
+      treeTrunkMat;
 
-    const crown = BABYLON.MeshBuilder.CreateSphere(
-      "treeCrown",
-      {
-        diameter: 5.5 * scale,
-        segments: 7
-      },
-      scene
-    );
+    trunk.isPickable =
+      false;
 
-    crown.position = new BABYLON.Vector3(
-      x,
-      5 * scale,
-      z
-    );
+    const crown =
+      BABYLON.MeshBuilder.CreateSphere(
+        "treeCrown",
+        {
+          diameter:
+            5.8 * scale,
+          segments: 6
+        },
+        scene
+      );
+
+    crown.position =
+      new BABYLON.Vector3(
+        x,
+        5.1 * scale,
+        z
+      );
 
     crown.material =
       alt
         ? treeLeafAltMat
         : treeLeafMat;
 
-    crown.isPickable = false;
+    crown.isPickable =
+      false;
   }
 
-  // Northern forest cluster
+  // Northwood forest
   for (
     let i = 0;
-    i < 125;
+    i < 165;
     i++
   ) {
     const angle =
@@ -1435,67 +1898,73 @@ const createScene = () => {
       Math.sqrt(
         Math.random()
       ) *
-      140;
-
-    const x =
-      15 +
-      Math.cos(angle) *
-      radius;
-
-    const z =
-      -220 +
-      Math.sin(angle) *
-      radius;
+      175;
 
     createTree(
-      x,
-      z,
-      0.8 +
-      Math.random() * 0.8,
-      Math.random() > 0.55
+      30 +
+        Math.cos(angle) *
+          radius,
+      -330 +
+        Math.sin(angle) *
+          radius,
+      0.75 +
+        Math.random() *
+          0.9,
+      Math.random() >
+        0.55
     );
   }
 
-  // General scattered trees
+  // Scattered world trees
   for (
     let i = 0;
-    i < 95;
+    i < 135;
     i++
   ) {
     const x =
       Math.random() *
-      680 -
-      340;
+      960 -
+      480;
 
     const z =
       Math.random() *
-      680 -
-      340;
+      960 -
+      480;
 
-    const distCapital = Math.sqrt(
-      x * x +
-      (z + 35) * (z + 35)
-    );
+    const capitalDist =
+      Math.sqrt(
+        x * x +
+        (z + 65) *
+          (z + 65)
+      );
 
-    const riverDistance =
-      Math.abs(z - 135);
+    const southDist =
+      Math.sqrt(
+        x * x +
+        (z - 285) *
+          (z - 285)
+      );
 
     if (
-      distCapital > 130 &&
-      riverDistance > 38
+      capitalDist >
+        180 &&
+      southDist >
+        115
     ) {
       createTree(
         x,
         z,
         0.75 +
-        Math.random() * 0.65,
-        Math.random() > 0.65
+          Math.random() *
+            0.65,
+        Math.random() >
+          0.68
       );
     }
   }
 
   // =========================================================
-  // ROCK FORMATIONS
+  // ROCKS
   // =========================================================
 
   function createRock(
@@ -1503,41 +1972,43 @@ const createScene = () => {
     z,
     size
   ) {
-    const rock = BABYLON.MeshBuilder.CreateSphere(
-      "rock",
-      {
-        diameter: size,
-        segments: 6
-      },
-      scene
-    );
+    const rock =
+      BABYLON.MeshBuilder.CreateSphere(
+        "rock",
+        {
+          diameter: size,
+          segments: 6
+        },
+        scene
+      );
 
-    rock.position = new BABYLON.Vector3(
-      x,
-      size * 0.23,
-      z
-    );
+    rock.position =
+      new BABYLON.Vector3(
+        x,
+        size * 0.24,
+        z
+      );
 
     rock.scaling.y =
       0.55 +
-      Math.random() * 0.35;
+      Math.random() *
+        0.35;
 
     rock.scaling.x =
       0.75 +
-      Math.random() * 0.4;
+      Math.random() *
+        0.45;
 
-    rock.material = rockMat;
-    rock.isPickable = false;
+    rock.material =
+      rockMat;
 
-    shadowGenerator.addShadowCaster(
-      rock
-    );
+    rock.isPickable =
+      false;
   }
 
-  // Northwest rocky zone
   for (
     let i = 0;
-    i < 55;
+    i < 70;
     i++
   ) {
     const angle =
@@ -1549,17 +2020,18 @@ const createScene = () => {
       Math.sqrt(
         Math.random()
       ) *
-      120;
+      155;
 
     createRock(
-      -220 +
-      Math.cos(angle) *
-      radius,
-      -185 +
-      Math.sin(angle) *
-      radius,
+      -330 +
+        Math.cos(angle) *
+          radius,
+      -285 +
+        Math.sin(angle) *
+          radius,
       3 +
-      Math.random() * 7
+        Math.random() *
+          8
     );
   }
 
@@ -1567,58 +2039,111 @@ const createScene = () => {
   // UI HELPERS
   // =========================================================
 
-  function uiPanelBase() {
+  function panelTheme() {
     return `
       background:
         linear-gradient(
           180deg,
-          rgba(6,13,24,0.97),
-          rgba(8,18,31,0.95)
+          rgba(5,12,23,0.965),
+          rgba(7,18,31,0.945)
         );
 
       border:
         1px solid
-        rgba(80,210,255,0.32);
+        rgba(93,216,255,0.30);
 
       box-shadow:
-        0 0 25px
-        rgba(0,160,255,0.10);
+        0 12px 32px
+        rgba(0,0,0,0.22),
+        0 0 24px
+        rgba(0,160,255,0.08);
 
       color:white;
 
       font-family:
+        Inter,
         Arial,
         sans-serif;
+
+      backdrop-filter:
+        blur(8px);
     `;
   }
 
-  function formatMoney(value) {
+  function formatMoney(
+    value
+  ) {
     return "$" +
-      Math.floor(value)
-        .toLocaleString();
+      Math.floor(
+        value
+      ).toLocaleString();
+  }
+
+  function resourceChip(
+    label,
+    value,
+    color
+  ) {
+    return `
+      <div
+        style="
+          display:flex;
+          align-items:center;
+          gap:7px;
+
+          padding:
+            7px 10px;
+
+          border-radius:8px;
+
+          background:
+            rgba(255,255,255,0.035);
+
+          border:
+            1px solid
+            rgba(255,255,255,0.055);
+
+          white-space:nowrap;
+        "
+      >
+        <span
+          style="
+            color:${color};
+            opacity:0.95;
+          "
+        >
+          ${label}
+        </span>
+
+        <b>
+          ${value}
+        </b>
+      </div>
+    `;
   }
 
   // =========================================================
-  // TOP HUD
+  // TOP BAR
   // =========================================================
 
-  const topBar = document.createElement(
-    "div"
-  );
+  const topBar =
+    document.createElement(
+      "div"
+    );
 
   topBar.style.cssText = `
     position:absolute;
+    top:0;
     left:0;
     right:0;
-    top:0;
 
-    height:64px;
+    min-height:66px;
 
-    ${uiPanelBase()}
+    ${panelTheme()}
 
+    border-top:none;
     border-left:none;
     border-right:none;
-    border-top:none;
 
     display:flex;
     align-items:center;
@@ -1627,55 +2152,92 @@ const createScene = () => {
     padding:
       0 18px;
 
-    z-index:70;
+    z-index:90;
   `;
 
   document.body.appendChild(
     topBar
   );
 
-  const titleArea = document.createElement(
-    "div"
-  );
+  const civIdentity =
+    document.createElement(
+      "div"
+    );
 
-  titleArea.innerHTML = `
+  civIdentity.innerHTML = `
     <div
       style="
-        font-size:18px;
-        font-weight:800;
-        letter-spacing:1.2px;
-        color:#86eaff;
+        display:flex;
+        align-items:center;
+        gap:9px;
       "
     >
-      MAP GAME
-    </div>
+      <div
+        style="
+          width:28px;
+          height:28px;
 
-    <div
-      style="
-        margin-top:2px;
-        font-size:10px;
-        opacity:0.50;
-        letter-spacing:0.7px;
-      "
-    >
-      ALPHA 0.0.5 — WORLD + INTERFACE
+          display:flex;
+          align-items:center;
+          justify-content:center;
+
+          border-radius:8px;
+
+          background:
+            linear-gradient(
+              135deg,
+              #1e86c8,
+              #64e5ff
+            );
+
+          color:#06101b;
+
+          font-weight:900;
+        "
+      >
+        M
+      </div>
+
+      <div>
+        <div
+          style="
+            font-size:16px;
+            font-weight:850;
+            letter-spacing:0.8px;
+          "
+        >
+          NOVA CIVILIZATION
+        </div>
+
+        <div
+          style="
+            margin-top:2px;
+            font-size:9px;
+            letter-spacing:0.7px;
+            opacity:0.48;
+          "
+        >
+          ALPHA 0.0.6 • BASIC VISUAL TARGET
+        </div>
+      </div>
     </div>
   `;
 
   topBar.appendChild(
-    titleArea
+    civIdentity
   );
 
-  const resourceBar = document.createElement(
-    "div"
-  );
+  const resourceBar =
+    document.createElement(
+      "div"
+    );
 
   resourceBar.style.cssText = `
     display:flex;
     align-items:center;
-    gap:16px;
-    font-size:13px;
-    font-weight:700;
+    gap:7px;
+
+    font-size:12px;
   `;
 
   topBar.appendChild(
@@ -1683,56 +2245,69 @@ const createScene = () => {
   );
 
   function updateHUD() {
-    resourceBar.innerHTML = `
-      <span>
-        💰 ${formatMoney(money)}
-      </span>
-
-      <span>
-        ⛏️ ${Math.floor(iron)}
-      </span>
-
-      <span>
-        🏗️ ${Math.floor(steel)}
-      </span>
-
-      <span>
-        ⚡ ${Math.floor(energy)}
-      </span>
-
-      <span>
-        👥 ${population.toLocaleString()}
-      </span>
-
-      <span
-        style="
-          color:#75e3a1;
-        "
-      >
-        +$${incomePerMinute}/min
-      </span>
-    `;
+    resourceBar.innerHTML =
+      resourceChip(
+        "CREDITS",
+        formatMoney(
+          money
+        ),
+        "#7fe9ff"
+      ) +
+      resourceChip(
+        "IRON",
+        Math.floor(
+          iron
+        ),
+        "#cbd3da"
+      ) +
+      resourceChip(
+        "STEEL",
+        Math.floor(
+          steel
+        ),
+        "#93bfe0"
+      ) +
+      resourceChip(
+        "POWER",
+        Math.floor(
+          energy
+        ),
+        "#ffd66c"
+      ) +
+      resourceChip(
+        "POP",
+        population.toLocaleString(),
+        "#a4ecc2"
+      ) +
+      resourceChip(
+        "INCOME",
+        "+$" +
+          incomePerMinute +
+          "/m",
+        "#7ee5a2"
+      );
   }
 
   // =========================================================
-  // LEFT NAVIGATION
+  // LEFT DOCK
   // =========================================================
 
-  const sideBar = document.createElement(
-    "div"
-  );
+  const sideDock =
+    document.createElement(
+      "div"
+    );
 
-  sideBar.style.cssText = `
+  sideDock.style.cssText = `
     position:absolute;
 
     left:14px;
-    top:82px;
+    top:84px;
 
-    width:58px;
+    width:60px;
 
-    ${uiPanelBase()}
+    ${panelTheme()}
 
-    border-radius:12px;
+    border-radius:14px;
 
     padding:8px;
 
@@ -1740,36 +2315,40 @@ const createScene = () => {
     flex-direction:column;
     gap:8px;
 
-    z-index:60;
+    z-index:80;
   `;
 
   document.body.appendChild(
-    sideBar
+    sideDock
   );
 
-  function createSideButton(
+  function createDockButton(
     icon,
     label
   ) {
-    const button = document.createElement(
-      "button"
-    );
+    const button =
+      document.createElement(
+        "button"
+      );
 
-    button.innerHTML = icon;
-    button.title = label;
+    button.innerHTML =
+      icon;
+
+    button.title =
+      label;
 
     button.style.cssText = `
-      width:42px;
-      height:42px;
+      width:44px;
+      height:44px;
 
       border:
         1px solid
-        rgba(255,255,255,0.08);
+        rgba(255,255,255,0.07);
 
-      border-radius:8px;
+      border-radius:10px;
 
       background:
-        rgba(255,255,255,0.035);
+        rgba(255,255,255,0.03);
 
       color:white;
 
@@ -1779,94 +2358,191 @@ const createScene = () => {
 
       transition:
         background 0.15s ease,
-        border-color 0.15s ease;
+        border-color 0.15s ease,
+        transform 0.15s ease;
     `;
 
-    button.onmouseenter = () => {
-      button.style.background =
-        "rgba(35,165,235,0.18)";
+    button.onmouseenter =
+      () => {
+        button.style.background =
+          "rgba(38,164,230,0.17)";
 
-      button.style.borderColor =
-        "rgba(80,210,255,0.35)";
-    };
+        button.style.borderColor =
+          "rgba(88,218,255,0.30)";
 
-    button.onmouseleave = () => {
-      button.style.background =
-        "rgba(255,255,255,0.035)";
+        button.style.transform =
+          "translateY(-1px)";
+      };
 
-      button.style.borderColor =
-        "rgba(255,255,255,0.08)";
-    };
+    button.onmouseleave =
+      () => {
+        button.style.background =
+          "rgba(255,255,255,0.03)";
 
-    sideBar.appendChild(
+        button.style.borderColor =
+          "rgba(255,255,255,0.07)";
+
+        button.style.transform =
+          "translateY(0)";
+      };
+
+    sideDock.appendChild(
       button
     );
 
     return button;
   }
 
-  const buildButton = createSideButton(
-    "🏗️",
-    "Construction"
-  );
+  const buildButton =
+    createDockButton(
+      "🏗️",
+      "Construction"
+    );
 
-  const worldButton = createSideButton(
-    "🌍",
-    "World"
-  );
+  const worldButton =
+    createDockButton(
+      "🌍",
+      "World"
+    );
 
-  const economyButton = createSideButton(
-    "📊",
-    "Economy"
-  );
+  const economyButton =
+    createDockButton(
+      "📊",
+      "Economy"
+    );
 
-  const researchButton = createSideButton(
-    "🔬",
-    "Research"
-  );
+  const regionButton =
+    createDockButton(
+      "🗺️",
+      "Regions"
+    );
 
-  const settingsButton = createSideButton(
-    "⚙️",
-    "Settings"
-  );
+  const researchButton =
+    createDockButton(
+      "🔬",
+      "Research"
+    );
+
+  const settingsButton =
+    createDockButton(
+      "⚙️",
+      "Settings"
+    );
 
   // =========================================================
-  // RIGHT CONTEXT PANEL
+  // RIGHT INSPECTOR
   // =========================================================
 
-  const contextPanel = document.createElement(
-    "div"
-  );
+  const inspector =
+    document.createElement(
+      "div"
+    );
 
-  contextPanel.style.cssText = `
+  inspector.style.cssText = `
     position:absolute;
 
     right:16px;
-    top:82px;
+    top:84px;
 
-    width:300px;
+    width:320px;
 
-    ${uiPanelBase()}
+    max-height:
+      calc(100vh - 135px);
 
-    border-radius:12px;
+    overflow-y:auto;
+
+    ${panelTheme()}
+
+    border-radius:14px;
 
     padding:16px;
 
-    z-index:58;
+    z-index:76;
 
     display:none;
   `;
 
   document.body.appendChild(
-    contextPanel
+    inspector
   );
 
-  function hideContextPanel() {
-    contextPanel.style.display =
+  function hideInspector() {
+    inspector.style.display =
       "none";
   }
 
-  function showBuildingContext(
+  function inspectorHeader(
+    title,
+    subtitle,
+    accent =
+      "#87eaff"
+  ) {
+    return `
+      <div
+        style="
+          display:flex;
+          justify-content:
+            space-between;
+          align-items:flex-start;
+          gap:12px;
+        "
+      >
+        <div>
+          <div
+            style="
+              color:${accent};
+              font-size:20px;
+              font-weight:850;
+            "
+          >
+            ${title}
+          </div>
+
+          <div
+            style="
+              margin-top:3px;
+              font-size:10px;
+              letter-spacing:0.6px;
+              opacity:0.48;
+            "
+          >
+            ${subtitle}
+          </div>
+        </div>
+
+        <button
+          id="closeInspector"
+          style="
+            border:none;
+            background:none;
+            color:white;
+            font-size:18px;
+            cursor:pointer;
+            opacity:0.8;
+          "
+        >
+          ✕
+        </button>
+      </div>
+    `;
+  }
+
+  function wireInspectorClose() {
+    const closeButton =
+      document.getElementById(
+        "closeInspector"
+      );
+
+    if (
+      closeButton instanceof
+      HTMLButtonElement
+    ) {
+      closeButton.onclick =
+        hideInspector;
+    }
+  }
+
+  function showBuildingInspector(
     mesh
   ) {
     if (
@@ -1879,30 +2555,32 @@ const createScene = () => {
     const data =
       mesh.metadata;
 
-    const name =
-      data.displayName ||
-      "Building";
+    inspector.style.display =
+      "block";
 
-    const type =
-      data.interactiveType ||
-      "building";
-
-    let details = "";
+    let productionBlock =
+      "";
 
     if (
       data.production
     ) {
-      details += `
+      productionBlock += `
         <div
           style="
             margin-top:12px;
+            padding:10px;
+            border-radius:9px;
+            background:
+              rgba(126,229,162,0.07);
+            border:
+              1px solid
+              rgba(126,229,162,0.12);
           "
         >
           <div
             style="
-              font-size:10px;
-              opacity:0.5;
-              margin-bottom:4px;
+              font-size:9px;
+              opacity:0.48;
             "
           >
             PRODUCTION
@@ -1910,7 +2588,8 @@ const createScene = () => {
 
           <div
             style="
-              color:#8ef0ae;
+              margin-top:4px;
+              color:#8debae;
               font-weight:bold;
             "
           >
@@ -1923,17 +2602,23 @@ const createScene = () => {
     if (
       data.consumption
     ) {
-      details += `
+      productionBlock += `
         <div
           style="
-            margin-top:10px;
+            margin-top:8px;
+            padding:10px;
+            border-radius:9px;
+            background:
+              rgba(255,209,103,0.06);
+            border:
+              1px solid
+              rgba(255,209,103,0.10);
           "
         >
           <div
             style="
-              font-size:10px;
-              opacity:0.5;
-              margin-bottom:4px;
+              font-size:9px;
+              opacity:0.48;
             "
           >
             CONSUMPTION
@@ -1941,7 +2626,9 @@ const createScene = () => {
 
           <div
             style="
-              color:#ffd272;
+              margin-top:4px;
+              color:#ffd66f;
+              font-weight:bold;
             "
           >
             ${data.consumption}
@@ -1950,173 +2637,131 @@ const createScene = () => {
       `;
     }
 
-    contextPanel.style.display =
-      "block";
-
-    contextPanel.innerHTML = `
-      <div
-        style="
-          display:flex;
-          justify-content:
-            space-between;
-          align-items:center;
-        "
-      >
-        <div>
+    inspector.innerHTML =
+      inspectorHeader(
+        data.displayName ||
+          "Building",
+        (
+          data.interactiveType ||
+          "BUILDING"
+        ).toUpperCase()
+      ) +
+      `
+        <div
+          style="
+            margin-top:14px;
+            display:grid;
+            grid-template-columns:
+              1fr 1fr;
+            gap:8px;
+          "
+        >
           <div
             style="
-              font-size:20px;
-              font-weight:800;
-              color:#89eaff;
+              padding:10px;
+              border-radius:9px;
+              background:
+                rgba(255,255,255,0.035);
             "
           >
-            ${name}
+            <div
+              style="
+                font-size:9px;
+                opacity:0.48;
+              "
+            >
+              LEVEL
+            </div>
+
+            <b>
+              ${data.level || 1}
+            </b>
           </div>
 
           <div
             style="
-              margin-top:2px;
-              font-size:10px;
-              opacity:0.50;
-              text-transform:uppercase;
+              padding:10px;
+              border-radius:9px;
+              background:
+                rgba(255,255,255,0.035);
             "
           >
-            ${type}
+            <div
+              style="
+                font-size:9px;
+                opacity:0.48;
+              "
+            >
+              EFFICIENCY
+            </div>
+
+            <b>
+              100%
+            </b>
           </div>
         </div>
 
+        ${productionBlock}
+
         <button
-          id="closeContext"
+          id="upgradeSelected"
           style="
-            border:none;
-            background:none;
+            width:100%;
+
+            margin-top:14px;
+
+            padding:10px;
+
+            border:
+              1px solid
+              rgba(80,210,255,0.32);
+
+            border-radius:9px;
+
+            background:
+              linear-gradient(
+                180deg,
+                rgba(31,145,210,0.85),
+                rgba(18,105,168,0.85)
+              );
+
             color:white;
-            font-size:18px;
+            font-weight:bold;
             cursor:pointer;
           "
         >
-          ✕
+          UPGRADE BUILDING
         </button>
-      </div>
 
-      <div
-        style="
-          margin-top:14px;
-          padding:10px;
-          border-radius:8px;
-          background:
-            rgba(255,255,255,0.035);
-        "
-      >
-        <div
+        <button
+          id="demolishSelected"
           style="
-            display:flex;
-            justify-content:
-              space-between;
+            width:100%;
+
+            margin-top:8px;
+
+            padding:9px;
+
+            border:
+              1px solid
+              rgba(255,110,110,0.14);
+
+            border-radius:9px;
+
+            background:
+              rgba(125,35,42,0.35);
+
+            color:#ffb4b4;
+
+            font-weight:bold;
+            cursor:pointer;
           "
         >
-          <span
-            style="
-              opacity:0.60;
-            "
-          >
-            Level
-          </span>
+          DEMOLISH
+        </button>
+      `;
 
-          <b>
-            ${data.level || 1}
-          </b>
-        </div>
-
-        <div
-          style="
-            display:flex;
-            justify-content:
-              space-between;
-            margin-top:7px;
-          "
-        >
-          <span
-            style="
-              opacity:0.60;
-            "
-          >
-            Efficiency
-          </span>
-
-          <b>
-            100%
-          </b>
-        </div>
-      </div>
-
-      ${details}
-
-      <button
-        id="upgradeSelected"
-        style="
-          width:100%;
-          margin-top:16px;
-          padding:10px;
-
-          border:
-            1px solid
-            rgba(80,210,255,0.35);
-
-          border-radius:8px;
-
-          background:
-            rgba(20,130,200,0.80);
-
-          color:white;
-
-          font-weight:bold;
-
-          cursor:pointer;
-        "
-      >
-        UPGRADE
-      </button>
-
-      <button
-        id="demolishSelected"
-        style="
-          width:100%;
-          margin-top:8px;
-          padding:9px;
-
-          border:
-            1px solid
-            rgba(255,100,100,0.22);
-
-          border-radius:8px;
-
-          background:
-            rgba(120,30,35,0.45);
-
-          color:#ffb0b0;
-
-          font-weight:bold;
-
-          cursor:pointer;
-        "
-      >
-        DEMOLISH
-      </button>
-    `;
-
-    const closeButton =
-      document.getElementById(
-        "closeContext"
-      );
-
-    if (
-      closeButton instanceof
-      HTMLButtonElement
-    ) {
-      closeButton.onclick =
-        hideContextPanel;
-    }
+    wireInspectorClose();
 
     const upgradeButton =
       document.getElementById(
@@ -2129,16 +2774,20 @@ const createScene = () => {
     ) {
       upgradeButton.onclick =
         () => {
+          const currentLevel =
+            data.level ||
+            1;
+
           const cost =
             1000 *
-            (data.level || 1);
+            currentLevel;
 
           if (
-            money <
-            cost
+            money < cost
           ) {
-            showBottomMessage(
-              "Not enough money for upgrade."
+            showToast(
+              "Not enough credits.",
+              "warning"
             );
 
             return;
@@ -2147,22 +2796,24 @@ const createScene = () => {
           money -= cost;
 
           data.level =
-            (data.level || 1) +
+            currentLevel +
             1;
 
-          mesh.scaling.y *= 1.04;
+          mesh.scaling.y *=
+            1.035;
 
           updateHUD();
           saveGame();
 
-          showBuildingContext(
+          showBuildingInspector(
             mesh
           );
 
-          showBottomMessage(
-            name +
-            " upgraded to Level " +
-            data.level
+          showToast(
+            data.displayName +
+              " upgraded to Level " +
+              data.level,
+            "success"
           );
         };
     }
@@ -2178,18 +2829,23 @@ const createScene = () => {
     ) {
       demolishButton.onclick =
         () => {
-          showBottomMessage(
-            "Demolition will be enabled when full construction placement is added."
+          showToast(
+            "Demolition will activate with full construction placement.",
+            "info"
           );
         };
     }
   }
 
-  function showTerrainContext(
+  // =========================================================
+  // TERRAIN / REGION INSPECTOR
+  // =========================================================
+
+  function closestRegionTo(
     point
   ) {
-    let closestRegion = null;
-    let bestDistance = Infinity;
+    let closest = null;
+    let best = Infinity;
 
     for (
       const region of regions
@@ -2209,243 +2865,355 @@ const createScene = () => {
         );
 
       if (
-        distance <
-        bestDistance
+        distance < best
       ) {
-        bestDistance =
-          distance;
-
-        closestRegion =
-          region;
+        best = distance;
+        closest = region;
       }
     }
 
-    if (!closestRegion) {
-      return;
-    }
+    return {
+      region: closest,
+      distance: best
+    };
+  }
 
-    const insideRegion =
-      bestDistance <=
-      closestRegion.radius;
-
-    const regionName =
-      insideRegion
-        ? closestRegion.name
-        : "Open Grassland";
-
-    const regionType =
-      insideRegion
-        ? closestRegion.type
-        : "Plains";
-
-    const description =
-      insideRegion
-        ? closestRegion.description
-        : "Open terrain available for future civilization expansion.";
-
-    contextPanel.style.display =
-      "block";
-
-    contextPanel.innerHTML = `
-      <div
-        style="
-          display:flex;
-          justify-content:
-            space-between;
-          align-items:center;
-        "
-      >
-        <div>
-          <div
-            style="
-              font-size:20px;
-              font-weight:800;
-              color:#89eaff;
-            "
-          >
-            ${regionName}
-          </div>
-
-          <div
-            style="
-              margin-top:2px;
-              font-size:10px;
-              opacity:0.50;
-            "
-          >
-            TERRAIN / ${regionType.toUpperCase()}
-          </div>
-        </div>
-
-        <button
-          id="closeContext"
-          style="
-            border:none;
-            background:none;
-            color:white;
-            font-size:18px;
-            cursor:pointer;
-          "
-        >
-          ✕
-        </button>
-      </div>
-
-      <div
-        style="
-          margin-top:14px;
-          line-height:1.55;
-          font-size:13px;
-          opacity:0.82;
-        "
-      >
-        ${description}
-      </div>
-
-      <div
-        style="
-          margin-top:14px;
-          padding:10px;
-          border-radius:8px;
-          background:
-            rgba(255,255,255,0.035);
-          font-size:12px;
-        "
-      >
-        <div>
-          <span
-            style="
-              opacity:0.55;
-            "
-          >
-            X:
-          </span>
-          ${point.x.toFixed(1)}
-        </div>
-
-        <div
-          style="
-            margin-top:4px;
-          "
-        >
-          <span
-            style="
-              opacity:0.55;
-            "
-          >
-            Z:
-          </span>
-          ${point.z.toFixed(1)}
-        </div>
-
-        <div
-          style="
-            margin-top:4px;
-          "
-        >
-          <span
-            style="
-              opacity:0.55;
-            "
-          >
-            Buildable:
-          </span>
-          Yes
-        </div>
-      </div>
-    `;
-
-    const closeButton =
-      document.getElementById(
-        "closeContext"
+  function showTerrainInspector(
+    point
+  ) {
+    const result =
+      closestRegionTo(
+        point
       );
 
-    if (
-      closeButton instanceof
-      HTMLButtonElement
-    ) {
-      closeButton.onclick =
-        hideContextPanel;
-    }
+    const region =
+      result.region;
+
+    const inside =
+      region &&
+      result.distance <=
+        region.radius;
+
+    const name =
+      inside
+        ? region.name
+        : "Open Territory";
+
+    const type =
+      inside
+        ? region.type
+        : "Grassland";
+
+    const accent =
+      inside
+        ? region.color
+        : "#bfe09a";
+
+    const description =
+      inside
+        ? region.description
+        : "Open land available for future expansion and development.";
+
+    inspector.style.display =
+      "block";
+
+    inspector.innerHTML =
+      inspectorHeader(
+        name,
+        "REGION • " +
+          type.toUpperCase(),
+        accent
+      ) +
+      `
+        <div
+          style="
+            margin-top:14px;
+            line-height:1.55;
+            font-size:13px;
+            opacity:0.82;
+          "
+        >
+          ${description}
+        </div>
+
+        <div
+          style="
+            margin-top:14px;
+
+            display:grid;
+            grid-template-columns:
+              1fr 1fr;
+            gap:8px;
+          "
+        >
+          <div
+            style="
+              padding:10px;
+              border-radius:9px;
+              background:
+                rgba(255,255,255,0.035);
+            "
+          >
+            <div
+              style="
+                font-size:9px;
+                opacity:0.48;
+              "
+            >
+              X
+            </div>
+
+            <b>
+              ${point.x.toFixed(0)}
+            </b>
+          </div>
+
+          <div
+            style="
+              padding:10px;
+              border-radius:9px;
+              background:
+                rgba(255,255,255,0.035);
+            "
+          >
+            <div
+              style="
+                font-size:9px;
+                opacity:0.48;
+              "
+            >
+              Z
+            </div>
+
+            <b>
+              ${point.z.toFixed(0)}
+            </b>
+          </div>
+        </div>
+
+        <div
+          style="
+            margin-top:8px;
+            padding:10px;
+            border-radius:9px;
+            background:
+              rgba(255,255,255,0.035);
+          "
+        >
+          <div
+            style="
+              font-size:9px;
+              opacity:0.48;
+            "
+          >
+            CONSTRUCTION
+          </div>
+
+          <div
+            style="
+              margin-top:3px;
+              color:#8debae;
+              font-weight:bold;
+            "
+          >
+            BUILDABLE
+          </div>
+        </div>
+      `;
+
+    wireInspectorClose();
   }
 
   // =========================================================
   // BOTTOM STATUS BAR
   // =========================================================
 
-  const bottomBar = document.createElement(
-    "div"
-  );
+  const bottomBar =
+    document.createElement(
+      "div"
+    );
 
   bottomBar.style.cssText = `
     position:absolute;
 
     left:50%;
-    bottom:14px;
+    bottom:15px;
 
     transform:
       translateX(-50%);
 
     min-width:420px;
-    max-width:70vw;
+    max-width:68vw;
 
-    ${uiPanelBase()}
+    ${panelTheme()}
 
-    border-radius:10px;
+    border-radius:11px;
 
     padding:
       9px 14px;
 
     text-align:center;
 
-    font-size:12px;
+    font-size:11px;
 
-    z-index:62;
+    z-index:78;
   `;
 
   document.body.appendChild(
     bottomBar
   );
 
-  function showBottomMessage(
-    message
+  function setBottomStatus(
+    text
   ) {
     bottomBar.innerHTML =
-      message;
+      text;
   }
 
-  showBottomMessage(
-    "Click a building or region for information. Use WASD / arrows / touch to move."
+  setBottomStatus(
+    "Explore the expanded world • Click buildings or terrain for details"
   );
+
+  // =========================================================
+  // TOASTS
+  // =========================================================
+
+  const toastHost =
+    document.createElement(
+      "div"
+    );
+
+  toastHost.style.cssText = `
+    position:absolute;
+
+    top:82px;
+    left:50%;
+
+    transform:
+      translateX(-50%);
+
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+
+    z-index:120;
+
+    pointer-events:none;
+  `;
+
+  document.body.appendChild(
+    toastHost
+  );
+
+  function showToast(
+    text,
+    type =
+      "info"
+  ) {
+    const toast =
+      document.createElement(
+        "div"
+      );
+
+    let accent =
+      "#7fe9ff";
+
+    if (
+      type ===
+      "success"
+    ) {
+      accent =
+        "#88e8a9";
+    }
+
+    if (
+      type ===
+      "warning"
+    ) {
+      accent =
+        "#ffd46d";
+    }
+
+    toast.style.cssText = `
+      padding:
+        9px 13px;
+
+      border-radius:9px;
+
+      background:
+        rgba(5,12,23,0.94);
+
+      border:
+        1px solid
+        ${accent}44;
+
+      color:white;
+
+      font-family:
+        Arial,
+        sans-serif;
+
+      font-size:11px;
+
+      box-shadow:
+        0 8px 24px
+        rgba(0,0,0,0.22);
+
+      pointer-events:none;
+    `;
+
+    toast.innerHTML = `
+      <span
+        style="
+          color:${accent};
+          font-weight:bold;
+        "
+      >
+        ${text}
+      </span>
+    `;
+
+    toastHost.appendChild(
+      toast
+    );
+
+    setTimeout(
+      () => {
+        toast.remove();
+      },
+      2600
+    );
+  }
 
   // =========================================================
   // CONSTRUCTION TERMINAL
   // =========================================================
 
-  const shop = document.createElement(
-    "div"
-  );
+  const shop =
+    document.createElement(
+      "div"
+    );
 
   shop.style.cssText = `
     position:absolute;
 
-    left:84px;
-    top:82px;
+    left:86px;
+    top:84px;
 
-    width:470px;
+    width:520px;
 
     max-height:
-      calc(100vh - 120px);
+      calc(100vh - 125px);
 
     overflow-y:auto;
 
-    ${uiPanelBase()}
+    ${panelTheme()}
 
-    border-radius:14px;
+    border-radius:15px;
 
     padding:18px;
 
-    z-index:64;
+    z-index:84;
 
     display:none;
   `;
@@ -2454,98 +3222,183 @@ const createScene = () => {
     shop
   );
 
-  let shopCategory =
+  let activeCategory =
     "industry";
 
   const shopItems = {
     industry: [
       {
-        name: "Iron Mine",
-        category: "RESOURCE EXTRACTION",
+        name:
+          "Iron Mine",
+        type:
+          "RESOURCE EXTRACTION",
         cost: 750,
-        accent: "#bcc8d0",
-        description: "Extracts iron for industrial production.",
-        stats: "+3 Iron / cycle • -1 Energy"
+        accent:
+          "#c8d0d6",
+        description:
+          "Extracts iron ore for industrial production.",
+        stats:
+          "+3 Iron / cycle • -1 Power"
       },
       {
-        name: "Steel Mill",
-        category: "HEAVY INDUSTRY",
+        name:
+          "Steel Mill",
+        type:
+          "HEAVY INDUSTRY",
         cost: 1200,
-        accent: "#8fb9d6",
-        description: "Converts iron into steel.",
-        stats: "+1 Steel / cycle • -3 Iron • -2 Energy"
+        accent:
+          "#94bddb",
+        description:
+          "Refines iron into construction-grade steel.",
+        stats:
+          "+1 Steel / cycle • -3 Iron • -2 Power"
       },
       {
-        name: "Fabrication Plant",
-        category: "MANUFACTURING",
+        name:
+          "Fabrication Plant",
+        type:
+          "MANUFACTURING",
         cost: 1800,
-        accent: "#83c5e8",
-        description: "Future manufacturing and advanced production.",
-        stats: "Unlocks later"
+        accent:
+          "#88c8ec",
+        description:
+          "Future manufacturing center for advanced goods.",
+        stats:
+          "Advanced production"
+      },
+      {
+        name:
+          "Warehouse",
+        type:
+          "STORAGE",
+        cost: 650,
+        accent:
+          "#d1d7dc",
+        description:
+          "Future storage and logistics buffer.",
+        stats:
+          "Storage infrastructure"
       }
     ],
 
     civil: [
       {
-        name: "Residential Block",
-        category: "CIVIL",
+        name:
+          "Residential Block",
+        type:
+          "RESIDENTIAL",
         cost: 500,
-        accent: "#9cecc0",
-        description: "Expands population and tax capacity.",
-        stats: "+500 population capacity"
+        accent:
+          "#9fecc0",
+        description:
+          "Expands housing and population capacity.",
+        stats:
+          "+500 population capacity"
       },
       {
-        name: "Town Hall Upgrade",
-        category: "ADMINISTRATION",
-        cost: 2000 * townHallLevel,
-        accent: "#83e8ff",
-        description: "Improves administration and offline income.",
+        name:
+          "Commercial Center",
+        type:
+          "COMMERCIAL",
+        cost: 900,
+        accent:
+          "#8de5dc",
+        description:
+          "Future local income and employment hub.",
         stats:
-          "Current level: " +
+          "Income infrastructure"
+      },
+      {
+        name:
+          "Town Hall Upgrade",
+        type:
+          "ADMINISTRATION",
+        cost:
+          2000 *
+          townHallLevel,
+        accent:
+          "#82eaff",
+        description:
+          "Improves government capacity and offline income.",
+        stats:
+          "Current Level " +
           townHallLevel
       }
     ],
 
     power: [
       {
-        name: "Power Plant",
-        category: "ENERGY",
+        name:
+          "Power Plant",
+        type:
+          "ENERGY",
         cost: 950,
-        accent: "#ffd768",
-        description: "Generates energy for industry.",
-        stats: "+8 Energy / cycle"
+        accent:
+          "#ffd76e",
+        description:
+          "Generates power for industrial buildings.",
+        stats:
+          "+8 Power / cycle"
       },
       {
-        name: "Grid Substation",
-        category: "POWER GRID",
+        name:
+          "Grid Substation",
+        type:
+          "POWER GRID",
         cost: 700,
-        accent: "#ffe99c",
-        description: "Future distribution and efficiency system.",
-        stats: "Infrastructure"
+        accent:
+          "#ffe8a0",
+        description:
+          "Future power distribution and efficiency structure.",
+        stats:
+          "Grid infrastructure"
       }
     ],
 
     infrastructure: [
       {
-        name: "Road",
-        category: "TRANSPORT",
+        name:
+          "Road",
+        type:
+          "TRANSPORT",
         cost: 100,
-        accent: "#c1c6cc",
-        description: "Connects city districts and future logistics.",
-        stats: "Placement coming next"
+        accent:
+          "#c9ced4",
+        description:
+          "Connects districts and future logistics systems.",
+        stats:
+          "Placement coming next"
       },
       {
-        name: "Bridge",
-        category: "TRANSPORT",
+        name:
+          "Bridge",
+        type:
+          "TRANSPORT",
         cost: 450,
-        accent: "#d7dde2",
-        description: "Crosses rivers and connects regions.",
-        stats: "Placement coming next"
+        accent:
+          "#dde2e6",
+        description:
+          "Connects development across rivers.",
+        stats:
+          "Placement coming next"
+      },
+      {
+        name:
+          "Power Pylon",
+        type:
+          "UTILITIES",
+        cost: 220,
+        accent:
+          "#c4cbd1",
+        description:
+          "Future transmission network component.",
+        stats:
+          "Grid infrastructure"
       }
     ]
   };
 
-  function shopCardHTML(
+  function shopCard(
     item,
     index
   ) {
@@ -2554,21 +3407,25 @@ const createScene = () => {
         style="
           padding:13px;
 
+          border-radius:11px;
+
           background:
-            rgba(255,255,255,0.035);
+            linear-gradient(
+              180deg,
+              rgba(255,255,255,0.04),
+              rgba(255,255,255,0.022)
+            );
 
           border:
             1px solid
             rgba(255,255,255,0.07);
-
-          border-radius:10px;
         "
       >
         <div
           style="
             color:${item.accent};
             font-size:16px;
-            font-weight:800;
+            font-weight:850;
           "
         >
           ${item.name}
@@ -2577,19 +3434,20 @@ const createScene = () => {
         <div
           style="
             margin-top:3px;
-            font-size:10px;
-            opacity:0.48;
+            font-size:9px;
+            opacity:0.46;
+            letter-spacing:0.5px;
           "
         >
-          ${item.category}
+          ${item.type}
         </div>
 
         <div
           style="
             margin-top:9px;
-            line-height:1.45;
             font-size:12px;
-            opacity:0.82;
+            line-height:1.45;
+            opacity:0.80;
           "
         >
           ${item.description}
@@ -2598,8 +3456,8 @@ const createScene = () => {
         <div
           style="
             margin-top:9px;
-            font-size:11px;
-            color:#9cdff4;
+            color:#9bdff5;
+            font-size:10px;
           "
         >
           ${item.stats}
@@ -2607,32 +3465,40 @@ const createScene = () => {
 
         <div
           style="
+            margin-top:12px;
+
             display:flex;
+            align-items:center;
             justify-content:
               space-between;
-            align-items:center;
-            margin-top:12px;
           "
         >
           <b>
-            ${formatMoney(item.cost)}
+            ${formatMoney(
+              item.cost
+            )}
           </b>
 
           <button
-            class="shopSelectButton"
-            data-shop-index="${index}"
+            class="shopSelect"
+            data-index="${index}"
+
             style="
               padding:
                 7px 13px;
 
               border:
                 1px solid
-                rgba(80,210,255,0.32);
+                rgba(80,210,255,0.30);
 
-              border-radius:7px;
+              border-radius:8px;
 
               background:
-                rgba(20,130,200,0.76);
+                linear-gradient(
+                  180deg,
+                  rgba(31,145,210,0.86),
+                  rgba(18,105,168,0.86)
+                );
 
               color:white;
 
@@ -2648,12 +3514,11 @@ const createScene = () => {
     `;
   }
 
-  function updateShop() {
+  function renderShop() {
     const items =
       shopItems[
-        shopCategory
-      ] ||
-      [];
+        activeCategory
+      ] || [];
 
     shop.innerHTML = `
       <div
@@ -2661,15 +3526,16 @@ const createScene = () => {
           display:flex;
           justify-content:
             space-between;
-          align-items:center;
+          align-items:flex-start;
+          gap:12px;
         "
       >
         <div>
           <div
             style="
               font-size:21px;
-              font-weight:800;
-              color:#83e8ff;
+              font-weight:850;
+              color:#84eaff;
             "
           >
             CONSTRUCTION NETWORK
@@ -2678,7 +3544,8 @@ const createScene = () => {
           <div
             style="
               margin-top:2px;
-              font-size:10px;
+              font-size:9px;
+              letter-spacing:0.6px;
               opacity:0.48;
             "
           >
@@ -2694,6 +3561,7 @@ const createScene = () => {
             color:white;
             font-size:20px;
             cursor:pointer;
+            opacity:0.8;
           "
         >
           ✕
@@ -2701,7 +3569,6 @@ const createScene = () => {
       </div>
 
       <div
-        id="shopTabs"
         style="
           display:flex;
           flex-wrap:wrap;
@@ -2710,29 +3577,29 @@ const createScene = () => {
         "
       >
         <button
-          data-category="industry"
           class="shopTab"
+          data-category="industry"
         >
           INDUSTRY
         </button>
 
         <button
-          data-category="civil"
           class="shopTab"
+          data-category="civil"
         >
           CIVIL
         </button>
 
         <button
-          data-category="power"
           class="shopTab"
+          data-category="power"
         >
           POWER
         </button>
 
         <button
-          data-category="infrastructure"
           class="shopTab"
+          data-category="infrastructure"
         >
           INFRASTRUCTURE
         </button>
@@ -2750,7 +3617,7 @@ const createScene = () => {
         ${items
           .map(
             (item, index) =>
-              shopCardHTML(
+              shopCard(
                 item,
                 index
               )
@@ -2796,7 +3663,7 @@ const createScene = () => {
 
         const active =
           category ===
-          shopCategory;
+          activeCategory;
 
         tab.style.cssText = `
           padding:
@@ -2806,17 +3673,17 @@ const createScene = () => {
             1px solid
             ${
               active
-                ? "rgba(80,210,255,0.48)"
-                : "rgba(255,255,255,0.08)"
+                ? "rgba(86,218,255,0.42)"
+                : "rgba(255,255,255,0.07)"
             };
 
-          border-radius:7px;
+          border-radius:8px;
 
           background:
             ${
               active
-                ? "rgba(30,155,225,0.16)"
-                : "rgba(255,255,255,0.03)"
+                ? "rgba(32,154,220,0.16)"
+                : "rgba(255,255,255,0.025)"
             };
 
           color:
@@ -2840,17 +3707,17 @@ const createScene = () => {
               return;
             }
 
-            shopCategory =
+            activeCategory =
               category;
 
-            updateShop();
+            renderShop();
           };
       }
     );
 
     const selectButtons =
       shop.querySelectorAll(
-        ".shopSelectButton"
+        ".shopSelect"
       );
 
     selectButtons.forEach(
@@ -2868,231 +3735,419 @@ const createScene = () => {
           () => {
             const index =
               Number(
-                button.dataset
-                  .shopIndex
+                button.dataset.index
               );
 
             const item =
-              items[index];
+              items[
+                index
+              ];
 
             if (!item) {
               return;
             }
 
-            showBottomMessage(
-              item.name +
-              " selected — full ghost placement comes in the next construction update."
-            );
-
             shop.style.display =
               "none";
+
+            setBottomStatus(
+              item.name +
+                " selected • placement system is the next construction update"
+            );
+
+            showToast(
+              item.name +
+                " selected",
+              "info"
+            );
           };
       }
     );
   }
 
-  buildButton.onclick = () => {
-    const open =
-      shop.style.display ===
-      "block";
+  buildButton.onclick =
+    () => {
+      const open =
+        shop.style.display ===
+        "block";
 
-    shop.style.display =
-      open
-        ? "none"
-        : "block";
+      shop.style.display =
+        open
+          ? "none"
+          : "block";
 
-    if (!open) {
-      updateShop();
-    }
-  };
+      if (!open) {
+        renderShop();
+      }
+    };
 
   // =========================================================
-  // WORLD PANEL
+  // WORLD OVERVIEW
   // =========================================================
 
-  worldButton.onclick = () => {
-    contextPanel.style.display =
+  function showWorldOverview() {
+    inspector.style.display =
       "block";
 
-    contextPanel.innerHTML = `
-      <div
-        style="
-          font-size:20px;
-          font-weight:800;
-          color:#89eaff;
-        "
-      >
-        WORLD OVERVIEW
-      </div>
+    inspector.innerHTML =
+      inspectorHeader(
+        "World Overview",
+        regions.length +
+          " DEVELOPMENT REGIONS"
+      ) +
+      `
+        <div
+          style="
+            margin-top:14px;
 
-      <div
-        style="
-          margin-top:4px;
-          font-size:11px;
-          opacity:0.52;
-        "
-      >
-        ${regions.length} DEVELOPMENT REGIONS
-      </div>
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+          "
+        >
+          ${regions
+            .map(
+              region => `
+                <button
+                  class="regionJump"
+                  data-region="${region.id}"
 
-      <div
-        style="
-          margin-top:14px;
-          display:flex;
-          flex-direction:column;
-          gap:8px;
-        "
-      >
-        ${regions
-          .map(
-            region => `
-              <div
-                style="
-                  padding:9px;
-                  border-radius:7px;
-                  background:
-                    rgba(255,255,255,0.035);
-                "
-              >
-                <b>
-                  ${region.name}
-                </b>
-
-                <div
                   style="
-                    font-size:10px;
-                    opacity:0.50;
-                    margin-top:2px;
+                    padding:10px;
+
+                    text-align:left;
+
+                    border:
+                      1px solid
+                      rgba(255,255,255,0.06);
+
+                    border-radius:9px;
+
+                    background:
+                      rgba(255,255,255,0.03);
+
+                    color:white;
+
+                    cursor:pointer;
                   "
                 >
-                  ${region.type.toUpperCase()}
-                </div>
-              </div>
-            `
+                  <div
+                    style="
+                      color:${region.color};
+                      font-weight:bold;
+                    "
+                  >
+                    ${region.name}
+                  </div>
+
+                  <div
+                    style="
+                      margin-top:2px;
+                      font-size:9px;
+                      opacity:0.48;
+                    "
+                  >
+                    ${region.type.toUpperCase()}
+                  </div>
+                </button>
+              `
+            )
+            .join("")}
+        </div>
+      `;
+
+    wireInspectorClose();
+
+    const jumpButtons =
+      inspector.querySelectorAll(
+        ".regionJump"
+      );
+
+    jumpButtons.forEach(
+      button => {
+        if (
+          !(
+            button instanceof
+            HTMLButtonElement
           )
-          .join("")}
-      </div>
-    `;
-  };
+        ) {
+          return;
+        }
+
+        button.onclick =
+          () => {
+            const id =
+              button.dataset.region;
+
+            const region =
+              regions.find(
+                r =>
+                  r.id ===
+                  id
+              );
+
+            if (!region) {
+              return;
+            }
+
+            camera.target.x =
+              region.x;
+
+            camera.target.z =
+              region.z;
+
+            camera.radius =
+              Math.max(
+                115,
+                region.radius *
+                  1.3
+              );
+
+            showToast(
+              "Camera moved to " +
+                region.name,
+              "info"
+            );
+          };
+      }
+    );
+  }
+
+  worldButton.onclick =
+    showWorldOverview;
+
+  regionButton.onclick =
+    showWorldOverview;
 
   // =========================================================
   // ECONOMY PANEL
   // =========================================================
 
-  economyButton.onclick = () => {
-    contextPanel.style.display =
-      "block";
+  economyButton.onclick =
+    () => {
+      inspector.style.display =
+        "block";
 
-    contextPanel.innerHTML = `
-      <div
-        style="
-          font-size:20px;
-          font-weight:800;
-          color:#89eaff;
-        "
-      >
-        ECONOMY
-      </div>
+      inspector.innerHTML =
+        inspectorHeader(
+          "Economy",
+          "CIVILIZATION FINANCIAL NETWORK",
+          "#82e8b0"
+        ) +
+        `
+          <div
+            style="
+              margin-top:14px;
+              display:grid;
+              grid-template-columns:
+                1fr 1fr;
+              gap:8px;
+            "
+          >
+            <div
+              style="
+                padding:10px;
+                border-radius:9px;
+                background:
+                  rgba(255,255,255,0.035);
+              "
+            >
+              <div
+                style="
+                  font-size:9px;
+                  opacity:0.48;
+                "
+              >
+                TREASURY
+              </div>
 
-      <div
-        style="
-          margin-top:14px;
-          display:flex;
-          flex-direction:column;
-          gap:8px;
-        "
-      >
-        <div
-          style="
-            padding:10px;
-            background:
-              rgba(255,255,255,0.035);
-            border-radius:8px;
-          "
-        >
-          Money:
-          <b>
-            ${formatMoney(money)}
-          </b>
-        </div>
+              <b>
+                ${formatMoney(
+                  money
+                )}
+              </b>
+            </div>
 
-        <div
-          style="
-            padding:10px;
-            background:
-              rgba(255,255,255,0.035);
-            border-radius:8px;
-          "
-        >
-          Passive income:
-          <b>
-            +$${incomePerMinute}/min
-          </b>
-        </div>
+            <div
+              style="
+                padding:10px;
+                border-radius:9px;
+                background:
+                  rgba(255,255,255,0.035);
+              "
+            >
+              <div
+                style="
+                  font-size:9px;
+                  opacity:0.48;
+                "
+              >
+                INCOME
+              </div>
 
-        <div
-          style="
-            padding:10px;
-            background:
-              rgba(255,255,255,0.035);
-            border-radius:8px;
-          "
-        >
-          Iron:
-          <b>
-            ${Math.floor(iron)}
-          </b>
-        </div>
+              <b
+                style="
+                  color:#82e8b0;
+                "
+              >
+                +$${incomePerMinute}/m
+              </b>
+            </div>
 
-        <div
-          style="
-            padding:10px;
-            background:
-              rgba(255,255,255,0.035);
-            border-radius:8px;
-          "
-        >
-          Steel:
-          <b>
-            ${Math.floor(steel)}
-          </b>
-        </div>
+            <div
+              style="
+                padding:10px;
+                border-radius:9px;
+                background:
+                  rgba(255,255,255,0.035);
+              "
+            >
+              <div
+                style="
+                  font-size:9px;
+                  opacity:0.48;
+                "
+              >
+                IRON
+              </div>
 
-        <div
-          style="
-            padding:10px;
-            background:
-              rgba(255,255,255,0.035);
-            border-radius:8px;
-          "
-        >
-          Energy:
-          <b>
-            ${Math.floor(energy)}
-          </b>
-        </div>
-      </div>
-    `;
-  };
+              <b>
+                ${Math.floor(
+                  iron
+                )}
+              </b>
+            </div>
+
+            <div
+              style="
+                padding:10px;
+                border-radius:9px;
+                background:
+                  rgba(255,255,255,0.035);
+              "
+            >
+              <div
+                style="
+                  font-size:9px;
+                  opacity:0.48;
+                "
+              >
+                STEEL
+              </div>
+
+              <b>
+                ${Math.floor(
+                  steel
+                )}
+              </b>
+            </div>
+          </div>
+
+          <div
+            style="
+              margin-top:9px;
+              padding:10px;
+              border-radius:9px;
+              background:
+                rgba(255,255,255,0.035);
+            "
+          >
+            <div
+              style="
+                font-size:9px;
+                opacity:0.48;
+              "
+            >
+              GRID POWER
+            </div>
+
+            <b
+              style="
+                color:#ffd66f;
+              "
+            >
+              ${Math.floor(
+                energy
+              )}
+            </b>
+          </div>
+        `;
+
+      wireInspectorClose();
+    };
+
+  researchButton.onclick =
+    () => {
+      showToast(
+        "Research comes after the construction foundation.",
+        "info"
+      );
+    };
+
+  settingsButton.onclick =
+    () => {
+      inspector.style.display =
+        "block";
+
+      inspector.innerHTML =
+        inspectorHeader(
+          "Settings",
+          "DISPLAY + CONTROLS"
+        ) +
+        `
+          <div
+            style="
+              margin-top:14px;
+              padding:10px;
+              border-radius:9px;
+              background:
+                rgba(255,255,255,0.035);
+            "
+          >
+            <div
+              style="
+                font-size:9px;
+                opacity:0.48;
+              "
+            >
+              GRAPHICS PRESET
+            </div>
+
+            <b
+              style="
+                color:#8beaff;
+              "
+            >
+              ${GRAPHICS_PRESET}
+            </b>
+          </div>
+
+          <div
+            style="
+              margin-top:8px;
+              padding:10px;
+              border-radius:9px;
+              background:
+                rgba(255,255,255,0.035);
+              line-height:1.5;
+              font-size:11px;
+            "
+          >
+            <b>Controls</b>
+            <br>
+            WASD / Arrow Keys / Touch pad — move
+            <br>
+            Mouse / touch drag — orbit
+            <br>
+            Wheel / pinch — zoom
+          </div>
+        `;
+
+      wireInspectorClose();
+    };
 
   // =========================================================
-  // RESEARCH / SETTINGS PLACEHOLDERS
-  // =========================================================
-
-  researchButton.onclick = () => {
-    showBottomMessage(
-      "Research tree is planned for a later Alpha update."
-    );
-  };
-
-  settingsButton.onclick = () => {
-    showBottomMessage(
-      "Graphics presets and control settings will be added later."
-    );
-  };
-
-  // =========================================================
-  // CLICK SELECTION
+  // CLICK / TAP INSPECTION
   // =========================================================
 
   scene.onPointerObservable.add(
@@ -3124,7 +4179,7 @@ const createScene = () => {
         mesh.metadata
           .interactiveType
       ) {
-        showBuildingContext(
+        showBuildingInspector(
           mesh
         );
 
@@ -3135,7 +4190,7 @@ const createScene = () => {
         mesh === ground &&
         pickInfo.pickedPoint
       ) {
-        showTerrainContext(
+        showTerrainInspector(
           pickInfo.pickedPoint
         );
       }
@@ -3143,30 +4198,31 @@ const createScene = () => {
   );
 
   // =========================================================
-  // TOUCH CONTROLS
+  // TOUCH MOVEMENT PAD
   // =========================================================
 
-  const touchControls = document.createElement(
-    "div"
-  );
+  const touchControls =
+    document.createElement(
+      "div"
+    );
 
   touchControls.style.cssText = `
     position:absolute;
 
     right:18px;
-    bottom:70px;
+    bottom:78px;
 
     display:grid;
 
     grid-template-columns:
-      54px 54px 54px;
+      52px 52px 52px;
 
     grid-template-rows:
-      54px 54px 54px;
+      52px 52px 52px;
 
     gap:6px;
 
-    z-index:68;
+    z-index:82;
   `;
 
   document.body.appendChild(
@@ -3178,37 +4234,42 @@ const createScene = () => {
     col,
     row
   ) {
-    const button = document.createElement(
-      "button"
-    );
+    const button =
+      document.createElement(
+        "button"
+      );
 
-    button.innerText = text;
+    button.innerText =
+      text;
 
     button.style.cssText = `
       grid-column:${col};
       grid-row:${row};
 
-      width:54px;
-      height:54px;
+      width:52px;
+      height:52px;
 
       border-radius:13px;
 
       border:
         1px solid
-        rgba(90,215,255,0.35);
+        rgba(90,215,255,0.30);
 
       background:
-        rgba(5,14,25,0.78);
+        rgba(5,14,25,0.76);
 
       color:white;
 
-      font-size:22px;
+      font-size:21px;
       font-weight:bold;
 
       touch-action:none;
       user-select:none;
 
       cursor:pointer;
+
+      backdrop-filter:
+        blur(5px);
     `;
 
     touchControls.appendChild(
@@ -3253,7 +4314,7 @@ const createScene = () => {
     right: false
   };
 
-  function bindHoldButton(
+  function bindTouchHold(
     button,
     direction
   ) {
@@ -3267,7 +4328,7 @@ const createScene = () => {
         ] = true;
 
         button.style.background =
-          "rgba(30,150,220,0.9)";
+          "rgba(29,145,210,0.90)";
 
         try {
           button.setPointerCapture(
@@ -3283,7 +4344,7 @@ const createScene = () => {
       ] = false;
 
       button.style.background =
-        "rgba(5,14,25,0.78)";
+        "rgba(5,14,25,0.76)";
     }
 
     button.addEventListener(
@@ -3302,28 +4363,28 @@ const createScene = () => {
     );
   }
 
-  bindHoldButton(
+  bindTouchHold(
     touchUp,
     "up"
   );
 
-  bindHoldButton(
+  bindTouchHold(
     touchDown,
     "down"
   );
 
-  bindHoldButton(
+  bindTouchHold(
     touchLeft,
     "left"
   );
 
-  bindHoldButton(
+  bindTouchHold(
     touchRight,
     "right"
   );
 
   // =========================================================
-  // CAMERA MOVEMENT
+  // KEYBOARD + CAMERA MOVEMENT
   // =========================================================
 
   const keys = {};
@@ -3351,10 +4412,10 @@ const createScene = () => {
     .add(
       () => {
         const speed =
-          0.70 *
+          0.78 *
           (
             camera.radius /
-            130
+            150
           );
 
         if (
@@ -3396,21 +4457,21 @@ const createScene = () => {
         camera.target.x =
           BABYLON.Scalar.Clamp(
             camera.target.x,
-            -MAP_HALF + 35,
-            MAP_HALF - 35
+            -WORLD_LIMIT,
+            WORLD_LIMIT
           );
 
         camera.target.z =
           BABYLON.Scalar.Clamp(
             camera.target.z,
-            -MAP_HALF + 35,
-            MAP_HALF - 35
+            -WORLD_LIMIT,
+            WORLD_LIMIT
           );
       }
     );
 
   // =========================================================
-  // SAVE / LOAD / OFFLINE CASH
+  // SAVE / LOAD
   // =========================================================
 
   function saveGame() {
@@ -3421,7 +4482,8 @@ const createScene = () => {
       energy,
       population,
       townHallLevel,
-      lastSaved: Date.now()
+      lastSaved:
+        Date.now()
     };
 
     localStorage.setItem(
@@ -3485,16 +4547,17 @@ const createScene = () => {
             ) /
             1000
           ),
-          12 * 60 * 60
+          12 *
+            60 *
+            60
         );
-
-      const offlineRate =
-        2 *
-        townHallLevel;
 
       const offlineCash =
         secondsAway *
-        offlineRate;
+        (
+          2 *
+          townHallLevel
+        );
 
       money +=
         offlineCash;
@@ -3503,16 +4566,22 @@ const createScene = () => {
         offlineCash >
         0
       ) {
-        showBottomMessage(
-          "Offline earnings collected: " +
-          formatMoney(
-            offlineCash
-          )
+        setTimeout(
+          () => {
+            showToast(
+              "Offline earnings: " +
+                formatMoney(
+                  offlineCash
+                ),
+              "success"
+            );
+          },
+          450
         );
       }
     } catch {
       console.log(
-        "Could not load save."
+        "Save data could not be loaded."
       );
     }
   }
@@ -3584,9 +4653,10 @@ const createScene = () => {
         );
 
         topBar.remove();
-        sideBar.remove();
-        contextPanel.remove();
+        sideDock.remove();
+        inspector.remove();
         bottomBar.remove();
+        toastHost.remove();
         shop.remove();
         touchControls.remove();
       }
@@ -3599,7 +4669,8 @@ const createScene = () => {
 // START ENGINE
 // ============================================================
 
-const scene = createScene();
+const scene =
+  createScene();
 
 engine.runRenderLoop(
   () => {
@@ -3607,7 +4678,6 @@ engine.runRenderLoop(
   }
 );
 
-// Remove loading screen if your index.html has one.
 const loadingScreen =
   document.getElementById(
     "loadingScreen"
@@ -3617,7 +4687,6 @@ if (loadingScreen) {
   loadingScreen.remove();
 }
 
-// Resize support
 window.addEventListener(
   "resize",
   () => {
