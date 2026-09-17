@@ -1,7 +1,6 @@
 // ============================================================
 // MAP GAME — world_visuals.js
-// Alpha 0.1.1b scenic world layer
-// Adds authored-feeling areas without changing gameplay state.
+// Alpha 0.1.1c terrain + environment pass
 // ============================================================
 
 (() => {
@@ -15,308 +14,545 @@
 
     const {
       scene,
-      engine,
       camera,
       shadowGenerator
     } = runtime;
 
-    const scenicRoots = [];
     let pipeline = null;
 
-    function mat(name, diffuse, emissive = null, alpha = 1) {
-      const m = new BABYLON.StandardMaterial(name, scene);
-      m.diffuseColor = new BABYLON.Color3(...diffuse);
-      if (emissive) m.emissiveColor = new BABYLON.Color3(...emissive);
-      m.specularColor = new BABYLON.Color3(.16, .18, .19);
+    function mat(
+      name,
+      color,
+      alpha = 1
+    ) {
+      const m =
+        new BABYLON.StandardMaterial(
+          name,
+          scene
+        );
+
+      m.diffuseColor =
+        new BABYLON.Color3(
+          ...color
+        );
+
+      m.specularColor =
+        new BABYLON.Color3(
+          .035,
+          .045,
+          .05
+        );
+
+      m.specularPower = 10;
       m.alpha = alpha;
       return m;
     }
 
-    const stone = mat("scenicStone", [.30,.34,.37]);
-    const stoneLight = mat("scenicStoneLight", [.52,.55,.56]);
-    const wood = mat("scenicWood", [.29,.17,.085]);
-    const darkMetal = mat("scenicDarkMetal", [.075,.09,.105]);
-    const beach = mat("scenicBeach", [.72,.63,.43]);
-    const grassDark = mat("scenicGrassDark", [.09,.25,.12]);
-    const leafA = mat("scenicLeafA", [.08,.31,.13]);
-    const leafB = mat("scenicLeafB", [.12,.39,.16]);
-    const leafC = mat("scenicLeafC", [.17,.44,.19]);
-    const lightWarm = mat("scenicWarmLight", [.18,.13,.05], [1.0,.48,.12]);
-    const glass = mat("scenicGlass", [.09,.28,.39], [.015,.045,.06], .78);
-    glass.specularColor = new BABYLON.Color3(.75,.88,.95);
+    const sand =
+      mat(
+        "envSand",
+        [.70,.61,.42]
+      );
 
-    function markScenic(mesh) {
+    const dryGrass =
+      mat(
+        "envDryGrass",
+        [.35,.43,.16]
+      );
+
+    const forestFloor =
+      mat(
+        "envForestFloor",
+        [.07,.17,.08]
+      );
+
+    const cliff =
+      mat(
+        "envCliff",
+        [.25,.29,.31]
+      );
+
+    const cliffLight =
+      mat(
+        "envCliffLight",
+        [.40,.42,.41]
+      );
+
+    const foam =
+      mat(
+        "envFoam",
+        [.82,.92,.95],
+        .63
+      );
+
+    const darkWood =
+      mat(
+        "envDarkWood",
+        [.22,.125,.055]
+      );
+
+    const leafDark =
+      mat(
+        "envLeafDark",
+        [.05,.21,.08]
+      );
+
+    const leafMid =
+      mat(
+        "envLeafMid",
+        [.075,.30,.105]
+      );
+
+    const leafLight =
+      mat(
+        "envLeafLight",
+        [.12,.38,.15]
+      );
+
+    function mark(
+      mesh,
+      shadow = true
+    ) {
       if (!mesh) return mesh;
       mesh.isPickable = false;
-      mesh.metadata = { ...(mesh.metadata || {}), scenic: true };
+      mesh.receiveShadows = true;
+
+      if (shadow) {
+        try {
+          shadowGenerator.addShadowCaster(mesh);
+        } catch (_) {}
+      }
+
       return mesh;
     }
 
-    function addCaster(mesh) {
-      try { shadowGenerator.addShadowCaster(mesh); } catch (_) {}
-      return mesh;
-    }
+    function groundPatch(
+      name,
+      x,
+      z,
+      w,
+      d,
+      material,
+      rotation = 0,
+      y = .15
+    ) {
+      const mesh =
+        BABYLON.MeshBuilder.CreateGround(
+          name,
+          {
+            width:w,
+            height:d,
+            subdivisions:1
+          },
+          scene
+        );
 
-    function box(name, x, y, z, w, h, d, material, parent = null) {
-      const mesh = BABYLON.MeshBuilder.CreateBox(name, { width:w, height:h, depth:d }, scene);
       mesh.position.set(x,y,z);
+      mesh.rotation.y = rotation;
       mesh.material = material;
-      mesh.parent = parent;
-      markScenic(mesh);
-      addCaster(mesh);
-      return mesh;
+      return mark(mesh,false);
     }
 
-    function cylinder(name, x, y, z, height, diameter, material, parent = null, tessellation = 12) {
-      const mesh = BABYLON.MeshBuilder.CreateCylinder(name, { height, diameter, tessellation }, scene);
-      mesh.position.set(x,y,z);
+    function rock(
+      x,
+      z,
+      scale = 1,
+      material = cliff
+    ) {
+      const mesh =
+        BABYLON.MeshBuilder.CreatePolyhedron(
+          "envRock",
+          {
+            type:2,
+            size:3.4*scale
+          },
+          scene
+        );
+
+      mesh.position.set(
+        x,
+        1.45*scale,
+        z
+      );
+
+      mesh.scaling.set(
+        1.35,
+        .72,
+        1.0
+      );
+
+      mesh.rotation.set(
+        .12,
+        (x+z)*.017,
+        -.08
+      );
+
       mesh.material = material;
-      mesh.parent = parent;
-      markScenic(mesh);
-      addCaster(mesh);
-      return mesh;
+      return mark(mesh);
     }
 
-    function tree(x,z,scale=1,variant=0,parent=null) {
-      const root = new BABYLON.TransformNode("scenicTreeRoot", scene);
+    function pine(
+      x,
+      z,
+      scale = 1,
+      leafMaterial = leafDark
+    ) {
+      const root =
+        new BABYLON.TransformNode(
+          "envPine",
+          scene
+        );
+
       root.position.set(x,0,z);
-      root.scaling.setAll(scale);
-      root.parent = parent;
 
-      const trunk = cylinder("scenicTreeTrunk",0,3.0,0,6.0,.9,wood,root,8);
-      const leafMat = [leafA,leafB,leafC][variant%3];
+      const trunk =
+        BABYLON.MeshBuilder.CreateCylinder(
+          "envPineTrunk",
+          {
+            diameterTop:.30*scale,
+            diameterBottom:.68*scale,
+            height:5.8*scale,
+            tessellation:7
+          },
+          scene
+        );
 
-      const crown = BABYLON.MeshBuilder.CreateIcoSphere("scenicTreeCrown", { radius:3.4, subdivisions:1 }, scene);
-      crown.position.set(0,7.0,0);
-      crown.scaling.set(1,1.15,1);
-      crown.material = leafMat;
-      crown.parent = root;
-      markScenic(crown);
-      addCaster(crown);
+      trunk.position.y = 2.9*scale;
+      trunk.material = darkWood;
+      trunk.parent = root;
+      mark(trunk);
 
-      const crown2 = BABYLON.MeshBuilder.CreateIcoSphere("scenicTreeCrown2", { radius:2.35, subdivisions:1 }, scene);
-      crown2.position.set(1.3,8.0,.4);
-      crown2.material = leafMat;
-      crown2.parent = root;
-      markScenic(crown2);
-      addCaster(crown2);
+      [
+        [4.0,5.0,2.4],
+        [5.3,4.0,2.15],
+        [6.55,3.0,1.75],
+        [7.65,1.9,1.25]
+      ].forEach(
+        p => {
+          const crown =
+            BABYLON.MeshBuilder.CreateCylinder(
+              "envPineCrown",
+              {
+                diameterTop:.16*scale,
+                diameterBottom:p[1]*scale,
+                height:p[2]*scale,
+                tessellation:8
+              },
+              scene
+            );
 
-      return root;
-    }
-
-    function lamp(x,z,parent=null) {
-      const root = new BABYLON.TransformNode("scenicLamp", scene);
-      root.position.set(x,0,z);
-      root.parent = parent;
-      cylinder("scenicLampPost",0,3.2,0,6.4,.22,darkMetal,root,8);
-      box("scenicLampHead",0,6.3,0,.75,.28,.75,lightWarm,root);
-      return root;
-    }
-
-    function createCivicDistrict() {
-      const root = new BABYLON.TransformNode("CivicDistrict",scene);
-      scenicRoots.push(root);
-
-      const plaza = box("civicPlaza",0,.06,-118,94,.12,66,stoneLight,root);
-      plaza.receiveShadows = true;
-
-      // stepped civic landmark
-      box("civicPodium",0,2.0,-128,46,4,30,stone,root);
-      box("civicMain",0,9.5,-128,31,15,24,stoneLight,root);
-      box("civicGlass",0,11,-140.2,22,9,.5,glass,root);
-      box("civicRoof",0,17.5,-128,36,.7,28,darkMetal,root);
-      cylinder("civicSpire",0,22,-128,9,.75,darkMetal,root,10);
-
-      // central fountain basin / sculpture
-      cylinder("fountainBasin",0,.55,-91,2.0,15,stone,root,24);
-      cylinder("fountainCore",0,3.0,-91,5.0,2.2,stoneLight,root,16);
-      const waterDisc = BABYLON.MeshBuilder.CreateCylinder("fountainWater", { height:.22, diameter:12.6, tessellation:24 }, scene);
-      waterDisc.position.set(0,1.48,-91);
-      waterDisc.material = runtime.waterMaterial;
-      waterDisc.parent=root;
-      markScenic(waterDisc);
-
-      for (let i=-3;i<=3;i++) {
-        lamp(-32,-91+i*8,root);
-        lamp(32,-91+i*8,root);
-      }
-
-      [-42,-29,29,42].forEach((x,idx)=>{
-        tree(x,-118,1.0,idx,root);
-        tree(x,-79,.9,idx+1,root);
-      });
-    }
-
-    function createAzureCoast() {
-      const root = new BABYLON.TransformNode("AzureCoastScenic",scene);
-      scenicRoots.push(root);
-      root.position.set(980,0,790);
-
-      // beach strip and boardwalk
-      box("azureBeach",0,-.20,0,300,.25,105,beach,root).receiveShadows=true;
-      box("azureBoardwalk",0,.10,-36,265,.26,10,wood,root);
-
-      for (let x=-118;x<=118;x+=22) lamp(x,-36,root);
-
-      // pier
-      box("azurePier",68,.05,54,10,.35,150,wood,root);
-      for(let z=10;z<=118;z+=18){
-        cylinder("pierPostL",64,-1.8,z,4,.5,darkMetal,root,8);
-        cylinder("pierPostR",72,-1.8,z,4,.5,darkMetal,root,8);
-      }
-
-      // lighthouse landmark
-      cylinder("lighthouseBase",-86,8.5,28,17,11,stoneLight,root,16);
-      cylinder("lighthouseTop",-86,18.0,28,4.5,8,darkMetal,root,16);
-      box("lighthouseGlow",-86,20.5,28,6.0,1.1,6.0,lightWarm,root);
-
-      // low resort silhouettes
-      for (let i=0;i<6;i++) {
-        const x=-110+i*42;
-        box("coastResort",x,6,-74,30,12,22,stoneLight,root);
-        box("coastResortGlass",x,7.2,-85.2,22,6,.35,glass,root);
-      }
-    }
-
-    function createEmeraldBasin() {
-      const root = new BABYLON.TransformNode("EmeraldBasinScenic",scene);
-      scenicRoots.push(root);
-      root.position.set(930,0,-650);
-
-      // Curated clusters; enough to read as forest without thousands of meshes.
-      const points=[];
-      for(let ring=0;ring<5;ring++){
-        const radius=55+ring*34;
-        const count=10+ring*5;
-        for(let i=0;i<count;i++){
-          const a=(i/count)*Math.PI*2 + ring*.37;
-          const wobble=Math.sin(i*2.31+ring)*11;
-          points.push([Math.cos(a)*(radius+wobble),Math.sin(a)*(radius+wobble)]);
+          crown.position.y = p[0]*scale;
+          crown.material = leafMaterial;
+          crown.parent = root;
+          mark(crown);
         }
-      }
-      points.forEach((p,i)=>tree(p[0],p[1],.72+(i%5)*.08,i,root));
+      );
 
-      // forest visitor lodge
-      box("basinLodge",0,5,0,36,10,24,wood,root);
-      box("basinLodgeRoof",0,10.5,0,41,1.0,29,darkMetal,root);
-      box("basinLodgeGlass",0,5,-12.2,20,5,.35,glass,root);
+      return root;
     }
 
-    function createHighlandObservatory() {
-      const root=new BABYLON.TransformNode("HighlandObservatory",scene);
-      scenicRoots.push(root);
-      root.position.set(-1080,0,-690);
+    function oak(
+      x,
+      z,
+      scale = 1,
+      index = 0
+    ) {
+      const root =
+        new BABYLON.TransformNode(
+          "envOak",
+          scene
+        );
 
-      box("obsPlatform",0,1.0,0,70,2,55,stone,root);
-      cylinder("obsTower",0,8,0,14,18,stoneLight,root,16);
-      const dome=BABYLON.MeshBuilder.CreateSphere("obsDome",{diameter:20,segments:16,slice:.5},scene);
-      dome.position.set(0,15,0);
-      dome.material=glass;
-      dome.parent=root;
-      markScenic(dome);addCaster(dome);
+      root.position.set(x,0,z);
 
-      // radio masts
-      [-24,24].forEach(x=>{
-        cylinder("obsMast",x,13,8,24,.8,darkMetal,root,8);
-        box("obsBeacon",x,25,8,1.6,1.1,1.6,lightWarm,root);
-      });
-    }
+      const trunk =
+        BABYLON.MeshBuilder.CreateCylinder(
+          "envOakTrunk",
+          {
+            diameterTop:.36*scale,
+            diameterBottom:.82*scale,
+            height:5.1*scale,
+            tessellation:7
+          },
+          scene
+        );
 
-    function createMeridianFields() {
-      const root=new BABYLON.TransformNode("MeridianFields",scene);
-      scenicRoots.push(root);
-      root.position.set(-820,0,890);
+      trunk.position.y = 2.55*scale;
+      trunk.material = darkWood;
+      trunk.parent = root;
+      mark(trunk);
 
-      const fieldColors=[
-        mat("fieldA",[.29,.39,.12]),
-        mat("fieldB",[.42,.42,.13]),
-        mat("fieldC",[.18,.34,.12])
+      const mats = [
+        leafDark,
+        leafMid,
+        leafLight
       ];
-      for(let ix=0;ix<4;ix++){
-        for(let iz=0;iz<3;iz++){
-          const p=box("fieldPlot",(ix-1.5)*70,.03,(iz-1)*64,58,.06,50,fieldColors[(ix+iz)%3],root);
-          p.receiveShadows=true;
+
+      [
+        [-1.0,5.6,.2,1.0,.90,1.0],
+        [1.0,5.9,.35,.92,1.00,.94],
+        [.1,7.0,-.4,1.08,1.03,1.05]
+      ].forEach(
+        (p,i) => {
+          const blob =
+            BABYLON.MeshBuilder.CreateIcoSphere(
+              "envOakLeaf",
+              {
+                radius:2.35*scale,
+                subdivisions:1
+              },
+              scene
+            );
+
+          blob.position.set(
+            p[0]*scale,
+            p[1]*scale,
+            p[2]*scale
+          );
+
+          blob.scaling.set(
+            p[3],
+            p[4],
+            p[5]
+          );
+
+          blob.material =
+            mats[
+              (index+i)%3
+            ];
+
+          blob.parent = root;
+          mark(blob);
+        }
+      );
+
+      return root;
+    }
+
+    // Forest floor zones
+    [
+      [30,-330,300,270,.12],
+      [930,-650,430,350,-.18],
+      [-840,760,310,240,.30]
+    ].forEach(
+      p => groundPatch(
+        "forestFloor",
+        p[0],p[1],p[2],p[3],
+        forestFloor,p[4]
+      )
+    );
+
+    // Dry plains variation
+    [
+      [-880,930,450,280,.10],
+      [-520,1040,280,190,-.18],
+      [530,740,300,180,.23]
+    ].forEach(
+      p => groundPatch(
+        "dryGrassPatch",
+        p[0],p[1],p[2],p[3],
+        dryGrass,p[4],
+        .13
+      )
+    );
+
+    // Actual beach bands
+    [
+      [1100,1060,300,115,-.20],
+      [1250,720,260,100,.55],
+      [760,1320,250,90,.30],
+      [-980,1190,310,95,-.35],
+      [-1310,700,240,90,.70]
+    ].forEach(
+      p => groundPatch(
+        "beachPatch",
+        p[0],p[1],p[2],p[3],
+        sand,p[4],
+        .10
+      )
+    );
+
+    // Broken surf strips on one highly visible coastline
+    for (let i=0;i<20;i++) {
+      const angle=.38+i*.112;
+      const r=1475+Math.sin(i*1.7)*52;
+      const x=Math.cos(angle)*r;
+      const z=Math.sin(angle)*r;
+
+      groundPatch(
+        "coastFoam",
+        x,z,
+        38+(i%4)*8,
+        4.5,
+        foam,
+        -angle,
+        -3.52
+      );
+    }
+
+    function forestCluster(
+      cx,
+      cz,
+      radius,
+      count,
+      pineBias
+    ) {
+      for (let i=0;i<count;i++) {
+        const a=
+          i*2.399963+
+          Math.sin(i*1.83)*.16;
+
+        const rr=
+          radius*
+          Math.sqrt((i+.5)/count);
+
+        const x=
+          cx+Math.cos(a)*rr;
+
+        const z=
+          cz+Math.sin(a)*rr;
+
+        const s=.68+(i%7)*.055;
+
+        if (
+          (i%10)/10 <
+          pineBias
+        ) {
+          pine(
+            x,z,s,
+            i%3===0
+              ? leafMid
+              : leafDark
+          );
+        } else {
+          oak(
+            x,z,s,i
+          );
         }
       }
-      box("fieldBarn",0,5,-112,34,10,25,stone,root);
-      box("fieldBarnRoof",0,10.5,-112,39,1,30,darkMetal,root);
     }
 
-    function createNightSkylineLights() {
-      // Distant skyline lights near the capital create a much better night read.
-      const root=new BABYLON.TransformNode("SkylineLights",scene);
-      scenicRoots.push(root);
-      const positions=[[-70,-52],[-48,-58],[-25,-56],[18,-54],[43,-60],[67,-50]];
-      positions.forEach((p,i)=>{
-        const h=20+(i%3)*8;
-        const building=box("skylineBuilding",p[0],h/2,p[1],13,h,13,darkMetal,root);
-        for(let y=5;y<h-3;y+=5){
-          for(let x=-4;x<=4;x+=4){
-            const win=box("skylineWindow",p[0]+x,y,p[1]-6.65,1.2,1.5,.15,lightWarm,root);
-            win.parent=null; // root position is zero; preserve world coordinates
-          }
+    forestCluster(
+      55,-355,165,68,.70
+    );
+
+    forestCluster(
+      930,-650,240,100,.56
+    );
+
+    forestCluster(
+      -840,760,160,54,.38
+    );
+
+    // Rocky highlands
+    [
+      [-1080,-690],
+      [-900,-790],
+      [-1230,-510],
+      [-640,-1030]
+    ].forEach(
+      (center,ci) => {
+        for (let i=0;i<18;i++) {
+          const a=i*2.17+ci;
+          const r=30+(i%6)*13;
+
+          rock(
+            center[0]+Math.cos(a)*r,
+            center[1]+Math.sin(a)*r,
+            .7+(i%5)*.18,
+            i%3===0
+              ? cliffLight
+              : cliff
+          );
         }
-      });
-    }
+      }
+    );
 
-    createCivicDistrict();
-    createAzureCoast();
-    createEmeraldBasin();
-    createHighlandObservatory();
-    createMeridianFields();
-    createNightSkylineLights();
+    // Improve the immediate city approach so first screenshot looks better.
+    for (let i=0;i<34;i++) {
+      const z=-250+i*18;
+      const side=i%2===0 ? -1 : 1;
+
+      if (i%3===0) {
+        rock(
+          side*(30+(i%4)*4),
+          z,
+          .55+(i%3)*.1
+        );
+      } else {
+        oak(
+          side*(32+(i%5)*3),
+          z,
+          .72+(i%4)*.06,
+          i
+        );
+      }
+    }
 
     function applyPreset(preset) {
-      const regular=preset === "REGULAR";
-
-      scenicRoots.forEach(root=>{
-        if (root.name === "EmeraldBasinScenic") {
-          // Basic keeps most of the forest, Regular shows all of it.
-          root.setEnabled(true);
-        }
-      });
+      const regular =
+        preset === "REGULAR";
 
       try {
         if (!pipeline) {
-          pipeline = new BABYLON.DefaultRenderingPipeline(
-            "mapGameVisualPipeline",
-            true,
-            scene,
-            [camera]
-          );
+          pipeline =
+            new BABYLON.DefaultRenderingPipeline(
+              "mapGameVisualPipeline",
+              true,
+              scene,
+              [camera]
+            );
         }
 
         pipeline.fxaaEnabled = true;
         pipeline.samples = regular ? 2 : 1;
         pipeline.bloomEnabled = regular;
-        pipeline.bloomThreshold = .84;
-        pipeline.bloomWeight = .18;
-        pipeline.bloomKernel = 42;
+        pipeline.bloomThreshold = .88;
+        pipeline.bloomWeight = .12;
+        pipeline.bloomKernel = 34;
         pipeline.imageProcessingEnabled = true;
-        pipeline.imageProcessing.contrast = regular ? 1.11 : 1.04;
-        pipeline.imageProcessing.exposure = regular ? 1.04 : 1.0;
+        pipeline.imageProcessing.contrast = regular ? 1.12 : 1.06;
+        pipeline.imageProcessing.exposure = regular ? 1.02 : .99;
         pipeline.imageProcessing.vignetteEnabled = regular;
-        pipeline.imageProcessing.vignetteWeight = .55;
-        pipeline.imageProcessing.vignetteStretch = .25;
+        pipeline.imageProcessing.vignetteWeight = .32;
+        pipeline.imageProcessing.vignetteStretch = .20;
       } catch (error) {
-        console.warn("Map Game visual pipeline unavailable:", error);
+        console.warn(
+          "Map Game visual pipeline unavailable:",
+          error
+        );
       }
     }
 
-    applyPreset(runtime.graphicsPreset || "BASIC");
+    applyPreset(
+      runtime.graphicsPreset ||
+      "BASIC"
+    );
 
-    window.addEventListener("mapgame:graphics", event => {
-      applyPreset(event.detail && event.detail.preset || "BASIC");
-    });
+    window.addEventListener(
+      "mapgame:graphics",
+      event => applyPreset(
+        event.detail &&
+        event.detail.preset ||
+        "BASIC"
+      )
+    );
 
     if (runtime.showToast) {
-      runtime.showToast("Scenic world layer loaded", "success");
+      runtime.showToast(
+        "Terrain & environment upgrade loaded",
+        "success"
+      );
     }
   }
 
   if (window.mapGameRuntime) {
     start(window.mapGameRuntime);
   } else {
-    window.addEventListener("mapgame:runtime-ready", event => start(event.detail), { once:true });
+    window.addEventListener(
+      "mapgame:runtime-ready",
+      event => start(event.detail),
+      { once:true }
+    );
   }
 })();

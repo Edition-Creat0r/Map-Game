@@ -1,6 +1,6 @@
 // ============================================================
-// MAP GAME — Alpha 0.1.1
-// WORLD SCALE + GRAPHICS FOUNDATION
+// MAP GAME — Alpha 0.1.1c
+// TERRAIN + ENVIRONMENT UPGRADE
 //
 // Goal:
 // - Make the "Basic" preset look genuinely good.
@@ -10,7 +10,7 @@
 // - Improve the entire HUD / panel language so it feels like one game.
 //
 // Replace your current game.js with this file.
-// Build 0.1.1: expanded world scale, coastline/deep ocean, world border, and live Basic/Regular graphics toggle.
+// Build 0.1.1c: terrain materials, rebuilt mountains and trees, richer biomes, coast detail, and stronger Basic/Regular visuals.
 // Your existing index.html + styles.css can stay the same.
 // ============================================================
 
@@ -522,6 +522,15 @@ const createScene = () => {
         b
       );
 
+    mat.specularColor =
+      new BABYLON.Color3(
+        0.055,
+        0.065,
+        0.075
+      );
+
+    mat.specularPower = 18;
+
     return mat;
   }
 
@@ -659,6 +668,21 @@ const createScene = () => {
       0.28,
       0.30,
       0.33
+    );
+
+  const snowMat =
+    makeMaterial(
+      "snowMat",
+      0.79,
+      0.84,
+      0.87
+    );
+
+  snowMat.specularColor =
+    new BABYLON.Color3(
+      0.10,
+      0.12,
+      0.14
     );
 
   const pylonMat =
@@ -862,23 +886,234 @@ const createScene = () => {
     radius,
     height
   ) {
+    const segments = 9;
+    const ringHeights = [
+      -3,
+      height * 0.28,
+      height * 0.58,
+      height * 0.82
+    ];
+
+    const ringScales = [
+      1.0,
+      0.72,
+      0.43,
+      0.19
+    ];
+
+    const positions = [];
+    const indices = [];
+    const uvs = [];
+
+    const seed =
+      Math.sin(
+        x * 0.017 +
+        z * 0.013
+      ) * 43758.5453;
+
+    function rand(
+      ringIndex,
+      segmentIndex
+    ) {
+      const v =
+        Math.sin(
+          seed +
+          ringIndex * 17.17 +
+          segmentIndex * 9.31
+        ) * 43758.5453;
+
+      return (
+        v -
+        Math.floor(v)
+      );
+    }
+
+    for (
+      let r = 0;
+      r < ringHeights.length;
+      r++
+    ) {
+      for (
+        let s = 0;
+        s < segments;
+        s++
+      ) {
+        const angle =
+          s / segments *
+          Math.PI *
+          2;
+
+        const rr =
+          radius *
+          ringScales[r] *
+          (
+            0.78 +
+            rand(r, s) *
+              0.42
+          );
+
+        positions.push(
+          Math.cos(angle) * rr,
+          ringHeights[r] +
+            (
+              rand(r + 4, s) -
+              0.5
+            ) *
+            height *
+            0.055,
+          Math.sin(angle) * rr
+        );
+
+        uvs.push(
+          s / segments,
+          r /
+            (
+              ringHeights.length -
+              1
+            )
+        );
+      }
+    }
+
+    const peakIndex =
+      positions.length / 3;
+
+    positions.push(
+      (
+        rand(11, 2) -
+        0.5
+      ) *
+        radius *
+        0.12,
+      height,
+      (
+        rand(13, 4) -
+        0.5
+      ) *
+        radius *
+        0.12
+    );
+
+    uvs.push(
+      0.5,
+      1
+    );
+
+    for (
+      let r = 0;
+      r <
+        ringHeights.length - 1;
+      r++
+    ) {
+      for (
+        let s = 0;
+        s < segments;
+        s++
+      ) {
+        const next =
+          (
+            s + 1
+          ) %
+          segments;
+
+        const a =
+          r *
+            segments +
+          s;
+
+        const b =
+          r *
+            segments +
+          next;
+
+        const c =
+          (
+            r + 1
+          ) *
+            segments +
+          s;
+
+        const d =
+          (
+            r + 1
+          ) *
+            segments +
+          next;
+
+        indices.push(
+          a,
+          c,
+          b,
+          b,
+          c,
+          d
+        );
+      }
+    }
+
+    const lastRingStart =
+      (
+        ringHeights.length -
+        1
+      ) *
+      segments;
+
+    for (
+      let s = 0;
+      s < segments;
+      s++
+    ) {
+      const next =
+        (
+          s + 1
+        ) %
+        segments;
+
+      indices.push(
+        lastRingStart + s,
+        peakIndex,
+        lastRingStart + next
+      );
+    }
+
+    const normals = [];
+
+    BABYLON.VertexData
+      .ComputeNormals(
+        positions,
+        indices,
+        normals
+      );
+
+    const data =
+      new BABYLON.VertexData();
+
+    data.positions =
+      positions;
+
+    data.indices =
+      indices;
+
+    data.normals =
+      normals;
+
+    data.uvs =
+      uvs;
+
     const mountain =
-      BABYLON.MeshBuilder.CreateCylinder(
+      new BABYLON.Mesh(
         "mountain",
-        {
-          diameterTop: 0,
-          diameterBottom:
-            radius * 2,
-          height,
-          tessellation: 7
-        },
         scene
       );
+
+    data.applyToMesh(
+      mountain
+    );
 
     mountain.position =
       new BABYLON.Vector3(
         x,
-        height / 2 - 3,
+        0,
         z
       );
 
@@ -887,6 +1122,52 @@ const createScene = () => {
 
     mountain.isPickable =
       false;
+
+    mountain.receiveShadows =
+      true;
+
+    if (
+      height > 95
+    ) {
+      const snowCap =
+        BABYLON.MeshBuilder
+          .CreatePolyhedron(
+            "mountainSnowCap",
+            {
+              type: 2,
+              size:
+                Math.max(
+                  8,
+                  radius * 0.18
+                )
+            },
+            scene
+          );
+
+      snowCap.position =
+        new BABYLON.Vector3(
+          x,
+          height * 0.91,
+          z
+        );
+
+      snowCap.scaling =
+        new BABYLON.Vector3(
+          1.6,
+          0.72,
+          1.6
+        );
+
+      snowCap.rotation.y =
+        rand(20, 1) *
+        Math.PI;
+
+      snowCap.material =
+        snowMat;
+
+      snowCap.isPickable =
+        false;
+    }
 
     return mountain;
   }
@@ -2187,23 +2468,45 @@ const createScene = () => {
     scale = 1,
     alt = false
   ) {
+    const variant =
+      Math.abs(
+        Math.floor(
+          x * 17 +
+          z * 13
+        )
+      ) %
+      5;
+
     const trunk =
-      BABYLON.MeshBuilder.CreateCylinder(
-        "treeTrunk",
-        {
-          diameter:
-            0.9 * scale,
-          height:
-            4.2 * scale,
-          tessellation: 7
-        },
-        scene
-      );
+      BABYLON.MeshBuilder
+        .CreateCylinder(
+          "treeTrunk",
+          {
+            diameterTop:
+              0.42 * scale,
+            diameterBottom:
+              0.88 * scale,
+            height:
+              (
+                variant === 3
+                  ? 5.4
+                  : 4.6
+              ) *
+              scale,
+            tessellation: 7
+          },
+          scene
+        );
 
     trunk.position =
       new BABYLON.Vector3(
         x,
-        2.1 * scale,
+        (
+          variant === 3
+            ? 2.7
+            : 2.3
+        ) *
+          scale,
         z
       );
 
@@ -2213,31 +2516,176 @@ const createScene = () => {
     trunk.isPickable =
       false;
 
-    const crown =
-      BABYLON.MeshBuilder.CreateSphere(
-        "treeCrown",
-        {
-          diameter:
-            5.8 * scale,
-          segments: 6
-        },
-        scene
-      );
-
-    crown.position =
-      new BABYLON.Vector3(
-        x,
-        5.1 * scale,
-        z
-      );
-
-    crown.material =
+    const leafMaterial =
       alt
         ? treeLeafAltMat
         : treeLeafMat;
 
-    crown.isPickable =
-      false;
+    function leafBlob(
+      ox,
+      oy,
+      oz,
+      sx,
+      sy,
+      sz,
+      material =
+        leafMaterial
+    ) {
+      const leaf =
+        BABYLON.MeshBuilder
+          .CreateIcoSphere(
+            "treeLeaf",
+            {
+              radius:
+                2.25 *
+                scale,
+              subdivisions: 1
+            },
+            scene
+          );
+
+      leaf.position =
+        new BABYLON.Vector3(
+          x +
+            ox *
+              scale,
+          oy *
+            scale,
+          z +
+            oz *
+              scale
+        );
+
+      leaf.scaling =
+        new BABYLON.Vector3(
+          sx,
+          sy,
+          sz
+        );
+
+      leaf.material =
+        material;
+
+      leaf.isPickable =
+        false;
+    }
+
+    if (
+      variant === 0 ||
+      variant === 1
+    ) {
+      leafBlob(
+        -0.9,
+        5.5,
+        0.1,
+        1.0,
+        0.92,
+        1.05
+      );
+
+      leafBlob(
+        1.0,
+        5.9,
+        0.35,
+        0.92,
+        1.02,
+        0.92,
+        treeLeafAltMat
+      );
+
+      leafBlob(
+        0.15,
+        7.0,
+        -0.35,
+        1.08,
+        1.05,
+        1.02
+      );
+    } else if (
+      variant === 2
+    ) {
+      leafBlob(
+        0,
+        5.4,
+        0,
+        1.18,
+        0.85,
+        1.18
+      );
+
+      leafBlob(
+        0.65,
+        6.25,
+        -0.3,
+        0.78,
+        0.75,
+        0.78,
+        treeLeafAltMat
+      );
+    } else if (
+      variant === 3
+    ) {
+      [
+        [4.0, 4.3, 2.2],
+        [5.4, 3.5, 2.0],
+        [6.7, 2.6, 1.55],
+        [7.8, 1.7, 1.1]
+      ].forEach(
+        layer => {
+          const crown =
+            BABYLON.MeshBuilder
+              .CreateCylinder(
+                "pineCrown",
+                {
+                  diameterTop:
+                    0.22 *
+                    scale,
+                  diameterBottom:
+                    layer[1] *
+                    scale,
+                  height:
+                    layer[2] *
+                    scale,
+                  tessellation: 8
+                },
+                scene
+              );
+
+          crown.position =
+            new BABYLON.Vector3(
+              x,
+              layer[0] *
+                scale,
+              z
+            );
+
+          crown.material =
+            leafMaterial;
+
+          crown.isPickable =
+            false;
+        }
+      );
+    } else {
+      leafBlob(
+        -0.4,
+        5.2,
+        0,
+        0.8,
+        0.9,
+        0.8
+      );
+
+      leafBlob(
+        0.55,
+        5.8,
+        0.25,
+        0.78,
+        0.82,
+        0.78,
+        treeLeafAltMat
+      );
+    }
   }
 
   // Northwood forest
@@ -8528,6 +8976,18 @@ const createScene = () => {
     shadowGenerator,
     glowLayer,
     ground,
+    grassMaterial: grassMat,
+    grassLightMaterial: grassLightMat,
+    dirtMaterial: dirtMat,
+    rockMaterial: rockMat,
+    snowMaterial: snowMat,
+    roadMaterial: roadMat,
+    roadEdgeMaterial: roadEdgeMat,
+    concreteMaterial: concreteMat,
+    darkMaterial: darkMat,
+    treeLeafMaterial: treeLeafMat,
+    treeLeafAltMaterial: treeLeafAltMat,
+    treeTrunkMaterial: treeTrunkMat,
     waterMaterial: waterMat,
     shallowOceanMaterial: shallowOceanMat,
     deepOceanMaterial: deepOceanMat,
