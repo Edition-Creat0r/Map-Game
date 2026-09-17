@@ -1,6 +1,6 @@
 // ============================================================
-// MAP GAME — Alpha 0.0.9
-// ACCOUNTS + LOGIN SCREEN
+// MAP GAME — Alpha 0.1
+// MULTIPLAYER FOUNDATION
 //
 // Goal:
 // - Make the "Basic" preset look genuinely good.
@@ -10,7 +10,7 @@
 // - Improve the entire HUD / panel language so it feels like one game.
 //
 // Replace your current game.js with this file.
-// Build 0.0.9: Supabase account UI, email verification gate, and singleplayer access.
+// Build 0.1: first multiplayer foundation using Supabase Realtime, shared presence, and persistent world state.
 // Your existing index.html + styles.css can stay the same.
 // ============================================================
 
@@ -2469,7 +2469,7 @@ const createScene = () => {
             opacity:0.48;
           "
         >
-          ALPHA 0.0.8 • WORLD MAP + DAY/NIGHT
+          ALPHA 0.1 • MULTIPLAYER FOUNDATION
         </div>
       </div>
     </div>
@@ -2495,6 +2495,60 @@ const createScene = () => {
   topBar.appendChild(
     resourceBar
   );
+
+  const multiplayerHudBadge =
+    document.createElement("div");
+
+  multiplayerHudBadge.style.cssText = `
+    position:absolute;
+    right:18px;
+    top:58px;
+    display:none;
+    align-items:center;
+    gap:7px;
+    padding:7px 10px;
+    border-radius:999px;
+    border:1px solid rgba(102,225,255,0.18);
+    background:rgba(5,14,24,0.88);
+    color:#a8efff;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.5px;
+    z-index:92;
+    pointer-events:none;
+    box-shadow:0 8px 22px rgba(0,0,0,.20);
+  `;
+
+  multiplayerHudBadge.innerHTML =
+    `<span style="
+      width:7px;height:7px;border-radius:50%;
+      background:#65e29b;
+      box-shadow:0 0 10px rgba(101,226,155,.55);
+    "></span>
+    <span id="multiplayerHudText">CENTRAL WORLD</span>`;
+
+  document.body.appendChild(multiplayerHudBadge);
+
+  if (
+    window.mapGameMultiplayer &&
+    typeof window.mapGameMultiplayer.onStateChange === "function"
+  ) {
+    window.mapGameMultiplayer.onStateChange(state => {
+      const text =
+        multiplayerHudBadge.querySelector("#multiplayerHudText");
+
+      if (state && state.connected) {
+        multiplayerHudBadge.style.display = "flex";
+
+        if (text) {
+          text.textContent =
+            `CENTRAL WORLD • ${state.onlineCount || 1} ONLINE`;
+        }
+      } else {
+        multiplayerHudBadge.style.display = "none";
+      }
+    });
+  }
 
   function updateHUD() {
     resourceBar.innerHTML =
@@ -8320,9 +8374,51 @@ const createScene = () => {
         return;
       }
 
-      // This is still local gameplay for now.
-      // A future multiplayer server will independently verify the Supabase token.
-      enterGame("Joined Central World");
+      if (
+        !window.mapGameMultiplayer ||
+        typeof window.mapGameMultiplayer.joinCentralWorld !== "function"
+      ) {
+        if (centralWorldMessage instanceof HTMLElement) {
+          centralWorldMessage.textContent =
+            "Multiplayer did not load. Check multiplayer.js and refresh.";
+        }
+        return;
+      }
+
+      const oldText = joinCentralWorldButton.textContent;
+      joinCentralWorldButton.disabled = true;
+      joinCentralWorldButton.textContent = "CONNECTING...";
+
+      if (centralWorldMessage instanceof HTMLElement) {
+        centralWorldMessage.textContent =
+          "Connecting securely to Central World...";
+      }
+
+      try {
+        const result =
+          await window.mapGameMultiplayer.joinCentralWorld();
+
+        if (centralWorldMessage instanceof HTMLElement) {
+          centralWorldMessage.textContent =
+            `Connected to Central World • ${result.onlineCount} online`;
+        }
+
+        enterGame(
+          `Central World connected • ${result.onlineCount} online`
+        );
+      } catch (error) {
+        console.error("Central World connection failed:", error);
+
+        if (centralWorldMessage instanceof HTMLElement) {
+          centralWorldMessage.textContent =
+            error && error.message
+              ? error.message
+              : "Could not connect to Central World.";
+        }
+
+        joinCentralWorldButton.disabled = false;
+        joinCentralWorldButton.textContent = oldText || "JOIN CENTRAL WORLD";
+      }
     });
   }
 
