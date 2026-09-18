@@ -1,10 +1,39 @@
+/* ============================================================
+   MAP GAME — styles.css
+   Alpha 0.1.1f — Home + Interface Polish
+   ============================================================ */
+
 :root {
   color-scheme: dark;
-  --bg: #07111c;
-  --panel: rgba(7, 17, 29, 0.9);
-  --cyan: #84eaff;
-  --cyan-soft: rgba(132, 234, 255, 0.16);
-  --text: #eef7fb;
+
+  --mg-bg-0: #03070c;
+  --mg-bg-1: #06101a;
+  --mg-bg-2: #0a1825;
+
+  --mg-panel: rgba(7, 17, 29, 0.90);
+  --mg-panel-strong: rgba(6, 14, 24, 0.96);
+  --mg-panel-soft: rgba(15, 31, 45, 0.72);
+
+  --mg-line: rgba(177, 224, 245, 0.10);
+  --mg-line-strong: rgba(115, 220, 255, 0.25);
+
+  --mg-cyan: #82e8ff;
+  --mg-cyan-2: #42c8f5;
+  --mg-blue: #1685c2;
+  --mg-green: #77e6aa;
+  --mg-gold: #ffd96a;
+  --mg-red: #ff8e96;
+
+  --mg-text: #eef8fc;
+  --mg-muted: rgba(229, 243, 249, 0.60);
+  --mg-faint: rgba(229, 243, 249, 0.38);
+
+  --mg-radius-sm: 9px;
+  --mg-radius: 14px;
+  --mg-radius-lg: 22px;
+
+  --mg-shadow: 0 28px 90px rgba(0, 0, 0, 0.46);
+  --mg-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
 }
 
 * {
@@ -18,107 +47,16 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 20%, rgba(22, 78, 105, 0.2), transparent 40%),
-    linear-gradient(180deg, #091521 0%, var(--bg) 100%);
-  color: var(--text);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: var(--mg-bg-0);
+  color: var(--mg-text);
+  font-family: var(--mg-font);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 body {
   position: relative;
   isolation: isolate;
-}
-
-#backgroundGlow {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(circle at 15% 18%, rgba(50, 177, 255, 0.08), transparent 24%),
-    radial-gradient(circle at 85% 78%, rgba(48, 218, 174, 0.06), transparent 26%);
-}
-
-#gameCanvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  border: 0;
-  outline: none;
-  touch-action: none;
-  z-index: 1;
-  filter: saturate(1.06) contrast(1.015);
-}
-
-#loadingScreen {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background:
-    radial-gradient(circle at center, rgba(17, 59, 84, 0.68), rgba(4, 10, 18, 0.96) 70%);
-  backdrop-filter: blur(6px);
-}
-
-.loading-card {
-  min-width: min(420px, 86vw);
-  padding: 28px 30px;
-  border: 1px solid rgba(132, 234, 255, 0.24);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(8, 20, 34, 0.95), rgba(5, 13, 23, 0.95));
-  box-shadow:
-    0 22px 70px rgba(0, 0, 0, 0.42),
-    0 0 45px rgba(56, 190, 255, 0.08);
-  text-align: center;
-}
-
-.loading-kicker {
-  color: var(--cyan);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 2.2px;
-}
-
-.loading-title {
-  margin-top: 8px;
-  font-size: 28px;
-  font-weight: 850;
-  letter-spacing: -0.4px;
-}
-
-.loading-subtitle {
-  margin-top: 7px;
-  font-size: 12px;
-  opacity: 0.56;
-}
-
-.loading-line {
-  width: 100%;
-  height: 4px;
-  margin-top: 18px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.loading-line span {
-  display: block;
-  width: 34%;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, rgba(132, 234, 255, 0.2), var(--cyan), rgba(132, 234, 255, 0.2));
-  box-shadow: 0 0 18px rgba(132, 234, 255, 0.3);
-  animation: loadingSweep 1.25s ease-in-out infinite;
-}
-
-@keyframes loadingSweep {
-  0% { transform: translateX(-130%); }
-  100% { transform: translateX(390%); }
 }
 
 button,
@@ -132,14 +70,562 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
-@media (max-width: 760px) {
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+#gameCanvas:focus-visible {
+  outline: 2px solid rgba(130, 232, 255, 0.64);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   GLOBAL BACKDROP
+   ============================================================ */
+
+#backgroundGlow,
+#shellGrid,
+#shellVignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+#backgroundGlow {
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(38, 164, 220, 0.16), transparent 30%),
+    radial-gradient(circle at 78% 74%, rgba(51, 190, 151, 0.08), transparent 28%),
+    linear-gradient(180deg, #091725 0%, #05101a 52%, #02060b 100%);
+}
+
+#shellGrid {
+  z-index: 0;
+  opacity: 0.20;
+  background-image:
+    linear-gradient(rgba(126, 211, 241, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(126, 211, 241, 0.055) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 78%);
+}
+
+#shellVignette {
+  z-index: 2;
+  background:
+    radial-gradient(circle at center, transparent 50%, rgba(0, 0, 0, 0.20) 100%);
+  mix-blend-mode: multiply;
+}
+
+#gameCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+  outline: none;
+  touch-action: none;
+  z-index: 1;
+  filter: saturate(1.045) contrast(1.018);
+}
+
+/* ============================================================
+   LOADING SCREEN
+   ============================================================ */
+
+#loadingScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(20, 92, 126, 0.44), transparent 35%),
+    radial-gradient(circle at 14% 82%, rgba(24, 103, 120, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(4, 12, 21, 0.98), rgba(2, 7, 13, 0.995));
+  backdrop-filter: blur(8px);
+}
+
+#loadingScreen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.24;
+  background-image:
+    linear-gradient(rgba(132, 234, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(132, 234, 255, 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at center, black 0%, transparent 78%);
+}
+
+.loading-card {
+  position: relative;
+  width: min(500px, 92vw);
+  padding: 26px 28px 22px;
+  overflow: hidden;
+  border: 1px solid rgba(132, 234, 255, 0.18);
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, rgba(14, 30, 44, 0.96), rgba(5, 13, 23, 0.98));
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.52),
+    0 0 70px rgba(60, 190, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.loading-card::after {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -115px;
+  top: -130px;
+  border-radius: 50%;
+  background: rgba(87, 212, 255, 0.07);
+  filter: blur(8px);
+}
+
+.loading-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.loading-logo {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(150, 237, 255, 0.42);
+  border-radius: 12px;
+  background:
+    linear-gradient(145deg, #53d8f3, #1595c3);
+  box-shadow:
+    0 10px 28px rgba(36, 182, 225, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  color: #031019;
+  font-weight: 950;
+  font-size: 18px;
+}
+
+.loading-brand-copy {
+  min-width: 0;
+}
+
+.loading-kicker {
+  color: var(--mg-cyan);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 1.9px;
+}
+
+.loading-title {
+  margin-top: 2px;
+  font-size: 27px;
+  font-weight: 950;
+  letter-spacing: -0.7px;
+}
+
+.loading-rule {
+  height: 1px;
+  margin: 18px 0 15px;
+  background: linear-gradient(90deg, rgba(132, 234, 255, 0.26), rgba(255, 255, 255, 0.04), transparent);
+}
+
+.loading-subtitle {
+  color: var(--mg-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.loading-line {
+  width: 100%;
+  height: 4px;
+  margin-top: 18px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.loading-line span {
+  display: block;
+  width: 34%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(132, 234, 255, 0.06), #77e7ff, rgba(132, 234, 255, 0.08));
+  box-shadow: 0 0 18px rgba(132, 234, 255, 0.32);
+  animation: mgLoadingSweep 1.25s ease-in-out infinite;
+}
+
+.loading-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  margin-top: 11px;
+  color: rgba(230, 245, 250, 0.34);
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: 1.05px;
+}
+
+.loading-meta-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(130, 232, 255, 0.62);
+}
+
+@keyframes mgLoadingSweep {
+  0%   { transform: translateX(-140%); }
+  100% { transform: translateX(390%); }
+}
+
+/* ============================================================
+   HOME SCREEN — GAME.JS CURRENT MARKUP OVERRIDES
+
+   game.js currently creates the home screen dynamically and gives
+   many elements inline styles. :has() lets this stylesheet polish
+   that screen without rewriting the auth/game logic.
+   ============================================================ */
+
+body > div:has(#joinCentralWorld) {
+  font-family: var(--mg-font) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: clamp(18px, 3vw, 38px) !important;
+  background:
+    radial-gradient(circle at 18% 14%, rgba(35, 155, 208, 0.23), transparent 28%),
+    radial-gradient(circle at 82% 82%, rgba(52, 181, 149, 0.09), transparent 25%),
+    linear-gradient(155deg, rgba(4, 11, 19, 0.97), rgba(3, 9, 16, 0.985)) !important;
+}
+
+body > div:has(#joinCentralWorld)::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.30;
+  background-image:
+    linear-gradient(rgba(118, 205, 238, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(118, 205, 238, 0.045) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: radial-gradient(circle at center, black 0%, transparent 80%);
+}
+
+/* Main home card */
+body > div:has(#joinCentralWorld) > div:first-child {
+  position: relative !important;
+  width: min(1040px, 95vw) !important;
+  border: 1px solid rgba(122, 220, 255, 0.16) !important;
+  border-radius: 24px !important;
+  background:
+    linear-gradient(145deg, rgba(10, 24, 38, 0.965), rgba(5, 13, 23, 0.985)) !important;
+  box-shadow:
+    0 42px 120px rgba(0, 0, 0, 0.57),
+    0 0 80px rgba(52, 185, 230, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+  backdrop-filter: blur(18px) saturate(1.1) !important;
+  overflow: hidden !important;
+}
+
+body > div:has(#joinCentralWorld) > div:first-child::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(85, 210, 255, 0.07), transparent 18%, transparent 82%, rgba(91, 211, 176, 0.035)),
+    radial-gradient(circle at 14% 0%, rgba(73, 190, 236, 0.10), transparent 28%);
+}
+
+body > div:has(#joinCentralWorld) > div:first-child > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header typography */
+body > div:has(#joinCentralWorld) > div:first-child > div:first-child {
+  padding: 30px 32px 22px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055) !important;
+}
+
+body > div:has(#joinCentralWorld) > div:first-child > div:first-child > div:first-child > div:first-child {
+  color: #83eaff !important;
+  letter-spacing: 2.7px !important;
+  font-size: 10px !important;
+}
+
+body > div:has(#joinCentralWorld) > div:first-child > div:first-child > div:first-child > div:nth-child(2) {
+  max-width: 720px;
+  font-size: clamp(34px, 5vw, 58px) !important;
+  font-weight: 950 !important;
+  line-height: 0.98 !important;
+  letter-spacing: -2px !important;
+  text-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+body > div:has(#joinCentralWorld) > div:first-child > div:first-child > div:first-child > div:nth-child(3) {
+  max-width: 690px !important;
+  margin-top: 13px !important;
+  color: rgba(228, 241, 247, 0.62) !important;
+  font-size: 12px !important;
+  line-height: 1.7 !important;
+}
+
+/* Account card */
+#accountSummary {
+  min-width: 230px !important;
+  padding: 13px 14px !important;
+  border: 1px solid rgba(137, 218, 245, 0.12) !important;
+  border-radius: 13px !important;
+  background: rgba(255, 255, 255, 0.025) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025) !important;
+}
+
+#accountActionButton,
+#playSingleplayer,
+#authSubmit,
+#showSignIn,
+#showCreateAccount,
+#resendVerification,
+#verificationDone,
+#closeAuthModal {
+  transition:
+    transform 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease,
+    box-shadow 120ms ease,
+    opacity 120ms ease !important;
+}
+
+#accountActionButton:hover,
+#playSingleplayer:hover,
+#showSignIn:hover,
+#showCreateAccount:hover,
+#resendVerification:hover,
+#verificationDone:hover,
+#closeAuthModal:hover {
+  transform: translateY(-1px);
+  border-color: rgba(133, 231, 255, 0.30) !important;
+  background: rgba(81, 190, 230, 0.10) !important;
+}
+
+/* Main world cards region */
+body > div:has(#joinCentralWorld) > div:first-child > div:nth-child(2) {
+  padding: 22px 32px 32px !important;
+  gap: 16px !important;
+}
+
+/* Central World card */
+#joinCentralWorld {
+  min-height: 48px !important;
+  border: 1px solid rgba(112, 226, 255, 0.38) !important;
+  border-radius: 11px !important;
+  background:
+    linear-gradient(180deg, #238fc8 0%, #12669e 100%) !important;
+  box-shadow:
+    0 10px 26px rgba(0, 128, 194, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+  letter-spacing: 0.25px !important;
+  transition:
+    transform 130ms ease,
+    filter 130ms ease,
+    box-shadow 130ms ease !important;
+}
+
+#joinCentralWorld:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow:
+    0 15px 34px rgba(0, 133, 202, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.19) !important;
+}
+
+#joinCentralWorld:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+#centralWorldStatusBadge {
+  border-color: rgba(118, 230, 163, 0.19) !important;
+  background: rgba(87, 195, 126, 0.08) !important;
+  box-shadow: inset 0 0 18px rgba(75, 220, 135, 0.035) !important;
+}
+
+#centralWorldMessage {
+  border: 1px solid rgba(255, 255, 255, 0.045) !important;
+  background: rgba(0, 0, 0, 0.17) !important;
+}
+
+#playSingleplayer {
+  min-height: 38px !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+}
+
+/* ============================================================
+   AUTH MODAL
+   ============================================================ */
+
+#authModal {
+  background: rgba(1, 5, 10, 0.76) !important;
+  backdrop-filter: blur(16px) saturate(1.15) !important;
+}
+
+#authModal > div {
+  border: 1px solid rgba(122, 222, 255, 0.18) !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(155deg, rgba(12, 28, 42, 0.985), rgba(5, 13, 22, 0.99)) !important;
+  box-shadow:
+    0 30px 100px rgba(0, 0, 0, 0.62),
+    0 0 50px rgba(69, 199, 241, 0.055) !important;
+}
+
+#authModalTitle {
+  letter-spacing: -0.5px;
+}
+
+#authForm input {
+  min-height: 42px !important;
+  border-color: rgba(255, 255, 255, 0.095) !important;
+  background: rgba(2, 9, 16, 0.72) !important;
+  color: white !important;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease !important;
+}
+
+#authForm input:focus {
+  border-color: rgba(114, 224, 255, 0.42) !important;
+  background: rgba(5, 15, 24, 0.88) !important;
+  box-shadow: 0 0 0 3px rgba(80, 202, 239, 0.075) !important;
+}
+
+#authSubmit {
+  min-height: 44px !important;
+  background: linear-gradient(180deg, #2292cd, #12689f) !important;
+  box-shadow: 0 10px 24px rgba(0, 134, 198, 0.16) !important;
+}
+
+#authSubmit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+/* ============================================================
+   GENERIC POLISH FOR DYNAMIC GAME UI
+   ============================================================ */
+
+[style*="backdrop-filter"] {
+  -webkit-backdrop-filter: inherit;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+::selection {
+  background: rgba(85, 207, 246, 0.25);
+  color: white;
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(162, 221, 241, 0.16);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(162, 221, 241, 0.26);
+  background-clip: padding-box;
+}
+
+.noscript-card {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  width: min(420px, 90vw);
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 16px;
+  background: #07111d;
+  box-shadow: var(--mg-shadow);
+  text-align: center;
+}
+
+/* ============================================================
+   RESPONSIVE HOME SCREEN
+   ============================================================ */
+
+@media (max-width: 820px) {
+  body > div:has(#joinCentralWorld) {
+    align-items: flex-start !important;
+    padding: 14px !important;
+  }
+
+  body > div:has(#joinCentralWorld) > div:first-child {
+    width: min(96vw, 720px) !important;
+    border-radius: 18px !important;
+  }
+
+  body > div:has(#joinCentralWorld) > div:first-child > div:first-child {
+    padding: 22px 20px 18px !important;
+  }
+
+  body > div:has(#joinCentralWorld) > div:first-child > div:nth-child(2) {
+    grid-template-columns: 1fr !important;
+    padding: 18px 20px 22px !important;
+  }
+
+  #accountSummary {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 560px) {
   .loading-card {
-    min-width: 0;
-    width: 88vw;
-    padding: 24px 22px;
+    width: 92vw;
+    padding: 22px 20px 19px;
   }
 
   .loading-title {
-    font-size: 24px;
+    font-size: 23px;
+  }
+
+  body > div:has(#joinCentralWorld) > div:first-child > div:first-child > div:first-child > div:nth-child(2) {
+    font-size: 34px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }
