@@ -1605,3 +1605,68 @@ body[data-shop-open="true"] #mgHUD {
     align-items: flex-start;
   }
 }
+
+
+/* ============================================================
+   MAP GAME — 0.2.1D
+   TERRITORY SCALE + LAND PLANNER + PLACEMENT RULES
+   ============================================================ */
+
+.mg-capital-rules {
+  margin: 9px 0 13px;
+  padding: 10px;
+  display: grid;
+  gap: 5px;
+  border: 1px solid rgba(104, 211, 255, .10);
+  border-radius: 8px;
+  background: rgba(0,0,0,.10);
+}
+
+.mg-capital-rules span {
+  color: rgba(225,241,249,.62);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.mg-capital-rules span.ok {
+  color: #78e5b3;
+}
+
+.mg-capital-rules span.bad {
+  color: #ff8c86;
+}
+
+/* The land planner is intentionally subtle: it marks large candidate
+   districts in-world without turning the territory into a neon grid. */
+body[data-mapgame-mode="territory"] .mg-location-pill,
+body[data-mapgame-mode="capital_placement"] .mg-location-pill {
+  border-color: rgba(92, 225, 177, .20);
+}
+
+/* World-map visual continuity */
+#mgWorldMapCanvas {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(36, 119, 146, .08), transparent 45%),
+    #071827;
+}
+
+.mg-territory-panel::before {
+  content: "REGIONAL SCALE";
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(105, 220, 255, .34);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .18em;
+}
+
+/* Better visual feedback on unlocked land planner button. */
+.mg-dock button[data-action="development"]:not(.locked) {
+  border-color: rgba(87, 226, 174, .12);
+}
+
+.mg-dock button[data-action="development"]:not(.locked):hover {
+  background:
+    linear-gradient(90deg, rgba(70, 221, 164, .14), rgba(70, 221, 164, .025));
+  border-color: rgba(87, 226, 174, .26);
+}

@@ -1,6 +1,6 @@
 // ============================================================
 // MAP GAME — multiplayer.js
-// Alpha 0.1 multiplayer foundation
+// Alpha 0.2.1D multiplayer + session guard
 //
 // Current responsibilities:
 // - Join / leave Central World
@@ -27,6 +27,10 @@
   let connected = false;
   let joining = false;
   let heartbeatTimer = null;
+  let sessionHeartbeatTimer = null;
+  let sessionId = null;
+  let deviceId = null;
+  let sessionConflictHandling = false;
 
   const onlinePlayers = new Map();
   const territoryClaims = new Map();
@@ -68,6 +72,136 @@
     }
 
     return "Player";
+  }
+
+  function getDeviceId() {
+    if (deviceId) return deviceId;
+
+    const key = "mapgame_device_id";
+    let existing = localStorage.getItem(key);
+
+    if (!existing) {
+      existing =
+        (crypto && typeof crypto.randomUUID === "function")
+          ? crypto.randomUUID()
+          : "device_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+      localStorage.setItem(key, existing);
+    }
+
+    deviceId = existing;
+    return deviceId;
+  }
+
+  function createSessionId() {
+    return (
+      (crypto && typeof crypto.randomUUID === "function")
+        ? crypto.randomUUID()
+        : "session_" + Date.now() + "_" + Math.random().toString(36).slice(2)
+    );
+  }
+
+  async function startProtectedSession(user) {
+    const db = requireClient();
+    sessionId = createSessionId();
+    const device = getDeviceId();
+
+    const { data, error } = await db.rpc(
+      "map_game_start_session",
+      {
+        p_world_id: WORLD_ID,
+        p_session_id: sessionId,
+        p_device_id: device,
+        p_username: usernameFromUser(user)
+      }
+    );
+
+    if (error) {
+      throw new Error(
+        "Could not validate this Central World session: " +
+        error.message
+      );
+    }
+
+    if (data !== true) {
+      throw new Error(
+        "Another active Map Game session was detected. For fairness, conflicting sessions were removed. Sign in again after closing the other session."
+      );
+    }
+  }
+
+  async function checkProtectedSession() {
+    if (!currentUser || !sessionId || sessionConflictHandling) {
+      return;
+    }
+
+    const db = requireClient();
+
+    const { data, error } = await db.rpc(
+      "map_game_session_heartbeat",
+      {
+        p_world_id: WORLD_ID,
+        p_session_id: sessionId
+      }
+    );
+
+    if (error) {
+      console.warn(
+        "Map Game session heartbeat failed:",
+        error.message
+      );
+      return;
+    }
+
+    if (data !== true) {
+      await handleSessionConflict();
+    }
+  }
+
+  async function endProtectedSession() {
+    if (!sessionId) return;
+
+    const db = client || window.mapGameAuth?.client;
+    const endingSession = sessionId;
+    sessionId = null;
+
+    if (!db) return;
+
+    try {
+      await db.rpc(
+        "map_game_end_session",
+        {
+          p_world_id: WORLD_ID,
+          p_session_id: endingSession
+        }
+      );
+    } catch (_) {}
+  }
+
+  async function handleSessionConflict() {
+    if (sessionConflictHandling) return;
+    sessionConflictHandling = true;
+
+    try {
+      window.dispatchEvent(
+        new CustomEvent(
+          "mapgame:session-conflict",
+          {
+            detail: {
+              message:
+                "Multiple active Central World sessions were detected. Both sessions have been kicked."
+            }
+          }
+        )
+      );
+
+      await leaveWorld({ skipSessionEnd: true });
+
+      try {
+        await window.mapGameAuth?.signOut?.();
+      } catch (_) {}
+    } finally {
+      sessionConflictHandling = false;
+    }
   }
 
   function stateSnapshot() {
@@ -512,6 +646,14 @@
       currentUser =
         data.user;
 
+      // Server-backed duplicate-session guard.
+      // Same account on another device OR a second account in the same
+      // browser profile causes all conflicting Central World sessions
+      // to be marked invalid.
+      await startProtectedSession(
+        currentUser
+      );
+
       await ensureMembership(
         currentUser
       );
@@ -537,6 +679,16 @@
           60000
         );
 
+      if (sessionHeartbeatTimer) {
+        clearInterval(sessionHeartbeatTimer);
+      }
+
+      sessionHeartbeatTimer =
+        setInterval(
+          checkProtectedSession,
+          10000
+        );
+
       emitState();
 
       console.log(
@@ -550,7 +702,7 @@
     }
   }
 
-  async function leaveWorld() {
+  async function leaveWorld(options = {}) {
     const db =
       client ||
       (
@@ -582,6 +734,17 @@
         heartbeatTimer
       );
       heartbeatTimer = null;
+    }
+
+    if (sessionHeartbeatTimer) {
+      clearInterval(sessionHeartbeatTimer);
+      sessionHeartbeatTimer = null;
+    }
+
+    if (!options.skipSessionEnd) {
+      await endProtectedSession();
+    } else {
+      sessionId = null;
     }
 
     emitState();
@@ -862,6 +1025,12 @@
           channel.untrack();
         } catch (_) {}
       }
+
+      // Best effort only. Stale sessions are automatically ignored
+      // server-side after the heartbeat timeout.
+      try {
+        endProtectedSession();
+      } catch (_) {}
     }
   );
 

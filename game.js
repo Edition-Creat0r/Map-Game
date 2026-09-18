@@ -96,10 +96,10 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.1B-C";
-  const CHUNK_WORLD_SIZE = 980;
-  const WORLD_COLS = 44;
-  const WORLD_ROWS = 30;
+  const VERSION = "0.2.1D";
+  const CHUNK_WORLD_SIZE = 1800;
+  const WORLD_COLS = 316;
+  const WORLD_ROWS = 316;
   const CENTRAL_X = Math.floor(WORLD_COLS / 2);
   const CENTRAL_Y = Math.floor(WORLD_ROWS / 2);
   const HUB_RADIUS = 430;
@@ -1475,8 +1475,8 @@
         <header class="mg-map-header">
           <div>
             <div class="mg-kicker">STRATEGIC WORLD</div>
-            <h2>Choose Your First Territory</h2>
-            <p>Drag to explore • scroll to zoom • hover a chunk to inspect it.</p>
+            <h2>Strategic World</h2>
+            <p>≈99,856 territories • drag to explore • scroll to zoom • hover to inspect.</p>
           </div>
           <div class="mg-map-header-actions">
             <button class="mg-btn mg-btn-secondary" id="mgMapRecenter">RECENTER</button>
@@ -1718,7 +1718,15 @@
         const reserved = isCentralReserved(x, y);
 
         mapCtx.fillStyle = reserved ? "#25364a" : info.color;
-        mapCtx.fillRect(px + 1, py + 1, cell - 2, cell - 2);
+        mapCtx.fillRect(px - 0.6, py - 0.6, cell + 1.2, cell + 1.2);
+
+        // Territory boundaries are an overlay, not the terrain itself.
+        // At wide zoom levels the world reads as one continuous map.
+        if (state.mapCamera.zoom > 0.78 && !reserved) {
+          mapCtx.strokeStyle = "rgba(5,18,28,.18)";
+          mapCtx.lineWidth = 0.75;
+          mapCtx.strokeRect(px + 0.4, py + 0.4, cell - 0.8, cell - 0.8);
+        }
 
         // Biome-specific strategic-map symbols. The claim grid remains
         // readable, but the world now resembles terrain rather than a
@@ -1894,6 +1902,8 @@
   // ==========================================================
 
   let territoryGround = null;
+  let territoryPlannerRoot = null;
+  let territoryPlannerVisible = false;
 
   function clearWorldRoots() {
     disposeNode(state.hubRoot);
@@ -1901,6 +1911,9 @@
     state.hubRoot = null;
     state.terrainRoot = null;
     territoryGround = null;
+    disposeNode(territoryPlannerRoot);
+    territoryPlannerRoot = null;
+    territoryPlannerVisible = false;
     if (state.capitalGhost) {
       disposeNode(state.capitalGhost);
       state.capitalGhost = null;
@@ -1908,29 +1921,26 @@
   }
 
   function territoryHeightFn(x, z, biome, sx, sy) {
-    const large =
-      Math.sin((x + sx * 31) * 0.0062) * 7.5 +
-      Math.cos((z - sy * 27) * 0.0054) * 6.2 +
-      Math.sin((x + z) * 0.0033) * 4.4;
-    const medium =
-      Math.sin(x * 0.017 + sy) * 2.3 +
-      Math.cos(z * 0.014 - sx) * 2.1;
+    if (window.mapGameTerritory?.heightAt) {
+      return window.mapGameTerritory.heightAt(
+        x,
+        z,
+        biome,
+        sx,
+        sy,
+        CHUNK_WORLD_SIZE
+      );
+    }
 
-    if (biome === "mountain") {
-      return large * 1.25 + medium + Math.max(0, Math.sin((x - 150) * 0.008) * 22);
-    }
-    if (biome === "coast") {
-      return large * 0.35 + medium * 0.25 - Math.max(0, (z - 300) * 0.06);
-    }
-    if (biome === "wetland") return large * 0.22 + medium * 0.20;
-    if (biome === "desert") return large * 0.52 + medium * 0.55;
-    if (biome === "tundra") return large * 0.65 + medium * 0.48;
-    if (biome === "forest") return large * 0.58 + medium * 0.50;
-    return large * 0.42 + medium * 0.42;
+    // Safe fallback if territory.js did not load.
+    return (
+      Math.sin((x + sx * 31) * 0.0042) * 8 +
+      Math.cos((z - sy * 27) * 0.0038) * 7
+    );
   }
 
   function createTerritoryGround(root, cell, biome) {
-    const sub = state.graphics === "REGULAR" ? 100 : 72;
+    const sub = state.graphics === "REGULAR" ? 128 : 88;
     const ground = BABYLON.MeshBuilder.CreateGround("territoryGround", {
       width: CHUNK_WORLD_SIZE,
       height: CHUNK_WORLD_SIZE,
@@ -1961,12 +1971,6 @@
       const z = p[i + 2];
       let y = territoryHeightFn(x, z, biome, cell.x, cell.y);
 
-      // Keep a broad safer central basin but do not make the entire map flat.
-      const dist = Math.hypot(x, z);
-      if (dist < 165) {
-        const flatten = 1 - clamp((165 - dist) / 130, 0, 0.82);
-        y *= flatten;
-      }
       p[i + 1] = y;
     }
     ground.updateVerticesData(BABYLON.VertexBuffer.PositionKind, p);
@@ -1978,43 +1982,229 @@
   }
 
   function placeTerritoryVegetation(root, cell, biome) {
-    const treeCount = biome === "forest" ? 190 : biome === "plains" ? 95 : biome === "wetland" ? 120 : biome === "tundra" ? 42 : biome === "desert" ? 10 : 56;
-    for (let i = 0; i < treeCount; i++) {
-      const x = seeded(cell.x, cell.y, i * 3 + 1) * 860 - 430;
-      const z = seeded(cell.x, cell.y, i * 3 + 2) * 860 - 430;
-      // keep the very center more open so a new player can identify a safe capital area
-      if (Math.hypot(x, z) < 105) continue;
-      if (biome === "desert" && i % 4 !== 0) continue;
-      const tree = createTree(root, x, z, 0.75 + seeded(cell.x, cell.y, i + 600) * 0.65, biome === "tundra" || i % 5 === 0 ? 1 : 0);
-      const h = territoryHeightFn(x, z, biome, cell.x, cell.y);
-      tree.position.y = h;
-    }
+    const points =
+      window.mapGameTerritory?.vegetationPoints?.(
+        cell,
+        biome,
+        CHUNK_WORLD_SIZE,
+        state.graphics
+      ) || [];
+
+    points.forEach((point, i) => {
+      const tree = createTree(
+        root,
+        point.x,
+        point.z,
+        point.scale,
+        point.conifer ? 1 : 0
+      );
+      tree.position.y = territoryHeightFn(
+        point.x,
+        point.z,
+        biome,
+        cell.x,
+        cell.y
+      );
+    });
+  }
+
+  function placeTerritoryRocks(root, cell, biome) {
+    const points =
+      window.mapGameTerritory?.rockPoints?.(
+        cell,
+        biome,
+        CHUNK_WORLD_SIZE,
+        state.graphics
+      ) || [];
+
+    points.forEach((point, i) => {
+      const rock = BABYLON.MeshBuilder.CreatePolyhedron(
+        `territoryRock_${i}`,
+        {
+          type: i % 3,
+          size: 3.6
+        },
+        scene
+      );
+      rock.scaling.set(
+        point.scale,
+        0.55 + point.scale * 0.35,
+        point.scale * (0.75 + (i % 4) * 0.08)
+      );
+      rock.position.set(
+        point.x,
+        territoryHeightFn(point.x, point.z, biome, cell.x, cell.y) + 1.2,
+        point.z
+      );
+      rock.rotation.y = seeded(cell.x, cell.y, 2400 + i) * Math.PI;
+      rock.material = rockMat;
+      rock.parent = root;
+      rock.isPickable = false;
+      rock.metadata = { terrainDetail: true };
+    });
   }
 
   function placeTerritoryMountains(root, cell, biome) {
+    // Main mountain mass now comes from the terrain heightfield.
+    // These ranges are distant silhouette/edge formations, not the terrain itself.
     if (biome === "mountain") {
-      createMountainRange(root, -330, -260, 5, 68, 122, cell.x * 19 + cell.y * 7 + 5);
-      createMountainRange(root, 300, 260, 4, 72, 112, cell.x * 23 + cell.y * 11 + 17);
-      createMountainRange(root, 330, -300, 3, 58, 88, cell.x * 29 + cell.y * 13 + 31);
-    } else {
-      createMountainRange(root, -400, -360, 3, 54, 75, cell.x * 17 + cell.y * 19 + 9);
-      if (biome !== "wetland" && biome !== "coast") {
-        createMountainRange(root, 390, 340, 2, 50, 68, cell.x * 31 + cell.y * 5 + 12);
-      }
+      createMountainRange(root, -760, -680, 5, 86, 154, cell.x * 19 + cell.y * 7 + 5);
+      createMountainRange(root, 720, 650, 5, 92, 166, cell.x * 23 + cell.y * 11 + 17);
+    } else if (biome !== "wetland" && biome !== "coast") {
+      createMountainRange(root, -820, -760, 3, 64, 92, cell.x * 17 + cell.y * 19 + 9);
+      createMountainRange(root, 810, 750, 3, 58, 84, cell.x * 31 + cell.y * 5 + 12);
     }
   }
 
   function addCoast(root, cell, biome) {
     if (biome !== "coast" && biome !== "wetland") return;
-    const water = BABYLON.MeshBuilder.CreateGround("territoryWater", {
-      width: CHUNK_WORLD_SIZE,
-      height: biome === "coast" ? 280 : 190,
-      subdivisions: 1
-    }, scene);
-    water.position.set(0, -4.5, 395);
-    water.material = waterMat;
-    water.parent = root;
-    water.isPickable = false;
+
+    if (biome === "coast") {
+      const water = BABYLON.MeshBuilder.CreateGround("territoryWater", {
+        width: CHUNK_WORLD_SIZE,
+        height: CHUNK_WORLD_SIZE * 0.43,
+        subdivisions: 1
+      }, scene);
+      water.position.set(0, -7.5, CHUNK_WORLD_SIZE * 0.39);
+      water.material = waterMat;
+      water.parent = root;
+      water.isPickable = false;
+      water.metadata = { water: true, blocksConstruction: true };
+    } else {
+      // Wetland river ribbon — broad enough to influence city placement
+      // without turning the entire territory into water.
+      const segments = 28;
+      for (let i = 0; i < segments; i++) {
+        const x = -CHUNK_WORLD_SIZE * 0.46 + i * (CHUNK_WORLD_SIZE * 0.92 / (segments - 1));
+        const info = window.mapGameTerritory?.waterBandAt?.(
+          x,
+          0,
+          biome,
+          CHUNK_WORLD_SIZE
+        );
+        const z = info?.shoreZ ?? 0;
+
+        const patch = BABYLON.MeshBuilder.CreateDisc(
+          `wetlandWater_${i}`,
+          {
+            radius: 34 + Math.abs(Math.sin(i * 0.7)) * 24,
+            tessellation: state.graphics === "REGULAR" ? 24 : 16
+          },
+          scene
+        );
+        patch.rotation.x = Math.PI / 2;
+        patch.position.set(x, -5.8, z);
+        patch.material = waterMat;
+        patch.parent = root;
+        patch.isPickable = false;
+        patch.metadata = { water: true, blocksConstruction: true };
+      }
+    }
+  }
+
+  function buildTerritoryPlanner(root, cell, biome) {
+    disposeNode(territoryPlannerRoot);
+    territoryPlannerRoot = new BABYLON.TransformNode("territoryPlanner", scene);
+    territoryPlannerRoot.parent = root;
+    territoryPlannerRoot.setEnabled(false);
+
+    const sites =
+      window.mapGameTerritory?.citySites?.(
+        cell,
+        biome,
+        CHUNK_WORLD_SIZE
+      ) || [];
+
+    sites.forEach((site, index) => {
+      const analysis =
+        window.mapGameTerritory?.analyzeSite?.({
+          x: site.x,
+          z: site.z,
+          biome,
+          cellX: cell.x,
+          cellY: cell.y,
+          chunkSize: CHUNK_WORLD_SIZE,
+          footprint: 130
+        });
+
+      const mat = new BABYLON.StandardMaterial(
+        `plannerMat_${index}`,
+        scene
+      );
+
+      if (analysis?.status === "excellent") {
+        mat.diffuseColor = new BABYLON.Color3(0.16, 0.88, 0.57);
+        mat.emissiveColor = new BABYLON.Color3(0.03, 0.18, 0.10);
+      } else if (analysis?.status === "usable") {
+        mat.diffuseColor = new BABYLON.Color3(0.95, 0.72, 0.20);
+        mat.emissiveColor = new BABYLON.Color3(0.20, 0.10, 0.02);
+      } else {
+        mat.diffuseColor = new BABYLON.Color3(0.86, 0.24, 0.22);
+        mat.emissiveColor = new BABYLON.Color3(0.18, 0.03, 0.03);
+      }
+
+      mat.alpha = 0.28;
+
+      const ring = BABYLON.MeshBuilder.CreateTorus(
+        `developmentSite_${index}`,
+        {
+          diameter: site.radius * 1.62,
+          thickness: 3.0,
+          tessellation: state.graphics === "REGULAR" ? 48 : 28
+        },
+        scene
+      );
+
+      ring.position.set(
+        site.x,
+        territoryHeightFn(site.x, site.z, biome, cell.x, cell.y) + 2.1,
+        site.z
+      );
+      ring.rotation.x = Math.PI / 2;
+      ring.material = mat;
+      ring.parent = territoryPlannerRoot;
+      ring.isPickable = false;
+
+      const center = BABYLON.MeshBuilder.CreateDisc(
+        `developmentSiteCore_${index}`,
+        {
+          radius: 8,
+          tessellation: 24
+        },
+        scene
+      );
+      center.rotation.x = Math.PI / 2;
+      center.position.copyFrom(ring.position);
+      center.position.y += 0.12;
+      center.material = mat;
+      center.parent = territoryPlannerRoot;
+      center.isPickable = false;
+    });
+
+    return territoryPlannerRoot;
+  }
+
+  function toggleTerritoryPlanner() {
+    if (!state.activeTerritory || !territoryPlannerRoot) {
+      showToast("Enter one of your territories to use the land planner.", "info");
+      return;
+    }
+
+    territoryPlannerVisible = !territoryPlannerVisible;
+    territoryPlannerRoot.setEnabled(territoryPlannerVisible);
+
+    setStatus(
+      territoryPlannerVisible
+        ? "LAND PLANNER • green = excellent development basin • amber = usable • red = restricted"
+        : "Territory planner hidden"
+    );
+
+    showToast(
+      territoryPlannerVisible
+        ? "Land Planner enabled. These are separated candidate development areas, not buildings."
+        : "Land Planner hidden.",
+      "info"
+    );
   }
 
   function enterTerritory(cell) {
@@ -2026,8 +2216,10 @@
 
     territoryGround = createTerritoryGround(root, cell, biome);
     placeTerritoryVegetation(root, cell, biome);
+    placeTerritoryRocks(root, cell, biome);
     placeTerritoryMountains(root, cell, biome);
     addCoast(root, cell, biome);
+    buildTerritoryPlanner(root, cell, biome);
 
     // subtle chunk boundary markers, visible but not walls
     const boundaryMat = new BABYLON.StandardMaterial("boundaryMat", scene);
@@ -2045,8 +2237,8 @@
 
     // Enter the territory closer to the surface so a 980x980 region
     // feels large instead of looking like a miniature board.
-    camera.target.set(0, 10, -24);
-    camera.radius = 225;
+    camera.target.set(0, 16, -70);
+    camera.radius = 285;
     camera.alpha = -Math.PI / 2.25;
     camera.beta = 1.04;
     setMode("TERRITORY");
@@ -2083,15 +2275,37 @@
     return pick.pickedPoint.clone();
   }
 
+  function analyzeCapitalSite(x, z) {
+    if (!state.activeTerritory) {
+      return {
+        allowed: false,
+        status: "blocked",
+        reasons: ["No active territory"]
+      };
+    }
+
+    if (window.mapGameTerritory?.analyzeSite) {
+      return window.mapGameTerritory.analyzeSite({
+        x,
+        z,
+        biome: state.activeTerritory.biome,
+        cellX: state.activeTerritory.x,
+        cellY: state.activeTerritory.y,
+        chunkSize: CHUNK_WORLD_SIZE,
+        footprint: 150
+      });
+    }
+
+    return {
+      allowed: Math.abs(x) < CHUNK_WORLD_SIZE * 0.40 &&
+               Math.abs(z) < CHUNK_WORLD_SIZE * 0.40,
+      status: "usable",
+      reasons: ["Basic placement check"]
+    };
+  }
+
   function isCapitalSiteSafe(x, z) {
-    if (!state.activeTerritory) return false;
-    const h = territoryHeightFn(x, z, state.activeTerritory.biome, state.activeTerritory.x, state.activeTerritory.y);
-    const hx = territoryHeightFn(x + 18, z, state.activeTerritory.biome, state.activeTerritory.x, state.activeTerritory.y);
-    const hz = territoryHeightFn(x, z + 18, state.activeTerritory.biome, state.activeTerritory.x, state.activeTerritory.y);
-    const slope = Math.max(Math.abs(hx - h), Math.abs(hz - h));
-    if (Math.abs(x) > 400 || Math.abs(z) > 400) return false;
-    if (state.activeTerritory.biome === "coast" && z > 280) return false;
-    return slope < 10.5;
+    return analyzeCapitalSite(x, z).allowed;
   }
 
   function beginCapitalPlacement() {
@@ -2126,7 +2340,8 @@
     if (info.type === BABYLON.PointerEventTypes.POINTERMOVE || info.type === BABYLON.PointerEventTypes.POINTERDOWN) {
       const p = getGroundPointFromPointer(info.event);
       if (!p) return;
-      const safe = isCapitalSiteSafe(p.x, p.z);
+      const analysis = analyzeCapitalSite(p.x, p.z);
+      const safe = analysis.allowed;
       if (!state.capitalGhost) state.capitalGhost = makeCapitalGhost();
       state.capitalGhost.setEnabled(true);
       state.capitalGhost.position.set(p.x, p.y + 0.5, p.z);
@@ -2154,6 +2369,9 @@
         <label class="mg-field-label" for="mgCapitalName">CAPITAL NAME</label>
         <input id="mgCapitalName" class="mg-input" maxlength="32" value="Nova Capital" />
         <div id="mgCapitalCoords" class="mg-capital-coords">Click the terrain to choose a site.</div>
+        <div id="mgCapitalRules" class="mg-capital-rules">
+          <span>○ Terrain analysis waiting</span>
+        </div>
         <div class="mg-dialog-actions">
           <button class="mg-btn mg-btn-secondary" id="mgCapitalCancel">LATER</button>
           <button class="mg-btn mg-btn-primary" id="mgCapitalConfirm" disabled>ESTABLISH CAPITAL</button>
@@ -2176,12 +2394,33 @@
     if (!capitalDialog) return;
     const coords = capitalDialog.querySelector("#mgCapitalCoords");
     const confirm = capitalDialog.querySelector("#mgCapitalConfirm");
+    const rules = capitalDialog.querySelector("#mgCapitalRules");
+
     if (!state.pendingCapitalXZ) {
       coords.textContent = "Click the terrain to choose a site.";
+      if (rules) rules.innerHTML = "<span>○ Terrain analysis waiting</span>";
       confirm.disabled = true;
     } else {
-      coords.textContent = `Site selected • X ${Math.round(state.pendingCapitalXZ.x)} • Z ${Math.round(state.pendingCapitalXZ.z)}`;
-      confirm.disabled = false;
+      const a = analyzeCapitalSite(
+        state.pendingCapitalXZ.x,
+        state.pendingCapitalXZ.z
+      );
+
+      coords.textContent =
+        `Site selected • X ${Math.round(state.pendingCapitalXZ.x)} • ` +
+        `Z ${Math.round(state.pendingCapitalXZ.z)} • ${a.status.toUpperCase()}`;
+
+      if (rules) {
+        rules.innerHTML = a.reasons
+          .slice(0, 4)
+          .map(reason =>
+            `<span class="${a.allowed ? "ok" : "bad"}">` +
+            `${a.allowed ? "✓" : "×"} ${escapeHtml(reason)}</span>`
+          )
+          .join("");
+      }
+
+      confirm.disabled = !a.allowed;
     }
   }
 
@@ -2676,7 +2915,7 @@
       <header class="mg-topbar">
         <div class="mg-brand-lockup">
           <div class="mg-brand-mark">M</div>
-          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • HUB + UI + SHOP FOUNDATION</span></div>
+          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • TERRITORY + CITY PLANNING FOUNDATION</span></div>
         </div>
         <div class="mg-top-status">
           <div class="mg-status-chip"><span>WORLD</span><b id="mgWorldLabel">SINGLEPLAYER</b></div>
@@ -2692,7 +2931,7 @@
         <button data-action="map" title="World Map">◈<span>WORLD</span></button>
         <button data-action="capital" title="Capital">◆<span>CAPITAL</span></button>
         <button data-action="shop" title="Construction Shop">▤<span>SHOP</span></button>
-        <button data-action="development" class="locked" title="Development — coming soon">▦<span>ZONES</span></button>
+        <button data-action="development" title="Land Planner — inspect separated buildable areas">▦<span>LAND</span></button>
         <button data-action="defense" class="locked" title="Defense — coming soon">⬡<span>DEFENSE</span></button>
       </nav>
 
@@ -2719,7 +2958,7 @@
       beginCapitalPlacement();
     };
     hudRoot.querySelector("[data-action='shop']").onclick = showShop;
-    hudRoot.querySelector("[data-action='development']").onclick = () => showToast("Zoning, roads, factories and power are the next major construction system.", "info");
+    hudRoot.querySelector("[data-action='development']").onclick = toggleTerritoryPlanner;
     hudRoot.querySelector("[data-action='defense']").onclick = () => showToast("Defense, walls and military are intentionally locked for now.", "info");
     hudRoot.querySelector("#mgUIModeToggle").onclick = toggleUIMode;
     hudRoot.querySelector("#mgGraphicsToggle").onclick = toggleGraphics;
@@ -2790,6 +3029,23 @@
     else if (state.activeTerritory) enterTerritory(state.activeTerritory);
     showToast(`${state.graphics} graphics active.`, "success");
   }
+
+  window.addEventListener("mapgame:session-conflict", event => {
+    const message =
+      event?.detail?.message ||
+      "Multiple Central World sessions were detected. You were signed out.";
+
+    try {
+      hideWorldMap();
+      hideShop();
+    } catch (_) {}
+
+    showToast(message, "error");
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 1700);
+  });
 
   // ==========================================================
   // HOME / AUTH

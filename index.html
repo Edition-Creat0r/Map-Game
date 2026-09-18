@@ -8,27 +8,25 @@
   <title>Map Game</title>
 
   <!-- Keep your existing polished base styles. -->
-  <link rel="stylesheet" href="styles.css?v=2113" />
-  <!-- 0.2.1B-C hub, UI-mode and shop foundation. -->
-  <link rel="stylesheet" href="phase2.css?v=2113" />
+  <link rel="stylesheet" href="styles.css?v=2120" />
+  <!-- 0.2.1D territory, city-planning and session-safety pass. -->
+  <link rel="stylesheet" href="phase2.css?v=2120" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="auth.js?v=2113" defer></script>
-  <script src="multiplayer.js?v=2113" defer></script>
+  <script src="auth.js?v=2120" defer></script>
+  <script src="multiplayer.js?v=2120" defer></script>
   <script src="https://cdn.babylonjs.com/babylon.js" defer></script>
+  <script src="territory.js?v=2120" defer></script>
 
-  <!-- IMPORTANT: 0.2.1B-C continues the restructured game scene. -->
-  <script src="game.js?v=2113" defer></script>
+  <!-- IMPORTANT: 0.2.1D continues the restructured game scene and begins modular territory code. -->
+  <script src="game.js?v=2120" defer></script>
 
   <!-- 0.2.0 loads the grass / rock / sand textures directly inside game.js. -->
 
-  <!-- DO NOT load the old visual files in this restructure:
-       terrain.js
-       materials.js
-       buildings.js
-       world_visuals.js
-       visual_overhaul.js
-       They would repopulate / alter the old scene. -->
+  <!-- territory.js is now ACTIVE.
+       The older terrain/materials/buildings/world_visuals files are still
+       disabled because they belong to the pre-0.2 scene. We will replace
+       them with clean 0.2 modules rather than re-enable old code. -->
 </head>
 <body>
   <div id="loadingScreen" aria-live="polite">
