@@ -96,7 +96,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.1D";
+  const VERSION = "0.2.1E";
   const CHUNK_WORLD_SIZE = 1800;
   const WORLD_COLS = 316;
   const WORLD_ROWS = 316;
@@ -1391,6 +1391,22 @@
     createMountainRange(root, -390, 320, 4, 68, 108, 41);
     createMountainRange(root, 350, 340, 5, 62, 98, 53);
 
+    // 0.2.1E — realistic mixed-use demonstration districts.
+    // This intentionally showcases a plausible city progression:
+    // detached homes -> apartments -> retail -> offices -> light industry.
+    if (window.mapGameBuildings?.buildNeighborhoodDemo) {
+      window.mapGameBuildings.buildNeighborhoodDemo(
+        window.mapGameRuntime || {
+          scene,
+          graphicsPreset: state.graphics,
+          createRoad,
+          createStreetLamp,
+          populateRoadLamps
+        },
+        root
+      );
+    }
+
     camera.target.set(0, 30, -28);
     camera.alpha = -Math.PI / 2.2;
     camera.beta = 1.02;
@@ -2581,62 +2597,19 @@
   // 0.2.1C — SHOP FOUNDATION
   // ==========================================================
 
-  const SHOP_CATALOG = [
-    {
-      id: "officeTower",
-      category: "Commercial",
-      name: "Office Tower",
-      description: "A modern commercial tower for jobs, offices and future tax income.",
-      cost: { money: 250000, steel: 500, glass: 300, concrete: 400 },
-      variants: ["Modern", "Glass", "Art Deco", "Classic", "Futuristic"],
-      production: ["Jobs", "Future tax income"]
-    },
-    {
-      id: "residentialBlock",
-      category: "Residential",
-      name: "Residential Block",
-      description: "Medium-density housing that grows population around connected roads.",
-      cost: { money: 120000, steel: 180, glass: 120, concrete: 350 },
-      variants: ["Modern", "Brick", "Garden", "Classic", "Futuristic"],
-      production: ["Population", "Local demand"]
-    },
-    {
-      id: "steelMill",
-      category: "Industrial",
-      name: "Steel Mill",
-      description: "Processes iron into steel. Requires road access and future power connection.",
-      cost: { money: 340000, iron: 900, concrete: 600 },
-      variants: ["Industrial", "Modern", "Carbon", "Heavy", "Futuristic"],
-      production: ["Steel"]
-    },
-    {
-      id: "powerPlant",
-      category: "Infrastructure",
-      name: "Power Plant",
-      description: "Major power infrastructure for cities, industry and advanced districts.",
-      cost: { money: 420000, steel: 750, concrete: 900 },
-      variants: ["Utility", "Modern", "Clean", "Carbon", "Futuristic"],
-      production: ["Electricity"]
-    },
-    {
-      id: "governmentHall",
-      category: "Government",
-      name: "Government Hall",
-      description: "Administrative center for laws, services and later government systems.",
-      cost: { money: 600000, steel: 600, glass: 400, concrete: 1000 },
-      variants: ["Civic", "Modern", "Classical", "Monumental", "Futuristic"],
-      production: ["Administration"]
-    },
-    {
-      id: "cityPark",
-      category: "Parks",
-      name: "City Park",
-      description: "A landscaped public space for city appeal, recreation and future tourism.",
-      cost: { money: 60000, concrete: 80 },
-      variants: ["Urban", "Natural", "Formal", "Waterfront", "Futuristic"],
-      production: ["Appeal", "Recreation"]
-    }
-  ];
+  const SHOP_CATALOG =
+    window.mapGameBuildings?.CATALOG || [
+      {
+        id: "officeTower",
+        category: "Commercial",
+        icon: "▥",
+        name: "Office Tower",
+        description: "Commercial offices.",
+        cost: { money: 980000 },
+        incomePerMin: 460,
+        variants: ["Modern", "Glass", "Classic", "Future"]
+      }
+    ];
 
   let shopOverlay = null;
   let shopSelection = { itemId: "officeTower", variant: 0 };
@@ -2648,7 +2621,8 @@
       steel: "Steel",
       glass: "Glass",
       concrete: "Concrete",
-      iron: "Iron"
+      iron: "Iron",
+      glass: "Glass"
     };
 
     return Object.entries(cost)
@@ -2672,14 +2646,23 @@
     shopOverlay.innerHTML = `
       <div class="mg-shop-shell">
         <header class="mg-shop-header">
-          <div>
-            <div class="mg-kicker">CITY DEVELOPMENT CATALOG</div>
-            <h2>Construction Shop</h2>
-            <p>Browse structures, model variants and future production chains.</p>
+          <div class="mg-shop-brand">
+            <div class="mg-shop-logo">M</div>
+            <div>
+              <div class="mg-kicker">MAP GAME DEVELOPMENT CATALOG</div>
+              <h2>City Shop</h2>
+              <p>Structures, variants, cost, footprint and operating income.</p>
+            </div>
           </div>
+
           <div class="mg-shop-head-actions">
+            <label class="mg-shop-search">
+              <span>⌕</span>
+              <input id="mgShopSearch" placeholder="Search buildings..." autocomplete="off">
+            </label>
+
             <select id="mgShopCategory" aria-label="Shop category">
-              <option value="All">ALL CATEGORIES</option>
+              <option value="All">ALL TYPES</option>
               <option>Residential</option>
               <option>Commercial</option>
               <option>Industrial</option>
@@ -2687,23 +2670,39 @@
               <option>Government</option>
               <option>Parks</option>
             </select>
+
             <button class="mg-btn mg-btn-secondary" id="mgShopClose">CLOSE</button>
           </div>
         </header>
+
+        <div class="mg-shop-subbar">
+          <div><b id="mgShopCount">0</b> STRUCTURES</div>
+          <div>INCOME <b id="mgShopEconomyRate">$0/min</b></div>
+          <div class="mg-shop-subhint">Model choice is cosmetic • gameplay stats stay consistent</div>
+        </div>
 
         <div class="mg-shop-body">
           <aside class="mg-shop-list" id="mgShopList"></aside>
 
           <main class="mg-shop-preview">
             <div class="mg-shop-preview-stage">
+              <div class="mg-shop-preview-sky"></div>
               <div class="mg-shop-preview-grid"></div>
+
               <div class="mg-shop-model" id="mgShopModel">
+                <div class="mg-shop-model-shadow"></div>
                 <div class="mg-shop-model-base"></div>
                 <div class="mg-shop-model-tower">
                   <span></span><span></span><span></span><span></span>
                 </div>
               </div>
-              <div class="mg-shop-preview-label">LIVE MODEL PREVIEW • UI FOUNDATION</div>
+
+              <div class="mg-shop-preview-label">
+                STRUCTURE PREVIEW
+              </div>
+              <div class="mg-shop-preview-quality">
+                ${state.graphics} MODEL
+              </div>
             </div>
 
             <div class="mg-shop-variants">
@@ -2718,29 +2717,40 @@
             <h3 id="mgShopTitle">Office Tower</h3>
             <p id="mgShopDescription"></p>
 
+            <div class="mg-shop-stat-grid">
+              <div>
+                <span>INCOME</span>
+                <strong id="mgShopIncome">$0/min</strong>
+              </div>
+              <div>
+                <span>FOOTPRINT</span>
+                <strong id="mgShopFootprint">—</strong>
+              </div>
+            </div>
+
             <div class="mg-shop-info-section">
-              <span class="mg-shop-small-label">SELECTED MODEL</span>
+              <span class="mg-shop-small-label">MODEL / ARCHITECTURE</span>
               <strong id="mgShopVariantName">Modern</strong>
             </div>
 
             <div class="mg-shop-cost" id="mgShopCost"></div>
 
             <div class="mg-shop-info-section">
-              <span class="mg-shop-small-label">PRODUCES / SUPPORTS</span>
+              <span class="mg-shop-small-label">ROLE</span>
               <div id="mgShopProduction"></div>
             </div>
 
             <button class="mg-btn mg-btn-primary mg-shop-place" id="mgShopPlace">
-              VIEW IN CITY
+              SELECT FOR CITY
             </button>
+
             <button class="mg-btn mg-btn-secondary" id="mgShopCancelPlacement">
-              CANCEL / RETURN
+              RETURN TO CITY
             </button>
 
             <div class="mg-panel-note">
-              0.2.1C includes the real catalog/model-selection shell.
-              World placement remains locked until the zoning/construction pass
-              so we do not create invalid buildings before road and terrain rules exist.
+              Foundations are designed to sink slightly into terrain so buildings
+              remain grounded on small slopes instead of floating.
             </div>
           </aside>
         </div>
@@ -2752,52 +2762,102 @@
     shopOverlay.querySelector("#mgShopClose").onclick = hideShop;
     shopOverlay.querySelector("#mgShopCancelPlacement").onclick = hideShop;
     shopOverlay.querySelector("#mgShopCategory").onchange = renderShopList;
+    shopOverlay.querySelector("#mgShopSearch").oninput = renderShopList;
     shopOverlay.querySelector("#mgVariantPrev").onclick = () => changeShopVariant(-1);
     shopOverlay.querySelector("#mgVariantNext").onclick = () => changeShopVariant(1);
+
     shopOverlay.querySelector("#mgShopPlace").onclick = () => {
       const item = currentShopItem();
       hideShop();
 
       if (!state.activeTerritory) {
-        showToast("Enter your territory before previewing city placement.", "info");
+        showToast("Enter your territory before selecting city construction.", "info");
         return;
       }
+
       if (!getCapitalForActiveTerritory()) {
-        showToast("Establish your capital before city construction begins.", "info");
+        showToast("Establish your capital before adding city structures.", "info");
         return;
       }
 
       setStatus(
-        `<b>${item.name}</b> • ${item.variants[shopSelection.variant]} model selected • ` +
-        `placement unlocks with the road/zoning construction pass`
+        `<b>${escapeHtml(item.name)}</b> • ` +
+        `${escapeHtml(item.variants[shopSelection.variant])} model • ` +
+        `$${Number(item.incomePerMin || 0).toLocaleString()}/min • ` +
+        `road/zoning placement is the next construction stage`
       );
+
       showToast(
-        `${item.name} / ${item.variants[shopSelection.variant]} selected for future placement.`,
+        `${item.name} selected. Placement rules are ready for the next construction pass.`,
         "success"
       );
     };
 
     renderShopList();
     renderShopSelection();
+
+    window.mapGameEconomy?.subscribe?.(snap => {
+      const rate = shopOverlay?.querySelector("#mgShopEconomyRate");
+      if (rate) {
+        rate.textContent =
+          `$${Math.floor(snap.incomePerMin || 0).toLocaleString()}/min`;
+      }
+    });
   }
 
   function renderShopList() {
     if (!shopOverlay) return;
-    const category = shopOverlay.querySelector("#mgShopCategory")?.value || "All";
+
+    const category =
+      shopOverlay.querySelector("#mgShopCategory")?.value || "All";
+    const search =
+      (shopOverlay.querySelector("#mgShopSearch")?.value || "")
+        .trim()
+        .toLowerCase();
+
     const list = shopOverlay.querySelector("#mgShopList");
     if (!list) return;
 
-    const items = SHOP_CATALOG.filter(item => category === "All" || item.category === category);
+    const items = SHOP_CATALOG.filter(item => {
+      const categoryMatch =
+        category === "All" || item.category === category;
+      const searchMatch =
+        !search ||
+        `${item.name} ${item.category} ${item.description || ""}`
+          .toLowerCase()
+          .includes(search);
+      return categoryMatch && searchMatch;
+    });
+
+    const count = shopOverlay.querySelector("#mgShopCount");
+    if (count) count.textContent = String(items.length);
+
     list.innerHTML = items.map(item => `
       <button
         class="mg-shop-list-item ${item.id === shopSelection.itemId ? "active" : ""}"
-        data-shop-item="${item.id}"
+        data-shop-item="${escapeHtml(item.id)}"
       >
-        <span>${item.category}</span>
-        <strong>${item.name}</strong>
-        <small>$${Number(item.cost.money || 0).toLocaleString()}</small>
+        <i class="mg-shop-item-icon">${item.icon || "◆"}</i>
+        <span class="mg-shop-item-copy">
+          <small>${escapeHtml(item.category)}</small>
+          <strong>${escapeHtml(item.name)}</strong>
+          <em>
+            $${Number(item.cost?.money || 0).toLocaleString()}
+            ${item.incomePerMin
+              ? ` • +$${Number(item.incomePerMin).toLocaleString()}/min`
+              : ""}
+          </em>
+        </span>
       </button>
     `).join("");
+
+    if (!items.length) {
+      list.innerHTML = `
+        <div class="mg-shop-empty">
+          No structures match this search.
+        </div>
+      `;
+    }
 
     list.querySelectorAll("[data-shop-item]").forEach(button => {
       button.onclick = () => {
@@ -2819,8 +2879,30 @@
     shopOverlay.querySelector("#mgShopDescription").textContent = item.description;
     shopOverlay.querySelector("#mgShopVariantName").textContent = item.variants[shopSelection.variant];
     shopOverlay.querySelector("#mgShopCost").innerHTML = formatShopCost(item.cost);
+
+    const income = shopOverlay.querySelector("#mgShopIncome");
+    if (income) {
+      income.textContent =
+        `$${Number(item.incomePerMin || 0).toLocaleString()}/min`;
+    }
+
+    const footprint = shopOverlay.querySelector("#mgShopFootprint");
+    if (footprint) {
+      const fp = item.footprint || [0, 0];
+      footprint.textContent = `${fp[0]} × ${fp[1]}`;
+    }
+
+    const roles = [
+      ...(item.produces || []),
+      ...(item.incomePerMin ? ["Revenue"] : []),
+      ...(item.population ? [`Population +${item.population}`] : []),
+      item.category
+    ];
+
     shopOverlay.querySelector("#mgShopProduction").innerHTML =
-      item.production.map(v => `<span class="mg-production-chip">${v}</span>`).join("");
+      roles
+        .map(v => `<span class="mg-production-chip">${escapeHtml(String(v))}</span>`)
+        .join("");
 
     const strip = shopOverlay.querySelector("#mgVariantStrip");
     strip.innerHTML = item.variants.map((variant, index) => `
@@ -2915,11 +2997,13 @@
       <header class="mg-topbar">
         <div class="mg-brand-lockup">
           <div class="mg-brand-mark">M</div>
-          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • TERRITORY + CITY PLANNING FOUNDATION</span></div>
+          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • CITY DEMO + SHOP + ECONOMY</span></div>
         </div>
         <div class="mg-top-status">
           <div class="mg-status-chip"><span>WORLD</span><b id="mgWorldLabel">SINGLEPLAYER</b></div>
           <div class="mg-status-chip"><span>ONLINE</span><b id="mgOnlineCount">—</b></div>
+          <div class="mg-status-chip mg-economy-chip"><span>MONEY</span><b id="mgMoney">$250,000</b></div>
+          <div class="mg-status-chip mg-economy-chip"><span>INCOME</span><b id="mgIncome">$0/min</b></div>
           <div class="mg-status-chip"><span>TIME</span><b id="mgTime">12:30 PM</b></div>
           <button class="mg-graphics-toggle" id="mgUIModeToggle">UI • ${uiMode}</button>
           <button class="mg-graphics-toggle" id="mgGraphicsToggle">GRAPHICS • ${state.graphics}</button>
@@ -2932,7 +3016,10 @@
         <button data-action="capital" title="Capital">◆<span>CAPITAL</span></button>
         <button data-action="shop" title="Construction Shop">▤<span>SHOP</span></button>
         <button data-action="development" title="Land Planner — inspect separated buildable areas">▦<span>LAND</span></button>
-        <button data-action="defense" class="locked" title="Defense — coming soon">⬡<span>DEFENSE</span></button>
+        <button data-action="economy" title="Economy summary">◎<span>ECONOMY</span></button>
+        <button data-action="infrastructure" class="locked" title="Roads and utilities — next construction pass">⌁<span>ROADS</span></button>
+        <button data-action="defense" class="locked" title="Defense — coming later">⬡<span>DEFENSE</span></button>
+        <button data-action="settings" title="Interface and graphics settings">⚙<span>SETTINGS</span></button>
       </nav>
 
       <div class="mg-location-pill" id="mgLocationPill">NEUTRAL CENTRAL HUB • PROTECTED</div>
@@ -2959,7 +3046,24 @@
     };
     hudRoot.querySelector("[data-action='shop']").onclick = showShop;
     hudRoot.querySelector("[data-action='development']").onclick = toggleTerritoryPlanner;
-    hudRoot.querySelector("[data-action='defense']").onclick = () => showToast("Defense, walls and military are intentionally locked for now.", "info");
+    hudRoot.querySelector("[data-action='economy']").onclick = () => {
+      const snap = window.mapGameEconomy?.snapshot?.();
+      if (!snap) {
+        showToast("Economy module is still loading.", "info");
+        return;
+      }
+      showToast(
+        `Economy • $${Math.floor(snap.money).toLocaleString()} • ` +
+        `+$${Math.floor(snap.incomePerMin).toLocaleString()}/min`,
+        "success"
+      );
+    };
+    hudRoot.querySelector("[data-action='infrastructure']").onclick = () =>
+      showToast("Road building and utilities unlock in the next construction pass.", "info");
+    hudRoot.querySelector("[data-action='defense']").onclick = () =>
+      showToast("Defense, walls and military are intentionally locked for now.", "info");
+    hudRoot.querySelector("[data-action='settings']").onclick = () =>
+      showToast("Use the UI and GRAPHICS controls in the top bar. More settings are coming.", "info");
     hudRoot.querySelector("#mgUIModeToggle").onclick = toggleUIMode;
     hudRoot.querySelector("#mgGraphicsToggle").onclick = toggleGraphics;
 
@@ -3046,6 +3150,52 @@
       window.location.reload();
     }, 1700);
   });
+
+  // ==========================================================
+  // ECONOMY HUD / OFFLINE INCOME
+  // ==========================================================
+
+  let economyUnsubscribe = null;
+
+  function updateEconomyHUD(snapshot) {
+    const money = document.getElementById("mgMoney");
+    const income = document.getElementById("mgIncome");
+
+    if (money) {
+      money.textContent =
+        `$${Math.floor(snapshot?.money || 0).toLocaleString()}`;
+    }
+
+    if (income) {
+      income.textContent =
+        `$${Math.floor(snapshot?.incomePerMin || 0).toLocaleString()}/min`;
+    }
+  }
+
+  function startLocalEconomy() {
+    if (!window.mapGameEconomy) return;
+
+    const offline = window.mapGameEconomy.applyOfflineIncome();
+
+    if (economyUnsubscribe) economyUnsubscribe();
+    economyUnsubscribe =
+      window.mapGameEconomy.subscribe(updateEconomyHUD);
+
+    window.mapGameEconomy.start();
+
+    if (offline.earned >= 1) {
+      setTimeout(() => {
+        showToast(
+          `Offline income +$${Math.floor(offline.earned).toLocaleString()} ` +
+          `(${Math.floor(offline.elapsedMinutes)} min at ` +
+          `$${Math.floor(offline.rate).toLocaleString()}/min)`,
+          "success"
+        );
+      }, 700);
+    }
+  }
+
+  startLocalEconomy();
 
   // ==========================================================
   // HOME / AUTH
@@ -3264,7 +3414,10 @@
     worldBorderRadius: CHUNK_WORLD_SIZE / 2,
     playableLandRadius: CHUNK_WORLD_SIZE / 2 - 20,
     showToast,
-    setBottomStatus: setStatus
+    setBottomStatus: setStatus,
+    createRoad,
+    createStreetLamp,
+    populateRoadLamps
   };
 
   // Keep runtime ground current whenever territory/hub changes.
