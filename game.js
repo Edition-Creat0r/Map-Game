@@ -38,7 +38,7 @@
   const scene = new BABYLON.Scene(engine);
   scene.clearColor = new BABYLON.Color4(0.62, 0.79, 0.94, 1);
   scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-  scene.fogDensity = 0.00072;
+  scene.fogDensity = 0.00092;
   scene.fogColor = new BABYLON.Color3(0.62, 0.79, 0.94);
   scene.ambientColor = new BABYLON.Color3(0.17, 0.20, 0.25);
 
@@ -65,7 +65,7 @@
     new BABYLON.Vector3(0.15, 1, 0.1),
     scene
   );
-  hemi.intensity = 0.62;
+  hemi.intensity = 0.66;
   hemi.groundColor = new BABYLON.Color3(0.16, 0.19, 0.22);
 
   const sun = new BABYLON.DirectionalLight(
@@ -74,7 +74,7 @@
     scene
   );
   sun.position = new BABYLON.Vector3(260, 420, 180);
-  sun.intensity = 1.18;
+  sun.intensity = 1.22;
 
   const moon = new BABYLON.DirectionalLight(
     "moon",
@@ -96,7 +96,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.0";
+  const VERSION = "0.2.1";
   const CHUNK_WORLD_SIZE = 980;
   const WORLD_COLS = 44;
   const WORLD_ROWS = 30;
@@ -121,7 +121,7 @@
     neutralHubReserved: true
   };
 
-  const localSaveKey = "mapGame_alpha020_firstPlayable";
+  const localSaveKey = "mapGame_alpha021_firstPlayable";
 
   // ==========================================================
   // UTILITIES
@@ -190,7 +190,14 @@
 
   function disposeNode(node) {
     if (!node) return;
-    try { node.dispose(false, true); } catch (_) {
+
+    // IMPORTANT:
+    // World roots share the global grass/rock/glass/road materials.
+    // Disposing child materials here caused the next scene (hub/territory)
+    // to lose its ground and appear as a blue void.
+    try {
+      node.dispose(false, false);
+    } catch (_) {
       try { node.dispose(); } catch (_) {}
     }
   }
@@ -219,6 +226,11 @@
   const rockMat = stdMat("rockMat", new BABYLON.Color3(0.35, 0.38, 0.42), 0.03);
   const snowMat = stdMat("snowMat", new BABYLON.Color3(0.89, 0.92, 0.95), 0.03);
   const sandMat = stdMat("sandMat", new BABYLON.Color3(0.72, 0.63, 0.43), 0.01);
+  const terrainBaseMat = stdMat(
+    "terrainBaseMat",
+    new BABYLON.Color3(0.18, 0.24, 0.15),
+    0.01
+  );
   const roadMat = stdMat("roadMat", new BABYLON.Color3(0.055, 0.065, 0.075), 0.04);
   const roadEdgeMat = stdMat("roadEdgeMat", new BABYLON.Color3(0.22, 0.24, 0.25), 0.03);
   const concreteMat = stdMat("concreteMat", new BABYLON.Color3(0.50, 0.53, 0.55), 0.05);
@@ -875,6 +887,20 @@
     ground.parent = root;
     ground.metadata = { neutralGround: true };
 
+    // Solid fallback layer beneath the textured surface.
+    // Even if a terrain texture is still loading, the neutral hub never
+    // appears to float over the sky.
+    const hubBase = BABYLON.MeshBuilder.CreateBox("hubTerrainBase", {
+      width: HUB_RADIUS * 2.52,
+      height: 14,
+      depth: HUB_RADIUS * 2.52
+    }, scene);
+    hubBase.position.y = -7.25;
+    hubBase.material = terrainBaseMat;
+    hubBase.receiveShadows = true;
+    hubBase.parent = root;
+    hubBase.isPickable = false;
+
     // central civic plaza
     const plaza = BABYLON.MeshBuilder.CreateCylinder("centralPlaza", {
       diameter: 210,
@@ -1202,6 +1228,91 @@
     drawWorldMap();
   }
 
+  function drawBiomeMapDetail(ctx, biome, x, y, px, py, cell) {
+    const regular = state.graphics === "REGULAR";
+    const count = regular ? 4 : 2;
+
+    ctx.save();
+    ctx.globalAlpha = regular ? 0.34 : 0.26;
+    ctx.lineWidth = Math.max(1, cell * 0.025);
+
+    if (biome === "forest") {
+      ctx.fillStyle = "rgba(15,63,35,.72)";
+      for (let i = 0; i < count + 1; i++) {
+        const cx = px + 7 + seeded(x, y, 80 + i * 2) * Math.max(4, cell - 14);
+        const cy = py + 7 + seeded(x, y, 81 + i * 2) * Math.max(4, cell - 14);
+        const rr = Math.max(1.6, cell * (0.045 + seeded(x, y, 96 + i) * 0.035));
+        ctx.beginPath();
+        ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (biome === "mountain") {
+      ctx.strokeStyle = "rgba(235,241,244,.62)";
+      for (let i = 0; i < count; i++) {
+        const cx = px + cell * (0.28 + seeded(x, y, 120 + i) * 0.44);
+        const cy = py + cell * (0.30 + seeded(x, y, 130 + i) * 0.42);
+        const s = Math.max(3, cell * 0.11);
+        ctx.beginPath();
+        ctx.moveTo(cx - s, cy + s * 0.7);
+        ctx.lineTo(cx, cy - s);
+        ctx.lineTo(cx + s, cy + s * 0.7);
+        ctx.stroke();
+      }
+    } else if (biome === "desert") {
+      ctx.strokeStyle = "rgba(91,67,27,.48)";
+      for (let i = 0; i < count; i++) {
+        const yy = py + cell * (0.32 + i * 0.20);
+        ctx.beginPath();
+        ctx.moveTo(px + cell * 0.17, yy);
+        ctx.quadraticCurveTo(px + cell * 0.50, yy - cell * 0.10, px + cell * 0.83, yy);
+        ctx.stroke();
+      }
+    } else if (biome === "coast") {
+      ctx.strokeStyle = "rgba(220,239,239,.60)";
+      for (let i = 0; i < count; i++) {
+        const yy = py + cell * (0.35 + i * 0.20);
+        ctx.beginPath();
+        ctx.moveTo(px + cell * 0.18, yy);
+        ctx.quadraticCurveTo(px + cell * 0.34, yy - 3, px + cell * 0.50, yy);
+        ctx.quadraticCurveTo(px + cell * 0.66, yy + 3, px + cell * 0.82, yy);
+        ctx.stroke();
+      }
+    } else if (biome === "wetland") {
+      ctx.strokeStyle = "rgba(166,218,206,.62)";
+      for (let i = 0; i < count; i++) {
+        const xx = px + cell * (0.28 + i * 0.22);
+        ctx.beginPath();
+        ctx.moveTo(xx, py + cell * 0.18);
+        ctx.bezierCurveTo(
+          xx - cell * 0.09, py + cell * 0.38,
+          xx + cell * 0.09, py + cell * 0.58,
+          xx, py + cell * 0.82
+        );
+        ctx.stroke();
+      }
+    } else if (biome === "tundra") {
+      ctx.fillStyle = "rgba(242,248,250,.62)";
+      for (let i = 0; i < count + 1; i++) {
+        const xx = px + cell * (0.18 + seeded(x, y, 160 + i) * 0.64);
+        const yy = py + cell * (0.18 + seeded(x, y, 170 + i) * 0.64);
+        const s = Math.max(1.3, cell * 0.045);
+        ctx.fillRect(xx - s / 2, yy - s / 2, s, s);
+      }
+    } else {
+      // plains: faint field bands
+      ctx.strokeStyle = "rgba(229,238,174,.42)";
+      for (let i = 0; i < count; i++) {
+        const yy = py + cell * (0.34 + i * 0.22);
+        ctx.beginPath();
+        ctx.moveTo(px + cell * 0.15, yy);
+        ctx.lineTo(px + cell * 0.85, yy + (i % 2 ? 2 : -2));
+        ctx.stroke();
+      }
+    }
+
+    ctx.restore();
+  }
+
   function drawWorldMap() {
     if (!mapCtx || !mapCanvas) return;
     const rect = mapCanvas.getBoundingClientRect();
@@ -1234,17 +1345,10 @@
         mapCtx.fillStyle = reserved ? "#25364a" : info.color;
         mapCtx.fillRect(px + 1, py + 1, cell - 2, cell - 2);
 
-        // biome texture strokes — Minecraft-map-ish but not pixel-noise overload
-        mapCtx.globalAlpha = 0.24;
-        mapCtx.fillStyle = info.accent;
-        const dots = state.graphics === "REGULAR" ? 5 : 3;
-        for (let k = 0; k < dots; k++) {
-          const dx = seeded(x, y, k * 2 + 1) * (cell - 8);
-          const dy = seeded(x, y, k * 2 + 2) * (cell - 8);
-          const ss = 2 + seeded(x, y, k + 20) * 5;
-          mapCtx.fillRect(px + 4 + dx, py + 4 + dy, ss, ss);
-        }
-        mapCtx.globalAlpha = 1;
+        // Biome-specific strategic-map symbols. The claim grid remains
+        // readable, but the world now resembles terrain rather than a
+        // spreadsheet of flat colors.
+        drawBiomeMapDetail(mapCtx, biome, x, y, px, py, cell);
 
         if (owner) {
           mapCtx.fillStyle = "rgba(25,58,85,0.46)";
@@ -1318,8 +1422,16 @@
       enter.hidden = !mine;
       if (mine) enter.hidden = false;
     } else {
-      claim.disabled = false;
-      claim.textContent = "CLAIM THIS TERRITORY";
+      const myStart = getMyStartingTerritory();
+      if (myStart) {
+        claim.disabled = true;
+        claim.textContent = "EXPANSION LOCKED";
+        claim.title = "You already have your free starting territory. Expansion comes later.";
+      } else {
+        claim.disabled = false;
+        claim.textContent = "CLAIM THIS TERRITORY";
+        claim.title = "Claim your one free starting territory.";
+      }
     }
   }
 
@@ -1337,21 +1449,51 @@
     if (mapOverlay) mapOverlay.hidden = true;
   }
 
+  function getMyStartingTerritory() {
+    if (state.worldType === "central") {
+      const direct = window.mapGameMultiplayer?.getMyTerritories?.() || [];
+      if (direct.length) return direct[0];
+
+      const uid = state.multiplayerState?.user?.id;
+      if (!uid) return null;
+      return Array.from(state.claimedTerritories.values())
+        .find(row => row && row.owner_id === uid) || null;
+    }
+
+    return Array.from(state.claimedTerritories.values())
+      .find(row => row && row.localOwner) || null;
+  }
+
   async function claimSelectedTerritory() {
     const cell = state.selectedTerritory;
     if (!cell || isCentralReserved(cell.x, cell.y)) return;
+
     const id = cell.id || territoryId(cell.x, cell.y);
     if (ownerForTerritory(id)) return;
 
+    // Alpha 0.2.1 rule:
+    // every player receives ONE free starting territory.
+    // Additional expansion is intentionally locked until the expansion
+    // economy/government system exists.
+    const existing = getMyStartingTerritory();
+    if (existing) {
+      const existingId = existing.territory_id || existing.id || "your first territory";
+      showToast(
+        `You already claimed ${existingId}. Additional territory expansion is coming later.`,
+        "info"
+      );
+      return;
+    }
+
     try {
       if (state.worldType === "central") {
-        if (!window.mapGameMultiplayer?.claimTerritory) throw new Error("Multiplayer is not ready.");
+        if (!window.mapGameMultiplayer?.claimTerritory) {
+          throw new Error("Multiplayer is not ready.");
+        }
+
         const row = await window.mapGameMultiplayer.claimTerritory(id);
         state.claimedTerritories.set(id, row);
       } else {
-        // Keep singleplayer simple: one initial claim for now.
-        const already = Array.from(state.claimedTerritories.values()).find(v => v && v.localOwner);
-        if (already) throw new Error("This alpha currently allows one starting territory in Singleplayer.");
         state.claimedTerritories.set(id, {
           territory_id: id,
           owner_id: "local",
@@ -1360,9 +1502,13 @@
         });
         saveLocalState();
       }
+
       updateTerritoryInspector(cell);
       drawWorldMap();
-      showToast("Territory claimed. Enter it to choose your capital site.", "success");
+      showToast(
+        "Starting territory claimed. Enter it to choose your capital site.",
+        "success"
+      );
     } catch (error) {
       showToast(error?.message || "Could not claim territory.", "error");
     }
@@ -1420,6 +1566,19 @@
     ground.material = biome === "desert" ? sandMat : biome === "mountain" ? grassLightMat : grassMat;
     ground.receiveShadows = true;
     ground.metadata = { territoryGround: true };
+
+    // Deep terrain base under every territory. This gives the region
+    // visual thickness and guarantees a non-sky fallback below valleys.
+    const territoryBase = BABYLON.MeshBuilder.CreateBox("territoryTerrainBase", {
+      width: CHUNK_WORLD_SIZE + 22,
+      height: 22,
+      depth: CHUNK_WORLD_SIZE + 22
+    }, scene);
+    territoryBase.position.y = -15;
+    territoryBase.material = terrainBaseMat;
+    territoryBase.receiveShadows = true;
+    territoryBase.parent = root;
+    territoryBase.isPickable = false;
 
     const p = ground.getVerticesData(BABYLON.VertexBuffer.PositionKind);
     for (let i = 0; i < p.length; i += 3) {
@@ -1509,10 +1668,12 @@
       edge.isPickable = false;
     });
 
-    camera.target.set(0, 8, 0);
-    camera.radius = 330;
+    // Enter the territory closer to the surface so a 980x980 region
+    // feels large instead of looking like a miniature board.
+    camera.target.set(0, 10, -24);
+    camera.radius = 225;
     camera.alpha = -Math.PI / 2.25;
-    camera.beta = 1.00;
+    camera.beta = 1.04;
     setMode("TERRITORY");
 
     const existingCapital = getCapitalForActiveTerritory();
@@ -1814,7 +1975,7 @@
       <header class="mg-topbar">
         <div class="mg-brand-lockup">
           <div class="mg-brand-mark">M</div>
-          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • FIRST PLAYABLE RESTRUCTURE</span></div>
+          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • WORLD & INTERFACE FOUNDATION</span></div>
         </div>
         <div class="mg-top-status">
           <div class="mg-status-chip"><span>WORLD</span><b id="mgWorldLabel">SINGLEPLAYER</b></div>
@@ -1862,9 +2023,30 @@
   function updateModeUI() {
     const pill = document.getElementById("mgLocationPill");
     if (!pill) return;
-    if (state.mode === "HUB") pill.textContent = "NEUTRAL CENTRAL HUB • PROTECTED • NO OWNER";
-    else if (state.mode === "MAP") pill.textContent = "STRATEGIC WORLD MAP";
-    else if (state.activeTerritory) pill.textContent = `TERRITORY ${state.activeTerritory.x}-${state.activeTerritory.y} • ${BIOMES[state.activeTerritory.biome].label.toUpperCase()}`;
+
+    if (state.mode === "HUB") {
+      pill.textContent = "NEUTRAL CENTRAL HUB • PROTECTED • NO OWNER";
+    } else if (state.mode === "MAP") {
+      pill.textContent = getMyStartingTerritory()
+        ? "STRATEGIC WORLD • EXPANSION LOCKED"
+        : "STRATEGIC WORLD • CHOOSE YOUR FREE STARTING TERRITORY";
+    } else if (state.activeTerritory) {
+      pill.textContent =
+        `TERRITORY ${state.activeTerritory.x}-${state.activeTerritory.y} • ` +
+        `${BIOMES[state.activeTerritory.biome].label.toUpperCase()}`;
+    }
+
+    const dock = document.getElementById("mgDock");
+    if (!dock) return;
+    dock.querySelectorAll("button").forEach(btn => btn.classList.remove("active"));
+
+    if (state.mode === "HUB") {
+      dock.querySelector("[data-action='hub']")?.classList.add("active");
+    } else if (state.mode === "MAP") {
+      dock.querySelector("[data-action='map']")?.classList.add("active");
+    } else if (state.activeTerritory) {
+      dock.querySelector("[data-action='capital']")?.classList.add("active");
+    }
   }
 
   function updateOnlineUI() {
