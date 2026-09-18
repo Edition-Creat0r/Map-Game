@@ -150,7 +150,46 @@
       );
 
     sandMaterial.specularPower = 4;
+// ============================================================
+// NORMAL MAPS
+// ============================================================
 
+const grassNormal =
+  makeTexture(
+    "assets/textures/grass/grass_normal.jpg",
+    14
+  );
+
+const rockNormal =
+  makeTexture(
+    "assets/textures/rock/rock_normal.jpg",
+    9
+  );
+
+const sandNormal =
+  makeTexture(
+    "assets/textures/sand/sand_normal.jpg",
+    12
+  );
+
+if (runtime.grassMaterial) {
+  runtime.grassMaterial.bumpTexture =
+    grassNormal;
+
+  grassNormal.level = 0.55;
+}
+
+if (runtime.rockMaterial) {
+  runtime.rockMaterial.bumpTexture =
+    rockNormal;
+
+  rockNormal.level = 0.8;
+}
+
+sandMaterial.bumpTexture =
+  sandNormal;
+
+sandNormal.level = 0.45;   
 
     // ========================================================
     // LARGE-SCALE GRASS COLOR VARIATION
