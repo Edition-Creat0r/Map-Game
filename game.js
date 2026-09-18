@@ -96,7 +96,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.1E";
+  const VERSION = "0.2.1F";
   const CHUNK_WORLD_SIZE = 1800;
   const WORLD_COLS = 316;
   const WORLD_ROWS = 316;
@@ -117,6 +117,10 @@
     hubRoot: null,
     capitalGhost: null,
     pendingCapitalXZ: null,
+    buildMode: null,
+    buildGhost: null,
+    buildRotation: 0,
+    buildAnalysis: null,
     mapCamera: { x: CENTRAL_X, y: CENTRAL_Y, zoom: 1.0 },
     neutralHubReserved: true
   };
@@ -636,6 +640,14 @@
       dash.parent = roadRoot;
       dash.isPickable = false;
     }
+
+    roadRoot.metadata = {
+      road: true,
+      blocksConstruction: true,
+      roadWidth: width + sidewalkMargin * 2,
+      roadDepth: depth + sidewalkMargin * 2,
+      roadRotation: rotation
+    };
 
     return roadRoot;
   }
@@ -2236,6 +2248,7 @@
     placeTerritoryMountains(root, cell, biome);
     addCoast(root, cell, biome);
     buildTerritoryPlanner(root, cell, biome);
+    restorePlacedBuildingsForTerritory();
 
     // subtle chunk boundary markers, visible but not walls
     const boundaryMat = new BABYLON.StandardMaterial("boundaryMat", scene);
@@ -2278,6 +2291,423 @@
     }
     const saved = loadLocalState();
     return saved.capital && saved.capital.territoryId === state.activeTerritory.id ? saved.capital : null;
+  }
+
+  // ==========================================================
+  // 0.2.1F — TERRAIN GRADING + REAL CONSTRUCTION
+  // ==========================================================
+
+  function flattenTerrainForStructure(x, z, width, depth, targetY, padding = 10) {
+    if (!territoryGround) return;
+
+    const positions =
+      territoryGround.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+    if (!positions) return;
+
+    const halfW = width / 2;
+    const halfD = depth / 2;
+    const outerW = halfW + padding;
+    const outerD = halfD + padding;
+
+    for (let i = 0; i < positions.length; i += 3) {
+      const vx = positions[i];
+      const vz = positions[i + 2];
+      const dx = Math.abs(vx - x);
+      const dz = Math.abs(vz - z);
+
+      if (dx > outerW || dz > outerD) continue;
+
+      if (dx <= halfW && dz <= halfD) {
+        positions[i + 1] = targetY;
+      } else {
+        const wx = clamp((outerW - dx) / Math.max(1, padding), 0, 1);
+        const wz = clamp((outerD - dz) / Math.max(1, padding), 0, 1);
+        const blend = Math.min(wx, wz);
+        positions[i + 1] = lerp(
+          positions[i + 1],
+          targetY,
+          blend * blend * (3 - 2 * blend)
+        );
+      }
+    }
+
+    territoryGround.updateVerticesData(
+      BABYLON.VertexBuffer.PositionKind,
+      positions
+    );
+
+    const normals = [];
+    BABYLON.VertexData.ComputeNormals(
+      positions,
+      territoryGround.getIndices(),
+      normals
+    );
+    territoryGround.updateVerticesData(
+      BABYLON.VertexBuffer.NormalKind,
+      normals
+    );
+    territoryGround.refreshBoundingInfo();
+  }
+
+  function removeTerrainDetailsNear(x, z, radius) {
+    if (!state.terrainRoot) return;
+
+    const nodes = state.terrainRoot.getDescendants?.(false) || [];
+    nodes.forEach(node => {
+      const removable =
+        node?.metadata?.vegetation ||
+        node?.metadata?.terrainDetail;
+
+      if (!removable) return;
+
+      const p =
+        node.getAbsolutePosition
+          ? node.getAbsolutePosition()
+          : node.position;
+
+      if (p && Math.hypot(p.x - x, p.z - z) <= radius) {
+        disposeNode(node);
+      }
+    });
+  }
+
+  function rectangleOverlap(ax, az, aw, ad, bx, bz, bw, bd, margin = 0) {
+    return (
+      Math.abs(ax - bx) * 2 < aw + bw + margin * 2 &&
+      Math.abs(az - bz) * 2 < ad + bd + margin * 2
+    );
+  }
+
+  function footprintForBuilding(def, rotation = 0) {
+    const fp = def?.footprint || [40, 40];
+    const quarterTurns =
+      Math.round(rotation / (Math.PI / 2)) % 2;
+
+    return quarterTurns
+      ? { width: fp[1], depth: fp[0] }
+      : { width: fp[0], depth: fp[1] };
+  }
+
+  function overlapsRoadOrBuilding(x, z, width, depth) {
+    if (!state.terrainRoot) return null;
+
+    const descendants =
+      state.terrainRoot.getDescendants?.(false) || [];
+
+    for (const node of descendants) {
+      if (!node?.metadata) continue;
+
+      if (node.metadata.road) {
+        const wp =
+          node.getAbsolutePosition
+            ? node.getAbsolutePosition()
+            : node.position;
+
+        if (
+          rectangleOverlap(
+            x, z, width, depth,
+            wp.x, wp.z,
+            Number(node.metadata.roadWidth || 0),
+            Number(node.metadata.roadDepth || 0),
+            5
+          )
+        ) {
+          return "Road / sidewalk collision";
+        }
+      }
+
+      if (node.metadata.placedBuilding) {
+        const wp =
+          node.getAbsolutePosition
+            ? node.getAbsolutePosition()
+            : node.position;
+        const fp = node.metadata.footprint || [40, 40];
+
+        if (
+          rectangleOverlap(
+            x, z, width, depth,
+            wp.x, wp.z,
+            fp[0], fp[1], 5
+          )
+        ) {
+          return "Another building occupies this site";
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function analyzeBuildingPlacement(def, x, z, rotation = 0) {
+    if (!state.activeTerritory) {
+      return { allowed: false, reasons: ["No active territory"] };
+    }
+
+    const fp = footprintForBuilding(def, rotation);
+
+    const terrain =
+      window.mapGameTerritory?.analyzeSite?.({
+        x,
+        z,
+        biome: state.activeTerritory.biome,
+        cellX: state.activeTerritory.x,
+        cellY: state.activeTerritory.y,
+        chunkSize: CHUNK_WORLD_SIZE,
+        footprint: Math.max(fp.width, fp.depth)
+      }) || { allowed: true, reasons: [] };
+
+    const terrainClass =
+      window.mapGameTerritory?.terrainClassAt?.(
+        x, z,
+        state.activeTerritory.biome,
+        state.activeTerritory.x,
+        state.activeTerritory.y,
+        CHUNK_WORLD_SIZE
+      );
+
+    const collision =
+      overlapsRoadOrBuilding(x, z, fp.width, fp.depth);
+
+    const reasons = [...(terrain.reasons || [])];
+    if (collision) reasons.push(collision);
+    if (terrainClass?.rocky) {
+      reasons.push("Rocky terrain — foundation excavation required");
+    }
+
+    const affordable =
+      window.mapGameEconomy?.canAfford?.(def.cost || {}) ?? true;
+    if (!affordable) reasons.push("Not enough money / resources");
+
+    return {
+      allowed: Boolean(terrain.allowed) && !collision && affordable,
+      reasons,
+      footprint: fp,
+      terrainClass,
+      targetY: territoryHeightFn(
+        x, z,
+        state.activeTerritory.biome,
+        state.activeTerritory.x,
+        state.activeTerritory.y
+      )
+    };
+  }
+
+  function disposeBuildGhost() {
+    if (state.buildGhost) {
+      disposeNode(state.buildGhost);
+      state.buildGhost = null;
+    }
+    state.buildMode = null;
+    state.buildAnalysis = null;
+  }
+
+  function makeBuildGhost(def) {
+    const root = new BABYLON.TransformNode("buildingPlacementGhost", scene);
+    root.parent = state.terrainRoot;
+
+    const fp = def.footprint || [40, 40];
+    const mat = new BABYLON.StandardMaterial("buildingPlacementGhostMat", scene);
+    mat.diffuseColor = new BABYLON.Color3(0.18, 0.94, 0.58);
+    mat.emissiveColor = new BABYLON.Color3(0.04, 0.20, 0.11);
+    mat.alpha = 0.32;
+
+    const base = BABYLON.MeshBuilder.CreateBox("buildingGhostFootprint", {
+      width: fp[0],
+      height: 1.1,
+      depth: fp[1]
+    }, scene);
+    base.position.y = 0.55;
+    base.material = mat;
+    base.parent = root;
+    base.isPickable = false;
+
+    const mass = BABYLON.MeshBuilder.CreateBox("buildingGhostMass", {
+      width: fp[0] * 0.72,
+      height: Math.max(9, Math.min(32, fp[0] * 0.55)),
+      depth: fp[1] * 0.70
+    }, scene);
+    mass.position.y = Math.max(6, fp[0] * 0.25);
+    mass.material = mat;
+    mass.parent = root;
+    mass.isPickable = false;
+
+    root.metadata = { material: mat, def };
+    return root;
+  }
+
+  function beginBuildingPlacement(item, variant = 0) {
+    if (!state.activeTerritory) {
+      showToast("Enter your territory before building.", "info");
+      return;
+    }
+
+    if (!getCapitalForActiveTerritory()) {
+      showToast("Establish your capital first.", "info");
+      return;
+    }
+
+    disposeBuildGhost();
+
+    state.buildMode = { type: item.id, variant };
+    state.buildRotation = 0;
+    state.buildGhost = makeBuildGhost(item);
+    setMode("BUILDING_PLACEMENT");
+
+    setStatus(
+      `<b>${escapeHtml(item.name)}</b> • move to choose a site • ` +
+      `R rotate • click place • Esc cancel`
+    );
+  }
+
+  function cancelBuildingPlacement(notify = true) {
+    disposeBuildGhost();
+    if (state.activeTerritory) setMode("TERRITORY");
+    if (notify) {
+      setStatus("Construction cancelled • open SHOP to choose another structure");
+    }
+  }
+
+  function saveLocalPlacedBuildings() {
+    if (state.worldType !== "singleplayer") return;
+    const old = loadLocalState();
+    old.buildings =
+      window.mapGameEconomy?.listPlacedBuildings?.() || [];
+    localStorage.setItem(localSaveKey, JSON.stringify(old));
+  }
+
+  async function placeCurrentBuilding(point) {
+    if (!state.buildMode || !state.activeTerritory) return;
+
+    const def =
+      window.mapGameBuildings?.item?.(state.buildMode.type) ||
+      SHOP_CATALOG.find(v => v.id === state.buildMode.type);
+    if (!def) return;
+
+    const analysis =
+      analyzeBuildingPlacement(
+        def,
+        point.x,
+        point.z,
+        state.buildRotation
+      );
+
+    if (!analysis.allowed) {
+      showToast(
+        analysis.reasons.find(v =>
+          /collision|water|steep|enough/i.test(v)
+        ) || "This site is not buildable.",
+        "error"
+      );
+      return;
+    }
+
+    const id =
+      `b_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const rocky = Boolean(analysis.terrainClass?.rocky);
+
+    flattenTerrainForStructure(
+      point.x,
+      point.z,
+      analysis.footprint.width,
+      analysis.footprint.depth,
+      analysis.targetY,
+      rocky ? 22 : 14
+    );
+
+    removeTerrainDetailsNear(
+      point.x,
+      point.z,
+      Math.hypot(
+        analysis.footprint.width,
+        analysis.footprint.depth
+      ) * 0.64
+    );
+
+    const buildingData = {
+      id,
+      type: def.id,
+      category: def.category,
+      variant: state.buildMode.variant || 0,
+      x: point.x,
+      y: analysis.targetY,
+      z: point.z,
+      rotation: state.buildRotation,
+      foundationDepth: rocky ? 5.8 : 3.2,
+      territoryId: state.activeTerritory.id,
+      ownerId: "local",
+      level: 1
+    };
+
+    const paid =
+      window.mapGameEconomy?.purchaseAndRegisterBuilding?.(
+        def,
+        buildingData
+      );
+
+    if (!paid) {
+      showToast("You cannot afford this structure.", "error");
+      return;
+    }
+
+    window.mapGameBuildings?.renderPlacedBuilding?.(
+      { scene, graphicsPreset: state.graphics },
+      buildingData,
+      state.terrainRoot
+    );
+
+    saveLocalPlacedBuildings();
+
+    showToast(
+      `${def.name} constructed${rocky ? " with rock excavation" : ""}.`,
+      "success"
+    );
+
+    cancelBuildingPlacement(false);
+
+    const utilities =
+      window.mapGameEconomy?.snapshot?.().utilities;
+
+    setStatus(
+      `<b>${escapeHtml(def.name)}</b> built • ` +
+      `base income $${Number(def.incomePerMin || 0).toLocaleString()}/min • ` +
+      `power ${Math.floor(utilities?.powerSupply || 0)}/${Math.floor(utilities?.powerDemand || 0)}`
+    );
+  }
+
+  function restorePlacedBuildingsForTerritory() {
+    if (!state.activeTerritory || !window.mapGameBuildings) return;
+
+    const rows =
+      window.mapGameEconomy?.listPlacedBuildings?.(
+        state.activeTerritory.id
+      ) || [];
+
+    rows.forEach(row => {
+      const def = window.mapGameBuildings.item(row.type);
+      const y = territoryHeightFn(
+        row.x, row.z,
+        state.activeTerritory.biome,
+        state.activeTerritory.x,
+        state.activeTerritory.y
+      );
+
+      flattenTerrainForStructure(
+        row.x, row.z,
+        ...(def.footprint || [40, 40]),
+        y, 12
+      );
+
+      removeTerrainDetailsNear(
+        row.x, row.z,
+        Math.hypot(...(def.footprint || [40,40])) * 0.58
+      );
+
+      window.mapGameBuildings.renderPlacedBuilding(
+        { scene, graphicsPreset: state.graphics },
+        { ...row, category: def.category, y },
+        state.terrainRoot
+      );
+    });
   }
 
   // ==========================================================
@@ -2352,6 +2782,51 @@
   }
 
   scene.onPointerObservable.add(info => {
+    if (state.mode === "BUILDING_PLACEMENT") {
+      if (
+        info.type === BABYLON.PointerEventTypes.POINTERMOVE ||
+        info.type === BABYLON.PointerEventTypes.POINTERDOWN
+      ) {
+        const p = getGroundPointFromPointer(info.event);
+        if (!p || !state.buildMode || !state.buildGhost) return;
+
+        const def =
+          window.mapGameBuildings?.item?.(state.buildMode.type) ||
+          SHOP_CATALOG.find(v => v.id === state.buildMode.type);
+        if (!def) return;
+
+        const analysis =
+          analyzeBuildingPlacement(
+            def,
+            p.x,
+            p.z,
+            state.buildRotation
+          );
+
+        state.buildAnalysis = analysis;
+        state.buildGhost.position.set(p.x, p.y + 0.35, p.z);
+        state.buildGhost.rotation.y = state.buildRotation;
+
+        const gm = state.buildGhost.metadata.material;
+        gm.diffuseColor =
+          analysis.allowed
+            ? new BABYLON.Color3(0.18, 0.94, 0.58)
+            : new BABYLON.Color3(0.96, 0.25, 0.21);
+        gm.emissiveColor =
+          analysis.allowed
+            ? new BABYLON.Color3(0.04, 0.20, 0.11)
+            : new BABYLON.Color3(0.20, 0.03, 0.03);
+
+        if (
+          info.type === BABYLON.PointerEventTypes.POINTERDOWN &&
+          analysis.allowed
+        ) {
+          placeCurrentBuilding(p);
+        }
+      }
+      return;
+    }
+
     if (state.mode !== "CAPITAL_PLACEMENT") return;
     if (info.type === BABYLON.PointerEventTypes.POINTERMOVE || info.type === BABYLON.PointerEventTypes.POINTERDOWN) {
       const p = getGroundPointFromPointer(info.event);
@@ -2501,14 +2976,38 @@
     const z = Number(capital.z) || 0;
     const y = territoryHeightFn(x, z, state.activeTerritory.biome, state.activeTerritory.x, state.activeTerritory.y);
 
-    // Capital placement automatically clears a civic footprint for now.
-    // Manual clearing remains disabled until the next system update.
-    removeVegetationNear(x, z, 95);
+    const terrainClass =
+      window.mapGameTerritory?.terrainClassAt?.(
+        x, z,
+        state.activeTerritory.biome,
+        state.activeTerritory.x,
+        state.activeTerritory.y,
+        CHUNK_WORLD_SIZE
+      );
+
+    flattenTerrainForStructure(
+      x, z, 112, 96, y,
+      terrainClass?.rocky ? 26 : 18
+    );
+    removeVegetationNear(x, z, 105);
+    removeTerrainDetailsNear(x, z, 105);
 
     const root = new BABYLON.TransformNode("playerCapital", scene);
     root.parent = state.terrainRoot;
     root.position.set(x, y, z);
     root.metadata = { playerCapital: true };
+
+    const capitalFoundation =
+      BABYLON.MeshBuilder.CreateBox("capitalFoundation", {
+        width: 94,
+        height: terrainClass?.rocky ? 7.5 : 4.0,
+        depth: 78
+      }, scene);
+    capitalFoundation.position.y =
+      terrainClass?.rocky ? -2.7 : -1.4;
+    capitalFoundation.material = darkMat;
+    capitalFoundation.parent = root;
+    capitalFoundation.isPickable = false;
 
     const plaza = BABYLON.MeshBuilder.CreateCylinder("capitalPlaza", {
       diameter: 104,
@@ -2726,6 +3225,14 @@
                 <span>FOOTPRINT</span>
                 <strong id="mgShopFootprint">—</strong>
               </div>
+              <div>
+                <span>POWER</span>
+                <strong id="mgShopPower">0</strong>
+              </div>
+              <div>
+                <span>WATER</span>
+                <strong id="mgShopWater">0</strong>
+              </div>
             </div>
 
             <div class="mg-shop-info-section">
@@ -2771,25 +3278,18 @@
       hideShop();
 
       if (!state.activeTerritory) {
-        showToast("Enter your territory before selecting city construction.", "info");
+        showToast("Enter your territory before building.", "info");
         return;
       }
 
       if (!getCapitalForActiveTerritory()) {
-        showToast("Establish your capital before adding city structures.", "info");
+        showToast("Establish your capital before city construction begins.", "info");
         return;
       }
 
-      setStatus(
-        `<b>${escapeHtml(item.name)}</b> • ` +
-        `${escapeHtml(item.variants[shopSelection.variant])} model • ` +
-        `$${Number(item.incomePerMin || 0).toLocaleString()}/min • ` +
-        `road/zoning placement is the next construction stage`
-      );
-
-      showToast(
-        `${item.name} selected. Placement rules are ready for the next construction pass.`,
-        "success"
+      beginBuildingPlacement(
+        item,
+        shopSelection.variant
       );
     };
 
@@ -2892,6 +3392,22 @@
       footprint.textContent = `${fp[0]} × ${fp[1]}`;
     }
 
+    const power = shopOverlay.querySelector("#mgShopPower");
+    if (power) {
+      power.textContent =
+        item.powerSupply
+          ? `+${item.powerSupply}`
+          : `-${item.powerUse || 0}`;
+    }
+
+    const water = shopOverlay.querySelector("#mgShopWater");
+    if (water) {
+      water.textContent =
+        item.waterSupply
+          ? `+${item.waterSupply}`
+          : `-${item.waterUse || 0}`;
+    }
+
     const roles = [
       ...(item.produces || []),
       ...(item.incomePerMin ? ["Revenue"] : []),
@@ -2971,6 +3487,20 @@
   }
 
   window.addEventListener("keydown", event => {
+    const tag = document.activeElement?.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+    if (state.mode === "BUILDING_PLACEMENT") {
+      if (event.key.toLowerCase() === "r") {
+        state.buildRotation += Math.PI / 2;
+        if (state.buildGhost) state.buildGhost.rotation.y = state.buildRotation;
+      } else if (event.key === "Escape") {
+        cancelBuildingPlacement();
+      }
+    }
+  });
+
+  window.addEventListener("keydown", event => {
     if (
       event.key.toLowerCase() === "u" &&
       !event.ctrlKey &&
@@ -2997,13 +3527,16 @@
       <header class="mg-topbar">
         <div class="mg-brand-lockup">
           <div class="mg-brand-mark">M</div>
-          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • CITY DEMO + SHOP + ECONOMY</span></div>
+          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • CONSTRUCTION + UTILITIES + CITY GROWTH</span></div>
         </div>
         <div class="mg-top-status">
           <div class="mg-status-chip"><span>WORLD</span><b id="mgWorldLabel">SINGLEPLAYER</b></div>
           <div class="mg-status-chip"><span>ONLINE</span><b id="mgOnlineCount">—</b></div>
           <div class="mg-status-chip mg-economy-chip"><span>MONEY</span><b id="mgMoney">$250,000</b></div>
           <div class="mg-status-chip mg-economy-chip"><span>INCOME</span><b id="mgIncome">$0/min</b></div>
+          <div class="mg-status-chip mg-utility-chip"><span>POWER</span><b id="mgPower">18/0</b></div>
+          <div class="mg-status-chip mg-utility-chip"><span>WATER</span><b id="mgWater">16/0</b></div>
+          <div class="mg-status-chip mg-utility-chip"><span>AIR</span><b id="mgAir">28/0</b></div>
           <div class="mg-status-chip"><span>TIME</span><b id="mgTime">12:30 PM</b></div>
           <button class="mg-graphics-toggle" id="mgUIModeToggle">UI • ${uiMode}</button>
           <button class="mg-graphics-toggle" id="mgGraphicsToggle">GRAPHICS • ${state.graphics}</button>
@@ -3080,6 +3613,10 @@
       pill.textContent = getMyStartingTerritory()
         ? "STRATEGIC WORLD • EXPANSION LOCKED"
         : "STRATEGIC WORLD • CHOOSE YOUR FREE STARTING TERRITORY";
+    } else if (state.mode === "BUILDING_PLACEMENT" && state.activeTerritory) {
+      pill.textContent =
+        `CONSTRUCTION • ${state.buildMode?.type || "BUILDING"} • ` +
+        `R ROTATE • ESC CANCEL`;
     } else if (state.activeTerritory) {
       pill.textContent =
         `TERRITORY ${state.activeTerritory.x}-${state.activeTerritory.y} • ` +
@@ -3169,6 +3706,24 @@
     if (income) {
       income.textContent =
         `$${Math.floor(snapshot?.incomePerMin || 0).toLocaleString()}/min`;
+    }
+
+    const utilities = snapshot?.utilities || {};
+    const power = document.getElementById("mgPower");
+    const water = document.getElementById("mgWater");
+    const air = document.getElementById("mgAir");
+
+    if (power) {
+      power.textContent =
+        `${Math.floor(utilities.powerSupply || 0)}/${Math.floor(utilities.powerDemand || 0)}`;
+    }
+    if (water) {
+      water.textContent =
+        `${Math.floor(utilities.waterSupply || 0)}/${Math.floor(utilities.waterDemand || 0)}`;
+    }
+    if (air) {
+      air.textContent =
+        `${Math.floor(utilities.cleanAirSupply || 0)}/${Math.floor(utilities.cleanAirDemand || 0)}`;
     }
   }
 

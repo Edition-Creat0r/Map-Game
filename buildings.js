@@ -20,6 +20,9 @@
       cost: { money: 42000, concrete: 45, glass: 16 },
       incomePerMin: 18,
       population: 4,
+      powerUse: 1,
+      waterUse: 1,
+      pollution: 0,
       footprint: [18, 22],
       variants: ["Contemporary", "Craftsman", "Stucco", "Town", "Future"]
     },
@@ -32,6 +35,9 @@
       cost: { money: 110000, concrete: 120, glass: 45, steel: 25 },
       incomePerMin: 48,
       population: 28,
+      powerUse: 3,
+      waterUse: 3,
+      pollution: 0,
       footprint: [46, 24],
       variants: ["Modern", "Brick", "Bay Area", "Garden", "Future"]
     },
@@ -44,6 +50,9 @@
       cost: { money: 260000, concrete: 260, glass: 120, steel: 80 },
       incomePerMin: 120,
       population: 130,
+      powerUse: 8,
+      waterUse: 10,
+      pollution: 0,
       footprint: [66, 58],
       variants: ["Modern", "Stucco", "Brick", "Urban", "Future"]
     },
@@ -56,6 +65,9 @@
       cost: { money: 680000, concrete: 560, glass: 420, steel: 310 },
       incomePerMin: 270,
       population: 420,
+      powerUse: 18,
+      waterUse: 22,
+      pollution: 0,
       footprint: [46, 46],
       variants: ["Glass", "Concrete", "Balcony", "Luxury", "Future"]
     },
@@ -67,6 +79,9 @@
       description: "Small neighborhood retail with reliable but modest income.",
       cost: { money: 58000, concrete: 50, glass: 25 },
       incomePerMin: 30,
+      powerUse: 2,
+      waterUse: 1,
+      pollution: 0,
       footprint: [24, 20],
       variants: ["Modern", "Classic", "Brick", "Market", "Future"]
     },
@@ -78,6 +93,9 @@
       description: "A small destination business that earns money and improves future district appeal.",
       cost: { money: 82000, concrete: 55, glass: 40 },
       incomePerMin: 44,
+      powerUse: 3,
+      waterUse: 2,
+      pollution: 0,
       footprint: [26, 22],
       variants: ["Glass", "Warm", "Industrial", "Garden", "Future"]
     },
@@ -89,6 +107,9 @@
       description: "Several shops in a single connected commercial building.",
       cost: { money: 240000, concrete: 190, glass: 130, steel: 70 },
       incomePerMin: 135,
+      powerUse: 7,
+      waterUse: 4,
+      pollution: 0,
       footprint: [74, 30],
       variants: ["Modern", "Bay Area", "Brick", "Lifestyle", "Future"]
     },
@@ -100,6 +121,9 @@
       description: "A larger store serving residential districts and generating steady revenue.",
       cost: { money: 360000, concrete: 300, glass: 110, steel: 110 },
       incomePerMin: 180,
+      powerUse: 10,
+      waterUse: 8,
+      pollution: 0,
       footprint: [82, 58],
       variants: ["Modern", "Urban", "Warehouse", "Natural", "Future"]
     },
@@ -111,6 +135,9 @@
       description: "Low-rise office buildings suited to a suburban technology corridor.",
       cost: { money: 520000, concrete: 360, glass: 300, steel: 190 },
       incomePerMin: 250,
+      powerUse: 16,
+      waterUse: 7,
+      pollution: 0,
       footprint: [86, 72],
       variants: ["Tech", "Glass", "Campus", "Classic", "Future"]
     },
@@ -122,6 +149,9 @@
       description: "High-value commercial office space for a developed downtown.",
       cost: { money: 980000, concrete: 690, glass: 720, steel: 520 },
       incomePerMin: 460,
+      powerUse: 28,
+      waterUse: 10,
+      pollution: 0,
       footprint: [50, 50],
       variants: ["Modern", "Glass", "Art Deco", "Classic", "Future"]
     },
@@ -133,6 +163,9 @@
       description: "Tourism and business lodging with high operating revenue.",
       cost: { money: 1250000, concrete: 850, glass: 650, steel: 460 },
       incomePerMin: 560,
+      powerUse: 32,
+      waterUse: 26,
+      pollution: 0,
       footprint: [60, 62],
       variants: ["Business", "Luxury", "Resort", "Urban", "Future"]
     },
@@ -144,6 +177,9 @@
       description: "Large shopping and dining complex. Expensive, but a major revenue generator.",
       cost: { money: 2400000, concrete: 1500, glass: 750, steel: 820 },
       incomePerMin: 980,
+      powerUse: 58,
+      waterUse: 34,
+      pollution: 1,
       footprint: [132, 110],
       variants: ["Open Air", "Glass", "Urban", "Classic", "Future"]
     },
@@ -155,6 +191,9 @@
       description: "Logistics building that supports future industrial supply chains.",
       cost: { money: 290000, concrete: 320, steel: 150 },
       incomePerMin: 95,
+      powerUse: 12,
+      waterUse: 3,
+      pollution: 8,
       footprint: [92, 62],
       variants: ["Logistics", "Clean", "Heavy", "Carbon", "Future"]
     },
@@ -166,6 +205,9 @@
       description: "Processes iron into steel. Later versions require road and power access.",
       cost: { money: 950000, iron: 900, concrete: 600, steel: 120 },
       incomePerMin: 180,
+      powerUse: 42,
+      waterUse: 16,
+      pollution: 28,
       footprint: [118, 92],
       variants: ["Industrial", "Modern", "Carbon", "Heavy", "Future"],
       produces: ["Steel"]
@@ -178,6 +220,9 @@
       description: "Advanced materials plant for later technology and aerospace progression.",
       cost: { money: 1850000, steel: 900, concrete: 1100 },
       incomePerMin: 330,
+      powerUse: 54,
+      waterUse: 18,
+      pollution: 18,
       footprint: [126, 96],
       variants: ["Industrial", "Clean", "Carbon", "Research", "Future"],
       produces: ["Carbon"]
@@ -190,9 +235,58 @@
       description: "Major power infrastructure. Its main value is future electricity capacity.",
       cost: { money: 900000, steel: 750, concrete: 900 },
       incomePerMin: 0,
+      powerUse: 2,
+      waterUse: 8,
+      pollution: 16,
+      powerSupply: 160,
       footprint: [122, 104],
       variants: ["Utility", "Modern", "Clean", "Carbon", "Future"],
       produces: ["Electricity"]
+    },
+    {
+      id: "solarFarm",
+      category: "Infrastructure",
+      icon: "☀",
+      name: "Solar Farm",
+      description: "Clean starter electricity. Low pollution, but it occupies a large site.",
+      cost: { money: 145000, steel: 45, glass: 35, concrete: 35 },
+      incomePerMin: 0,
+      powerUse: 0,
+      waterUse: 0,
+      pollution: 0,
+      powerSupply: 65,
+      footprint: [88, 62],
+      variants: ["Standard", "Dense", "Landscape", "Tech", "Future"]
+    },
+    {
+      id: "waterPlant",
+      category: "Infrastructure",
+      icon: "◒",
+      name: "Water Treatment Plant",
+      description: "Provides treated water capacity to homes, shops and industry.",
+      cost: { money: 175000, steel: 55, concrete: 110 },
+      incomePerMin: 0,
+      powerUse: 8,
+      waterUse: 0,
+      pollution: 2,
+      waterSupply: 85,
+      footprint: [78, 64],
+      variants: ["Utility", "Modern", "Compact", "Green", "Future"]
+    },
+    {
+      id: "airQualityCenter",
+      category: "Infrastructure",
+      icon: "◌",
+      name: "Air Quality Center",
+      description: "Filters industrial emissions and expands clean-air capacity.",
+      cost: { money: 210000, steel: 70, glass: 20, concrete: 95 },
+      incomePerMin: 0,
+      powerUse: 14,
+      waterUse: 3,
+      pollution: -18,
+      cleanAirSupply: 45,
+      footprint: [66, 56],
+      variants: ["Civic", "Green", "Industrial", "Research", "Future"]
     },
     {
       id: "governmentHall",
@@ -202,6 +296,9 @@
       description: "Administrative center for laws, services and future government systems.",
       cost: { money: 750000, steel: 600, glass: 400, concrete: 1000 },
       incomePerMin: 0,
+      powerUse: 8,
+      waterUse: 6,
+      pollution: 0,
       footprint: [86, 72],
       variants: ["Civic", "Modern", "Classical", "Monumental", "Future"]
     },
@@ -213,6 +310,9 @@
       description: "Future military and emergency-services training complex.",
       cost: { money: 680000, steel: 280, concrete: 720 },
       incomePerMin: 0,
+      powerUse: 10,
+      waterUse: 8,
+      pollution: 1,
       footprint: [130, 110],
       variants: ["Standard", "Urban", "Field", "Secure", "Future"]
     },
@@ -224,6 +324,10 @@
       description: "Landscaped public space for recreation, city appeal and future tourism.",
       cost: { money: 90000, concrete: 80 },
       incomePerMin: 0,
+      powerUse: 2,
+      waterUse: 6,
+      pollution: -8,
+      cleanAirSupply: 18,
       footprint: [86, 76],
       variants: ["Urban", "Natural", "Formal", "Waterfront", "Future"]
     },
@@ -235,6 +339,9 @@
       description: "Large recreation destination with future tourism and ticket revenue.",
       cost: { money: 2800000, steel: 1100, concrete: 1300 },
       incomePerMin: 720,
+      powerUse: 46,
+      waterUse: 30,
+      pollution: 3,
       footprint: [190, 170],
       variants: ["Classic", "Boardwalk", "Adventure", "Modern", "Future"]
     }
@@ -481,13 +588,199 @@
     return root;
   }
 
+
+  function addRegularFacadeDetail(B, scene, root, w, h, d, mats, kind = "generic") {
+    const floors = Math.max(2, Math.floor(h / 4.1));
+
+    for (let f = 1; f < floors; f++) {
+      const y = f * (h / floors);
+      const band = B.MeshBuilder.CreateBox("regularFloorBand", {
+        width: w + 0.18,
+        height: 0.18,
+        depth: d + 0.18
+      }, scene);
+      band.position.y = y;
+      band.material = mats.dark;
+      band.parent = root;
+      band.isPickable = false;
+    }
+
+    const cols = Math.max(3, Math.floor(w / 6));
+    for (let c = 0; c < cols; c++) {
+      const win = B.MeshBuilder.CreateBox("regularWindowColumn", {
+        width: Math.max(1.7, w / (cols * 1.8)),
+        height: h * 0.66,
+        depth: 0.14
+      }, scene);
+      win.position.set(
+        -w * 0.40 + (c + 0.5) * (w * 0.80 / cols),
+        h * 0.52,
+        -d / 2 - 0.10
+      );
+      win.material = mats.storefront;
+      win.parent = root;
+      win.isPickable = false;
+    }
+
+    if (kind !== "house") {
+      const hvac = B.MeshBuilder.CreateBox("roofHVAC", {
+        width: Math.max(4, w * 0.24),
+        height: 2.1,
+        depth: Math.max(4, d * 0.22)
+      }, scene);
+      hvac.position.set(w * 0.18, h + 1.05, 0);
+      hvac.material = mats.dark;
+      hvac.parent = root;
+      hvac.isPickable = false;
+    }
+  }
+
+  function renderPlacedBuilding(runtime, data, parent) {
+    if (!runtime?.scene || !window.BABYLON) return null;
+
+    const B = window.BABYLON;
+    const scene = runtime.scene;
+    const def = item(data.type);
+    const regular = runtime.graphicsPreset === "REGULAR";
+    const mats = createMaterials(B, scene, regular);
+    const fp = def.footprint || [40, 40];
+    const w = fp[0];
+    const d = fp[1];
+
+    const root = new B.TransformNode(`placed_${data.id}`, scene);
+    root.parent = parent || null;
+    root.position.set(data.x || 0, data.y || 0, data.z || 0);
+    root.rotation.y = data.rotation || 0;
+    root.metadata = {
+      placedBuilding: true,
+      placedBuildingId: data.id,
+      buildingType: data.type,
+      footprint: fp.slice(),
+      ownerId: data.ownerId || "local"
+    };
+
+    const foundationDepth = data.foundationDepth || 3.2;
+    addFoundation(B, scene, root, w, d, mats.dark, foundationDepth);
+
+    let visual;
+
+    if (data.type === "smallHouse") {
+      visual = house(B, scene, root, 0, 0, 0, mats, data.variant || 0);
+    } else if (data.type === "townhomes") {
+      visual = new B.TransformNode("townhomesVisual", scene);
+      visual.parent = root;
+      for (let i = -1; i <= 1; i++) {
+        house(B, scene, visual, i * 15.5, 0, 0, mats, (data.variant || 0) + i + 2);
+      }
+    } else if (def.category === "Residential") {
+      const h = data.type === "apartmentTower" ? 72 : 28;
+      visual = apartment(B, scene, root, 0, 0, w * 0.86, h, d * 0.82, mats, data.variant || 0);
+      if (regular) addRegularFacadeDetail(B, scene, visual, w * 0.86, h, d * 0.82, mats, "apartment");
+    } else if (def.category === "Commercial") {
+      if (["officeTower","hotel"].includes(data.type)) {
+        const h = data.type === "officeTower" ? 96 : 72;
+        visual = apartment(B, scene, root, 0, 0, w * 0.78, h, d * 0.76, mats, data.variant || 0);
+        if (regular) addRegularFacadeDetail(B, scene, visual, w * 0.78, h, d * 0.76, mats, "tower");
+      } else {
+        visual = retail(B, scene, root, 0, 0, w * 0.90, d * 0.82, mats, data.variant || 0);
+        if (regular && data.type === "officeLow") {
+          addRegularFacadeDetail(B, scene, visual, w * 0.90, 18, d * 0.82, mats, "office");
+        }
+      }
+    } else if (def.category === "Industrial") {
+      visual = warehouse(B, scene, root, 0, 0, w * 0.92, d * 0.86, mats, data.variant || 0);
+      if (["steelMill", "carbonPlant"].includes(data.type)) {
+        const stacks = regular ? 3 : 2;
+        for (let i = 0; i < stacks; i++) {
+          const stack = B.MeshBuilder.CreateCylinder("factoryStack", {
+            diameter: 3.6,
+            height: 25 + i * 3,
+            tessellation: regular ? 18 : 10
+          }, scene);
+          stack.position.set(-w * 0.25 + i * 10, 16, d * 0.18);
+          stack.material = mats.dark;
+          stack.parent = root;
+          stack.isPickable = false;
+        }
+      }
+    } else if (data.type === "solarFarm") {
+      visual = new B.TransformNode("solarFarmVisual", scene);
+      visual.parent = root;
+      const rows = regular ? 5 : 3;
+      const cols = regular ? 7 : 5;
+      for (let rz = 0; rz < rows; rz++) {
+        for (let cx = 0; cx < cols; cx++) {
+          const panel = B.MeshBuilder.CreateBox("solarPanel", {
+            width: 8.5,
+            height: 0.35,
+            depth: 5.2
+          }, scene);
+          panel.position.set(
+            -w * 0.34 + cx * (w * 0.68 / Math.max(1, cols - 1)),
+            2.3,
+            -d * 0.30 + rz * (d * 0.60 / Math.max(1, rows - 1))
+          );
+          panel.rotation.x = -0.22;
+          panel.material = mats.storefront;
+          panel.parent = visual;
+        }
+      }
+    } else if (["waterPlant", "airQualityCenter", "powerPlant"].includes(data.type)) {
+      visual = warehouse(B, scene, root, 0, 0, w * 0.88, d * 0.82, mats, data.variant || 0);
+      if (regular) addRegularFacadeDetail(B, scene, visual, w * 0.88, 18, d * 0.82, mats, "utility");
+    } else if (def.category === "Parks") {
+      visual = new B.TransformNode("parkVisual", scene);
+      visual.parent = root;
+
+      const lawn = B.MeshBuilder.CreateBox("parkLawn", {
+        width: w * 0.92,
+        height: 0.3,
+        depth: d * 0.90
+      }, scene);
+      lawn.position.y = 0.1;
+      lawn.material = mats.accent;
+      lawn.parent = visual;
+
+      const trees = regular ? 12 : 6;
+      for (let i = 0; i < trees; i++) {
+        const trunk = B.MeshBuilder.CreateCylinder("parkTreeTrunk", {
+          diameter: 0.8,
+          height: 4.5,
+          tessellation: 8
+        }, scene);
+        trunk.position.set(
+          -w * 0.36 + (i % 4) * w * 0.24,
+          2.3,
+          -d * 0.30 + Math.floor(i / 4) * d * 0.28
+        );
+        trunk.material = mats.dark;
+        trunk.parent = visual;
+
+        const crown = B.MeshBuilder.CreateIcoSphere("parkTreeCrown", {
+          radius: 2.7,
+          subdivisions: regular ? 2 : 1
+        }, scene);
+        crown.position.copyFrom(trunk.position);
+        crown.position.y += 4.0;
+        crown.material = mats.warm;
+        crown.parent = visual;
+      }
+    } else {
+      visual = apartment(B, scene, root, 0, 0, w * 0.84, 24, d * 0.80, mats, data.variant || 0);
+      if (regular) addRegularFacadeDetail(B, scene, visual, w * 0.84, 24, d * 0.80, mats, "civic");
+    }
+
+    return root;
+  }
+
   window.mapGameBuildings = {
-    VERSION: "0.2.1E",
+    VERSION: "0.2.1F",
     CATALOG,
     item,
     buildNeighborhoodDemo,
+    renderPlacedBuilding,
     addFoundation
   };
 
-  console.log("Map Game buildings 0.2.1E ready.");
+  console.log("Map Game buildings 0.2.1F ready.");
 })();

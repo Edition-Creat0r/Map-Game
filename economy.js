@@ -16,11 +16,11 @@
   const OFFLINE_CAP_MINUTES = 12 * 60;
 
   const DEFAULT = {
-    money: 250000,
-    iron: 120,
-    steel: 60,
-    concrete: 300,
-    glass: 120,
+    money: 400000,
+    iron: 200,
+    steel: 100,
+    concrete: 500,
+    glass: 180,
     placedIncomeItems: [],
     lastEconomyTick: Date.now(),
     totalEarned: 0
@@ -55,13 +55,74 @@
     return window.mapGameBuildings?.CATALOG || [];
   }
 
-  function incomePerMinute() {
-    let total = 0;
+  function utilitySummary() {
+    const defs = catalog();
+    let powerSupply = 18;
+    let waterSupply = 16;
+    let cleanAirSupply = 28;
+    let powerDemand = 0;
+    let waterDemand = 0;
+    let pollution = 0;
+
     for (const placed of state.placedIncomeItems) {
-      const def = catalog().find(v => v.id === placed.type);
+      const def = defs.find(v => v.id === placed.type);
       if (!def) continue;
-      total += Number(def.incomePerMin || 0) * Number(placed.level || 1);
+      const level = Number(placed.level || 1);
+
+      powerSupply += Number(def.powerSupply || 0) * level;
+      waterSupply += Number(def.waterSupply || 0) * level;
+      cleanAirSupply += Number(def.cleanAirSupply || 0) * level;
+
+      powerDemand += Number(def.powerUse || 0) * level;
+      waterDemand += Number(def.waterUse || 0) * level;
+      pollution += Number(def.pollution || 0) * level;
     }
+
+    const cleanAirDemand = Math.max(0, pollution);
+    const powerRatio = powerDemand <= 0 ? 1 : Math.min(1, powerSupply / powerDemand);
+    const waterRatio = waterDemand <= 0 ? 1 : Math.min(1, waterSupply / waterDemand);
+    const airRatio = cleanAirDemand <= 0 ? 1 : Math.min(1, cleanAirSupply / cleanAirDemand);
+
+    return {
+      powerSupply,
+      waterSupply,
+      cleanAirSupply,
+      powerDemand,
+      waterDemand,
+      pollution,
+      cleanAirDemand,
+      powerRatio,
+      waterRatio,
+      airRatio,
+      operationalRatio: Math.min(powerRatio, waterRatio, airRatio)
+    };
+  }
+
+  function buildingOperationalRatio(def, summary) {
+    if (!def) return 0;
+    let ratio = 1;
+    if (Number(def.powerUse || 0) > 0) ratio = Math.min(ratio, summary.powerRatio);
+    if (Number(def.waterUse || 0) > 0) ratio = Math.min(ratio, summary.waterRatio);
+    if (Number(def.pollution || 0) > 0) ratio = Math.min(ratio, summary.airRatio);
+    return Math.max(0, Math.min(1, ratio));
+  }
+
+  function incomePerMinute() {
+    const defs = catalog();
+    const summary = utilitySummary();
+    let total = 0;
+
+    for (const placed of state.placedIncomeItems) {
+      const def = defs.find(v => v.id === placed.type);
+      if (!def) continue;
+
+      const level = Number(placed.level || 1);
+      total +=
+        Number(def.incomePerMin || 0) *
+        level *
+        buildingOperationalRatio(def, summary);
+    }
+
     return total;
   }
 
@@ -78,7 +139,8 @@
   function snapshot() {
     return {
       ...state,
-      incomePerMin: incomePerMinute()
+      incomePerMin: incomePerMinute(),
+      utilities: utilitySummary()
     };
   }
 
@@ -202,6 +264,33 @@
     return true;
   }
 
+  function purchaseAndRegisterBuilding(def, buildingData) {
+    if (!def || !buildingData?.id) return false;
+    if (!spend(def.cost || {})) return false;
+
+    state.placedIncomeItems.push({
+      id: buildingData.id,
+      type: def.id,
+      level: Number(buildingData.level || 1),
+      territoryId: buildingData.territoryId || null,
+      x: Number(buildingData.x || 0),
+      z: Number(buildingData.z || 0),
+      rotation: Number(buildingData.rotation || 0),
+      variant: Number(buildingData.variant || 0),
+      createdAt: Date.now()
+    });
+
+    save();
+    emit();
+    return true;
+  }
+
+  function listPlacedBuildings(territoryId = null) {
+    return state.placedIncomeItems.filter(v =>
+      !territoryId || v.territoryId === territoryId
+    );
+  }
+
   function subscribe(fn) {
     listeners.add(fn);
     fn(snapshot());
@@ -209,7 +298,7 @@
   }
 
   window.mapGameEconomy = {
-    VERSION: "0.2.1E",
+    VERSION: "0.2.1F",
     OFFLINE_CAP_MINUTES,
     snapshot,
     incomePerMinute,
@@ -218,6 +307,9 @@
     stop,
     registerPlacedBuilding,
     removePlacedBuilding,
+    purchaseAndRegisterBuilding,
+    listPlacedBuildings,
+    utilitySummary,
     canAfford,
     spend,
     credit,
@@ -227,5 +319,5 @@
   };
 
   window.addEventListener("beforeunload", save);
-  console.log("Map Game economy 0.2.1E ready.");
+  console.log("Map Game economy 0.2.1F ready.");
 })();

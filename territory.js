@@ -199,6 +199,22 @@
     });
   }
 
+  function terrainClassAt(x, z, biome, cellX, cellY, chunkSize = 1800) {
+    const slope = slopeAt(x, z, biome, cellX, cellY, chunkSize, 18);
+    const h = heightAt(x, z, biome, cellX, cellY, chunkSize);
+    const rocky =
+      biome === "mountain" ||
+      slope > 9 ||
+      (biome === "tundra" && h > 10);
+
+    return {
+      rocky,
+      slope,
+      height: h,
+      label: rocky ? "rocky terrain" : "soil terrain"
+    };
+  }
+
   function analyzeSite({
     x,
     z,
@@ -346,15 +362,16 @@
   }
 
   window.mapGameTerritory = {
-    VERSION: "0.2.1D",
+    VERSION: "0.2.1F",
     heightAt,
     slopeAt,
     waterBandAt,
     citySites,
     analyzeSite,
     vegetationPoints,
-    rockPoints
+    rockPoints,
+    terrainClassAt
   };
 
-  console.log("Map Game territory planner 0.2.1D ready.");
+  console.log("Map Game territory planner 0.2.1F ready.");
 })();
