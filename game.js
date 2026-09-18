@@ -96,7 +96,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.1";
+  const VERSION = "0.2.1B-C";
   const CHUNK_WORLD_SIZE = 980;
   const WORLD_COLS = 44;
   const WORLD_ROWS = 30;
@@ -433,15 +433,68 @@
     shadowGenerator.addShadowCaster(mesh);
 
     if (height > 70) {
-      const cap = BABYLON.MeshBuilder.CreatePolyhedron(`${name}_snow`, {
-        type: 1,
-        size: radius * 0.28
-      }, scene);
-      cap.scaling = new BABYLON.Vector3(1.5, height / Math.max(1, radius) * 0.38, 1.2);
-      cap.position = new BABYLON.Vector3(x + topOffsetX, height * 0.90, z + topOffsetZ);
-      cap.material = snowMat;
-      cap.parent = parent || null;
-      cap.isPickable = false;
+      // Snow now follows the actual upper mountain surface rather than
+      // sitting on the peak as a separate low-poly "ice hat".
+      const snowStartRing = Math.max(1, rings - 2);
+      const snowPositions = [];
+      const snowIndices = [];
+      const snowUvs = [];
+      const snowRingCount = rings - snowStartRing + 1;
+
+      for (let rr = snowStartRing; rr <= rings; rr++) {
+        for (let s = 0; s < segments; s++) {
+          const source = (rr * segments + s) * 3;
+          snowPositions.push(
+            positions[source],
+            positions[source + 1] + 0.16,
+            positions[source + 2]
+          );
+          snowUvs.push(s / segments, (rr - snowStartRing) / Math.max(1, snowRingCount - 1));
+        }
+      }
+
+      for (let rr = 0; rr < snowRingCount - 1; rr++) {
+        for (let s = 0; s < segments; s++) {
+          const n = (s + 1) % segments;
+          const a = rr * segments + s;
+          const b = rr * segments + n;
+          const c = (rr + 1) * segments + s;
+          const d = (rr + 1) * segments + n;
+          snowIndices.push(a, c, b, b, c, d);
+        }
+      }
+
+      const snowTop = snowPositions.length / 3;
+      snowPositions.push(
+        x + topOffsetX,
+        height * 1.04 + 0.18,
+        z + topOffsetZ
+      );
+      snowUvs.push(0.5, 1);
+
+      const snowTopRingStart = (snowRingCount - 1) * segments;
+      for (let s = 0; s < segments; s++) {
+        snowIndices.push(
+          snowTopRingStart + s,
+          snowTop,
+          snowTopRingStart + ((s + 1) % segments)
+        );
+      }
+
+      const snowNormals = [];
+      BABYLON.VertexData.ComputeNormals(snowPositions, snowIndices, snowNormals);
+      const snowData = new BABYLON.VertexData();
+      snowData.positions = snowPositions;
+      snowData.indices = snowIndices;
+      snowData.normals = snowNormals;
+      snowData.uvs = snowUvs;
+
+      const snowSurface = new BABYLON.Mesh(`${name}_snowSurface`, scene);
+      snowData.applyToMesh(snowSurface);
+      snowSurface.material = snowMat;
+      snowSurface.parent = parent || null;
+      snowSurface.isPickable = false;
+      snowSurface.receiveShadows = true;
     }
 
     return mesh;
@@ -868,6 +921,225 @@
   // NEUTRAL CENTRAL HUB
   // ==========================================================
 
+
+  function createMidRiseBlock(root, x, z, w, h, d, variant = 0) {
+    const node = new BABYLON.TransformNode("hubMidRise", scene);
+    node.parent = root;
+    node.position.set(x, 0, z);
+
+    const baseH = Math.min(9, h * 0.22);
+    const base = BABYLON.MeshBuilder.CreateBox("midRisePodium", {
+      width: w * 1.10,
+      height: baseH,
+      depth: d * 1.08
+    }, scene);
+    base.position.y = baseH / 2;
+    base.material = buildingWallMaterial();
+    base.parent = node;
+    base.receiveShadows = true;
+    shadowGenerator.addShadowCaster(base);
+
+    const upper = BABYLON.MeshBuilder.CreateBox("midRiseUpper", {
+      width: w,
+      height: h - baseH,
+      depth: d
+    }, scene);
+    upper.position.y = baseH + (h - baseH) / 2;
+    upper.material = variant % 3 === 0 ? buildingGlassMaterial() : buildingWallMaterial();
+    upper.parent = node;
+    upper.receiveShadows = true;
+    shadowGenerator.addShadowCaster(upper);
+
+    addWindowGrid(node, w, h - baseH, d, {
+      floorHeight: state.graphics === "REGULAR" ? 4.3 : 5.2,
+      windowSpacing: state.graphics === "REGULAR" ? 4.6 : 5.8
+    });
+
+    if (variant % 2 === 0) {
+      const roof = BABYLON.MeshBuilder.CreateBox("midRiseRoof", {
+        width: w * 0.72,
+        height: 2.2,
+        depth: d * 0.64
+      }, scene);
+      roof.position.y = h + 1.1;
+      roof.material = darkMat;
+      roof.parent = node;
+    }
+
+    return node;
+  }
+
+  function createParkBlock(root, x, z, w, d, seed = 1) {
+    const park = new BABYLON.TransformNode("hubPark", scene);
+    park.parent = root;
+    park.position.set(x, 0, z);
+
+    const lawn = BABYLON.MeshBuilder.CreateBox("parkLawn", {
+      width: w,
+      height: 0.38,
+      depth: d
+    }, scene);
+    lawn.position.y = 0.24;
+    lawn.material = grassLightMat;
+    lawn.parent = park;
+    lawn.receiveShadows = true;
+
+    const walkA = BABYLON.MeshBuilder.CreateBox("parkWalk", {
+      width: Math.max(4, w * 0.10),
+      height: 0.18,
+      depth: d * 0.86
+    }, scene);
+    walkA.position.y = 0.50;
+    walkA.material = concreteLightMat;
+    walkA.parent = park;
+
+    const walkB = BABYLON.MeshBuilder.CreateBox("parkWalk", {
+      width: w * 0.86,
+      height: 0.18,
+      depth: Math.max(4, d * 0.10)
+    }, scene);
+    walkB.position.y = 0.51;
+    walkB.material = concreteLightMat;
+    walkB.parent = park;
+
+    const treeCount = state.graphics === "REGULAR" ? 12 : 8;
+    for (let i = 0; i < treeCount; i++) {
+      let tx = -w * 0.40 + seeded(seed, i, 310) * w * 0.80;
+      let tz = -d * 0.40 + seeded(seed, i, 320) * d * 0.80;
+      if (Math.abs(tx) < w * 0.10 || Math.abs(tz) < d * 0.10) {
+        tx += tx < 0 ? -w * 0.10 : w * 0.10;
+        tz += tz < 0 ? -d * 0.10 : d * 0.10;
+      }
+      createTree(park, tx, tz, 0.62 + seeded(seed, i, 330) * 0.32, i % 6 === 0 ? 1 : 0);
+    }
+
+    return park;
+  }
+
+  function createTransitCenter(root, x, z, rotation = 0) {
+    const transit = new BABYLON.TransformNode("hubTransitCenter", scene);
+    transit.parent = root;
+    transit.position.set(x, 0, z);
+    transit.rotation.y = rotation;
+
+    const base = BABYLON.MeshBuilder.CreateBox("transitBase", {
+      width: 96,
+      height: 10,
+      depth: 42
+    }, scene);
+    base.position.y = 5;
+    base.material = buildingWallMaterial();
+    base.parent = transit;
+    shadowGenerator.addShadowCaster(base);
+
+    const glassHall = BABYLON.MeshBuilder.CreateBox("transitGlassHall", {
+      width: 72,
+      height: 14,
+      depth: 28
+    }, scene);
+    glassHall.position.y = 14;
+    glassHall.material = buildingGlassMaterial();
+    glassHall.parent = transit;
+    shadowGenerator.addShadowCaster(glassHall);
+
+    for (let i = -3; i <= 3; i++) {
+      const rib = BABYLON.MeshBuilder.CreateBox("transitRib", {
+        width: 0.7,
+        height: 15,
+        depth: 30
+      }, scene);
+      rib.position.set(i * 10, 14, 0);
+      rib.material = darkMat;
+      rib.parent = transit;
+    }
+
+    const canopy = BABYLON.MeshBuilder.CreateBox("transitCanopy", {
+      width: 108,
+      height: 1.1,
+      depth: 8
+    }, scene);
+    canopy.position.set(0, 9, -24);
+    canopy.material = darkMat;
+    canopy.parent = transit;
+
+    return transit;
+  }
+
+  function createLandscapeMound(root, x, z, sx, sy, sz, seed = 1) {
+    const mound = BABYLON.MeshBuilder.CreateSphere("landscapeMound", {
+      diameter: 28,
+      segments: state.graphics === "REGULAR" ? 16 : 10
+    }, scene);
+    mound.position.set(x, -7 + sy * 0.35, z);
+    mound.scaling.set(sx, sy, sz);
+    mound.material = grassMat;
+    mound.parent = root;
+    mound.receiveShadows = true;
+    mound.isPickable = false;
+
+    const rockCount = state.graphics === "REGULAR" ? 4 : 2;
+    for (let i = 0; i < rockCount; i++) {
+      const rock = BABYLON.MeshBuilder.CreatePolyhedron("gatewayRock", {
+        type: 2,
+        size: 3.0 + seeded(seed, i, 505) * 4.5
+      }, scene);
+      rock.position.set(
+        x + (seeded(seed, i, 510) - 0.5) * sx * 18,
+        1.0 + seeded(seed, i, 520) * 2.2,
+        z + (seeded(seed, i, 530) - 0.5) * sz * 18
+      );
+      rock.scaling.y = 0.65 + seeded(seed, i, 540) * 0.55;
+      rock.material = rockMat;
+      rock.parent = root;
+      rock.isPickable = false;
+    }
+
+    return mound;
+  }
+
+  function createHubGateway(root, x, z, axis = "z", seed = 1) {
+    const gateway = new BABYLON.TransformNode("hubGateway", scene);
+    gateway.parent = root;
+    gateway.position.set(x, 0, z);
+
+    const horizontal = axis === "x";
+    const plaza = BABYLON.MeshBuilder.CreateBox("gatewayPlaza", {
+      width: horizontal ? 70 : 110,
+      height: 0.46,
+      depth: horizontal ? 110 : 70
+    }, scene);
+    plaza.position.y = 0.32;
+    plaza.material = concreteLightMat;
+    plaza.parent = gateway;
+
+    for (const side of [-1, 1]) {
+      const pylon = BABYLON.MeshBuilder.CreateBox("gatewayPylon", {
+        width: horizontal ? 5 : 13,
+        height: 20,
+        depth: horizontal ? 13 : 5
+      }, scene);
+      pylon.position.set(
+        horizontal ? 0 : side * 27,
+        10,
+        horizontal ? side * 27 : 0
+      );
+      pylon.material = darkMat;
+      pylon.parent = gateway;
+
+      const light = BABYLON.MeshBuilder.CreateBox("gatewayLight", {
+        width: horizontal ? 5.4 : 13.4,
+        height: 0.7,
+        depth: horizontal ? 13.4 : 5.4
+      }, scene);
+      light.position.copyFrom(pylon.position);
+      light.position.y = 17.5;
+      light.material = lampGlowMat;
+      light.parent = gateway;
+    }
+
+    return gateway;
+  }
+
   function buildNeutralHub() {
     disposeNode(state.terrainRoot);
     disposeNode(state.hubRoot);
@@ -960,6 +1232,86 @@
     ];
     sky.forEach(args => createGlassSkyscraper(root, ...args));
 
+    // ----------------------------------------------------------
+    // 0.2.1B — SECONDARY CITY DISTRICTS
+    // The neutral hub now reads as a real city rather than one plaza
+    // surrounded by a handful of towers.
+    // ----------------------------------------------------------
+
+    // Outer boulevard frame / connection roads.
+    createRoad(root, 0, -300, 610, 18, 0);
+    createRoad(root, 0, 300, 610, 18, 0);
+    createRoad(root, -300, 0, 18, 610, 0);
+    createRoad(root, 300, 0, 18, 610, 0);
+
+    populateRoadLamps(root, "x", -285, 285, -300, 48);
+    populateRoadLamps(root, "x", -285, 285, 300, 48);
+    populateRoadLamps(root, "z", -285, 285, -300, 48);
+    populateRoadLamps(root, "z", -285, 285, 300, 48);
+
+    // Mid-rise mixed office blocks.
+    const midBlocks = [
+      [-245, -82, 46, 48, 38, 0],
+      [-245, 82, 42, 56, 34, 1],
+      [245, -82, 46, 58, 38, 2],
+      [245, 82, 42, 50, 36, 3],
+
+      [-82, -245, 44, 54, 38, 4],
+      [82, -245, 40, 62, 34, 5],
+      [-82, 245, 46, 52, 36, 6],
+      [82, 245, 42, 60, 36, 7],
+
+      [-245, -245, 40, 44, 36, 8],
+      [245, -245, 42, 52, 38, 9],
+      [-245, 245, 44, 48, 38, 10],
+      [245, 245, 40, 56, 34, 11]
+    ];
+    midBlocks.forEach(args => createMidRiseBlock(root, ...args));
+
+    // Additional skyline anchors to make the central hub visibly larger
+    // from every direction.
+    const secondarySkyline = [
+      [-325, -155, 34, 102, 32, 12],
+      [325, -145, 36, 116, 34, 13],
+      [-325, 155, 38, 128, 34, 14],
+      [325, 150, 34, 108, 32, 15],
+      [-155, -335, 36, 96, 34, 16],
+      [155, -340, 38, 124, 36, 17],
+      [-155, 335, 36, 112, 34, 18],
+      [155, 338, 40, 132, 36, 19]
+    ];
+    secondarySkyline.forEach(args => createGlassSkyscraper(root, ...args));
+
+    // Civic parks create deliberate negative space between districts.
+    createParkBlock(root, -150, -150, 92, 82, 41);
+    createParkBlock(root, 150, -150, 92, 82, 42);
+    createParkBlock(root, -150, 150, 92, 82, 43);
+    createParkBlock(root, 150, 150, 92, 82, 44);
+
+    // Transit/cultural anchors at the east/west sides.
+    createTransitCenter(root, -390, 0, Math.PI / 2);
+    createTransitCenter(root, 390, 0, Math.PI / 2);
+
+    // Four monumental arrival gateways connect the structured city
+    // to the more natural terrain belt.
+    createHubGateway(root, 0, -400, "z", 61);
+    createHubGateway(root, 0, 400, "z", 62);
+    createHubGateway(root, -400, 0, "x", 63);
+    createHubGateway(root, 400, 0, "x", 64);
+
+    // Terrain transition mounds around the edge: city -> parkland -> world.
+    const transitionMounds = [
+      [-430, -300, 3.0, 0.75, 2.2, 71],
+      [-430, 300, 2.8, 0.65, 2.4, 72],
+      [430, -300, 3.0, 0.70, 2.1, 73],
+      [430, 300, 2.8, 0.72, 2.4, 74],
+      [-305, -430, 2.4, 0.72, 3.0, 75],
+      [305, -430, 2.3, 0.68, 3.1, 76],
+      [-305, 430, 2.5, 0.74, 3.0, 77],
+      [305, 430, 2.4, 0.70, 3.1, 78]
+    ];
+    transitionMounds.forEach(args => createLandscapeMound(root, ...args));
+
     // civic center — large horizontal office complex
     const civic = new BABYLON.TransformNode("CentralAdministration", scene);
     civic.parent = root;
@@ -1010,16 +1362,39 @@
       createTree(root, x, z, 0.72 + seeded(90, 9, i) * 0.45, i % 5 === 0 ? 1 : 0);
     }
 
+    // Structured-to-natural transition tree belt.
+    // Keep the four main gateway approaches open.
+    const edgeTreeCount = state.graphics === "REGULAR" ? 120 : 76;
+    for (let i = 0; i < edgeTreeCount; i++) {
+      const angle = seeded(201, 7, i) * Math.PI * 2;
+      const rr = 350 + seeded(201, 9, i) * 115;
+      const x = Math.cos(angle) * rr;
+      const z = Math.sin(angle) * rr;
+
+      const onGateway =
+        (Math.abs(x) < 36 && Math.abs(z) > 350) ||
+        (Math.abs(z) < 36 && Math.abs(x) > 350);
+      if (onGateway) continue;
+
+      createTree(
+        root,
+        x,
+        z,
+        0.72 + seeded(201, 11, i) * 0.52,
+        i % 7 === 0 ? 1 : 0
+      );
+    }
+
     // distant natural mountain belt, outside the neutral development
     createMountainRange(root, -360, -350, 5, 70, 120, 17);
     createMountainRange(root, 320, -390, 4, 76, 130, 29);
     createMountainRange(root, -390, 320, 4, 68, 108, 41);
     createMountainRange(root, 350, 340, 5, 62, 98, 53);
 
-    camera.target.set(0, 22, -15);
+    camera.target.set(0, 30, -28);
     camera.alpha = -Math.PI / 2.2;
-    camera.beta = 1.01;
-    camera.radius = 300;
+    camera.beta = 1.02;
+    camera.radius = 340;
 
     state.activeTerritory = null;
     state.selectedTerritory = null;
@@ -1962,6 +2337,332 @@
     (save.claims || []).forEach(row => state.claimedTerritories.set(row.territory_id, row));
   }
 
+
+  // ==========================================================
+  // 0.2.1C — SHOP FOUNDATION
+  // ==========================================================
+
+  const SHOP_CATALOG = [
+    {
+      id: "officeTower",
+      category: "Commercial",
+      name: "Office Tower",
+      description: "A modern commercial tower for jobs, offices and future tax income.",
+      cost: { money: 250000, steel: 500, glass: 300, concrete: 400 },
+      variants: ["Modern", "Glass", "Art Deco", "Classic", "Futuristic"],
+      production: ["Jobs", "Future tax income"]
+    },
+    {
+      id: "residentialBlock",
+      category: "Residential",
+      name: "Residential Block",
+      description: "Medium-density housing that grows population around connected roads.",
+      cost: { money: 120000, steel: 180, glass: 120, concrete: 350 },
+      variants: ["Modern", "Brick", "Garden", "Classic", "Futuristic"],
+      production: ["Population", "Local demand"]
+    },
+    {
+      id: "steelMill",
+      category: "Industrial",
+      name: "Steel Mill",
+      description: "Processes iron into steel. Requires road access and future power connection.",
+      cost: { money: 340000, iron: 900, concrete: 600 },
+      variants: ["Industrial", "Modern", "Carbon", "Heavy", "Futuristic"],
+      production: ["Steel"]
+    },
+    {
+      id: "powerPlant",
+      category: "Infrastructure",
+      name: "Power Plant",
+      description: "Major power infrastructure for cities, industry and advanced districts.",
+      cost: { money: 420000, steel: 750, concrete: 900 },
+      variants: ["Utility", "Modern", "Clean", "Carbon", "Futuristic"],
+      production: ["Electricity"]
+    },
+    {
+      id: "governmentHall",
+      category: "Government",
+      name: "Government Hall",
+      description: "Administrative center for laws, services and later government systems.",
+      cost: { money: 600000, steel: 600, glass: 400, concrete: 1000 },
+      variants: ["Civic", "Modern", "Classical", "Monumental", "Futuristic"],
+      production: ["Administration"]
+    },
+    {
+      id: "cityPark",
+      category: "Parks",
+      name: "City Park",
+      description: "A landscaped public space for city appeal, recreation and future tourism.",
+      cost: { money: 60000, concrete: 80 },
+      variants: ["Urban", "Natural", "Formal", "Waterfront", "Futuristic"],
+      production: ["Appeal", "Recreation"]
+    }
+  ];
+
+  let shopOverlay = null;
+  let shopSelection = { itemId: "officeTower", variant: 0 };
+  let uiMode = localStorage.getItem("mapgame_ui_mode") || "COMMAND";
+
+  function formatShopCost(cost) {
+    const labels = {
+      money: "$",
+      steel: "Steel",
+      glass: "Glass",
+      concrete: "Concrete",
+      iron: "Iron"
+    };
+
+    return Object.entries(cost)
+      .map(([key, value]) => {
+        if (key === "money") return `<div><span>Cost</span><b>$${Number(value).toLocaleString()}</b></div>`;
+        return `<div><span>${labels[key] || key}</span><b>${Number(value).toLocaleString()}</b></div>`;
+      })
+      .join("");
+  }
+
+  function currentShopItem() {
+    return SHOP_CATALOG.find(item => item.id === shopSelection.itemId) || SHOP_CATALOG[0];
+  }
+
+  function buildShopOverlay() {
+    if (shopOverlay) return;
+
+    shopOverlay = document.createElement("section");
+    shopOverlay.id = "mgShopOverlay";
+    shopOverlay.hidden = true;
+    shopOverlay.innerHTML = `
+      <div class="mg-shop-shell">
+        <header class="mg-shop-header">
+          <div>
+            <div class="mg-kicker">CITY DEVELOPMENT CATALOG</div>
+            <h2>Construction Shop</h2>
+            <p>Browse structures, model variants and future production chains.</p>
+          </div>
+          <div class="mg-shop-head-actions">
+            <select id="mgShopCategory" aria-label="Shop category">
+              <option value="All">ALL CATEGORIES</option>
+              <option>Residential</option>
+              <option>Commercial</option>
+              <option>Industrial</option>
+              <option>Infrastructure</option>
+              <option>Government</option>
+              <option>Parks</option>
+            </select>
+            <button class="mg-btn mg-btn-secondary" id="mgShopClose">CLOSE</button>
+          </div>
+        </header>
+
+        <div class="mg-shop-body">
+          <aside class="mg-shop-list" id="mgShopList"></aside>
+
+          <main class="mg-shop-preview">
+            <div class="mg-shop-preview-stage">
+              <div class="mg-shop-preview-grid"></div>
+              <div class="mg-shop-model" id="mgShopModel">
+                <div class="mg-shop-model-base"></div>
+                <div class="mg-shop-model-tower">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+              </div>
+              <div class="mg-shop-preview-label">LIVE MODEL PREVIEW • UI FOUNDATION</div>
+            </div>
+
+            <div class="mg-shop-variants">
+              <button id="mgVariantPrev" aria-label="Previous model">‹</button>
+              <div id="mgVariantStrip"></div>
+              <button id="mgVariantNext" aria-label="Next model">›</button>
+            </div>
+          </main>
+
+          <aside class="mg-shop-info">
+            <div class="mg-kicker" id="mgShopCategoryLabel">COMMERCIAL</div>
+            <h3 id="mgShopTitle">Office Tower</h3>
+            <p id="mgShopDescription"></p>
+
+            <div class="mg-shop-info-section">
+              <span class="mg-shop-small-label">SELECTED MODEL</span>
+              <strong id="mgShopVariantName">Modern</strong>
+            </div>
+
+            <div class="mg-shop-cost" id="mgShopCost"></div>
+
+            <div class="mg-shop-info-section">
+              <span class="mg-shop-small-label">PRODUCES / SUPPORTS</span>
+              <div id="mgShopProduction"></div>
+            </div>
+
+            <button class="mg-btn mg-btn-primary mg-shop-place" id="mgShopPlace">
+              VIEW IN CITY
+            </button>
+            <button class="mg-btn mg-btn-secondary" id="mgShopCancelPlacement">
+              CANCEL / RETURN
+            </button>
+
+            <div class="mg-panel-note">
+              0.2.1C includes the real catalog/model-selection shell.
+              World placement remains locked until the zoning/construction pass
+              so we do not create invalid buildings before road and terrain rules exist.
+            </div>
+          </aside>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(shopOverlay);
+
+    shopOverlay.querySelector("#mgShopClose").onclick = hideShop;
+    shopOverlay.querySelector("#mgShopCancelPlacement").onclick = hideShop;
+    shopOverlay.querySelector("#mgShopCategory").onchange = renderShopList;
+    shopOverlay.querySelector("#mgVariantPrev").onclick = () => changeShopVariant(-1);
+    shopOverlay.querySelector("#mgVariantNext").onclick = () => changeShopVariant(1);
+    shopOverlay.querySelector("#mgShopPlace").onclick = () => {
+      const item = currentShopItem();
+      hideShop();
+
+      if (!state.activeTerritory) {
+        showToast("Enter your territory before previewing city placement.", "info");
+        return;
+      }
+      if (!getCapitalForActiveTerritory()) {
+        showToast("Establish your capital before city construction begins.", "info");
+        return;
+      }
+
+      setStatus(
+        `<b>${item.name}</b> • ${item.variants[shopSelection.variant]} model selected • ` +
+        `placement unlocks with the road/zoning construction pass`
+      );
+      showToast(
+        `${item.name} / ${item.variants[shopSelection.variant]} selected for future placement.`,
+        "success"
+      );
+    };
+
+    renderShopList();
+    renderShopSelection();
+  }
+
+  function renderShopList() {
+    if (!shopOverlay) return;
+    const category = shopOverlay.querySelector("#mgShopCategory")?.value || "All";
+    const list = shopOverlay.querySelector("#mgShopList");
+    if (!list) return;
+
+    const items = SHOP_CATALOG.filter(item => category === "All" || item.category === category);
+    list.innerHTML = items.map(item => `
+      <button
+        class="mg-shop-list-item ${item.id === shopSelection.itemId ? "active" : ""}"
+        data-shop-item="${item.id}"
+      >
+        <span>${item.category}</span>
+        <strong>${item.name}</strong>
+        <small>$${Number(item.cost.money || 0).toLocaleString()}</small>
+      </button>
+    `).join("");
+
+    list.querySelectorAll("[data-shop-item]").forEach(button => {
+      button.onclick = () => {
+        shopSelection.itemId = button.dataset.shopItem;
+        shopSelection.variant = 0;
+        renderShopList();
+        renderShopSelection();
+      };
+    });
+  }
+
+  function renderShopSelection() {
+    if (!shopOverlay) return;
+    const item = currentShopItem();
+    shopSelection.variant = clamp(shopSelection.variant, 0, item.variants.length - 1);
+
+    shopOverlay.querySelector("#mgShopCategoryLabel").textContent = item.category.toUpperCase();
+    shopOverlay.querySelector("#mgShopTitle").textContent = item.name;
+    shopOverlay.querySelector("#mgShopDescription").textContent = item.description;
+    shopOverlay.querySelector("#mgShopVariantName").textContent = item.variants[shopSelection.variant];
+    shopOverlay.querySelector("#mgShopCost").innerHTML = formatShopCost(item.cost);
+    shopOverlay.querySelector("#mgShopProduction").innerHTML =
+      item.production.map(v => `<span class="mg-production-chip">${v}</span>`).join("");
+
+    const strip = shopOverlay.querySelector("#mgVariantStrip");
+    strip.innerHTML = item.variants.map((variant, index) => `
+      <button class="mg-variant-card ${index === shopSelection.variant ? "active" : ""}" data-variant="${index}">
+        <i></i>
+        <span>${variant}</span>
+      </button>
+    `).join("");
+
+    strip.querySelectorAll("[data-variant]").forEach(button => {
+      button.onclick = () => {
+        shopSelection.variant = Number(button.dataset.variant);
+        renderShopSelection();
+      };
+    });
+
+    const model = shopOverlay.querySelector("#mgShopModel");
+    model.dataset.category = item.category.toLowerCase();
+    model.style.setProperty("--mg-model-variant", String(shopSelection.variant));
+  }
+
+  function changeShopVariant(delta) {
+    const item = currentShopItem();
+    shopSelection.variant =
+      (shopSelection.variant + delta + item.variants.length) % item.variants.length;
+    renderShopSelection();
+  }
+
+  function showShop() {
+    if (!shopOverlay) buildShopOverlay();
+    shopOverlay.hidden = false;
+    document.body.dataset.shopOpen = "true";
+    renderShopList();
+    renderShopSelection();
+  }
+
+  function hideShop() {
+    if (shopOverlay) shopOverlay.hidden = true;
+    delete document.body.dataset.shopOpen;
+  }
+
+  // ==========================================================
+  // UI MODES — COMMAND / IMMERSIVE
+  // ==========================================================
+
+  function applyUIMode(mode, notify = false) {
+    uiMode = mode === "IMMERSIVE" ? "IMMERSIVE" : "COMMAND";
+    localStorage.setItem("mapgame_ui_mode", uiMode);
+    document.body.dataset.uiMode = uiMode.toLowerCase();
+
+    const btn = document.getElementById("mgUIModeToggle");
+    if (btn) btn.textContent = `UI • ${uiMode}`;
+
+    if (notify) {
+      showToast(
+        uiMode === "IMMERSIVE"
+          ? "Immersive UI enabled. Press U or use the UI button to return."
+          : "Command UI restored.",
+        "info"
+      );
+    }
+  }
+
+  function toggleUIMode() {
+    applyUIMode(uiMode === "COMMAND" ? "IMMERSIVE" : "COMMAND", true);
+  }
+
+  window.addEventListener("keydown", event => {
+    if (
+      event.key.toLowerCase() === "u" &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.altKey
+    ) {
+      const tag = document.activeElement?.tagName;
+      if (tag !== "INPUT" && tag !== "TEXTAREA" && tag !== "SELECT") {
+        toggleUIMode();
+      }
+    }
+  });
+
   // ==========================================================
   // MAIN HUD
   // ==========================================================
@@ -1975,12 +2676,13 @@
       <header class="mg-topbar">
         <div class="mg-brand-lockup">
           <div class="mg-brand-mark">M</div>
-          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • WORLD & INTERFACE FOUNDATION</span></div>
+          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • HUB + UI + SHOP FOUNDATION</span></div>
         </div>
         <div class="mg-top-status">
           <div class="mg-status-chip"><span>WORLD</span><b id="mgWorldLabel">SINGLEPLAYER</b></div>
           <div class="mg-status-chip"><span>ONLINE</span><b id="mgOnlineCount">—</b></div>
           <div class="mg-status-chip"><span>TIME</span><b id="mgTime">12:30 PM</b></div>
+          <button class="mg-graphics-toggle" id="mgUIModeToggle">UI • ${uiMode}</button>
           <button class="mg-graphics-toggle" id="mgGraphicsToggle">GRAPHICS • ${state.graphics}</button>
         </div>
       </header>
@@ -1989,7 +2691,8 @@
         <button data-action="hub" title="Neutral Central Hub">⌂<span>HUB</span></button>
         <button data-action="map" title="World Map">◈<span>WORLD</span></button>
         <button data-action="capital" title="Capital">◆<span>CAPITAL</span></button>
-        <button data-action="development" class="locked" title="Development — coming soon">▦<span>BUILD</span></button>
+        <button data-action="shop" title="Construction Shop">▤<span>SHOP</span></button>
+        <button data-action="development" class="locked" title="Development — coming soon">▦<span>ZONES</span></button>
         <button data-action="defense" class="locked" title="Defense — coming soon">⬡<span>DEFENSE</span></button>
       </nav>
 
@@ -2015,9 +2718,13 @@
       }
       beginCapitalPlacement();
     };
-    hudRoot.querySelector("[data-action='development']").onclick = () => showToast("Development, zones, factories and power are the next major system.", "info");
+    hudRoot.querySelector("[data-action='shop']").onclick = showShop;
+    hudRoot.querySelector("[data-action='development']").onclick = () => showToast("Zoning, roads, factories and power are the next major construction system.", "info");
     hudRoot.querySelector("[data-action='defense']").onclick = () => showToast("Defense, walls and military are intentionally locked for now.", "info");
+    hudRoot.querySelector("#mgUIModeToggle").onclick = toggleUIMode;
     hudRoot.querySelector("#mgGraphicsToggle").onclick = toggleGraphics;
+
+    applyUIMode(uiMode, false);
   }
 
   function updateModeUI() {

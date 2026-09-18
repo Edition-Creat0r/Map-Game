@@ -1109,1114 +1109,499 @@ body[data-mapgame-mode="capital_placement"]::after {
     opacity: 0;
   }
 }
+
+
 /* ============================================================
-   MAP GAME — ALPHA 0.2.0 UI ADDITION
-   Add this as phase2.css after your existing styles.css.
+   MAP GAME — 0.2.1B-C
+   EXPANDED HUB + UI MODES + SHOP FOUNDATION
    ============================================================ */
 
-:root {
-  --mg-bg: #07111c;
-  --mg-panel: rgba(8, 18, 29, 0.92);
-  --mg-panel-2: rgba(11, 27, 42, 0.88);
-  --mg-line: rgba(125, 216, 255, 0.22);
-  --mg-line-strong: rgba(125, 216, 255, 0.48);
-  --mg-cyan: #83e8ff;
-  --mg-cyan-2: #43c9ef;
-  --mg-green: #58e0a8;
-  --mg-red: #ff6e78;
-  --mg-text: #f5f9fc;
-  --mg-muted: #8da0b3;
-  --mg-shadow: 0 18px 55px rgba(0, 0, 0, 0.38);
+body[data-ui-mode="immersive"] .mg-dock,
+body[data-ui-mode="immersive"] .mg-bottom-status,
+body[data-ui-mode="immersive"] .mg-location-pill {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
 }
 
-html, body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #04080e;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: var(--mg-text);
+body[data-ui-mode="immersive"] .mg-topbar {
+  height: 42px;
+  background: linear-gradient(180deg, rgba(5, 17, 29, .82), rgba(5, 17, 29, .44));
+  border-bottom-color: rgba(255,255,255,.055);
 }
 
-#gameCanvas {
+body[data-ui-mode="immersive"] .mg-brand-lockup span,
+body[data-ui-mode="immersive"] .mg-status-chip {
+  display: none;
+}
+
+body[data-ui-mode="immersive"] .mg-brand-mark {
+  width: 26px;
+  height: 26px;
+}
+
+body[data-ui-mode="immersive"] #gameCanvas {
+  filter: saturate(1.035) contrast(1.02);
+}
+
+.mg-dock,
+.mg-bottom-status,
+.mg-location-pill,
+.mg-topbar {
+  transition:
+    opacity .18s ease,
+    transform .18s ease,
+    height .18s ease,
+    background .18s ease;
+}
+
+/* ---------------- SHOP ---------------- */
+
+#mgShopOverlay {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  outline: none;
+  z-index: 190;
+  padding: 12px;
+  background:
+    radial-gradient(circle at 50% 8%, rgba(39, 161, 212, .13), transparent 34%),
+    rgba(2, 9, 16, .78);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
 }
 
-button, input {
-  font: inherit;
-}
-
-button {
-  -webkit-tap-highlight-color: transparent;
-}
-
-[hidden] {
+#mgShopOverlay[hidden] {
   display: none !important;
 }
 
-/* ----------------------------- BUTTONS ----------------------------- */
-
-.mg-btn {
-  min-height: 42px;
-  padding: 0 16px;
-  border-radius: 10px;
-  border: 1px solid var(--mg-line);
-  color: var(--mg-text);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: .07em;
-  cursor: pointer;
-  transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
-}
-
-.mg-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-.mg-btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.mg-btn:disabled {
-  opacity: .46;
-  cursor: default;
-}
-
-.mg-btn-primary {
-  background: linear-gradient(180deg, rgba(62, 199, 238, .96), rgba(30, 128, 178, .96));
-  border-color: rgba(133, 232, 255, .78);
-  color: #04111a;
-  box-shadow: 0 9px 26px rgba(35, 173, 219, .20), inset 0 1px rgba(255,255,255,.35);
-}
-
-.mg-btn-primary:hover:not(:disabled) {
-  box-shadow: 0 12px 30px rgba(35, 173, 219, .32), inset 0 1px rgba(255,255,255,.4);
-}
-
-.mg-btn-secondary {
-  background: rgba(255,255,255,.045);
-  color: #dce9f1;
-}
-
-.mg-btn-secondary:hover:not(:disabled) {
-  background: rgba(102, 205, 244, .09);
-  border-color: rgba(132, 225, 255, .40);
-}
-
-.mg-btn-large {
-  min-height: 50px;
-  width: 100%;
-}
-
-/* ----------------------------- HOME ----------------------------- */
-
-#mgHome {
-  position: fixed;
-  inset: 0;
-  z-index: 120;
-  overflow: auto;
-  background:
-    radial-gradient(circle at 68% 25%, rgba(58, 163, 210, .18), transparent 30%),
-    radial-gradient(circle at 16% 75%, rgba(66, 130, 93, .13), transparent 31%),
-    linear-gradient(135deg, #06101c 0%, #091826 46%, #07101a 100%);
-}
-
-.mg-home-backdrop {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, rgba(3,9,15,.84) 0%, rgba(3,9,15,.55) 38%, rgba(3,9,15,.24) 70%, rgba(3,9,15,.68) 100%);
-}
-
-.mg-home-grid {
-  position: absolute;
-  inset: 0;
-  opacity: .28;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(131,232,255,.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(131,232,255,.07) 1px, transparent 1px);
-  background-size: 48px 48px;
-  -webkit-mask-image: radial-gradient(circle at 65% 40%, black 0%, transparent 72%);
-  mask-image: radial-gradient(circle at 65% 40%, black 0%, transparent 72%);
-}
-
-.mg-home-shell {
-  position: relative;
-  min-height: 100%;
-  box-sizing: border-box;
-  display: grid;
-  grid-template-columns: minmax(340px, 1.16fr) minmax(360px, .84fr);
-  align-items: center;
-  gap: 70px;
-  padding: 70px clamp(40px, 7vw, 112px);
-}
-
-.mg-home-hero {
-  max-width: 760px;
-}
-
-.mg-home-kicker,
-.mg-kicker {
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: .20em;
-  color: var(--mg-cyan);
-  opacity: .82;
-}
-
-.mg-home-hero h1 {
-  margin: 18px 0 20px;
-  font-size: clamp(48px, 6vw, 86px);
-  line-height: .94;
-  letter-spacing: -.055em;
-  font-weight: 820;
-  color: #fff;
-}
-
-.mg-home-hero h1 span {
-  color: #8fe6fa;
-}
-
-.mg-home-hero > p {
-  max-width: 680px;
-  margin: 0;
-  color: #aebdca;
-  line-height: 1.72;
-  font-size: 16px;
-}
-
-.mg-home-feature-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 9px;
-  margin-top: 30px;
-}
-
-.mg-home-feature-row span {
-  padding: 8px 11px;
-  border-radius: 999px;
-  border: 1px solid rgba(120,220,255,.16);
-  background: rgba(10,26,39,.55);
-  color: #8fa8ba;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: .11em;
-}
-
-.mg-home-cards {
-  display: grid;
-  gap: 16px;
-  max-width: 520px;
-  justify-self: end;
-  width: 100%;
-}
-
-.mg-world-card {
-  position: relative;
-  padding: 26px;
-  overflow: hidden;
-  border: 1px solid rgba(136, 206, 235, .16);
+.mg-shop-shell {
+  width: min(1480px, calc(100vw - 24px));
+  height: min(860px, calc(100vh - 24px));
+  margin: 0 auto;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(16,31,46,.91), rgba(7,17,27,.94));
-  box-shadow: var(--mg-shadow), inset 0 1px rgba(255,255,255,.035);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.mg-world-card-primary {
-  border-color: rgba(94, 210, 250, .35);
+  overflow: hidden;
+  color: #ecf8ff;
+  border: 1px solid rgba(103, 215, 255, .22);
   background:
-    radial-gradient(circle at 85% 0%, rgba(61,187,231,.15), transparent 35%),
-    linear-gradient(180deg, rgba(14,34,51,.96), rgba(7,17,27,.96));
+    radial-gradient(circle at 52% 22%, rgba(42, 144, 190, .09), transparent 33%),
+    linear-gradient(180deg, rgba(7, 25, 41, .985), rgba(4, 14, 25, .99));
+  box-shadow:
+    0 40px 110px rgba(0,0,0,.54),
+    inset 0 1px 0 rgba(255,255,255,.04);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
-.mg-world-card h2 {
-  margin: 12px 0 8px;
+.mg-shop-header {
+  min-height: 96px;
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid rgba(102, 213, 255, .12);
+  background:
+    linear-gradient(180deg, rgba(11, 40, 61, .72), rgba(7, 25, 41, .52));
+}
+
+.mg-shop-header h2 {
+  margin: 3px 0 4px;
   font-size: 25px;
-  letter-spacing: -.025em;
+  letter-spacing: -.03em;
 }
 
-.mg-world-card p {
-  margin: 0 0 20px;
-  color: #91a4b4;
-  line-height: 1.58;
+.mg-shop-header p {
+  margin: 0;
+  color: rgba(223,240,250,.58);
+  font-size: 12px;
+}
+
+.mg-shop-head-actions {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+
+#mgShopCategory {
+  min-width: 190px;
+  height: 42px;
+  padding: 0 34px 0 13px;
+  color: #eaf8ff;
+  border: 1px solid rgba(109, 214, 255, .22);
+  border-radius: 9px;
+  background: rgba(8, 28, 44, .92);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  outline: none;
+}
+
+.mg-shop-body {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 245px minmax(360px, 1fr) 310px;
+}
+
+.mg-shop-list {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 13px;
+  border-right: 1px solid rgba(102, 213, 255, .10);
+  background: rgba(4, 16, 28, .56);
+}
+
+.mg-shop-list-item {
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 12px 13px;
+  display: grid;
+  gap: 3px;
+  text-align: left;
+  color: #e8f6fd;
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 10px;
+  background: rgba(255,255,255,.025);
+  cursor: pointer;
+}
+
+.mg-shop-list-item:hover,
+.mg-shop-list-item.active {
+  border-color: rgba(91, 215, 255, .34);
+  background:
+    linear-gradient(90deg, rgba(46, 174, 225, .16), rgba(46, 174, 225, .035));
+}
+
+.mg-shop-list-item span {
+  color: #79dffc;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.mg-shop-list-item strong {
   font-size: 13px;
 }
 
-.mg-card-badge {
-  display: inline-flex;
-  padding: 5px 8px;
-  border-radius: 6px;
-  background: rgba(70, 211, 169, .12);
-  color: #78e7be;
-  border: 1px solid rgba(77, 222, 173, .18);
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: .16em;
+.mg-shop-list-item small {
+  color: rgba(221,239,249,.55);
+  font-size: 10px;
 }
 
-.mg-card-badge.muted {
-  background: rgba(255,255,255,.04);
-  border-color: rgba(255,255,255,.08);
-  color: #8ba0b0;
-}
-
-.mg-account-state {
-  margin: 16px 0;
-  padding: 12px 13px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,.07);
-  background: rgba(0,0,0,.18);
+.mg-shop-preview {
+  min-width: 0;
+  padding: 18px;
   display: grid;
-  gap: 4px;
-  color: #97a8b6;
-  font-size: 11px;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 13px;
 }
 
-.mg-account-state b {
-  color: #e9f2f7;
+.mg-shop-preview-stage {
+  position: relative;
+  min-height: 380px;
+  overflow: hidden;
+  border: 1px solid rgba(93, 211, 255, .18);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(45, 157, 206, .17), transparent 34%),
+    linear-gradient(180deg, rgba(13, 44, 64, .62), rgba(3, 14, 24, .86));
+  perspective: 1000px;
 }
 
-.mg-account-state span {
-  color: #788d9d;
+.mg-shop-preview-grid {
+  position: absolute;
+  inset: 54% -20% -25%;
+  transform: rotateX(63deg);
+  transform-origin: center top;
+  background-image:
+    linear-gradient(rgba(95, 215, 255, .10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(95, 215, 255, .10) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(180deg, black, transparent 82%);
+  -webkit-mask-image: linear-gradient(180deg, black, transparent 82%);
 }
 
-/* ----------------------------- HUD ----------------------------- */
-
-#mgHUD {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 45;
+.mg-shop-model {
+  --mg-model-variant: 0;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 210px;
+  height: 300px;
+  transform:
+    translate(-50%, -47%)
+    rotateY(calc(-18deg + var(--mg-model-variant) * 4deg));
+  transform-style: preserve-3d;
+  transition: transform .25s ease;
 }
 
-#mgHUD button {
-  pointer-events: auto;
+.mg-shop-model-base {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 0;
+  height: 54px;
+  border: 1px solid rgba(150, 229, 255, .25);
+  background:
+    linear-gradient(180deg, rgba(90, 113, 126, .96), rgba(36, 52, 63, .98));
+  box-shadow: 0 20px 45px rgba(0,0,0,.35);
 }
 
-.mg-topbar {
+.mg-shop-model-tower {
+  position: absolute;
+  width: 126px;
+  height: 230px;
+  left: 42px;
+  bottom: 48px;
+  border: 1px solid rgba(164, 231, 255, .34);
+  background:
+    linear-gradient(90deg, rgba(14, 45, 62, .96), rgba(53, 134, 167, .86), rgba(9, 30, 44, .96));
+  box-shadow:
+    inset 0 0 28px rgba(105, 220, 255, .12),
+    18px 25px 45px rgba(0,0,0,.30);
+  clip-path: polygon(7% 0, 100% 4%, 95% 100%, 0 100%);
+}
+
+.mg-shop-model-tower span {
   position: absolute;
   left: 0;
   right: 0;
-  top: 0;
-  height: 62px;
-  padding: 0 16px;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(180deg, rgba(7,17,28,.965), rgba(7,17,27,.89));
-  border-bottom: 1px solid rgba(105, 211, 250, .18);
-  box-shadow: 0 8px 24px rgba(0,0,0,.18);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  height: 2px;
+  background: rgba(194, 239, 255, .21);
 }
 
-.mg-brand-lockup {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.mg-shop-model-tower span:nth-child(1) { top: 20%; }
+.mg-shop-model-tower span:nth-child(2) { top: 40%; }
+.mg-shop-model-tower span:nth-child(3) { top: 60%; }
+.mg-shop-model-tower span:nth-child(4) { top: 80%; }
+
+.mg-shop-model[data-category="industrial"] .mg-shop-model-tower {
+  height: 138px;
+  width: 182px;
+  left: 14px;
+  clip-path: polygon(0 14%, 68% 14%, 68% 0, 100% 0, 100% 100%, 0 100%);
+  background: linear-gradient(90deg, #293640, #56636b, #212a31);
 }
 
-.mg-brand-mark {
-  width: 31px;
-  height: 31px;
-  display: grid;
-  place-items: center;
-  border-radius: 9px;
-  background: linear-gradient(145deg, #61d8f4, #2e9fc9);
-  color: #06131c;
-  font-weight: 950;
-  box-shadow: inset 0 1px rgba(255,255,255,.4), 0 7px 16px rgba(29,160,207,.17);
+.mg-shop-model[data-category="parks"] .mg-shop-model-tower {
+  height: 72px;
+  bottom: 50px;
+  background: linear-gradient(90deg, #275640, #4b865e, #203f33);
 }
 
-.mg-brand-lockup strong {
-  display: block;
-  font-size: 13px;
-  letter-spacing: .07em;
-}
-
-.mg-brand-lockup span {
-  display: block;
-  margin-top: 2px;
-  color: #60788b;
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: .11em;
-}
-
-.mg-top-status {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.mg-status-chip,
-.mg-graphics-toggle {
-  height: 31px;
-  box-sizing: border-box;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(255,255,255,.035);
-}
-
-.mg-status-chip {
-  min-width: 74px;
-  padding: 0 10px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.mg-status-chip span {
-  color: #6f8495;
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: .08em;
-}
-
-.mg-status-chip b {
-  color: #d9e5ec;
-  font-size: 9px;
-  font-weight: 800;
-}
-
-.mg-graphics-toggle {
-  padding: 0 11px;
-  color: #9fe9fb;
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: .08em;
-  cursor: pointer;
-}
-
-.mg-graphics-toggle:hover {
-  border-color: rgba(111,216,255,.35);
-  background: rgba(71,185,226,.08);
-}
-
-.mg-dock {
+.mg-shop-preview-label {
   position: absolute;
   left: 14px;
-  top: 80px;
-  display: grid;
-  gap: 6px;
-  width: 56px;
-  padding: 7px;
-  border-radius: 15px;
-  border: 1px solid rgba(102,211,251,.18);
-  background: rgba(5,14,24,.84);
-  box-shadow: 0 16px 35px rgba(0,0,0,.24);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  bottom: 12px;
+  color: rgba(219,241,250,.44);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .14em;
 }
 
-.mg-dock button {
-  position: relative;
-  width: 42px;
-  height: 42px;
-  margin: auto;
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 10px;
-  background: rgba(255,255,255,.035);
-  color: #dce9ef;
-  font-size: 18px;
+.mg-shop-variants {
+  height: 78px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 38px;
+  gap: 9px;
+  align-items: stretch;
+}
+
+.mg-shop-variants > button,
+.mg-variant-card {
+  color: #eaf8ff;
+  border: 1px solid rgba(111, 215, 255, .15);
+  border-radius: 9px;
+  background: rgba(255,255,255,.025);
   cursor: pointer;
-  transition: .14s ease;
 }
 
-.mg-dock button:hover {
-  border-color: rgba(101,218,255,.37);
-  background: rgba(52,171,215,.11);
-  transform: translateX(2px);
-}
-
-.mg-dock button span {
-  position: absolute;
-  left: 52px;
-  top: 50%;
-  transform: translateY(-50%) translateX(-6px);
-  opacity: 0;
-  pointer-events: none;
-  padding: 6px 8px;
-  border-radius: 6px;
-  white-space: nowrap;
-  background: rgba(4,12,20,.94);
-  border: 1px solid rgba(111,209,245,.18);
-  color: #9eb2c0;
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: .10em;
-  transition: .14s ease;
-}
-
-.mg-dock button:hover span {
-  opacity: 1;
-  transform: translateY(-50%) translateX(0);
-}
-
-.mg-dock button.locked {
-  opacity: .45;
-}
-
-.mg-location-pill {
-  position: absolute;
-  top: 78px;
-  left: 82px;
-  padding: 7px 10px;
-  border-radius: 8px;
-  background: rgba(5,15,25,.78);
-  border: 1px solid rgba(103,206,244,.16);
-  color: #9fcfe0;
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: .12em;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.mg-bottom-status {
-  position: absolute;
-  left: 50%;
-  bottom: 15px;
-  transform: translateX(-50%);
-  min-width: 380px;
-  max-width: calc(100vw - 180px);
-  padding: 8px 14px;
-  box-sizing: border-box;
-  text-align: center;
-  border-radius: 9px;
-  background: rgba(4,13,22,.82);
-  border: 1px solid rgba(86,202,245,.20);
-  box-shadow: 0 10px 30px rgba(0,0,0,.20);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  color: #b7c5ce;
-  font-size: 9px;
-}
-
-.mg-bottom-status b {
-  color: #edf7fa;
-}
-
-/* ----------------------------- WORLD MAP ----------------------------- */
-
-#mgWorldMapOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  background: rgba(2,8,14,.88);
-  backdrop-filter: blur(9px);
-  -webkit-backdrop-filter: blur(9px);
-}
-
-.mg-map-shell {
-  position: absolute;
-  inset: 18px;
+#mgVariantStrip {
+  min-width: 0;
   display: grid;
-  grid-template-rows: auto 1fr;
-  min-height: 0;
-  overflow: hidden;
-  border: 1px solid rgba(106,211,250,.20);
-  border-radius: 18px;
-  background: #06111d;
-  box-shadow: 0 30px 80px rgba(0,0,0,.48);
-}
-
-.mg-map-header {
-  min-height: 86px;
-  padding: 18px 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  border-bottom: 1px solid rgba(255,255,255,.065);
-  background: linear-gradient(180deg, rgba(15,33,49,.96), rgba(8,19,30,.94));
-}
-
-.mg-map-header h2 {
-  margin: 5px 0 3px;
-  font-size: 24px;
-  letter-spacing: -.025em;
-}
-
-.mg-map-header p {
-  margin: 0;
-  color: #788e9e;
-  font-size: 11px;
-}
-
-.mg-map-header-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.mg-map-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 310px;
-  min-height: 0;
-}
-
-.mg-map-stage {
-  position: relative;
-  min-height: 0;
-  background: #071522;
-}
-
-#mgWorldMapCanvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  cursor: crosshair;
-}
-
-.mg-map-legend {
-  position: absolute;
-  left: 15px;
-  bottom: 15px;
-  display: flex;
-  gap: 13px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: rgba(4,13,22,.82);
-  border: 1px solid rgba(255,255,255,.07);
-  color: #91a4b3;
-  font-size: 9px;
-  pointer-events: none;
-}
-
-.mg-map-legend span {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.mg-map-legend i {
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-}
-
-.legend-neutral { background: #84e6ff; }
-.legend-open { background: #76985c; }
-.legend-owned { background: #59d9a7; }
-
-.mg-territory-panel {
-  padding: 22px;
-  border-left: 1px solid rgba(255,255,255,.065);
-  background: linear-gradient(180deg, rgba(11,25,39,.98), rgba(6,16,26,.98));
-}
-
-.mg-territory-panel h3 {
-  margin: 10px 0 5px;
-  font-size: 21px;
-}
-
-.mg-territory-panel > p {
-  margin: 0 0 18px;
-  color: #8497a5;
-  font-size: 11px;
-}
-
-.mg-territory-stats {
-  display: grid;
+  grid-template-columns: repeat(5, minmax(72px, 1fr));
   gap: 7px;
-  margin-bottom: 16px;
 }
 
-.mg-territory-stats > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 10px 11px;
-  border-radius: 8px;
-  background: rgba(255,255,255,.035);
-  border: 1px solid rgba(255,255,255,.055);
+.mg-variant-card {
+  min-width: 0;
+  padding: 6px;
+  display: grid;
+  gap: 5px;
 }
 
-.mg-territory-stats span {
-  color: #6d8292;
-  font-size: 9px;
+.mg-variant-card i {
+  border-radius: 5px;
+  background:
+    linear-gradient(135deg, rgba(79, 200, 243, .38), rgba(255,255,255,.035)),
+    #102738;
 }
 
-.mg-territory-stats b {
-  color: #cfdae1;
-  font-size: 9px;
+.mg-variant-card span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 8px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
-.mg-territory-panel .mg-btn {
-  width: 100%;
-  margin-bottom: 8px;
+.mg-variant-card.active {
+  border-color: rgba(91, 222, 255, .58);
+  box-shadow: inset 0 0 0 1px rgba(91, 222, 255, .10);
 }
 
-.mg-panel-note {
-  margin-top: 14px;
-  padding: 12px;
-  border-radius: 9px;
-  border: 1px dashed rgba(124,190,218,.15);
-  color: #617787;
-  font-size: 9px;
-  line-height: 1.55;
+.mg-shop-info {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 18px;
+  border-left: 1px solid rgba(102, 213, 255, .10);
+  background:
+    linear-gradient(180deg, rgba(8, 29, 45, .90), rgba(4, 16, 28, .92));
 }
 
-/* ----------------------------- CAPITAL PANEL ----------------------------- */
-
-.mg-floating-panel {
-  position: fixed;
-  z-index: 82;
-  background: rgba(7,18,29,.93);
-  border: 1px solid rgba(110,213,250,.23);
-  box-shadow: var(--mg-shadow);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-
-.mg-capital-dialog {
-  right: 20px;
-  top: 84px;
-  width: min(340px, calc(100vw - 40px));
-  padding: 21px;
-  box-sizing: border-box;
-  border-radius: 15px;
-}
-
-.mg-capital-dialog h3 {
-  margin: 8px 0 7px;
+.mg-shop-info h3 {
+  margin: 5px 0 7px;
   font-size: 22px;
 }
 
-.mg-capital-dialog p {
-  margin: 0 0 17px;
-  color: #899cab;
+.mg-shop-info > p {
+  min-height: 48px;
+  margin: 0 0 15px;
+  color: rgba(223,240,249,.65);
   font-size: 11px;
   line-height: 1.55;
 }
 
-.mg-field-label {
+.mg-shop-info-section {
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 9px;
+  background: rgba(255,255,255,.022);
+}
+
+.mg-shop-small-label {
   display: block;
-  margin: 12px 0 6px;
-  color: #718797;
+  margin-bottom: 5px;
+  color: rgba(216,240,250,.45);
   font-size: 8px;
   font-weight: 900;
   letter-spacing: .13em;
 }
 
-.mg-input {
-  width: 100%;
-  height: 43px;
-  box-sizing: border-box;
-  border-radius: 9px;
-  border: 1px solid rgba(114,201,236,.18);
-  outline: none;
-  padding: 0 12px;
-  background: rgba(2,9,15,.55);
-  color: #e8f2f7;
+.mg-shop-cost {
+  display: grid;
+  gap: 6px;
+  margin: 13px 0;
 }
 
-.mg-input:focus {
-  border-color: rgba(111,218,255,.54);
-  box-shadow: 0 0 0 3px rgba(66,178,219,.08);
-}
-
-.mg-capital-coords {
-  margin-top: 10px;
-  padding: 9px 10px;
+.mg-shop-cost > div {
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid rgba(255,255,255,.055);
   border-radius: 8px;
-  background: rgba(255,255,255,.035);
-  color: #89a0af;
+  background: rgba(255,255,255,.022);
+  font-size: 10px;
+}
+
+.mg-shop-cost span {
+  color: rgba(225,240,249,.56);
+}
+
+.mg-production-chip {
+  display: inline-block;
+  margin: 3px 4px 0 0;
+  padding: 5px 7px;
+  border: 1px solid rgba(83, 228, 171, .18);
+  border-radius: 6px;
+  color: #83e9bd;
+  background: rgba(68, 213, 154, .065);
   font-size: 9px;
 }
 
-.mg-dialog-actions {
-  display: grid;
-  grid-template-columns: 90px 1fr;
-  gap: 8px;
-  margin-top: 15px;
-}
-
-/* ----------------------------- AUTH ----------------------------- */
-
-.mg-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 160;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: rgba(1,5,9,.78);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.mg-auth-card {
-  position: relative;
-  width: min(420px, calc(100vw - 40px));
-  padding: 27px;
-  box-sizing: border-box;
-  border-radius: 18px;
-  border: 1px solid rgba(104,208,247,.25);
-  background: linear-gradient(180deg, #0d2132, #07131f);
-  box-shadow: 0 35px 90px rgba(0,0,0,.58);
-}
-
-.mg-auth-card h2 {
-  margin: 8px 0 16px;
-  font-size: 24px;
-}
-
-.mg-modal-close {
-  position: absolute;
-  right: 13px;
-  top: 13px;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(255,255,255,.035);
-  color: #8da0ae;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.mg-auth-tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5px;
-  padding: 4px;
-  margin-bottom: 14px;
-  border-radius: 9px;
-  background: rgba(0,0,0,.20);
-}
-
-.mg-auth-tabs button {
-  min-height: 34px;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  color: #6f8494;
-  font-size: 9px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.mg-auth-tabs button.active {
-  background: rgba(82,194,235,.13);
-  color: #aeefff;
-}
-
-.mg-auth-card .mg-btn-large {
-  margin-top: 16px;
-}
-
-.mg-auth-message {
-  min-height: 18px;
-  margin-top: 12px;
-  color: #8ca4b3;
-  font-size: 10px;
-  line-height: 1.5;
-}
-
-/* ----------------------------- TOASTS ----------------------------- */
-
-#mgToastHost {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 220;
-  display: grid;
-  gap: 8px;
-  width: min(330px, calc(100vw - 36px));
-  pointer-events: none;
-}
-
-.mg-toast {
-  opacity: 0;
-  transform: translateY(7px);
-  padding: 11px 13px;
-  border-radius: 10px;
-  border: 1px solid rgba(114,211,247,.18);
-  background: rgba(6,17,27,.94);
-  color: #cbd8e0;
-  box-shadow: 0 15px 40px rgba(0,0,0,.30);
-  font-size: 10px;
-  transition: .22s ease;
-}
-
-.mg-toast.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.mg-toast-success { border-color: rgba(89,224,168,.34); }
-.mg-toast-error { border-color: rgba(255,110,120,.38); }
-.mg-toast-info { border-color: rgba(104,211,250,.28); }
-
-/* ----------------------------- LOADING ----------------------------- */
-
-.loading-finish {
-  opacity: 0 !important;
-  transition: opacity .4s ease !important;
-}
-
-/* ----------------------------- RESPONSIVE ----------------------------- */
-
-@media (max-width: 960px) {
-  .mg-home-shell {
-    grid-template-columns: 1fr;
-    align-content: center;
-    gap: 36px;
-    padding: 60px 28px;
-  }
-
-  .mg-home-cards {
-    justify-self: stretch;
-    max-width: none;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .mg-home-hero h1 {
-    font-size: clamp(44px, 9vw, 72px);
-  }
-
-  .mg-map-body {
-    grid-template-columns: 1fr 270px;
-  }
-
-  .mg-status-chip:nth-child(1),
-  .mg-status-chip:nth-child(2) {
-    display: none;
-  }
-}
-
-@media (max-width: 700px) {
-  .mg-home-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .mg-home-shell {
-    padding: 42px 18px;
-  }
-
-  .mg-map-shell {
-    inset: 8px;
-  }
-
-  .mg-map-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .mg-map-body {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(350px, 1fr) auto;
-  }
-
-  .mg-territory-panel {
-    border-left: 0;
-    border-top: 1px solid rgba(255,255,255,.065);
-    max-height: 260px;
-    overflow: auto;
-  }
-
-  .mg-brand-lockup span,
-  .mg-status-chip {
-    display: none;
-  }
-
-  .mg-bottom-status {
-    min-width: 0;
-    width: calc(100vw - 110px);
-    left: auto;
-    right: 14px;
-    transform: none;
-  }
-}
-
-
-/* ============================================================
-   MAP GAME — ALPHA 0.2.1A
-   FOUNDATION + COMMAND UI DEPTH PASS
-   ============================================================ */
-
-:root {
-  --mg-panel-strong: rgba(5, 17, 29, .94);
-  --mg-panel-mid: rgba(8, 25, 40, .86);
-  --mg-line-strong: rgba(112, 216, 255, .28);
-  --mg-cyan: #75dcff;
-  --mg-green: #59e5ab;
-  --mg-shadow-deep: 0 18px 55px rgba(0, 0, 0, .34);
-}
-
-.mg-topbar {
-  background:
-    linear-gradient(180deg, rgba(7, 23, 38, .985), rgba(5, 17, 29, .965)),
-    radial-gradient(circle at 18% -30%, rgba(80, 190, 255, .12), transparent 40%);
-  border-bottom-color: rgba(114, 215, 255, .18);
-  box-shadow: 0 10px 34px rgba(0, 0, 0, .18);
-}
-
-.mg-brand-mark {
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.12) inset,
-    0 8px 24px rgba(38, 191, 241, .20);
-}
-
-.mg-status-chip,
-.mg-graphics-toggle {
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-
-.mg-dock {
-  width: 58px;
-  transition: width .18s ease, box-shadow .18s ease;
-  overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(8, 27, 43, .95), rgba(6, 18, 31, .94));
-  box-shadow: var(--mg-shadow-deep);
-}
-
-.mg-dock:hover {
-  width: 132px;
-}
-
-.mg-dock button {
+.mg-shop-place {
   width: 100%;
-  justify-content: flex-start;
-  gap: 10px;
-  padding-left: 13px;
-  position: relative;
+  margin: 4px 0 8px;
 }
 
-.mg-dock button span {
-  position: static;
-  min-width: 62px;
-  opacity: 0;
-  transform: translateX(-5px);
+.mg-shop-info #mgShopCancelPlacement {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+body[data-shop-open="true"] #mgHUD {
+  filter: blur(1px);
   pointer-events: none;
-  background: none;
-  border: 0;
-  padding: 0;
-  box-shadow: none;
-  font-size: 9px;
-  letter-spacing: .12em;
-  text-align: left;
-  transition: opacity .16s ease, transform .16s ease;
 }
 
-.mg-dock:hover button span {
-  opacity: .88;
-  transform: translateX(0);
-}
+@media (max-width: 980px) {
+  .mg-shop-body {
+    grid-template-columns: 190px minmax(300px, 1fr);
+  }
 
-.mg-dock button.active {
-  color: white;
-  background:
-    linear-gradient(90deg, rgba(59, 190, 238, .22), rgba(59, 190, 238, .055));
-  border-color: rgba(104, 220, 255, .32);
-  box-shadow: inset 3px 0 0 rgba(95, 220, 255, .88);
-}
+  .mg-shop-info {
+    position: absolute;
+    right: 20px;
+    top: 118px;
+    width: 285px;
+    max-height: calc(100% - 140px);
+    border: 1px solid rgba(102, 213, 255, .15);
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.35);
+  }
 
-.mg-dock button.locked {
-  opacity: .42;
-}
-
-.mg-dock button.locked::after {
-  content: "LOCKED";
-  display: none;
-  margin-left: auto;
-  margin-right: 8px;
-  font-size: 7px;
-  letter-spacing: .12em;
-  opacity: .6;
-}
-
-.mg-dock:hover button.locked::after {
-  display: block;
-}
-
-.mg-location-pill {
-  background: rgba(5, 21, 35, .88);
-  border-color: rgba(100, 216, 255, .28);
-  box-shadow: 0 10px 28px rgba(0,0,0,.16);
-  backdrop-filter: blur(13px);
-  -webkit-backdrop-filter: blur(13px);
-}
-
-.mg-bottom-status {
-  background: rgba(5, 20, 33, .88);
-  border-color: rgba(102, 213, 255, .25);
-  box-shadow: 0 12px 30px rgba(0,0,0,.22);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-
-/* Strategic map gets stronger depth without obscuring the canvas. */
-.mg-map-shell {
-  background:
-    radial-gradient(circle at 25% 0%, rgba(36, 132, 180, .10), transparent 36%),
-    linear-gradient(180deg, rgba(6, 20, 34, .985), rgba(4, 14, 25, .985));
-  box-shadow:
-    0 30px 90px rgba(0,0,0,.46),
-    inset 0 1px 0 rgba(255,255,255,.035);
-}
-
-.mg-map-header {
-  background:
-    linear-gradient(180deg, rgba(10, 35, 54, .78), rgba(7, 24, 39, .70));
-}
-
-.mg-territory-panel {
-  background:
-    linear-gradient(180deg, rgba(8, 27, 43, .96), rgba(5, 18, 31, .96));
-  border-left: 1px solid rgba(116, 216, 255, .15);
-  box-shadow: -18px 0 44px rgba(0,0,0,.13);
-}
-
-.mg-territory-stats > div {
-  background: rgba(255,255,255,.025);
-  border-color: rgba(255,255,255,.065);
-}
-
-.mg-panel-note {
-  background: rgba(0,0,0,.10);
-}
-
-/* Extra atmosphere around the canvas edges. */
-#gameCanvas {
-  filter: saturate(1.02) contrast(1.015);
-}
-
-body[data-mapgame-mode="hub"]::after,
-body[data-mapgame-mode="territory"]::after,
-body[data-mapgame-mode="capital_placement"]::after {
-  content: "";
-  position: fixed;
-  inset: 52px 0 0;
-  pointer-events: none;
-  z-index: 4;
-  background:
-    linear-gradient(180deg, rgba(3, 14, 25, .025), transparent 18%),
-    radial-gradient(ellipse at center, transparent 58%, rgba(2, 9, 16, .08) 100%);
+  .mg-shop-preview {
+    padding-right: 320px;
+  }
 }
 
 @media (max-width: 760px) {
-  .mg-dock:hover {
-    width: 58px;
+  #mgShopOverlay {
+    padding: 5px;
   }
 
-  .mg-dock:hover button span,
-  .mg-dock:hover button.locked::after {
-    display: none;
-    opacity: 0;
+  .mg-shop-shell {
+    width: calc(100vw - 10px);
+    height: calc(100vh - 10px);
+  }
+
+  .mg-shop-body {
+    display: block;
+    overflow-y: auto;
+  }
+
+  .mg-shop-list {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(102, 213, 255, .10);
+  }
+
+  .mg-shop-list-item {
+    min-width: 145px;
+  }
+
+  .mg-shop-preview {
+    min-height: 430px;
+    padding: 10px;
+  }
+
+  .mg-shop-info {
+    position: static;
+    width: auto;
+    max-height: none;
+    margin: 10px;
+  }
+
+  .mg-shop-head-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mg-shop-header {
+    align-items: flex-start;
   }
 }
