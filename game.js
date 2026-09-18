@@ -1,8970 +1,2091 @@
 // ============================================================
-// MAP GAME — Alpha 0.1.1c
-// TERRAIN + ENVIRONMENT UPGRADE
-//
-// Goal:
-// - Make the "Basic" preset look genuinely good.
-// - Push visuals close to "Regular" without making the Chromebook
-//   completely hate us.
-// - Expand the world into recognizable regions and districts.
-// - Improve the entire HUD / panel language so it feels like one game.
-//
+// MAP GAME — ALPHA 0.2.0 RESTRUCTURE
+// FIRST PLAYABLE WORLD FLOW FOUNDATION
 // Replace your current game.js with this file.
-// Build 0.1.1c: terrain materials, rebuilt mountains and trees, richer biomes, coast detail, and stronger Basic/Regular visuals.
-// Your existing index.html + styles.css can stay the same.
+//
+// This version intentionally removes the old pre-built city/spawn layout.
+// Flow:
+//  1) Neutral Central Hub
+//  2) 2D strategic world map
+//  3) Claim one territory chunk
+//  4) Enter that territory
+//  5) Pick a capital site
+//  6) Establish capital (only construction action enabled for now)
+//
+// Future systems are visible but locked:
+// residential/commercial/industrial zones, factories, power,
+// defense, walls, military, attacks, clearing tools, upgrades.
 // ============================================================
 
-const canvas = document.getElementById("gameCanvas");
+(() => {
+  "use strict";
 
-const engine = new BABYLON.Engine(
-  canvas,
-  true,
-  {
+  const canvas = document.getElementById("gameCanvas");
+  if (!canvas || !window.BABYLON) {
+    console.error("Map Game 0.2.0: canvas or Babylon.js missing.");
+    return;
+  }
+
+  // ==========================================================
+  // ENGINE / SCENE
+  // ==========================================================
+
+  const engine = new BABYLON.Engine(canvas, true, {
     preserveDrawingBuffer: true,
     stencil: true
-  }
-);
+  });
 
-// Slightly reduce internal resolution on weaker hardware.
-// This keeps the scene sharper than "potato mode" while helping Chromebooks.
-const deviceScale =
-  window.devicePixelRatio >= 2
-    ? 1.35
-    : 1.15;
-
-engine.setHardwareScalingLevel(deviceScale);
-
-// ============================================================
-// SCENE
-// ============================================================
-
-const createScene = () => {
   const scene = new BABYLON.Scene(engine);
+  scene.clearColor = new BABYLON.Color4(0.62, 0.79, 0.94, 1);
+  scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+  scene.fogDensity = 0.00072;
+  scene.fogColor = new BABYLON.Color3(0.62, 0.79, 0.94);
+  scene.ambientColor = new BABYLON.Color3(0.17, 0.20, 0.25);
 
-  scene.clearColor = new BABYLON.Color4(
-    0.66,
-    0.79,
-    0.91,
-    1
+  const camera = new BABYLON.ArcRotateCamera(
+    "mainCamera",
+    -Math.PI / 2,
+    1.02,
+    265,
+    new BABYLON.Vector3(0, 20, 0),
+    scene
   );
-
-  // =========================================================
-  // GAME STATE
-  // =========================================================
-
-  let money = 35000;
-  let iron = 60;
-  let steel = 28;
-  let energy = 220;
-  let population = 3800;
-  let incomePerMinute = 175;
-
-  let townHallLevel = 1;
-
-  const SAVE_KEY =
-    "mapGame_alpha007_construction";
-
-  // Gameplay data stays separate from Babylon meshes.
-  // That makes future Basic / Regular / Deep / Hyper switching much safer.
-  let placedBuildings = [];
-  let nextBuildingId = 1;
-
-  let buildMode = null;
-  let buildGhost = null;
-  let buildGhostValid = false;
-  let buildRotation = 0;
-
-  // Planned account-level cap for player-created PRIVATE worlds.
-  // This is only a UI/design constant for now; the real server will enforce it later.
-  const PRIVATE_WORLD_LIMIT = 3;
-
-  // Day/night cycle: 0.00 = midnight, 0.25 = sunrise, 0.50 = noon, 0.75 = sunset.
-  let worldTime = 0.34;
-  const DAY_LENGTH_SECONDS = 720;
-
-  // Strategic zoning foundation. Zones are intentionally lightweight data objects.
-  // Detailed buildings inside a zone will be generated visually later rather than all
-  // becoming expensive simulation objects.
-  let strategicZones = [
-    { id: "zone_capital", name: "Nova Core", type: "capital", x: 0, z: -65, radius: 92, attention: 3, level: 3 },
-    { id: "zone_southbank", name: "Southbank Growth Zone", type: "residential", x: 0, z: 285, radius: 105, attention: 2, level: 2 },
-    { id: "zone_forge", name: "Forge Industrial Zone", type: "industrial", x: 330, z: -115, radius: 95, attention: 2, level: 2 }
-  ];
-  let nextZoneId = 1;
-
-  // =========================================================
-  // GRAPHICS TARGET
-  // =========================================================
-
-  let currentGraphicsPreset =
-    localStorage.getItem("mapGameGraphicsPreset") === "REGULAR"
-      ? "REGULAR"
-      : "BASIC";
-
-  // =========================================================
-  // WORLD
-  // =========================================================
-
-  const MAP_SIZE = 4200;
-  const MAP_HALF = MAP_SIZE / 2;
-  const PLAYABLE_LAND_RADIUS = 1560;
-  const SHALLOW_WATER_RADIUS = 1810;
-  const WORLD_BORDER_RADIUS = 2040;
-  const WORLD_LIMIT = WORLD_BORDER_RADIUS - 34;
-
-  function coastRadiusAtAngle(angle) {
-    return PLAYABLE_LAND_RADIUS +
-      Math.sin(angle * 3.0) * 115 +
-      Math.sin(angle * 7.0 + 0.8) * 62 +
-      Math.cos(angle * 5.0 - 0.4) * 46;
-  }
-
-  function clampPointToWorld(x, z, inset = 0) {
-    const limit = Math.max(80, WORLD_LIMIT - inset);
-    const d = Math.sqrt(x*x + z*z);
-    if (d <= limit || d === 0) return {x,z};
-    const scale = limit / d;
-    return {x:x*scale, z:z*scale};
-  }
-
-  const regions = [
-    {
-      id: "capital",
-      name: "Nova Capital",
-      type: "Capital",
-      x: 0,
-      z: -65,
-      radius: 135,
-      color: "#83e8ff",
-      description:
-        "Administrative, commercial, and high-density center of your civilization."
-    },
-    {
-      id: "northForest",
-      name: "Northwood",
-      type: "Forest",
-      x: 30,
-      z: -330,
-      radius: 160,
-      color: "#91e6a5",
-      description:
-        "Dense forest, rolling hills, and future lumber or conservation development."
-    },
-    {
-      id: "northWestMine",
-      name: "Granite Reach",
-      type: "Mining",
-      x: -330,
-      z: -285,
-      radius: 145,
-      color: "#c5cbd1",
-      description:
-        "Rugged mineral country containing the civilization's primary mining complex."
-    },
-    {
-      id: "eastIndustry",
-      name: "Forge District",
-      type: "Industrial",
-      x: 330,
-      z: -115,
-      radius: 150,
-      color: "#91bad7",
-      description:
-        "Heavy industry, refining, fabrication, and future manufacturing."
-    },
-    {
-      id: "westPower",
-      name: "Helios Grid",
-      type: "Power",
-      x: -325,
-      z: 65,
-      radius: 140,
-      color: "#ffd86a",
-      description:
-        "Power generation, substations, transmission, and utility infrastructure."
-    },
-    {
-      id: "southResidential",
-      name: "Southbank",
-      type: "Residential",
-      x: 0,
-      z: 285,
-      radius: 170,
-      color: "#a4ecc2",
-      description:
-        "Major residential expansion zone with parks, roads, and river access."
-    },
-    {
-      id: "southEastReserve",
-      name: "Apex Reserve",
-      type: "Development",
-      x: 330,
-      z: 285,
-      radius: 160,
-      color: "#d1c7ff",
-      description:
-        "Large open reserve for future airports, military bases, logistics, or special projects."
-    },
-    {
-      id: "southWestPlains",
-      name: "Westfield Plains",
-      type: "Plains",
-      x: -330,
-      z: 290,
-      radius: 165,
-      color: "#d7e6a2",
-      description:
-        "Open land ideal for agriculture, large factories, or future suburban expansion."
-    },
-    { id:"emeraldBasin", name:"Emerald Basin", type:"Forest Basin", x:980, z:-620, radius:260, color:"#77d89c", description:"A broad forest basin for future cities, parks, logging, and tourism." },
-    { id:"westernHighlands", name:"Western Highlands", type:"Mountain", x:-1080, z:-670, radius:285, color:"#c8ced6", description:"Large highland territory with steep terrain and mineral potential." },
-    { id:"meridianPlains", name:"Meridian Plains", type:"Plains", x:-850, z:900, radius:300, color:"#cfe39b", description:"A wide open region for future metropolitan expansion." },
-    { id:"azureCoast", name:"Azure Coast", type:"Coastal", x:1040, z:850, radius:280, color:"#86d9ef", description:"Long ocean-facing coastline for ports, resorts, and coastal cities." }
-  ];
-
-  // =========================================================
-  // SKY / FOG
-  // =========================================================
-
-  scene.fogMode =
-    BABYLON.Scene.FOGMODE_EXP2;
-
-  scene.fogDensity = 0.00058;
-
-  scene.fogColor =
-    new BABYLON.Color3(
-      0.66,
-      0.79,
-      0.91
-    );
-
-  // =========================================================
-  // CAMERA
-  // =========================================================
-
-  const camera =
-    new BABYLON.ArcRotateCamera(
-      "camera",
-      -Math.PI / 2,
-      1.01,
-      190,
-      new BABYLON.Vector3(
-        0,
-        0,
-        -30
-      ),
-      scene
-    );
-
-  camera.attachControl(
-    canvas,
-    true
-  );
-
-  camera.lowerRadiusLimit = 30;
-  camera.upperRadiusLimit = 1280;
-
-  camera.lowerBetaLimit = 0.27;
-  camera.upperBetaLimit = 1.37;
-
-  camera.wheelPrecision = 30;
-  camera.inertia = 0.82;
-  camera.panningInertia = 0.86;
+  camera.attachControl(canvas, true);
+  camera.lowerRadiusLimit = 35;
+  camera.upperRadiusLimit = 650;
+  camera.lowerBetaLimit = 0.35;
+  camera.upperBetaLimit = 1.36;
+  camera.wheelPrecision = 28;
   camera.panningSensibility = 80;
+  camera.inertia = 0.83;
+  camera.panningInertia = 0.85;
 
-  // =========================================================
-  // LIGHTING
-  // =========================================================
-
-  const hemi =
-    new BABYLON.HemisphericLight(
-      "hemi",
-      new BABYLON.Vector3(
-        0,
-        1,
-        0
-      ),
-      scene
-    );
-
-  hemi.intensity = 0.62;
-
-  const sun =
-    new BABYLON.DirectionalLight(
-      "sun",
-      new BABYLON.Vector3(
-        -0.48,
-        -1,
-        -0.34
-      ),
-      scene
-    );
-
-  sun.position =
-    new BABYLON.Vector3(
-      260,
-      360,
-      210
-    );
-
-  sun.intensity = 1.0;
-
-  const shadowGenerator =
-    new BABYLON.ShadowGenerator(
-      1024,
-      sun
-    );
-
-  shadowGenerator.useBlurExponentialShadowMap =
-    true;
-
-  shadowGenerator.blurKernel = 12;
-
-
-  // =========================================================
-  // SKY + DAY / NIGHT GRAPHICS
-  // =========================================================
-
-  const moon =
-    new BABYLON.DirectionalLight(
-      "moon",
-      new BABYLON.Vector3(
-        0.45,
-        -1,
-        0.25
-      ),
-      scene
-    );
-
-  moon.position =
-    new BABYLON.Vector3(
-      -220,
-      260,
-      -170
-    );
-
-  moon.diffuse =
-    new BABYLON.Color3(
-      0.38,
-      0.48,
-      0.70
-    );
-
-  moon.intensity = 0;
-
-  const skySphere =
-    BABYLON.MeshBuilder.CreateSphere(
-      "skySphere",
-      {
-        diameter: 6200,
-        segments: 16
-      },
-      scene
-    );
-
-  skySphere.infiniteDistance = true;
-  skySphere.isPickable = false;
-
-  const skyMat =
-    new BABYLON.StandardMaterial(
-      "skyMat",
-      scene
-    );
-
-  skyMat.backFaceCulling = false;
-  skyMat.disableLighting = true;
-  skyMat.emissiveColor =
-    new BABYLON.Color3(
-      0.48,
-      0.67,
-      0.87
-    );
-
-  skySphere.material = skyMat;
-
-  // Subtle glow is mostly visible at night and makes windows / street lights pop.
-  const glowLayer =
-    new BABYLON.GlowLayer(
-      "nightGlow",
-      scene,
-      {
-        blurKernelSize: 16
-      }
-    );
-
-  glowLayer.intensity = 0.12;
-
-  const streetLampMat =
-    new BABYLON.StandardMaterial(
-      "streetLampMat",
-      scene
-    );
-
-  streetLampMat.diffuseColor =
-    new BABYLON.Color3(
-      0.62,
-      0.56,
-      0.30
-    );
-
-  streetLampMat.emissiveColor =
-    new BABYLON.Color3(
-      0,
-      0,
-      0
-    );
-
-  const nightPointLights = [];
-
-  function createStreetLamp(
-    x,
-    z,
-    height = 6
-  ) {
-    const pole =
-      BABYLON.MeshBuilder.CreateCylinder(
-        "streetLampPole",
-        {
-          diameter: 0.35,
-          height,
-          tessellation: 8
-        },
-        scene
-      );
-
-    pole.position =
-      new BABYLON.Vector3(
-        x,
-        height / 2,
-        z
-      );
-
-    pole.material = darkMat;
-    pole.isPickable = false;
-
-    const lamp =
-      BABYLON.MeshBuilder.CreateSphere(
-        "streetLampBulb",
-        {
-          diameter: 0.75,
-          segments: 6
-        },
-        scene
-      );
-
-    lamp.position =
-      new BABYLON.Vector3(
-        x,
-        height + 0.1,
-        z
-      );
-
-    lamp.material = streetLampMat;
-    lamp.isPickable = false;
-  }
-
-  // Only a few real point lights are used. The rest are emissive meshes.
-  // This keeps the night scene attractive without creating hundreds of expensive lights.
-  [
-    [-70, -65],
-    [70, -65],
-    [0, 25],
-    [0, -145]
-  ].forEach(
-    ([x, z], index) => {
-      const light =
-        new BABYLON.PointLight(
-          "nightPointLight_" + index,
-          new BABYLON.Vector3(
-            x,
-            11,
-            z
-          ),
-          scene
-        );
-
-      light.diffuse =
-        new BABYLON.Color3(
-          1.0,
-          0.72,
-          0.38
-        );
-
-      light.range = 52;
-      light.intensity = 0;
-
-      nightPointLights.push(
-        light
-      );
-    }
+  const hemi = new BABYLON.HemisphericLight(
+    "hemi",
+    new BABYLON.Vector3(0.15, 1, 0.1),
+    scene
   );
+  hemi.intensity = 0.62;
+  hemi.groundColor = new BABYLON.Color3(0.16, 0.19, 0.22);
 
-  // =========================================================
-  // MATERIAL HELPERS
-  // =========================================================
+  const sun = new BABYLON.DirectionalLight(
+    "sun",
+    new BABYLON.Vector3(-0.48, -1, -0.34),
+    scene
+  );
+  sun.position = new BABYLON.Vector3(260, 420, 180);
+  sun.intensity = 1.18;
 
-  function makeMaterial(
-    name,
-    r,
-    g,
-    b
-  ) {
-    const mat =
-      new BABYLON.StandardMaterial(
-        name,
-        scene
-      );
+  const moon = new BABYLON.DirectionalLight(
+    "moon",
+    new BABYLON.Vector3(0.42, -1, 0.26),
+    scene
+  );
+  moon.position = new BABYLON.Vector3(-250, 330, -160);
+  moon.intensity = 0.0;
+  moon.diffuse = new BABYLON.Color3(0.48, 0.62, 0.94);
 
-    mat.diffuseColor =
-      new BABYLON.Color3(
-        r,
-        g,
-        b
-      );
+  const shadowGenerator = new BABYLON.ShadowGenerator(2048, sun);
+  shadowGenerator.usePercentageCloserFiltering = true;
+  shadowGenerator.filteringQuality = BABYLON.ShadowGenerator.QUALITY_MEDIUM;
 
-    mat.specularColor =
-      new BABYLON.Color3(
-        0.055,
-        0.065,
-        0.075
-      );
+  const glowLayer = new BABYLON.GlowLayer("glow", scene, { blurKernelSize: 24 });
+  glowLayer.intensity = 0.32;
 
-    mat.specularPower = 18;
+  // ==========================================================
+  // CONSTANTS / GAME STATE
+  // ==========================================================
 
-    return mat;
+  const VERSION = "0.2.0";
+  const CHUNK_WORLD_SIZE = 980;
+  const WORLD_COLS = 44;
+  const WORLD_ROWS = 30;
+  const CENTRAL_X = Math.floor(WORLD_COLS / 2);
+  const CENTRAL_Y = Math.floor(WORLD_ROWS / 2);
+  const HUB_RADIUS = 430;
+
+  const state = {
+    mode: "HOME", // HOME | HUB | MAP | TERRITORY | CAPITAL_PLACEMENT
+    worldType: "singleplayer", // singleplayer | central
+    graphics: localStorage.getItem("mapgame_graphics") || "BASIC",
+    selectedTerritory: null,
+    activeTerritory: null,
+    claimedTerritories: new Map(),
+    capital: null,
+    multiplayerState: null,
+    terrainRoot: null,
+    hubRoot: null,
+    capitalGhost: null,
+    pendingCapitalXZ: null,
+    mapCamera: { x: CENTRAL_X, y: CENTRAL_Y, zoom: 1.0 },
+    neutralHubReserved: true
+  };
+
+  const localSaveKey = "mapGame_alpha020_firstPlayable";
+
+  // ==========================================================
+  // UTILITIES
+  // ==========================================================
+
+  function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
   }
 
-  const grassMat =
-    makeMaterial(
-      "grassMat",
-      0.22,
-      0.47,
-      0.18
-    );
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
 
-  const grassLightMat =
-    makeMaterial(
-      "grassLightMat",
-      0.30,
-      0.54,
-      0.22
-    );
+  function hash2(x, y, salt = 0) {
+    let h = Math.imul((x | 0) ^ 0x9e3779b9, 0x85ebca6b);
+    h ^= Math.imul((y | 0) ^ 0xc2b2ae35, 0x27d4eb2f);
+    h ^= Math.imul(salt | 0, 0x165667b1);
+    h ^= h >>> 15;
+    h = Math.imul(h, 0x2c1b3c6d);
+    h ^= h >>> 12;
+    h = Math.imul(h, 0x297a2d39);
+    h ^= h >>> 15;
+    return (h >>> 0) / 4294967295;
+  }
 
-  const dirtMat =
-    makeMaterial(
-      "dirtMat",
-      0.36,
-      0.28,
-      0.18
-    );
+  function seeded(x, y, i = 0) {
+    return hash2(x * 101 + i * 17, y * 137 - i * 31, 911);
+  }
 
-  const roadMat =
-    makeMaterial(
-      "roadMat",
-      0.075,
-      0.085,
-      0.10
-    );
+  function territoryId(x, y) {
+    return `T_${x}_${y}`;
+  }
 
-  const roadEdgeMat =
-    makeMaterial(
-      "roadEdgeMat",
-      0.34,
-      0.36,
-      0.39
-    );
+  function parseTerritoryId(id) {
+    const m = /^T_(-?\d+)_(-?\d+)$/.exec(String(id || ""));
+    if (!m) return null;
+    return { x: Number(m[1]), y: Number(m[2]) };
+  }
 
-  const roadLineYellowMat =
-    makeMaterial(
-      "roadLineYellowMat",
-      0.94,
-      0.80,
-      0.24
-    );
+  function isCentralReserved(x, y) {
+    return Math.abs(x - CENTRAL_X) <= 1 && Math.abs(y - CENTRAL_Y) <= 1;
+  }
 
-  const roadLineWhiteMat =
-    makeMaterial(
-      "roadLineWhiteMat",
-      0.88,
-      0.90,
-      0.92
-    );
-
-  const concreteMat =
-    makeMaterial(
-      "concreteMat",
-      0.57,
-      0.62,
-      0.66
-    );
-
-  const concreteDarkMat =
-    makeMaterial(
-      "concreteDarkMat",
-      0.30,
-      0.34,
-      0.38
-    );
-
-  const darkMat =
-    makeMaterial(
-      "darkMat",
-      0.028,
-      0.038,
-      0.052
-    );
-
-  const industrialMat =
-    makeMaterial(
-      "industrialMat",
-      0.33,
-      0.40,
-      0.47
-    );
-
-  const mineMat =
-    makeMaterial(
-      "mineMat",
-      0.19,
-      0.21,
-      0.24
-    );
-
-  const powerMat =
-    makeMaterial(
-      "powerMat",
-      0.51,
-      0.39,
-      0.10
-    );
-
-  const treeTrunkMat =
-    makeMaterial(
-      "treeTrunkMat",
-      0.27,
-      0.14,
-      0.055
-    );
-
-  const treeLeafMat =
-    makeMaterial(
-      "treeLeafMat",
-      0.075,
-      0.30,
-      0.085
-    );
-
-  const treeLeafAltMat =
-    makeMaterial(
-      "treeLeafAltMat",
-      0.12,
-      0.38,
-      0.12
-    );
-
-  const rockMat =
-    makeMaterial(
-      "rockMat",
-      0.28,
-      0.30,
-      0.33
-    );
-
-  const snowMat =
-    makeMaterial(
-      "snowMat",
-      0.79,
-      0.84,
-      0.87
-    );
-
-  snowMat.specularColor =
-    new BABYLON.Color3(
-      0.10,
-      0.12,
-      0.14
-    );
-
-  const pylonMat =
-    makeMaterial(
-      "pylonMat",
-      0.25,
-      0.28,
-      0.31
-    );
-
-  const parkMat =
-    makeMaterial(
-      "parkMat",
-      0.19,
-      0.50,
-      0.17
-    );
-
-  const glassMat =
-    new BABYLON.StandardMaterial(
-      "glassMat",
-      scene
-    );
-
-  glassMat.diffuseColor =
-    new BABYLON.Color3(
-      0.08,
-      0.40,
-      0.67
-    );
-
-  glassMat.alpha = 0.62;
-
-  glassMat.specularColor =
-    new BABYLON.Color3(
-      0.9,
-      0.95,
-      1.0
-    );
-
-  const darkGlassMat =
-    new BABYLON.StandardMaterial(
-      "darkGlassMat",
-      scene
-    );
-
-  darkGlassMat.diffuseColor =
-    new BABYLON.Color3(
-      0.04,
-      0.18,
-      0.28
-    );
-
-  darkGlassMat.alpha = 0.78;
-
-  // =========================================================
-  // TERRAIN
-  // =========================================================
-
-  const ground =
-    BABYLON.MeshBuilder.CreateGround(
-      "ground",
-      {
-        width: MAP_SIZE,
-        height: MAP_SIZE,
-        subdivisions: 150
-      },
-      scene
-    );
-
-  ground.material = grassMat;
-  ground.receiveShadows = true;
-  ground.isPickable = true;
-
-  const positions =
-    ground.getVerticesData(
-      BABYLON.VertexBuffer.PositionKind
-    );
-
-  if (positions) {
-    for (
-      let i = 0;
-      i < positions.length;
-      i += 3
-    ) {
-      const x = positions[i];
-      const z = positions[i + 2];
-
-      let height =
-        Math.sin(x * 0.0105) * 4.0 +
-        Math.cos(z * 0.009) * 3.6 +
-        Math.sin((x + z) * 0.0068) * 2.5 +
-        Math.cos((x - z) * 0.0045) * 1.8;
-
-      // Flatten capital
-      const capitalDistance =
-        Math.sqrt(
-          x * x +
-          (z + 65) *
-            (z + 65)
-        );
-
-      if (
-        capitalDistance <
-        160
-      ) {
-        height *= 0.10;
-      }
-
-      // Smooth Southbank
-      const southDistance =
-        Math.sqrt(
-          x * x +
-          (z - 285) *
-            (z - 285)
-        );
-
-      if (
-        southDistance <
-        185
-      ) {
-        height *= 0.28;
-      }
-
-      // Rugged mining terrain
-      const miningDistance =
-        Math.sqrt(
-          (x + 330) *
-            (x + 330) +
-          (z + 285) *
-            (z + 285)
-        );
-
-      if (
-        miningDistance <
-        175
-      ) {
-        height +=
-          Math.sin(
-            x * 0.038
-          ) * 4.5 +
-          Math.cos(
-            z * 0.043
-          ) * 4.0;
-      }
-
-      // Northwood rolling hills
-      const forestDistance =
-        Math.sqrt(
-          (x - 30) *
-            (x - 30) +
-          (z + 330) *
-            (z + 330)
-        );
-
-      if (
-        forestDistance <
-        180
-      ) {
-        height +=
-          Math.sin(
-            z * 0.024
-          ) * 2.5;
-      }
-
-      const worldDistance = Math.sqrt(x*x + z*z);
-      const worldAngle = Math.atan2(z,x);
-      const localCoastRadius = coastRadiusAtAngle(worldAngle);
-
-      if (worldDistance > localCoastRadius) {
-        const coastT = BABYLON.Scalar.Clamp((worldDistance-localCoastRadius)/370,0,1);
-        const shelfDepth = BABYLON.Scalar.Lerp(1.5,34,coastT*coastT);
-        height = BABYLON.Scalar.Lerp(height,-shelfDepth,coastT);
-      }
-
-      if (worldDistance > SHALLOW_WATER_RADIUS) {
-        const deepT = BABYLON.Scalar.Clamp((worldDistance-SHALLOW_WATER_RADIUS)/(WORLD_BORDER_RADIUS-SHALLOW_WATER_RADIUS),0,1);
-        height = Math.min(height,BABYLON.Scalar.Lerp(-24,-58,deepT));
-      }
-
-      positions[
-        i + 1
-      ] = height;
+  function showToast(message, kind = "info") {
+    let host = document.getElementById("mgToastHost");
+    if (!host) {
+      host = document.createElement("div");
+      host.id = "mgToastHost";
+      document.body.appendChild(host);
     }
-
-    ground.updateVerticesData(
-      BABYLON.VertexBuffer.PositionKind,
-      positions
-    );
-
-    ground.refreshBoundingInfo();
+    const toast = document.createElement("div");
+    toast.className = `mg-toast mg-toast-${kind}`;
+    toast.textContent = message;
+    host.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add("show"));
+    setTimeout(() => {
+      toast.classList.remove("show");
+      setTimeout(() => toast.remove(), 240);
+    }, 3000);
   }
 
-  // =========================================================
-  // LOW-POLY DISTANT RIDGES
-  // =========================================================
+  function setStatus(text) {
+    const el = document.getElementById("mgBottomStatusText");
+    if (el) el.innerHTML = text;
+  }
 
-  function createMountain(
-    x,
-    z,
-    radius,
-    height
-  ) {
-    const segments = 9;
-    const ringHeights = [
-      -3,
-      height * 0.28,
-      height * 0.58,
-      height * 0.82
-    ];
+  function disposeNode(node) {
+    if (!node) return;
+    try { node.dispose(false, true); } catch (_) {
+      try { node.dispose(); } catch (_) {}
+    }
+  }
 
-    const ringScales = [
-      1.0,
-      0.72,
-      0.43,
-      0.19
-    ];
+  function setMode(mode) {
+    state.mode = mode;
+    document.body.dataset.mapgameMode = mode.toLowerCase();
+    updateModeUI();
+  }
 
+  // ==========================================================
+  // MATERIALS
+  // ==========================================================
+
+  function stdMat(name, color, spec = 0.04) {
+    const m = new BABYLON.StandardMaterial(name, scene);
+    m.diffuseColor = color;
+    m.specularColor = new BABYLON.Color3(spec, spec, spec);
+    m.specularPower = 24;
+    return m;
+  }
+
+  const grassMat = stdMat("grassMat", new BABYLON.Color3(0.35, 0.48, 0.24), 0.02);
+  const grassLightMat = stdMat("grassLightMat", new BABYLON.Color3(0.46, 0.58, 0.30), 0.02);
+  const dirtMat = stdMat("dirtMat", new BABYLON.Color3(0.31, 0.23, 0.15), 0.01);
+  const rockMat = stdMat("rockMat", new BABYLON.Color3(0.35, 0.38, 0.42), 0.03);
+  const snowMat = stdMat("snowMat", new BABYLON.Color3(0.89, 0.92, 0.95), 0.03);
+  const sandMat = stdMat("sandMat", new BABYLON.Color3(0.72, 0.63, 0.43), 0.01);
+  const roadMat = stdMat("roadMat", new BABYLON.Color3(0.055, 0.065, 0.075), 0.04);
+  const roadEdgeMat = stdMat("roadEdgeMat", new BABYLON.Color3(0.22, 0.24, 0.25), 0.03);
+  const concreteMat = stdMat("concreteMat", new BABYLON.Color3(0.50, 0.53, 0.55), 0.05);
+  const concreteLightMat = stdMat("concreteLightMat", new BABYLON.Color3(0.68, 0.70, 0.71), 0.05);
+  const darkMat = stdMat("darkMat", new BABYLON.Color3(0.07, 0.085, 0.10), 0.08);
+  const metalMat = stdMat("metalMat", new BABYLON.Color3(0.25, 0.28, 0.31), 0.28);
+  const treeTrunkMat = stdMat("treeTrunkMat", new BABYLON.Color3(0.24, 0.16, 0.085), 0.01);
+  const treeLeafMat = stdMat("treeLeafMat", new BABYLON.Color3(0.10, 0.33, 0.12), 0.01);
+  const treeLeafAltMat = stdMat("treeLeafAltMat", new BABYLON.Color3(0.16, 0.40, 0.15), 0.01);
+
+  // ----------------------------------------------------------
+  // REAL TERRAIN TEXTURES
+  // Uses the grass / rock / sand files you already added.
+  // If one file is missing Babylon falls back to the material color.
+  // ----------------------------------------------------------
+
+  function terrainTexture(path, scale) {
+    const tex = new BABYLON.Texture(
+      path,
+      scene,
+      false,
+      false,
+      BABYLON.Texture.TRILINEAR_SAMPLINGMODE
+    );
+    tex.wrapU = BABYLON.Texture.WRAP_ADDRESSMODE;
+    tex.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE;
+    tex.uScale = scale;
+    tex.vScale = scale;
+    tex.anisotropicFilteringLevel = state.graphics === "REGULAR" ? 8 : 2;
+    return tex;
+  }
+
+  const grassDiffuse = terrainTexture("assets/textures/grass/grass_diffuse.jpg", 18);
+  const grassNormal = terrainTexture("assets/textures/grass/grass_normal.jpg", 18);
+  grassNormal.level = 0.50;
+  grassMat.diffuseTexture = grassDiffuse;
+  grassMat.bumpTexture = grassNormal;
+  grassLightMat.diffuseTexture = grassDiffuse;
+  grassLightMat.bumpTexture = grassNormal;
+
+  const rockDiffuse = terrainTexture("assets/textures/rock/rock_diffuse.jpg", 10);
+  const rockNormal = terrainTexture("assets/textures/rock/rock_normal.jpg", 10);
+  rockNormal.level = 0.72;
+  rockMat.diffuseTexture = rockDiffuse;
+  rockMat.bumpTexture = rockNormal;
+
+  const sandDiffuse = terrainTexture("assets/textures/sand/sand_diffuse.jpg", 14);
+  const sandNormal = terrainTexture("assets/textures/sand/sand_normal.jpg", 14);
+  sandNormal.level = 0.42;
+  sandMat.diffuseTexture = sandDiffuse;
+  sandMat.bumpTexture = sandNormal;
+
+  const roadMarkingMat = stdMat("roadMarkingMat", new BABYLON.Color3(0.92, 0.82, 0.28), 0.02);
+  roadMarkingMat.emissiveColor = new BABYLON.Color3(0.08, 0.07, 0.01);
+
+  const lampGlowMat = stdMat("lampGlow", new BABYLON.Color3(1.0, 0.78, 0.32), 0.02);
+  lampGlowMat.emissiveColor = new BABYLON.Color3(1.0, 0.58, 0.12);
+
+  const waterMat = new BABYLON.PBRMaterial("waterMat", scene);
+  waterMat.albedoColor = new BABYLON.Color3(0.025, 0.21, 0.34);
+  waterMat.metallic = 0.05;
+  waterMat.roughness = 0.16;
+  waterMat.alpha = 0.84;
+  waterMat.transparencyMode = BABYLON.PBRMaterial.PBRMATERIAL_ALPHABLEND;
+
+  const glassBasic = new BABYLON.StandardMaterial("glassBasic", scene);
+  glassBasic.diffuseColor = new BABYLON.Color3(0.08, 0.24, 0.35);
+  glassBasic.specularColor = new BABYLON.Color3(0.65, 0.75, 0.82);
+  glassBasic.specularPower = 96;
+  glassBasic.alpha = 0.82;
+
+  const glassRegular = new BABYLON.PBRMaterial("glassRegular", scene);
+  glassRegular.albedoColor = new BABYLON.Color3(0.055, 0.17, 0.25);
+  glassRegular.metallic = 0.12;
+  glassRegular.roughness = 0.10;
+  glassRegular.alpha = 0.76;
+  glassRegular.transparencyMode = BABYLON.PBRMaterial.PBRMATERIAL_ALPHABLEND;
+  glassRegular.indexOfRefraction = 1.45;
+  glassRegular.environmentIntensity = 1.05;
+  glassRegular.clearCoat.isEnabled = true;
+  glassRegular.clearCoat.intensity = 0.55;
+  glassRegular.clearCoat.roughness = 0.14;
+
+  const facadeRegular = new BABYLON.PBRMaterial("facadeRegular", scene);
+  facadeRegular.albedoColor = new BABYLON.Color3(0.39, 0.43, 0.47);
+  facadeRegular.metallic = 0.08;
+  facadeRegular.roughness = 0.34;
+  facadeRegular.clearCoat.isEnabled = true;
+  facadeRegular.clearCoat.intensity = 0.16;
+  facadeRegular.clearCoat.roughness = 0.28;
+
+  // ==========================================================
+  // SKY / TIME
+  // ==========================================================
+
+  let dayClock = 12.5;
+  let lastFrame = performance.now();
+
+  function updateDayNight(dt) {
+    dayClock = (dayClock + dt / 720000) % 24;
+    const t = dayClock / 24;
+    const angle = t * Math.PI * 2 - Math.PI / 2;
+    const sunHeight = Math.sin(angle);
+    const daylight = clamp((sunHeight + 0.22) / 0.88, 0.07, 1);
+
+    sun.direction.set(-Math.cos(angle) * 0.56, -Math.max(0.16, sunHeight), -0.36);
+    sun.intensity = 0.18 + daylight * 1.02;
+    hemi.intensity = 0.28 + daylight * 0.40;
+    moon.intensity = (1 - daylight) * 0.42;
+
+    const daySky = new BABYLON.Color3(0.59, 0.78, 0.94);
+    const nightSky = new BABYLON.Color3(0.035, 0.055, 0.11);
+    const duskSky = new BABYLON.Color3(0.34, 0.25, 0.31);
+    let sky;
+    if (daylight < 0.28) {
+      sky = BABYLON.Color3.Lerp(nightSky, duskSky, daylight / 0.28);
+    } else {
+      sky = BABYLON.Color3.Lerp(duskSky, daySky, (daylight - 0.28) / 0.72);
+    }
+    scene.clearColor = new BABYLON.Color4(sky.r, sky.g, sky.b, 1);
+    scene.fogColor.copyFrom(sky);
+
+    const timeEl = document.getElementById("mgTime");
+    if (timeEl) {
+      let hr = Math.floor(dayClock);
+      const min = Math.floor((dayClock - hr) * 60);
+      const ap = hr >= 12 ? "PM" : "AM";
+      hr = hr % 12 || 12;
+      timeEl.textContent = `${hr}:${String(min).padStart(2, "0")} ${ap}`;
+    }
+  }
+
+  // ==========================================================
+  // MOUNTAIN GENERATOR — RING-BASED, NOT CUT CONES
+  // ==========================================================
+
+  function createMountainMesh(name, x, z, radius, height, seed, parent) {
+    const rings = 7;
+    const segments = state.graphics === "REGULAR" ? 13 : 10;
     const positions = [];
     const indices = [];
     const uvs = [];
 
-    const seed =
-      Math.sin(
-        x * 0.017 +
-        z * 0.013
-      ) * 43758.5453;
+    for (let r = 0; r <= rings; r++) {
+      const t = r / rings;
+      const y = Math.pow(t, 1.12) * height;
+      const shrink = Math.pow(1 - t, 0.76);
+      const centerDriftX = (hash2(seed, r, 33) - 0.5) * radius * 0.24 * t;
+      const centerDriftZ = (hash2(seed, r, 71) - 0.5) * radius * 0.24 * t;
 
-    function rand(
-      ringIndex,
-      segmentIndex
-    ) {
-      const v =
-        Math.sin(
-          seed +
-          ringIndex * 17.17 +
-          segmentIndex * 9.31
-        ) * 43758.5453;
-
-      return (
-        v -
-        Math.floor(v)
-      );
-    }
-
-    for (
-      let r = 0;
-      r < ringHeights.length;
-      r++
-    ) {
-      for (
-        let s = 0;
-        s < segments;
-        s++
-      ) {
-        const angle =
-          s / segments *
-          Math.PI *
-          2;
-
-        const rr =
-          radius *
-          ringScales[r] *
-          (
-            0.78 +
-            rand(r, s) *
-              0.42
-          );
-
+      for (let s = 0; s < segments; s++) {
+        const a = (s / segments) * Math.PI * 2;
+        const jag = 0.76 + hash2(seed + r * 9, s, 121) * 0.40;
+        const ridge = 1 + Math.sin(a * 3 + seed * 0.17) * 0.10;
+        const rr = radius * shrink * jag * ridge;
         positions.push(
-          Math.cos(angle) * rr,
-          ringHeights[r] +
-            (
-              rand(r + 4, s) -
-              0.5
-            ) *
-            height *
-            0.055,
-          Math.sin(angle) * rr
+          x + centerDriftX + Math.cos(a) * rr,
+          y,
+          z + centerDriftZ + Math.sin(a) * rr
         );
-
-        uvs.push(
-          s / segments,
-          r /
-            (
-              ringHeights.length -
-              1
-            )
-        );
+        uvs.push(s / segments, t);
       }
     }
 
-    const peakIndex =
-      positions.length / 3;
-
-    positions.push(
-      (
-        rand(11, 2) -
-        0.5
-      ) *
-        radius *
-        0.12,
-      height,
-      (
-        rand(13, 4) -
-        0.5
-      ) *
-        radius *
-        0.12
-    );
-
-    uvs.push(
-      0.5,
-      1
-    );
-
-    for (
-      let r = 0;
-      r <
-        ringHeights.length - 1;
-      r++
-    ) {
-      for (
-        let s = 0;
-        s < segments;
-        s++
-      ) {
-        const next =
-          (
-            s + 1
-          ) %
-          segments;
-
-        const a =
-          r *
-            segments +
-          s;
-
-        const b =
-          r *
-            segments +
-          next;
-
-        const c =
-          (
-            r + 1
-          ) *
-            segments +
-          s;
-
-        const d =
-          (
-            r + 1
-          ) *
-            segments +
-          next;
-
-        indices.push(
-          a,
-          c,
-          b,
-          b,
-          c,
-          d
-        );
+    for (let r = 0; r < rings; r++) {
+      for (let s = 0; s < segments; s++) {
+        const n = (s + 1) % segments;
+        const a = r * segments + s;
+        const b = r * segments + n;
+        const c = (r + 1) * segments + s;
+        const d = (r + 1) * segments + n;
+        indices.push(a, c, b, b, c, d);
       }
     }
 
-    const lastRingStart =
-      (
-        ringHeights.length -
-        1
-      ) *
-      segments;
-
-    for (
-      let s = 0;
-      s < segments;
-      s++
-    ) {
-      const next =
-        (
-          s + 1
-        ) %
-        segments;
-
-      indices.push(
-        lastRingStart + s,
-        peakIndex,
-        lastRingStart + next
-      );
+    const topCenterIndex = positions.length / 3;
+    const topOffsetX = (hash2(seed, 888, 9) - 0.5) * radius * 0.18;
+    const topOffsetZ = (hash2(seed, 999, 9) - 0.5) * radius * 0.18;
+    positions.push(x + topOffsetX, height * 1.04, z + topOffsetZ);
+    uvs.push(0.5, 1);
+    const topRingStart = rings * segments;
+    for (let s = 0; s < segments; s++) {
+      indices.push(topRingStart + s, topCenterIndex, topRingStart + ((s + 1) % segments));
     }
 
     const normals = [];
+    BABYLON.VertexData.ComputeNormals(positions, indices, normals);
+    const vd = new BABYLON.VertexData();
+    vd.positions = positions;
+    vd.indices = indices;
+    vd.normals = normals;
+    vd.uvs = uvs;
 
-    BABYLON.VertexData
-      .ComputeNormals(
-        positions,
-        indices,
-        normals
-      );
+    const mesh = new BABYLON.Mesh(name, scene);
+    vd.applyToMesh(mesh);
+    mesh.material = rockMat;
+    mesh.parent = parent || null;
+    mesh.isPickable = false;
+    mesh.receiveShadows = true;
+    shadowGenerator.addShadowCaster(mesh);
 
-    const data =
-      new BABYLON.VertexData();
-
-    data.positions =
-      positions;
-
-    data.indices =
-      indices;
-
-    data.normals =
-      normals;
-
-    data.uvs =
-      uvs;
-
-    const mountain =
-      new BABYLON.Mesh(
-        "mountain",
-        scene
-      );
-
-    data.applyToMesh(
-      mountain
-    );
-
-    mountain.position =
-      new BABYLON.Vector3(
-        x,
-        0,
-        z
-      );
-
-    mountain.material =
-      rockMat;
-
-    mountain.isPickable =
-      false;
-
-    mountain.receiveShadows =
-      true;
-
-    if (
-      height > 95
-    ) {
-      const snowCap =
-        BABYLON.MeshBuilder
-          .CreatePolyhedron(
-            "mountainSnowCap",
-            {
-              type: 2,
-              size:
-                Math.max(
-                  8,
-                  radius * 0.18
-                )
-            },
-            scene
-          );
-
-      snowCap.position =
-        new BABYLON.Vector3(
-          x,
-          height * 0.91,
-          z
-        );
-
-      snowCap.scaling =
-        new BABYLON.Vector3(
-          1.6,
-          0.72,
-          1.6
-        );
-
-      snowCap.rotation.y =
-        rand(20, 1) *
-        Math.PI;
-
-      snowCap.material =
-        snowMat;
-
-      snowCap.isPickable =
-        false;
+    if (height > 70) {
+      const cap = BABYLON.MeshBuilder.CreatePolyhedron(`${name}_snow`, {
+        type: 1,
+        size: radius * 0.28
+      }, scene);
+      cap.scaling = new BABYLON.Vector3(1.5, height / Math.max(1, radius) * 0.38, 1.2);
+      cap.position = new BABYLON.Vector3(x + topOffsetX, height * 0.90, z + topOffsetZ);
+      cap.material = snowMat;
+      cap.parent = parent || null;
+      cap.isPickable = false;
     }
 
-    return mountain;
+    return mesh;
   }
 
-  for (
-    let i = 0;
-    i < 12;
-    i++
-  ) {
-    createMountain(
-      -500 +
-        Math.random() *
-          220,
-      -470 +
-        Math.random() *
-          220,
-      35 +
-        Math.random() *
-          45,
-      45 +
-        Math.random() *
-          60
-    );
+  function createMountainRange(root, cx, cz, count, baseRadius, baseHeight, seed) {
+    for (let i = 0; i < count; i++) {
+      const along = i - (count - 1) / 2;
+      const r = baseRadius * (0.76 + hash2(seed, i, 4) * 0.52);
+      const h = baseHeight * (0.76 + hash2(seed, i, 8) * 0.58);
+      const x = cx + along * baseRadius * 1.04 + (hash2(seed, i, 13) - 0.5) * r * 0.8;
+      const z = cz + (hash2(seed, i, 19) - 0.5) * r * 1.4;
+      createMountainMesh(`mountain_${seed}_${i}`, x, z, r, h, seed * 100 + i, root);
+
+      // foothills make ranges blend into the landscape rather than isolated spikes
+      if (i % 2 === 0) {
+        createMountainMesh(
+          `foothill_${seed}_${i}`,
+          x + r * 0.74,
+          z + r * 0.52,
+          r * 0.52,
+          h * 0.38,
+          seed * 130 + i,
+          root
+        );
+      }
+    }
   }
 
-  for (let i=0;i<34;i++) {
-    const angle=Math.random()*Math.PI*2;
-    const distance=720+Math.random()*620;
-    createMountain(Math.cos(angle)*distance,Math.sin(angle)*distance,45+Math.random()*75,70+Math.random()*125);
-  }
+  // ==========================================================
+  // TREES / VEGETATION
+  // ==========================================================
 
-  // =========================================================
-  // WATER
-  // =========================================================
+  function createTree(root, x, z, scale = 1, type = 0) {
+    const node = new BABYLON.TransformNode("tree", scene);
+    node.parent = root;
+    node.position.set(x, 0, z);
+    node.scaling.setAll(scale);
+    node.metadata = { vegetation: true };
 
-  const waterMat =
-    new BABYLON.StandardMaterial(
-      "waterMat",
-      scene
-    );
+    const trunk = BABYLON.MeshBuilder.CreateCylinder("treeTrunk", {
+      diameterTop: 0.9,
+      diameterBottom: 1.25,
+      height: 6.3,
+      tessellation: 8
+    }, scene);
+    trunk.position.y = 3.15;
+    trunk.material = treeTrunkMat;
+    trunk.parent = node;
+    trunk.isPickable = false;
 
-  waterMat.diffuseColor =
-    new BABYLON.Color3(
-      0.055,
-      0.30,
-      0.52
-    );
-
-  waterMat.alpha = 0.85;
-
-  waterMat.specularColor =
-    new BABYLON.Color3(
-      0.75,
-      0.90,
-      1.0
-    );
-
-  const shallowOceanMat = new BABYLON.StandardMaterial("shallowOceanMat", scene);
-  shallowOceanMat.diffuseColor = new BABYLON.Color3(0.055,0.35,0.54);
-  shallowOceanMat.alpha = 0.84;
-  shallowOceanMat.specularColor = new BABYLON.Color3(0.72,0.90,1.0);
-
-  const deepOceanMat = new BABYLON.StandardMaterial("deepOceanMat", scene);
-  deepOceanMat.diffuseColor = new BABYLON.Color3(0.018,0.095,0.17);
-  deepOceanMat.alpha = 0.96;
-  deepOceanMat.specularColor = new BABYLON.Color3(0.34,0.48,0.62);
-
-  const deepOcean = BABYLON.MeshBuilder.CreateGround("deepOcean",{width:MAP_SIZE*1.04,height:MAP_SIZE*1.04,subdivisions:1},scene);
-  deepOcean.position.y=-4.3; deepOcean.material=deepOceanMat; deepOcean.isPickable=false;
-
-  const shallowOcean = BABYLON.MeshBuilder.CreateDisc("shallowOcean",{radius:SHALLOW_WATER_RADIUS,tessellation:96},scene);
-  shallowOcean.rotation.x=Math.PI/2; shallowOcean.position.y=-3.8; shallowOcean.material=shallowOceanMat; shallowOcean.isPickable=false;
-
-  const worldBorderMat = new BABYLON.StandardMaterial("worldBorderMat",scene);
-  worldBorderMat.diffuseColor=new BABYLON.Color3(0.08,0.20,0.27);
-  worldBorderMat.emissiveColor=new BABYLON.Color3(0.05,0.16,0.22);
-  worldBorderMat.alpha=0.42;
-  const worldBorderRing=BABYLON.MeshBuilder.CreateTorus("worldBorderRing",{diameter:WORLD_BORDER_RADIUS*2,thickness:7,tessellation:128},scene);
-  worldBorderRing.position.y=-2.7; worldBorderRing.material=worldBorderMat; worldBorderRing.isPickable=false;
-
-  function createWater(
-    x,
-    z,
-    width,
-    depth,
-    rotation = 0
-  ) {
-    const water =
-      BABYLON.MeshBuilder.CreateGround(
-        "water",
-        {
-          width,
-          height: depth,
-          subdivisions: 1
-        },
-        scene
-      );
-
-    water.position =
-      new BABYLON.Vector3(
-        x,
-        -0.36,
-        z
-      );
-
-    water.rotation.y =
-      rotation;
-
-    water.material =
-      waterMat;
-
-    water.isPickable =
-      false;
-
-    return water;
-  }
-
-  // Main river
-  createWater(
-    -270,
-    125,
-    300,
-    42,
-    Math.PI / 20
-  );
-
-  createWater(
-    0,
-    150,
-    330,
-    46,
-    -Math.PI / 28
-  );
-
-  createWater(
-    300,
-    175,
-    310,
-    42,
-    Math.PI / 18
-  );
-
-  // Small lake
-  createWater(
-    -365,
-    330,
-    150,
-    100,
-    Math.PI / 10
-  );
-
-  function applyGraphicsPreset(preset, notify=true) {
-    currentGraphicsPreset = preset === "REGULAR" ? "REGULAR" : "BASIC";
-    localStorage.setItem("mapGameGraphicsPreset", currentGraphicsPreset);
-    const regular = currentGraphicsPreset === "REGULAR";
-    engine.setHardwareScalingLevel(regular ? 1.0 : 1.28);
-    scene.fogDensity = regular ? 0.00042 : 0.00058;
-    shadowGenerator.blurKernel = regular ? 18 : 9;
-    shallowOceanMat.specularPower = regular ? 96 : 38;
-    deepOceanMat.specularPower = regular ? 72 : 28;
-    waterMat.specularPower = regular ? 88 : 34;
-    glassMat.specularPower = regular ? 96 : 42;
-    camera.upperRadiusLimit = regular ? 1420 : 1180;
-
-    if (window.mapGameRuntime) {
-      window.mapGameRuntime.graphicsPreset =
-        currentGraphicsPreset;
+    if (type === 1) {
+      for (let i = 0; i < 3; i++) {
+        const crown = BABYLON.MeshBuilder.CreateCylinder("pineCrown", {
+          diameterTop: 0,
+          diameterBottom: 6.8 - i * 1.1,
+          height: 5.6,
+          tessellation: 9
+        }, scene);
+        crown.position.y = 6.0 + i * 2.25;
+        crown.material = i % 2 ? treeLeafAltMat : treeLeafMat;
+        crown.parent = node;
+        crown.isPickable = false;
+      }
+    } else {
+      const crown = BABYLON.MeshBuilder.CreateIcoSphere("treeCrown", {
+        radius: 4.0,
+        subdivisions: state.graphics === "REGULAR" ? 2 : 1
+      }, scene);
+      crown.position.y = 8.2;
+      crown.scaling = new BABYLON.Vector3(1.08, 0.82, 0.96);
+      crown.material = type === 2 ? treeLeafAltMat : treeLeafMat;
+      crown.parent = node;
+      crown.isPickable = false;
     }
 
-    window.dispatchEvent(
-      new CustomEvent(
-        "mapgame:graphics",
-        {
-          detail: {
-            preset: currentGraphicsPreset
-          }
-        }
-      )
-    );
-
-    if (notify) showToast("Graphics switched to " + currentGraphicsPreset,"success");
-  }
-  applyGraphicsPreset(currentGraphicsPreset,false);
-
-  const graphicsQuickToggle=document.createElement("button");
-  graphicsQuickToggle.id = "mg-graphics-toggle";
-  graphicsQuickToggle.style.cssText=`position:absolute;right:18px;top:94px;z-index:91;padding:7px 10px;border-radius:9px;border:1px solid rgba(113,225,255,.15);background:rgba(5,14,24,.82);color:#b8efff;font-size:9px;font-weight:900;letter-spacing:.7px;cursor:pointer;backdrop-filter:blur(8px);`;
-  const refreshGraphicsToggle=()=>graphicsQuickToggle.textContent="GRAPHICS • "+currentGraphicsPreset;
-  graphicsQuickToggle.onclick=()=>{applyGraphicsPreset(currentGraphicsPreset==="BASIC"?"REGULAR":"BASIC");refreshGraphicsToggle();};
-  refreshGraphicsToggle(); document.body.appendChild(graphicsQuickToggle);
-
-  // =========================================================
-  // ROAD HELPERS
-  // =========================================================
-
-  function createRoadBase(
-    x,
-    z,
-    width,
-    depth,
-    rotation = 0
-  ) {
-    const shoulder =
-      BABYLON.MeshBuilder.CreateBox(
-        "roadShoulder",
-        {
-          width:
-            width + 5,
-          height: 0.08,
-          depth:
-            depth + 5
-        },
-        scene
-      );
-
-    shoulder.position =
-      new BABYLON.Vector3(
-        x,
-        0.055,
-        z
-      );
-
-    shoulder.rotation.y =
-      rotation;
-
-    shoulder.material =
-      roadEdgeMat;
-
-    shoulder.isPickable =
-      false;
-
-    const road =
-      BABYLON.MeshBuilder.CreateBox(
-        "road",
-        {
-          width,
-          height: 0.12,
-          depth
-        },
-        scene
-      );
-
-    road.position =
-      new BABYLON.Vector3(
-        x,
-        0.11,
-        z
-      );
-
-    road.rotation.y =
-      rotation;
-
-    road.material =
-      roadMat;
-
-    road.receiveShadows =
-      true;
-
-    road.isPickable =
-      false;
-
-    return road;
+    return node;
   }
 
-  function createDash(
-    x,
-    z,
-    width,
-    depth,
-    material,
-    rotation = 0
-  ) {
-    const dash =
-      BABYLON.MeshBuilder.CreateBox(
-        "roadDash",
-        {
-          width,
-          height: 0.025,
-          depth
-        },
-        scene
+  // ==========================================================
+  // ROADS + STREET DETAIL
+  // ==========================================================
+
+  function createRoad(root, x, z, width, depth, rotation = 0, opts = {}) {
+    const roadRoot = new BABYLON.TransformNode("roadRoot", scene);
+    roadRoot.parent = root;
+    roadRoot.position.set(x, 0, z);
+    roadRoot.rotation.y = rotation;
+
+    const sidewalkMargin = opts.sidewalk === false ? 0 : 6.0;
+    if (sidewalkMargin) {
+      const sidewalk = BABYLON.MeshBuilder.CreateBox("sidewalk", {
+        width: width + sidewalkMargin * 2,
+        depth: depth + sidewalkMargin * 2,
+        height: 0.45
+      }, scene);
+      sidewalk.position.y = 0.20;
+      sidewalk.material = concreteLightMat;
+      sidewalk.parent = roadRoot;
+      sidewalk.receiveShadows = true;
+      sidewalk.isPickable = false;
+    }
+
+    const curb = BABYLON.MeshBuilder.CreateBox("curb", {
+      width: width + 1.8,
+      depth: depth + 1.8,
+      height: 0.28
+    }, scene);
+    curb.position.y = 0.33;
+    curb.material = roadEdgeMat;
+    curb.parent = roadRoot;
+    curb.isPickable = false;
+
+    const road = BABYLON.MeshBuilder.CreateBox("road", {
+      width,
+      depth,
+      height: 0.24
+    }, scene);
+    road.position.y = 0.48;
+    road.material = roadMat;
+    road.parent = roadRoot;
+    road.receiveShadows = true;
+    road.isPickable = false;
+
+    const longAxisIsDepth = depth >= width;
+    const length = longAxisIsDepth ? depth : width;
+    const spacing = 18;
+    const count = Math.floor(length / spacing);
+    for (let i = 0; i < count; i++) {
+      if (i % 2 !== 0) continue;
+      const dash = BABYLON.MeshBuilder.CreateBox("roadDash", {
+        width: longAxisIsDepth ? 0.65 : 6.0,
+        depth: longAxisIsDepth ? 6.0 : 0.65,
+        height: 0.035
+      }, scene);
+      const offset = -length / 2 + spacing / 2 + i * spacing;
+      dash.position.set(longAxisIsDepth ? 0 : offset, 0.615, longAxisIsDepth ? offset : 0);
+      dash.material = roadMarkingMat;
+      dash.parent = roadRoot;
+      dash.isPickable = false;
+    }
+
+    return roadRoot;
+  }
+
+  function createStreetLamp(root, x, z, rotation = 0, lit = true) {
+    const node = new BABYLON.TransformNode("streetLamp", scene);
+    node.parent = root;
+    node.position.set(x, 0, z);
+    node.rotation.y = rotation;
+
+    const pole = BABYLON.MeshBuilder.CreateCylinder("lampPole", {
+      diameter: 0.55,
+      height: 8.5,
+      tessellation: 10
+    }, scene);
+    pole.position.y = 4.25;
+    pole.material = darkMat;
+    pole.parent = node;
+    pole.isPickable = false;
+
+    const arm = BABYLON.MeshBuilder.CreateBox("lampArm", {
+      width: 3.2,
+      depth: 0.42,
+      height: 0.42
+    }, scene);
+    arm.position.set(1.25, 8.1, 0);
+    arm.material = darkMat;
+    arm.parent = node;
+    arm.isPickable = false;
+
+    const head = BABYLON.MeshBuilder.CreateBox("lampHead", {
+      width: 1.2,
+      depth: 0.8,
+      height: 0.35
+    }, scene);
+    head.position.set(2.65, 7.92, 0);
+    head.material = lit ? lampGlowMat : darkMat;
+    head.parent = node;
+    head.isPickable = false;
+
+    return node;
+  }
+
+  function populateRoadLamps(root, axis, start, end, fixed, spacing = 42) {
+    for (let p = start; p <= end; p += spacing) {
+      if (axis === "z") {
+        createStreetLamp(root, fixed - 12.5, p, 0);
+        createStreetLamp(root, fixed + 12.5, p, Math.PI);
+      } else {
+        createStreetLamp(root, p, fixed - 12.5, Math.PI / 2);
+        createStreetLamp(root, p, fixed + 12.5, -Math.PI / 2);
+      }
+    }
+  }
+
+  // ==========================================================
+  // BUILDINGS — REAL GLASS / SETBACKS / FACADE DETAIL
+  // ==========================================================
+
+  function buildingWallMaterial() {
+    return state.graphics === "REGULAR" ? facadeRegular : concreteMat;
+  }
+
+  function buildingGlassMaterial() {
+    return state.graphics === "REGULAR" ? glassRegular : glassBasic;
+  }
+
+  function addWindowGrid(root, w, h, d, opts = {}) {
+    const floors = Math.max(2, Math.floor(h / (opts.floorHeight || 5.0)));
+    const cols = Math.max(2, Math.floor(w / (opts.windowSpacing || 5.5)));
+    const glass = buildingGlassMaterial();
+    const frame = opts.frameMaterial || darkMat;
+    const frontZ = -d / 2 - 0.13;
+    const backZ = d / 2 + 0.13;
+
+    // One large glass plane behind the frames makes regular mode read as curtain wall.
+    const paneFront = BABYLON.MeshBuilder.CreateBox("curtainGlass", {
+      width: w * 0.80,
+      height: h * 0.78,
+      depth: 0.18
+    }, scene);
+    paneFront.position.set(0, h * 0.52, frontZ);
+    paneFront.material = glass;
+    paneFront.parent = root;
+    paneFront.isPickable = false;
+
+    const paneBack = paneFront.clone("curtainGlassRear");
+    paneBack.position.z = backZ;
+    paneBack.parent = root;
+
+    // Floor bands
+    for (let f = 1; f < floors; f++) {
+      const y = (f / floors) * h;
+      for (const z of [frontZ - 0.08, backZ + 0.08]) {
+        const band = BABYLON.MeshBuilder.CreateBox("floorBand", {
+          width: w * 0.84,
+          height: 0.26,
+          depth: 0.22
+        }, scene);
+        band.position.set(0, y, z);
+        band.material = frame;
+        band.parent = root;
+        band.isPickable = false;
+      }
+    }
+
+    // Vertical mullions
+    for (let c = 0; c <= cols; c++) {
+      const x = lerp(-w * 0.40, w * 0.40, c / cols);
+      for (const z of [frontZ - 0.10, backZ + 0.10]) {
+        const mullion = BABYLON.MeshBuilder.CreateBox("mullion", {
+          width: 0.24,
+          height: h * 0.79,
+          depth: 0.24
+        }, scene);
+        mullion.position.set(x, h * 0.52, z);
+        mullion.material = frame;
+        mullion.parent = root;
+        mullion.isPickable = false;
+      }
+    }
+  }
+
+  function createOfficeTower(root, x, z, w, h, d, variant = 0) {
+    const tower = new BABYLON.TransformNode("officeTower", scene);
+    tower.parent = root;
+    tower.position.set(x, 0, z);
+
+    const podiumH = Math.min(12, h * 0.20);
+    const podium = BABYLON.MeshBuilder.CreateBox("officePodium", {
+      width: w * 1.22,
+      height: podiumH,
+      depth: d * 1.18
+    }, scene);
+    podium.position.y = podiumH / 2;
+    podium.material = buildingWallMaterial();
+    podium.parent = tower;
+    podium.receiveShadows = true;
+    shadowGenerator.addShadowCaster(podium);
+
+    const shaftH = h - podiumH;
+    const shaft = BABYLON.MeshBuilder.CreateBox("officeShaft", {
+      width: w,
+      height: shaftH,
+      depth: d
+    }, scene);
+    shaft.position.y = podiumH + shaftH / 2;
+    shaft.material = buildingWallMaterial();
+    shaft.parent = tower;
+    shaft.receiveShadows = true;
+    shadowGenerator.addShadowCaster(shaft);
+
+    // stepped crown / side setback — breaks the plain rectangle silhouette
+    if (variant % 3 !== 1) {
+      const crownH = Math.max(7, h * 0.12);
+      const crown = BABYLON.MeshBuilder.CreateBox("towerCrown", {
+        width: w * 0.74,
+        height: crownH,
+        depth: d * 0.74
+      }, scene);
+      crown.position.y = h + crownH / 2 - 1.0;
+      crown.position.x = variant % 2 ? w * 0.10 : -w * 0.10;
+      crown.material = darkMat;
+      crown.parent = tower;
+      shadowGenerator.addShadowCaster(crown);
+    }
+
+    addWindowGrid(tower, w, shaftH, d, {
+      floorHeight: state.graphics === "REGULAR" ? 4.6 : 5.4,
+      windowSpacing: state.graphics === "REGULAR" ? 4.7 : 6.0
+    });
+
+    // Side glass fins in Regular
+    if (state.graphics === "REGULAR") {
+      for (const sx of [-1, 1]) {
+        const fin = BABYLON.MeshBuilder.CreateBox("glassFin", {
+          width: 0.45,
+          height: shaftH * 0.82,
+          depth: d * 0.90
+        }, scene);
+        fin.position.set(sx * (w / 2 + 0.25), podiumH + shaftH * 0.52, 0);
+        fin.material = metalMat;
+        fin.parent = tower;
+        fin.isPickable = false;
+      }
+    }
+
+    // entrance canopy
+    const canopy = BABYLON.MeshBuilder.CreateBox("officeCanopy", {
+      width: w * 0.42,
+      height: 0.45,
+      depth: 5.5
+    }, scene);
+    canopy.position.set(0, 4.0, -d / 2 - 2.4);
+    canopy.material = darkMat;
+    canopy.parent = tower;
+
+    tower.metadata = { neutralBuilding: true, buildingType: "office" };
+    return tower;
+  }
+
+  function createGlassSkyscraper(root, x, z, w, h, d, variant = 0) {
+    const tower = new BABYLON.TransformNode("glassSkyscraper", scene);
+    tower.parent = root;
+    tower.position.set(x, 0, z);
+
+    const glass = buildingGlassMaterial();
+    const segments = variant % 2 ? 3 : 2;
+    let usedHeight = 0;
+    for (let i = 0; i < segments; i++) {
+      const segH = i === segments - 1 ? h - usedHeight : h * (0.34 + i * 0.08);
+      const scale = 1 - i * 0.12;
+      const body = BABYLON.MeshBuilder.CreateBox("glassTowerSegment", {
+        width: w * scale,
+        height: segH,
+        depth: d * (1 - i * 0.08)
+      }, scene);
+      body.position.set(
+        (i % 2 ? 1 : -1) * i * w * 0.035,
+        usedHeight + segH / 2,
+        (variant % 3 - 1) * i * 0.6
       );
+      body.material = glass;
+      body.parent = tower;
+      body.receiveShadows = true;
+      shadowGenerator.addShadowCaster(body);
 
-    dash.position =
-      new BABYLON.Vector3(
-        x,
-        0.185,
-        z
-      );
+      // metal slab at segment transition
+      if (i > 0) {
+        const slab = BABYLON.MeshBuilder.CreateBox("glassTowerSlab", {
+          width: w * scale + 1.2,
+          height: 0.55,
+          depth: d * (1 - i * 0.08) + 1.2
+        }, scene);
+        slab.position.set(body.position.x, usedHeight + 0.10, body.position.z);
+        slab.material = darkMat;
+        slab.parent = tower;
+      }
+      usedHeight += segH;
+    }
 
-    dash.rotation.y =
-      rotation;
+    // exterior vertical frames
+    const frameCount = state.graphics === "REGULAR" ? 7 : 4;
+    for (let i = 0; i < frameCount; i++) {
+      const xPos = lerp(-w * 0.46, w * 0.46, i / Math.max(1, frameCount - 1));
+      const frame = BABYLON.MeshBuilder.CreateBox("skyscraperFrame", {
+        width: 0.34,
+        height: h * 0.92,
+        depth: 0.32
+      }, scene);
+      frame.position.set(xPos, h * 0.47, -d / 2 - 0.28);
+      frame.material = metalMat;
+      frame.parent = tower;
+      frame.isPickable = false;
+    }
 
-    dash.material =
-      material;
+    const roof = BABYLON.MeshBuilder.CreateBox("skyscraperRoof", {
+      width: w * 0.64,
+      height: 1.0,
+      depth: d * 0.64
+    }, scene);
+    roof.position.y = h + 0.5;
+    roof.material = darkMat;
+    roof.parent = tower;
 
-    dash.isPickable =
-      false;
+    if (variant % 2 === 0) {
+      const spire = BABYLON.MeshBuilder.CreateCylinder("spire", {
+        diameterTop: 0.16,
+        diameterBottom: 0.65,
+        height: Math.max(10, h * 0.17),
+        tessellation: 8
+      }, scene);
+      spire.position.y = h + Math.max(10, h * 0.17) / 2;
+      spire.material = metalMat;
+      spire.parent = tower;
+    }
+
+    tower.metadata = { neutralBuilding: true, buildingType: "glassSkyscraper" };
+    return tower;
   }
 
-  // Capital cross
-  createRoadBase(
-    0,
-    -70,
-    15,
-    470
-  );
+  // ==========================================================
+  // NEUTRAL CENTRAL HUB
+  // ==========================================================
 
-  createRoadBase(
-    0,
-    -65,
-    500,
-    15
-  );
+  function buildNeutralHub() {
+    disposeNode(state.terrainRoot);
+    disposeNode(state.hubRoot);
+    state.terrainRoot = null;
 
-  // East industry corridor
-  createRoadBase(
-    285,
-    -115,
-    13,
-    270
-  );
+    const root = new BABYLON.TransformNode("NeutralCentralHub", scene);
+    state.hubRoot = root;
 
-  // West utility corridor
-  createRoadBase(
-    -280,
-    25,
-    13,
-    280
-  );
+    // ground
+    const ground = BABYLON.MeshBuilder.CreateGround("hubGround", {
+      width: HUB_RADIUS * 2.45,
+      height: HUB_RADIUS * 2.45,
+      subdivisions: 96
+    }, scene);
+    ground.material = grassMat;
+    ground.receiveShadows = true;
+    ground.parent = root;
+    ground.metadata = { neutralGround: true };
 
-  // Southbank avenue
-  createRoadBase(
-    0,
-    285,
-    500,
-    14
-  );
+    // central civic plaza
+    const plaza = BABYLON.MeshBuilder.CreateCylinder("centralPlaza", {
+      diameter: 210,
+      height: 0.65,
+      tessellation: 64
+    }, scene);
+    plaza.position.y = 0.22;
+    plaza.material = concreteLightMat;
+    plaza.parent = root;
 
-  // Mining road
-  createRoadBase(
-    -250,
-    -230,
-    13,
-    240,
-    -Math.PI / 7
-  );
+    // fountain / reflecting pool
+    const pool = BABYLON.MeshBuilder.CreateCylinder("reflectingPool", {
+      diameter: 68,
+      height: 0.65,
+      tessellation: 64
+    }, scene);
+    pool.position.y = 0.46;
+    pool.material = waterMat;
+    pool.parent = root;
 
-  // Southeast development road
-  createRoadBase(
-    310,
-    270,
-    13,
-    260,
-    -Math.PI / 12
-  );
+    const fountainCore = BABYLON.MeshBuilder.CreateCylinder("fountainCore", {
+      diameter: 8,
+      height: 2.8,
+      tessellation: 24
+    }, scene);
+    fountainCore.position.y = 1.7;
+    fountainCore.material = concreteMat;
+    fountainCore.parent = root;
 
-  // Road markings
-  for (
-    let z = -290;
-    z <= 140;
-    z += 20
-  ) {
-    createDash(
-      0,
-      z,
-      0.7,
-      8,
-      roadLineYellowMat
-    );
+    // cross-boulevard system
+    createRoad(root, 0, 0, 24, 760, 0);
+    createRoad(root, 0, 0, 760, 24, 0);
+    createRoad(root, -175, 0, 18, 520, 0);
+    createRoad(root, 175, 0, 18, 520, 0);
+    createRoad(root, 0, -175, 520, 18, 0);
+    createRoad(root, 0, 175, 520, 18, 0);
+
+    populateRoadLamps(root, "z", -355, 355, 0, 44);
+    populateRoadLamps(root, "x", -355, 355, 0, 44);
+
+    // central offices — purposely symmetrical but not identical
+    createOfficeTower(root, -76, -76, 42, 88, 38, 0);
+    createOfficeTower(root, 76, -76, 42, 96, 38, 1);
+    createOfficeTower(root, -76, 76, 44, 76, 40, 2);
+    createOfficeTower(root, 76, 76, 44, 82, 40, 3);
+
+    // taller skyline ring
+    const sky = [
+      [-210, -160, 38, 142, 34, 0],
+      [210, -155, 42, 168, 38, 1],
+      [-220, 150, 44, 158, 40, 2],
+      [215, 160, 38, 136, 36, 3],
+      [-140, -245, 35, 118, 34, 4],
+      [145, -245, 41, 150, 36, 5],
+      [-145, 245, 40, 126, 36, 6],
+      [145, 245, 42, 156, 38, 7]
+    ];
+    sky.forEach(args => createGlassSkyscraper(root, ...args));
+
+    // civic center — large horizontal office complex
+    const civic = new BABYLON.TransformNode("CentralAdministration", scene);
+    civic.parent = root;
+    civic.position.set(0, 0, -310);
+    const civicBase = BABYLON.MeshBuilder.CreateBox("centralOfficeBase", {
+      width: 150,
+      height: 18,
+      depth: 58
+    }, scene);
+    civicBase.position.y = 9;
+    civicBase.material = buildingWallMaterial();
+    civicBase.parent = civic;
+    shadowGenerator.addShadowCaster(civicBase);
+    const civicGlass = BABYLON.MeshBuilder.CreateBox("centralOfficeGlass", {
+      width: 116,
+      height: 12,
+      depth: 0.25
+    }, scene);
+    civicGlass.position.set(0, 10.5, -29.15);
+    civicGlass.material = buildingGlassMaterial();
+    civicGlass.parent = civic;
+    for (let x = -50; x <= 50; x += 10) {
+      const rib = BABYLON.MeshBuilder.CreateBox("centralOfficeRib", {
+        width: 0.55,
+        height: 13,
+        depth: 0.45
+      }, scene);
+      rib.position.set(x, 10.5, -29.4);
+      rib.material = darkMat;
+      rib.parent = civic;
+    }
+    const civicSign = BABYLON.MeshBuilder.CreateBox("centralOfficeSign", {
+      width: 54,
+      height: 2.1,
+      depth: 0.55
+    }, scene);
+    civicSign.position.set(0, 22, -29.6);
+    civicSign.material = lampGlowMat;
+    civicSign.parent = civic;
+
+    // landscaped park belts
+    for (let i = 0; i < 90; i++) {
+      const angle = seeded(90, 5, i) * Math.PI * 2;
+      const rr = 118 + seeded(90, 7, i) * 210;
+      const x = Math.cos(angle) * rr;
+      const z = Math.sin(angle) * rr;
+      if (Math.abs(x) < 26 || Math.abs(z) < 26) continue;
+      createTree(root, x, z, 0.72 + seeded(90, 9, i) * 0.45, i % 5 === 0 ? 1 : 0);
+    }
+
+    // distant natural mountain belt, outside the neutral development
+    createMountainRange(root, -360, -350, 5, 70, 120, 17);
+    createMountainRange(root, 320, -390, 4, 76, 130, 29);
+    createMountainRange(root, -390, 320, 4, 68, 108, 41);
+    createMountainRange(root, 350, 340, 5, 62, 98, 53);
+
+    camera.target.set(0, 22, -15);
+    camera.alpha = -Math.PI / 2.2;
+    camera.beta = 1.01;
+    camera.radius = 300;
+
+    state.activeTerritory = null;
+    state.selectedTerritory = null;
+    setMode("HUB");
+    setStatus("Neutral Central Hub • owned by no civilization • open the World Map to choose your first territory");
   }
 
-  for (
-    let x = -235;
-    x <= 235;
-    x += 20
-  ) {
-    createDash(
-      x,
-      -65,
-      8,
-      0.7,
-      roadLineWhiteMat
-    );
+  // ==========================================================
+  // PROCEDURAL BIOMES / WORLD MAP
+  // ==========================================================
+
+  const BIOMES = {
+    plains: { label: "Plains", color: "#7fa85a", accent: "#a9c97a" },
+    forest: { label: "Forest", color: "#2f7140", accent: "#4b8d4e" },
+    mountain: { label: "Highlands", color: "#6d7275", accent: "#969a9d" },
+    desert: { label: "Drylands", color: "#c4a45d", accent: "#d5bc7b" },
+    coast: { label: "Coast", color: "#7dab86", accent: "#d6c98e" },
+    wetland: { label: "Wetlands", color: "#4d8469", accent: "#6da28a" },
+    tundra: { label: "Tundra", color: "#9eaaa0", accent: "#c7cfc8" }
+  };
+
+  function getBiome(x, y) {
+    if (isCentralReserved(x, y)) return "plains";
+    const nx = x / WORLD_COLS;
+    const ny = y / WORLD_ROWS;
+    const continental =
+      Math.sin(nx * 9.2) * 0.28 +
+      Math.cos(ny * 8.4) * 0.26 +
+      Math.sin((nx + ny) * 13.0) * 0.18 +
+      (hash2(x, y, 55) - 0.5) * 0.44;
+    const humidity =
+      Math.cos(nx * 13.4 + ny * 3.2) * 0.34 +
+      (hash2(x, y, 77) - 0.5) * 0.66;
+    const temp = 1 - Math.abs((y / (WORLD_ROWS - 1)) * 2 - 1);
+
+    if (continental > 0.58) return "mountain";
+    if (temp < 0.28 && continental > -0.12) return "tundra";
+    if (continental < -0.42) return "coast";
+    if (humidity > 0.42 && continental < 0.22) return "wetland";
+    if (humidity > 0.10) return "forest";
+    if (humidity < -0.38 && temp > 0.45) return "desert";
+    return "plains";
   }
 
-  for (
-    let x = -235;
-    x <= 235;
-    x += 22
-  ) {
-    createDash(
-      x,
-      285,
-      8,
-      0.7,
-      roadLineWhiteMat
-    );
+  // ==========================================================
+  // 2D WORLD MAP UI
+  // ==========================================================
+
+  let mapOverlay = null;
+  let mapCanvas = null;
+  let mapCtx = null;
+  let mapHover = null;
+  let mapDragging = false;
+  let mapDragStart = null;
+  let mapViewStart = null;
+
+  function ownerForTerritory(id) {
+    return state.claimedTerritories.get(id) || null;
   }
 
-
-  // =========================================================
-  // STREET LIGHTS
-  // =========================================================
-
-  for (
-    let z = -250;
-    z <= 100;
-    z += 36
-  ) {
-    createStreetLamp(
-      -10,
-      z
-    );
-
-    createStreetLamp(
-      10,
-      z
-    );
+  function syncClaimsFromMultiplayer(snapshot) {
+    if (!snapshot) return;
+    state.multiplayerState = snapshot;
+    state.claimedTerritories.clear();
+    (snapshot.territoryClaims || []).forEach(row => {
+      state.claimedTerritories.set(row.territory_id, row);
+    });
+    if (mapOverlay && !mapOverlay.hidden) drawWorldMap();
+    updateOnlineUI();
   }
 
-  for (
-    let x = -210;
-    x <= 210;
-    x += 40
-  ) {
-    createStreetLamp(
-      x,
-      -77
-    );
-  }
+  function createMapOverlay() {
+    mapOverlay = document.createElement("section");
+    mapOverlay.id = "mgWorldMapOverlay";
+    mapOverlay.hidden = true;
+    mapOverlay.innerHTML = `
+      <div class="mg-map-shell">
+        <header class="mg-map-header">
+          <div>
+            <div class="mg-kicker">STRATEGIC WORLD</div>
+            <h2>Choose Your First Territory</h2>
+            <p>Drag to explore • scroll to zoom • hover a chunk to inspect it.</p>
+          </div>
+          <div class="mg-map-header-actions">
+            <button class="mg-btn mg-btn-secondary" id="mgMapRecenter">RECENTER</button>
+            <button class="mg-btn mg-btn-secondary" id="mgMapClose">RETURN TO HUB</button>
+          </div>
+        </header>
+        <div class="mg-map-body">
+          <div class="mg-map-stage">
+            <canvas id="mgWorldMapCanvas"></canvas>
+            <div class="mg-map-legend">
+              <span><i class="legend-neutral"></i> Neutral Center</span>
+              <span><i class="legend-open"></i> Unclaimed</span>
+              <span><i class="legend-owned"></i> Claimed</span>
+            </div>
+          </div>
+          <aside class="mg-territory-panel" id="mgTerritoryPanel">
+            <div class="mg-kicker">TERRITORY INSPECTOR</div>
+            <h3 id="mgTerritoryTitle">Hover over the map</h3>
+            <p id="mgTerritoryBiome">Biome data will appear here.</p>
+            <div class="mg-territory-stats" id="mgTerritoryStats"></div>
+            <button class="mg-btn mg-btn-primary" id="mgClaimTerritory" disabled>SELECT A TERRITORY</button>
+            <button class="mg-btn mg-btn-secondary" id="mgEnterTerritory" hidden>ENTER TERRITORY</button>
+            <div class="mg-panel-note">Only territory claiming and capital placement are enabled in this alpha. Building, clearing, defense and attacks remain locked.</div>
+          </aside>
+        </div>
+      </div>`;
+    document.body.appendChild(mapOverlay);
 
-  for (
-    let x = -210;
-    x <= 210;
-    x += 46
-  ) {
-    createStreetLamp(
-      x,
-      297
-    );
-  }
+    mapCanvas = mapOverlay.querySelector("#mgWorldMapCanvas");
+    mapCtx = mapCanvas.getContext("2d");
 
-  // =========================================================
-  // BRIDGES
-  // =========================================================
-
-  function createBridge(
-    x,
-    z,
-    width,
-    depth,
-    rotation = 0
-  ) {
-    const deck =
-      BABYLON.MeshBuilder.CreateBox(
-        "bridgeDeck",
-        {
-          width,
-          height: 0.65,
-          depth
-        },
-        scene
-      );
-
-    deck.position =
-      new BABYLON.Vector3(
-        x,
-        1.15,
-        z
-      );
-
-    deck.rotation.y =
-      rotation;
-
-    deck.material =
-      roadMat;
-
-    shadowGenerator.addShadowCaster(
-      deck
-    );
-
-    const railWidth =
-      0.45;
-
-    const rail1 =
-      BABYLON.MeshBuilder.CreateBox(
-        "bridgeRail",
-        {
-          width:
-            railWidth,
-          height: 1.15,
-          depth
-        },
-        scene
-      );
-
-    rail1.position =
-      new BABYLON.Vector3(
-        x - width / 2 +
-          0.45,
-        1.85,
-        z
-      );
-
-    rail1.rotation.y =
-      rotation;
-
-    rail1.material =
-      concreteMat;
-
-    const rail2 =
-      rail1.clone(
-        "bridgeRail2"
-      );
-
-    rail2.position.x =
-      x +
-      width / 2 -
-      0.45;
-
-    return deck;
-  }
-
-  createBridge(
-    0,
-    145,
-    15,
-    78
-  );
-
-  createBridge(
-    305,
-    168,
-    13,
-    62,
-    -Math.PI / 12
-  );
-
-  // =========================================================
-  // INTERACTIVE DATA
-  // =========================================================
-
-  function markInteractive(
-    mesh,
-    type,
-    displayName,
-    data = {}
-  ) {
-    mesh.metadata = {
-      interactiveType:
-        type,
-      displayName,
-      blocksConstruction: true,
-      ...data
+    mapOverlay.querySelector("#mgMapClose").onclick = () => {
+      hideWorldMap();
+      setMode(state.activeTerritory ? "TERRITORY" : "HUB");
+    };
+    mapOverlay.querySelector("#mgMapRecenter").onclick = () => {
+      state.mapCamera.x = CENTRAL_X;
+      state.mapCamera.y = CENTRAL_Y;
+      state.mapCamera.zoom = 1;
+      drawWorldMap();
     };
 
-    mesh.isPickable =
-      true;
-  }
-
-  // =========================================================
-  // BASIC-PRESET MODERN BUILDING
-  // =========================================================
-
-  function createModernBuilding(
-    x,
-    z,
-    w,
-    h,
-    d,
-    options = {}
-  ) {
-    const {
-      name =
-        "Modern Building",
-      type =
-        "building",
-      glassAmount =
-        0.66,
-      material =
-        concreteMat,
-      darkGlass =
-        false
-    } = options;
-
-    const body =
-      BABYLON.MeshBuilder.CreateBox(
-        "modernBuilding",
-        {
-          width: w,
-          height: h,
-          depth: d
-        },
-        scene
-      );
-
-    body.position =
-      new BABYLON.Vector3(
-        x,
-        h / 2,
-        z
-      );
-
-    body.material =
-      material;
-
-    shadowGenerator.addShadowCaster(
-      body
-    );
-
-    const frontGlass =
-      BABYLON.MeshBuilder.CreateBox(
-        "frontGlass",
-        {
-          width:
-            w *
-            glassAmount,
-          height:
-            h * 0.57,
-          depth: 0.25
-        },
-        scene
-      );
-
-    frontGlass.position =
-      new BABYLON.Vector3(
-        x,
-        h * 0.52,
-        z - d / 2 - 0.14
-      );
-
-    frontGlass.material =
-      darkGlass
-        ? darkGlassMat
-        : glassMat;
-
-    frontGlass.isPickable =
-      false;
-
-    const roofCap =
-      BABYLON.MeshBuilder.CreateBox(
-        "roofCap",
-        {
-          width:
-            w + 0.9,
-          height: 0.65,
-          depth:
-            d + 0.9
-        },
-        scene
-      );
-
-    roofCap.position =
-      new BABYLON.Vector3(
-        x,
-        h + 0.33,
-        z
-      );
-
-    roofCap.material =
-      darkMat;
-
-    roofCap.isPickable =
-      false;
-
-    // Black structural stripes
-    const stripeLeft =
-      BABYLON.MeshBuilder.CreateBox(
-        "stripeLeft",
-        {
-          width: 0.75,
-          height: h,
-          depth:
-            d + 0.25
-        },
-        scene
-      );
-
-    stripeLeft.position =
-      new BABYLON.Vector3(
-        x - w / 2 +
-          0.38,
-        h / 2,
-        z
-      );
-
-    stripeLeft.material =
-      darkMat;
-
-    stripeLeft.isPickable =
-      false;
-
-    const stripeRight =
-      stripeLeft.clone(
-        "stripeRight"
-      );
-
-    stripeRight.position.x =
-      x +
-      w / 2 -
-      0.38;
-
-    markInteractive(
-      body,
-      type,
-      name,
-      {
-        level: 1
+    mapOverlay.querySelector("#mgClaimTerritory").onclick = () => claimSelectedTerritory();
+    mapOverlay.querySelector("#mgEnterTerritory").onclick = () => {
+      if (state.selectedTerritory) {
+        hideWorldMap();
+        enterTerritory(state.selectedTerritory);
       }
-    );
-
-    return body;
-  }
-
-  // =========================================================
-  // CAPITAL CORE
-  // =========================================================
-
-  createModernBuilding(
-    0,
-    -95,
-    28,
-    15,
-    22,
-    {
-      name:
-        "Central Administration",
-      type:
-        "townHall",
-      glassAmount:
-        0.80
-    }
-  );
-
-  createModernBuilding(
-    42,
-    -102,
-    14,
-    30,
-    14,
-    {
-      name:
-        "Commerce Tower",
-      type:
-        "commercial",
-      glassAmount:
-        0.84,
-      darkGlass:
-        true
-    }
-  );
-
-  createModernBuilding(
-    -43,
-    -100,
-    15,
-    22,
-    15,
-    {
-      name:
-        "Civic Offices",
-      type:
-        "commercial",
-      glassAmount:
-        0.76
-    }
-  );
-
-  createModernBuilding(
-    42,
-    -42,
-    16,
-    19,
-    16,
-    {
-      name:
-        "Central Residences",
-      type:
-        "residential",
-      glassAmount:
-        0.72
-    }
-  );
-
-  createModernBuilding(
-    -44,
-    -42,
-    16,
-    17,
-    16,
-    {
-      name:
-        "Central Residences",
-      type:
-        "residential",
-      glassAmount:
-        0.70
-    }
-  );
-
-  createModernBuilding(
-    78,
-    -96,
-    13,
-    22,
-    13,
-    {
-      name:
-        "Technology Center",
-      type:
-        "commercial",
-      glassAmount:
-        0.78,
-      darkGlass:
-        true
-    }
-  );
-
-  createModernBuilding(
-    -80,
-    -96,
-    13,
-    20,
-    13,
-    {
-      name:
-        "Municipal Center",
-      type:
-        "commercial",
-      glassAmount:
-        0.72
-    }
-  );
-
-  // =========================================================
-  // CAPITAL PARK
-  // =========================================================
-
-  const park =
-    BABYLON.MeshBuilder.CreateBox(
-      "capitalPark",
-      {
-        width: 75,
-        height: 0.16,
-        depth: 60
-      },
-      scene
-    );
-
-  park.position =
-    new BABYLON.Vector3(
-      0,
-      0.10,
-      15
-    );
-
-  park.material =
-    parkMat;
-
-  park.isPickable =
-    false;
-
-  // =========================================================
-  // RESIDENTIAL BLOCK HELPER
-  // =========================================================
-
-  function createResidentialDistrict(
-    startX,
-    startZ,
-    columns,
-    rows,
-    spacingX,
-    spacingZ,
-    minHeight,
-    maxHeight
-  ) {
-    for (
-      let row = 0;
-      row < rows;
-      row++
-    ) {
-      for (
-        let col = 0;
-        col < columns;
-        col++
-      ) {
-        const x =
-          startX +
-          col *
-            spacingX;
-
-        const z =
-          startZ +
-          row *
-            spacingZ;
-
-        const h =
-          minHeight +
-          Math.floor(
-            Math.random() *
-              (
-                maxHeight -
-                minHeight +
-                1
-              )
-          );
-
-        createModernBuilding(
-          x,
-          z,
-          11,
-          h,
-          11,
-          {
-            name:
-              "Residential Block",
-            type:
-              "residential",
-            glassAmount:
-              0.60
-          }
-        );
-      }
-    }
-  }
-
-  createResidentialDistrict(
-    -105,
-    55,
-    6,
-    3,
-    35,
-    31,
-    7,
-    14
-  );
-
-  createResidentialDistrict(
-    -150,
-    315,
-    8,
-    4,
-    42,
-    35,
-    7,
-    16
-  );
-
-  // =========================================================
-  // MINING COMPLEX
-  // =========================================================
-
-  const mineBase =
-    BABYLON.MeshBuilder.CreateBox(
-      "mineBase",
-      {
-        width: 36,
-        height: 8,
-        depth: 30
-      },
-      scene
-    );
-
-  mineBase.position =
-    new BABYLON.Vector3(
-      -330,
-      4,
-      -285
-    );
-
-  mineBase.material =
-    mineMat;
-
-  markInteractive(
-    mineBase,
-    "ironMine",
-    "Granite Reach Mine",
-    {
-      level: 1,
-      production:
-        "+3 Iron / cycle",
-      consumption:
-        "-1 Energy"
-    }
-  );
-
-  shadowGenerator.addShadowCaster(
-    mineBase
-  );
-
-  const mineTower =
-    BABYLON.MeshBuilder.CreateCylinder(
-      "mineTower",
-      {
-        diameter: 12,
-        height: 24,
-        tessellation: 8
-      },
-      scene
-    );
-
-  mineTower.position =
-    new BABYLON.Vector3(
-      -330,
-      15,
-      -285
-    );
-
-  mineTower.material =
-    darkMat;
-
-  mineTower.isPickable =
-    false;
-
-  // =========================================================
-  // INDUSTRIAL DISTRICT
-  // =========================================================
-
-  const steelMill =
-    BABYLON.MeshBuilder.CreateBox(
-      "steelMill",
-      {
-        width: 42,
-        height: 12,
-        depth: 32
-      },
-      scene
-    );
-
-  steelMill.position =
-    new BABYLON.Vector3(
-      330,
-      6,
-      -145
-    );
-
-  steelMill.material =
-    industrialMat;
-
-  markInteractive(
-    steelMill,
-    "steelMill",
-    "Forge District Steelworks",
-    {
-      level: 1,
-      production:
-        "+1 Steel / cycle",
-      consumption:
-        "-3 Iron, -2 Energy"
-    }
-  );
-
-  shadowGenerator.addShadowCaster(
-    steelMill
-  );
-
-  for (
-    let i = 0;
-    i < 4;
-    i++
-  ) {
-    const chimney =
-      BABYLON.MeshBuilder.CreateCylinder(
-        "steelChimney" + i,
-        {
-          diameter: 4.5,
-          height: 31,
-          tessellation: 14
-        },
-        scene
-      );
-
-    chimney.position =
-      new BABYLON.Vector3(
-        311 +
-          i * 13,
-        17,
-        -158
-      );
-
-    chimney.material =
-      darkMat;
-
-    chimney.isPickable =
-      false;
-
-    shadowGenerator.addShadowCaster(
-      chimney
-    );
-  }
-
-  createModernBuilding(
-    332,
-    -88,
-    34,
-    10,
-    25,
-    {
-      name:
-        "Fabrication Plant",
-      type:
-        "factory",
-      material:
-        industrialMat,
-      glassAmount:
-        0.35
-    }
-  );
-
-  createModernBuilding(
-    372,
-    -88,
-    28,
-    9,
-    22,
-    {
-      name:
-        "Industrial Warehouse",
-      type:
-        "factory",
-      material:
-        industrialMat,
-      glassAmount:
-        0.24
-    }
-  );
-
-  // =========================================================
-  // POWER DISTRICT
-  // =========================================================
-
-  const powerPlant =
-    BABYLON.MeshBuilder.CreateBox(
-      "powerPlant",
-      {
-        width: 38,
-        height: 12,
-        depth: 32
-      },
-      scene
-    );
-
-  powerPlant.position =
-    new BABYLON.Vector3(
-      -325,
-      6,
-      65
-    );
-
-  powerPlant.material =
-    powerMat;
-
-  markInteractive(
-    powerPlant,
-    "powerPlant",
-    "Helios Power Station",
-    {
-      level: 1,
-      production:
-        "+8 Energy / cycle"
-    }
-  );
-
-  shadowGenerator.addShadowCaster(
-    powerPlant
-  );
-
-  for (
-    let i = 0;
-    i < 2;
-    i++
-  ) {
-    const coolingTower =
-      BABYLON.MeshBuilder.CreateCylinder(
-        "coolingTower" + i,
-        {
-          diameterTop: 13,
-          diameterBottom: 20,
-          height: 31,
-          tessellation: 18
-        },
-        scene
-      );
-
-    coolingTower.position =
-      new BABYLON.Vector3(
-        -348 +
-          i * 38,
-        18,
-        65
-      );
-
-    coolingTower.material =
-      concreteMat;
-
-    coolingTower.isPickable =
-      false;
-
-    shadowGenerator.addShadowCaster(
-      coolingTower
-    );
-  }
-
-  // =========================================================
-  // POWER PYLONS
-  // =========================================================
-
-  function createPylon(
-    x,
-    z,
-    scale = 1
-  ) {
-    const mast =
-      BABYLON.MeshBuilder.CreateBox(
-        "pylonMast",
-        {
-          width:
-            2.3 * scale,
-          height:
-            20 * scale,
-          depth:
-            2.3 * scale
-        },
-        scene
-      );
-
-    mast.position =
-      new BABYLON.Vector3(
-        x,
-        10 * scale,
-        z
-      );
-
-    mast.material =
-      pylonMat;
-
-    mast.isPickable =
-      false;
-
-    const arm =
-      BABYLON.MeshBuilder.CreateBox(
-        "pylonArm",
-        {
-          width:
-            12 * scale,
-          height:
-            1.2 * scale,
-          depth:
-            1.2 * scale
-        },
-        scene
-      );
-
-    arm.position =
-      new BABYLON.Vector3(
-        x,
-        15 * scale,
-        z
-      );
-
-    arm.material =
-      pylonMat;
-
-    arm.isPickable =
-      false;
-
-    const arm2 =
-      arm.clone(
-        "pylonArm2"
-      );
-
-    arm2.position.y =
-      11 * scale;
-  }
-
-  for (
-    let i = 0;
-    i < 9;
-    i++
-  ) {
-    createPylon(
-      -275 +
-        i * 37,
-      112 +
-        i * 4,
-      0.9
-    );
-  }
-
-  // =========================================================
-  // TREES
-  // =========================================================
-
-  function createTree(
-    x,
-    z,
-    scale = 1,
-    alt = false
-  ) {
-    const variant =
-      Math.abs(
-        Math.floor(
-          x * 17 +
-          z * 13
-        )
-      ) %
-      5;
-
-    const trunk =
-      BABYLON.MeshBuilder
-        .CreateCylinder(
-          "treeTrunk",
-          {
-            diameterTop:
-              0.42 * scale,
-            diameterBottom:
-              0.88 * scale,
-            height:
-              (
-                variant === 3
-                  ? 5.4
-                  : 4.6
-              ) *
-              scale,
-            tessellation: 7
-          },
-          scene
-        );
-
-    trunk.position =
-      new BABYLON.Vector3(
-        x,
-        (
-          variant === 3
-            ? 2.7
-            : 2.3
-        ) *
-          scale,
-        z
-      );
-
-    trunk.material =
-      treeTrunkMat;
-
-    trunk.isPickable =
-      false;
-
-    const leafMaterial =
-      alt
-        ? treeLeafAltMat
-        : treeLeafMat;
-
-    function leafBlob(
-      ox,
-      oy,
-      oz,
-      sx,
-      sy,
-      sz,
-      material =
-        leafMaterial
-    ) {
-      const leaf =
-        BABYLON.MeshBuilder
-          .CreateIcoSphere(
-            "treeLeaf",
-            {
-              radius:
-                2.25 *
-                scale,
-              subdivisions: 1
-            },
-            scene
-          );
-
-      leaf.position =
-        new BABYLON.Vector3(
-          x +
-            ox *
-              scale,
-          oy *
-            scale,
-          z +
-            oz *
-              scale
-        );
-
-      leaf.scaling =
-        new BABYLON.Vector3(
-          sx,
-          sy,
-          sz
-        );
-
-      leaf.material =
-        material;
-
-      leaf.isPickable =
-        false;
-    }
-
-    if (
-      variant === 0 ||
-      variant === 1
-    ) {
-      leafBlob(
-        -0.9,
-        5.5,
-        0.1,
-        1.0,
-        0.92,
-        1.05
-      );
-
-      leafBlob(
-        1.0,
-        5.9,
-        0.35,
-        0.92,
-        1.02,
-        0.92,
-        treeLeafAltMat
-      );
-
-      leafBlob(
-        0.15,
-        7.0,
-        -0.35,
-        1.08,
-        1.05,
-        1.02
-      );
-    } else if (
-      variant === 2
-    ) {
-      leafBlob(
-        0,
-        5.4,
-        0,
-        1.18,
-        0.85,
-        1.18
-      );
-
-      leafBlob(
-        0.65,
-        6.25,
-        -0.3,
-        0.78,
-        0.75,
-        0.78,
-        treeLeafAltMat
-      );
-    } else if (
-      variant === 3
-    ) {
-      [
-        [4.0, 4.3, 2.2],
-        [5.4, 3.5, 2.0],
-        [6.7, 2.6, 1.55],
-        [7.8, 1.7, 1.1]
-      ].forEach(
-        layer => {
-          const crown =
-            BABYLON.MeshBuilder
-              .CreateCylinder(
-                "pineCrown",
-                {
-                  diameterTop:
-                    0.22 *
-                    scale,
-                  diameterBottom:
-                    layer[1] *
-                    scale,
-                  height:
-                    layer[2] *
-                    scale,
-                  tessellation: 8
-                },
-                scene
-              );
-
-          crown.position =
-            new BABYLON.Vector3(
-              x,
-              layer[0] *
-                scale,
-              z
-            );
-
-          crown.material =
-            leafMaterial;
-
-          crown.isPickable =
-            false;
-        }
-      );
-    } else {
-      leafBlob(
-        -0.4,
-        5.2,
-        0,
-        0.8,
-        0.9,
-        0.8
-      );
-
-      leafBlob(
-        0.55,
-        5.8,
-        0.25,
-        0.78,
-        0.82,
-        0.78,
-        treeLeafAltMat
-      );
-    }
-  }
-
-  // Northwood forest
-  for (
-    let i = 0;
-    i < 165;
-    i++
-  ) {
-    const angle =
-      Math.random() *
-      Math.PI *
-      2;
-
-    const radius =
-      Math.sqrt(
-        Math.random()
-      ) *
-      175;
-
-    createTree(
-      30 +
-        Math.cos(angle) *
-          radius,
-      -330 +
-        Math.sin(angle) *
-          radius,
-      0.75 +
-        Math.random() *
-          0.9,
-      Math.random() >
-        0.55
-    );
-  }
-
-  // Scattered world trees
-  for (
-    let i = 0;
-    i < 135;
-    i++
-  ) {
-    const x =
-      Math.random() *
-      960 -
-      480;
-
-    const z =
-      Math.random() *
-      960 -
-      480;
-
-    const capitalDist =
-      Math.sqrt(
-        x * x +
-        (z + 65) *
-          (z + 65)
-      );
-
-    const southDist =
-      Math.sqrt(
-        x * x +
-        (z - 285) *
-          (z - 285)
-      );
-
-    if (
-      capitalDist >
-        180 &&
-      southDist >
-        115
-    ) {
-      createTree(
-        x,
-        z,
-        0.75 +
-          Math.random() *
-            0.65,
-        Math.random() >
-          0.68
-      );
-    }
-  }
-
-  // =========================================================
-  // ROCKS
-  // =========================================================
-
-  function createRock(
-    x,
-    z,
-    size
-  ) {
-    const rock =
-      BABYLON.MeshBuilder.CreateSphere(
-        "rock",
-        {
-          diameter: size,
-          segments: 6
-        },
-        scene
-      );
-
-    rock.position =
-      new BABYLON.Vector3(
-        x,
-        size * 0.24,
-        z
-      );
-
-    rock.scaling.y =
-      0.55 +
-      Math.random() *
-        0.35;
-
-    rock.scaling.x =
-      0.75 +
-      Math.random() *
-        0.45;
-
-    rock.material =
-      rockMat;
-
-    rock.isPickable =
-      false;
-  }
-
-  for (
-    let i = 0;
-    i < 70;
-    i++
-  ) {
-    const angle =
-      Math.random() *
-      Math.PI *
-      2;
-
-    const radius =
-      Math.sqrt(
-        Math.random()
-      ) *
-      155;
-
-    createRock(
-      -330 +
-        Math.cos(angle) *
-          radius,
-      -285 +
-        Math.sin(angle) *
-          radius,
-      3 +
-        Math.random() *
-          8
-    );
-  }
-
-  // =========================================================
-  // UI HELPERS
-  // =========================================================
-
-  function panelTheme() {
-    return `
-      background:
-        linear-gradient(
-          180deg,
-          rgba(5,12,23,0.965),
-          rgba(7,18,31,0.945)
-        );
-
-      border:
-        1px solid
-        rgba(93,216,255,0.30);
-
-      box-shadow:
-        0 12px 32px
-        rgba(0,0,0,0.22),
-        0 0 24px
-        rgba(0,160,255,0.08);
-
-      color:white;
-
-      font-family:
-        Inter,
-        Arial,
-        sans-serif;
-
-      backdrop-filter:
-        blur(8px);
-    `;
-  }
-
-  function formatMoney(
-    value
-  ) {
-    return "$" +
-      Math.floor(
-        value
-      ).toLocaleString();
-  }
-
-  function resourceChip(
-    label,
-    value,
-    color
-  ) {
-    return `
-      <div
-        style="
-          display:flex;
-          align-items:center;
-          gap:7px;
-
-          padding:
-            7px 10px;
-
-          border-radius:8px;
-
-          background:
-            rgba(255,255,255,0.035);
-
-          border:
-            1px solid
-            rgba(255,255,255,0.055);
-
-          white-space:nowrap;
-        "
-      >
-        <span
-          style="
-            color:${color};
-            opacity:0.95;
-          "
-        >
-          ${label}
-        </span>
-
-        <b>
-          ${value}
-        </b>
-      </div>
-    `;
-  }
-
-  // =========================================================
-  // TOP BAR
-  // =========================================================
-
-  const topBar =
-    document.createElement(
-      "div"
-    );
-
-  topBar.id = "mg-topbar";
-
-  topBar.style.cssText = `
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-
-    min-height:66px;
-
-    ${panelTheme()}
-
-    border-top:none;
-    border-left:none;
-    border-right:none;
-
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    padding:
-      0 18px;
-
-    z-index:90;
-  `;
-
-  document.body.appendChild(
-    topBar
-  );
-
-  const civIdentity =
-    document.createElement(
-      "div"
-    );
-
-  civIdentity.innerHTML = `
-    <div
-      style="
-        display:flex;
-        align-items:center;
-        gap:9px;
-      "
-    >
-      <div
-        style="
-          width:28px;
-          height:28px;
-
-          display:flex;
-          align-items:center;
-          justify-content:center;
-
-          border-radius:8px;
-
-          background:
-            linear-gradient(
-              135deg,
-              #1e86c8,
-              #64e5ff
-            );
-
-          color:#06101b;
-
-          font-weight:900;
-        "
-      >
-        M
-      </div>
-
-      <div>
-        <div
-          style="
-            font-size:16px;
-            font-weight:850;
-            letter-spacing:0.8px;
-          "
-        >
-          NOVA CIVILIZATION
-        </div>
-
-        <div
-          style="
-            margin-top:2px;
-            font-size:9px;
-            letter-spacing:0.7px;
-            opacity:0.48;
-          "
-        >
-          ALPHA 0.1.1 • VISUAL WORLD PASS
-        </div>
-      </div>
-    </div>
-  `;
-
-  topBar.appendChild(
-    civIdentity
-  );
-
-  const resourceBar =
-    document.createElement(
-      "div"
-    );
-
-  resourceBar.style.cssText = `
-    display:flex;
-    align-items:center;
-    gap:7px;
-
-    font-size:12px;
-  `;
-
-  topBar.appendChild(
-    resourceBar
-  );
-
-  const multiplayerHudBadge =
-    document.createElement("div");
-
-  multiplayerHudBadge.id = "mg-multiplayer-badge";
-
-  multiplayerHudBadge.style.cssText = `
-    position:absolute;
-    right:18px;
-    top:58px;
-    display:none;
-    align-items:center;
-    gap:7px;
-    padding:7px 10px;
-    border-radius:999px;
-    border:1px solid rgba(102,225,255,0.18);
-    background:rgba(5,14,24,0.88);
-    color:#a8efff;
-    font-size:9px;
-    font-weight:800;
-    letter-spacing:.5px;
-    z-index:92;
-    pointer-events:none;
-    box-shadow:0 8px 22px rgba(0,0,0,.20);
-  `;
-
-  multiplayerHudBadge.innerHTML =
-    `<span style="
-      width:7px;height:7px;border-radius:50%;
-      background:#65e29b;
-      box-shadow:0 0 10px rgba(101,226,155,.55);
-    "></span>
-    <span id="multiplayerHudText">CENTRAL WORLD</span>`;
-
-  document.body.appendChild(multiplayerHudBadge);
-
-  if (
-    window.mapGameMultiplayer &&
-    typeof window.mapGameMultiplayer.onStateChange === "function"
-  ) {
-    window.mapGameMultiplayer.onStateChange(state => {
-      const text =
-        multiplayerHudBadge.querySelector("#multiplayerHudText");
-
-      if (state && state.connected) {
-        multiplayerHudBadge.style.display = "flex";
-
-        if (text) {
-          text.textContent =
-            `CENTRAL WORLD • ${state.onlineCount || 1} ONLINE`;
-        }
+    };
+
+    mapCanvas.addEventListener("pointerdown", e => {
+      mapDragging = true;
+      mapDragStart = { x: e.clientX, y: e.clientY };
+      mapViewStart = { x: state.mapCamera.x, y: state.mapCamera.y };
+      mapCanvas.setPointerCapture?.(e.pointerId);
+    });
+    mapCanvas.addEventListener("pointermove", e => {
+      if (mapDragging) {
+        const cell = 42 * state.mapCamera.zoom;
+        state.mapCamera.x = mapViewStart.x - (e.clientX - mapDragStart.x) / cell;
+        state.mapCamera.y = mapViewStart.y - (e.clientY - mapDragStart.y) / cell;
+        state.mapCamera.x = clamp(state.mapCamera.x, 0, WORLD_COLS - 1);
+        state.mapCamera.y = clamp(state.mapCamera.y, 0, WORLD_ROWS - 1);
+        drawWorldMap();
       } else {
-        multiplayerHudBadge.style.display = "none";
+        updateMapHover(e);
       }
+    });
+    mapCanvas.addEventListener("pointerup", e => {
+      const dragged = mapDragStart && Math.hypot(e.clientX - mapDragStart.x, e.clientY - mapDragStart.y) > 6;
+      mapDragging = false;
+      if (!dragged) selectMapCell(e);
+    });
+    mapCanvas.addEventListener("pointerleave", () => {
+      mapDragging = false;
+      mapHover = null;
+      drawWorldMap();
+    });
+    mapCanvas.addEventListener("wheel", e => {
+      e.preventDefault();
+      state.mapCamera.zoom = clamp(state.mapCamera.zoom * (e.deltaY > 0 ? 0.88 : 1.14), 0.58, 2.35);
+      drawWorldMap();
+    }, { passive: false });
+
+    window.addEventListener("resize", resizeWorldMapCanvas);
+  }
+
+  function resizeWorldMapCanvas() {
+    if (!mapCanvas) return;
+    const r = mapCanvas.parentElement.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    mapCanvas.width = Math.max(1, Math.floor(r.width * dpr));
+    mapCanvas.height = Math.max(1, Math.floor(r.height * dpr));
+    mapCanvas.style.width = `${r.width}px`;
+    mapCanvas.style.height = `${r.height}px`;
+    mapCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawWorldMap();
+  }
+
+  function cellFromPointer(e) {
+    const rect = mapCanvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const cell = 42 * state.mapCamera.zoom;
+    const centerPxX = rect.width / 2;
+    const centerPxY = rect.height / 2;
+    const x = Math.floor(state.mapCamera.x + (mx - centerPxX) / cell + 0.5);
+    const y = Math.floor(state.mapCamera.y + (my - centerPxY) / cell + 0.5);
+    if (x < 0 || y < 0 || x >= WORLD_COLS || y >= WORLD_ROWS) return null;
+    return { x, y, id: territoryId(x, y) };
+  }
+
+  function updateMapHover(e) {
+    mapHover = cellFromPointer(e);
+    drawWorldMap();
+    updateTerritoryInspector(mapHover || state.selectedTerritory);
+  }
+
+  function selectMapCell(e) {
+    const cell = cellFromPointer(e);
+    if (!cell) return;
+    state.selectedTerritory = cell;
+    updateTerritoryInspector(cell);
+    drawWorldMap();
+  }
+
+  function drawWorldMap() {
+    if (!mapCtx || !mapCanvas) return;
+    const rect = mapCanvas.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+    mapCtx.clearRect(0, 0, w, h);
+
+    const bg = mapCtx.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, "#092038");
+    bg.addColorStop(1, "#06121e");
+    mapCtx.fillStyle = bg;
+    mapCtx.fillRect(0, 0, w, h);
+
+    const cell = 42 * state.mapCamera.zoom;
+    const minX = Math.max(0, Math.floor(state.mapCamera.x - w / cell / 2) - 2);
+    const maxX = Math.min(WORLD_COLS - 1, Math.ceil(state.mapCamera.x + w / cell / 2) + 2);
+    const minY = Math.max(0, Math.floor(state.mapCamera.y - h / cell / 2) - 2);
+    const maxY = Math.min(WORLD_ROWS - 1, Math.ceil(state.mapCamera.y + h / cell / 2) + 2);
+
+    for (let y = minY; y <= maxY; y++) {
+      for (let x = minX; x <= maxX; x++) {
+        const px = w / 2 + (x - state.mapCamera.x) * cell - cell / 2;
+        const py = h / 2 + (y - state.mapCamera.y) * cell - cell / 2;
+        const id = territoryId(x, y);
+        const biome = getBiome(x, y);
+        const info = BIOMES[biome];
+        const owner = ownerForTerritory(id);
+        const reserved = isCentralReserved(x, y);
+
+        mapCtx.fillStyle = reserved ? "#25364a" : info.color;
+        mapCtx.fillRect(px + 1, py + 1, cell - 2, cell - 2);
+
+        // biome texture strokes — Minecraft-map-ish but not pixel-noise overload
+        mapCtx.globalAlpha = 0.24;
+        mapCtx.fillStyle = info.accent;
+        const dots = state.graphics === "REGULAR" ? 5 : 3;
+        for (let k = 0; k < dots; k++) {
+          const dx = seeded(x, y, k * 2 + 1) * (cell - 8);
+          const dy = seeded(x, y, k * 2 + 2) * (cell - 8);
+          const ss = 2 + seeded(x, y, k + 20) * 5;
+          mapCtx.fillRect(px + 4 + dx, py + 4 + dy, ss, ss);
+        }
+        mapCtx.globalAlpha = 1;
+
+        if (owner) {
+          mapCtx.fillStyle = "rgba(25,58,85,0.46)";
+          mapCtx.fillRect(px + 2, py + 2, cell - 4, cell - 4);
+          mapCtx.strokeStyle = owner.owner_id === state.multiplayerState?.user?.id ? "#51e3a7" : "#78bfff";
+          mapCtx.lineWidth = 2.2;
+          mapCtx.strokeRect(px + 2.5, py + 2.5, cell - 5, cell - 5);
+        }
+
+        if (reserved) {
+          mapCtx.fillStyle = "rgba(4,13,22,0.32)";
+          mapCtx.fillRect(px, py, cell, cell);
+          mapCtx.strokeStyle = "rgba(105,220,255,0.38)";
+          mapCtx.lineWidth = 1;
+          mapCtx.strokeRect(px + 1, py + 1, cell - 2, cell - 2);
+        }
+
+        const isHover = mapHover && mapHover.x === x && mapHover.y === y;
+        const isSelected = state.selectedTerritory && state.selectedTerritory.x === x && state.selectedTerritory.y === y;
+        if (isHover || isSelected) {
+          mapCtx.strokeStyle = isSelected ? "#ffffff" : "#9ae9ff";
+          mapCtx.lineWidth = isSelected ? 3.5 : 2.2;
+          mapCtx.strokeRect(px + 2, py + 2, cell - 4, cell - 4);
+        }
+      }
+    }
+
+    // neutral center marker
+    const cpx = w / 2 + (CENTRAL_X - state.mapCamera.x) * cell;
+    const cpy = h / 2 + (CENTRAL_Y - state.mapCamera.y) * cell;
+    mapCtx.beginPath();
+    mapCtx.arc(cpx, cpy, Math.max(7, cell * 0.22), 0, Math.PI * 2);
+    mapCtx.fillStyle = "#8be8ff";
+    mapCtx.fill();
+    mapCtx.strokeStyle = "rgba(255,255,255,.9)";
+    mapCtx.lineWidth = 2;
+    mapCtx.stroke();
+  }
+
+  function updateTerritoryInspector(cell) {
+    const title = document.getElementById("mgTerritoryTitle");
+    const biomeEl = document.getElementById("mgTerritoryBiome");
+    const stats = document.getElementById("mgTerritoryStats");
+    const claim = document.getElementById("mgClaimTerritory");
+    const enter = document.getElementById("mgEnterTerritory");
+    if (!title || !cell) {
+      if (title) title.textContent = "Hover over the map";
+      return;
+    }
+
+    const id = cell.id || territoryId(cell.x, cell.y);
+    const biome = getBiome(cell.x, cell.y);
+    const owner = ownerForTerritory(id);
+    const reserved = isCentralReserved(cell.x, cell.y);
+    title.textContent = reserved ? "Neutral Central District" : `Territory ${cell.x}-${cell.y}`;
+    biomeEl.textContent = `${BIOMES[biome].label} • ${CHUNK_WORLD_SIZE} × ${CHUNK_WORLD_SIZE} world units`;
+    stats.innerHTML = `
+      <div><span>Terrain</span><b>${BIOMES[biome].label}</b></div>
+      <div><span>Status</span><b>${reserved ? "Protected neutral zone" : owner ? "Claimed" : "Available"}</b></div>
+      <div><span>Owner</span><b>${reserved ? "No civilization" : owner ? escapeHtml(owner.owner_username || "Player") : "Unclaimed"}</b></div>`;
+
+    claim.hidden = false;
+    enter.hidden = true;
+    if (reserved) {
+      claim.disabled = true;
+      claim.textContent = "NEUTRAL — CANNOT CLAIM";
+    } else if (owner) {
+      const mine = state.worldType === "singleplayer" || owner.owner_id === state.multiplayerState?.user?.id;
+      claim.disabled = true;
+      claim.textContent = mine ? "YOUR TERRITORY" : "ALREADY CLAIMED";
+      enter.hidden = !mine;
+      if (mine) enter.hidden = false;
+    } else {
+      claim.disabled = false;
+      claim.textContent = "CLAIM THIS TERRITORY";
+    }
+  }
+
+  function showWorldMap() {
+    if (!mapOverlay) createMapOverlay();
+    mapOverlay.hidden = false;
+    setMode("MAP");
+    setTimeout(() => {
+      resizeWorldMapCanvas();
+      updateTerritoryInspector(state.selectedTerritory);
+    }, 0);
+  }
+
+  function hideWorldMap() {
+    if (mapOverlay) mapOverlay.hidden = true;
+  }
+
+  async function claimSelectedTerritory() {
+    const cell = state.selectedTerritory;
+    if (!cell || isCentralReserved(cell.x, cell.y)) return;
+    const id = cell.id || territoryId(cell.x, cell.y);
+    if (ownerForTerritory(id)) return;
+
+    try {
+      if (state.worldType === "central") {
+        if (!window.mapGameMultiplayer?.claimTerritory) throw new Error("Multiplayer is not ready.");
+        const row = await window.mapGameMultiplayer.claimTerritory(id);
+        state.claimedTerritories.set(id, row);
+      } else {
+        // Keep singleplayer simple: one initial claim for now.
+        const already = Array.from(state.claimedTerritories.values()).find(v => v && v.localOwner);
+        if (already) throw new Error("This alpha currently allows one starting territory in Singleplayer.");
+        state.claimedTerritories.set(id, {
+          territory_id: id,
+          owner_id: "local",
+          owner_username: "You",
+          localOwner: true
+        });
+        saveLocalState();
+      }
+      updateTerritoryInspector(cell);
+      drawWorldMap();
+      showToast("Territory claimed. Enter it to choose your capital site.", "success");
+    } catch (error) {
+      showToast(error?.message || "Could not claim territory.", "error");
+    }
+  }
+
+  // ==========================================================
+  // TERRITORY WORLD GENERATOR
+  // ==========================================================
+
+  let territoryGround = null;
+
+  function clearWorldRoots() {
+    disposeNode(state.hubRoot);
+    disposeNode(state.terrainRoot);
+    state.hubRoot = null;
+    state.terrainRoot = null;
+    territoryGround = null;
+    if (state.capitalGhost) {
+      disposeNode(state.capitalGhost);
+      state.capitalGhost = null;
+    }
+  }
+
+  function territoryHeightFn(x, z, biome, sx, sy) {
+    const large =
+      Math.sin((x + sx * 31) * 0.0062) * 7.5 +
+      Math.cos((z - sy * 27) * 0.0054) * 6.2 +
+      Math.sin((x + z) * 0.0033) * 4.4;
+    const medium =
+      Math.sin(x * 0.017 + sy) * 2.3 +
+      Math.cos(z * 0.014 - sx) * 2.1;
+
+    if (biome === "mountain") {
+      return large * 1.25 + medium + Math.max(0, Math.sin((x - 150) * 0.008) * 22);
+    }
+    if (biome === "coast") {
+      return large * 0.35 + medium * 0.25 - Math.max(0, (z - 300) * 0.06);
+    }
+    if (biome === "wetland") return large * 0.22 + medium * 0.20;
+    if (biome === "desert") return large * 0.52 + medium * 0.55;
+    if (biome === "tundra") return large * 0.65 + medium * 0.48;
+    if (biome === "forest") return large * 0.58 + medium * 0.50;
+    return large * 0.42 + medium * 0.42;
+  }
+
+  function createTerritoryGround(root, cell, biome) {
+    const sub = state.graphics === "REGULAR" ? 100 : 72;
+    const ground = BABYLON.MeshBuilder.CreateGround("territoryGround", {
+      width: CHUNK_WORLD_SIZE,
+      height: CHUNK_WORLD_SIZE,
+      subdivisions: sub,
+      updatable: true
+    }, scene);
+    ground.parent = root;
+    ground.material = biome === "desert" ? sandMat : biome === "mountain" ? grassLightMat : grassMat;
+    ground.receiveShadows = true;
+    ground.metadata = { territoryGround: true };
+
+    const p = ground.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+    for (let i = 0; i < p.length; i += 3) {
+      const x = p[i];
+      const z = p[i + 2];
+      let y = territoryHeightFn(x, z, biome, cell.x, cell.y);
+
+      // Keep a broad safer central basin but do not make the entire map flat.
+      const dist = Math.hypot(x, z);
+      if (dist < 165) {
+        const flatten = 1 - clamp((165 - dist) / 130, 0, 0.82);
+        y *= flatten;
+      }
+      p[i + 1] = y;
+    }
+    ground.updateVerticesData(BABYLON.VertexBuffer.PositionKind, p);
+    const normals = [];
+    BABYLON.VertexData.ComputeNormals(p, ground.getIndices(), normals);
+    ground.updateVerticesData(BABYLON.VertexBuffer.NormalKind, normals);
+    ground.refreshBoundingInfo();
+    return ground;
+  }
+
+  function placeTerritoryVegetation(root, cell, biome) {
+    const treeCount = biome === "forest" ? 190 : biome === "plains" ? 95 : biome === "wetland" ? 120 : biome === "tundra" ? 42 : biome === "desert" ? 10 : 56;
+    for (let i = 0; i < treeCount; i++) {
+      const x = seeded(cell.x, cell.y, i * 3 + 1) * 860 - 430;
+      const z = seeded(cell.x, cell.y, i * 3 + 2) * 860 - 430;
+      // keep the very center more open so a new player can identify a safe capital area
+      if (Math.hypot(x, z) < 105) continue;
+      if (biome === "desert" && i % 4 !== 0) continue;
+      const tree = createTree(root, x, z, 0.75 + seeded(cell.x, cell.y, i + 600) * 0.65, biome === "tundra" || i % 5 === 0 ? 1 : 0);
+      const h = territoryHeightFn(x, z, biome, cell.x, cell.y);
+      tree.position.y = h;
+    }
+  }
+
+  function placeTerritoryMountains(root, cell, biome) {
+    if (biome === "mountain") {
+      createMountainRange(root, -330, -260, 5, 68, 122, cell.x * 19 + cell.y * 7 + 5);
+      createMountainRange(root, 300, 260, 4, 72, 112, cell.x * 23 + cell.y * 11 + 17);
+      createMountainRange(root, 330, -300, 3, 58, 88, cell.x * 29 + cell.y * 13 + 31);
+    } else {
+      createMountainRange(root, -400, -360, 3, 54, 75, cell.x * 17 + cell.y * 19 + 9);
+      if (biome !== "wetland" && biome !== "coast") {
+        createMountainRange(root, 390, 340, 2, 50, 68, cell.x * 31 + cell.y * 5 + 12);
+      }
+    }
+  }
+
+  function addCoast(root, cell, biome) {
+    if (biome !== "coast" && biome !== "wetland") return;
+    const water = BABYLON.MeshBuilder.CreateGround("territoryWater", {
+      width: CHUNK_WORLD_SIZE,
+      height: biome === "coast" ? 280 : 190,
+      subdivisions: 1
+    }, scene);
+    water.position.set(0, -4.5, 395);
+    water.material = waterMat;
+    water.parent = root;
+    water.isPickable = false;
+  }
+
+  function enterTerritory(cell) {
+    clearWorldRoots();
+    const biome = getBiome(cell.x, cell.y);
+    const root = new BABYLON.TransformNode(`Territory_${cell.x}_${cell.y}`, scene);
+    state.terrainRoot = root;
+    state.activeTerritory = { ...cell, id: cell.id || territoryId(cell.x, cell.y), biome };
+
+    territoryGround = createTerritoryGround(root, cell, biome);
+    placeTerritoryVegetation(root, cell, biome);
+    placeTerritoryMountains(root, cell, biome);
+    addCoast(root, cell, biome);
+
+    // subtle chunk boundary markers, visible but not walls
+    const boundaryMat = new BABYLON.StandardMaterial("boundaryMat", scene);
+    boundaryMat.diffuseColor = new BABYLON.Color3(0.2, 0.72, 0.96);
+    boundaryMat.emissiveColor = new BABYLON.Color3(0.04, 0.18, 0.28);
+    boundaryMat.alpha = 0.28;
+    const half = CHUNK_WORLD_SIZE / 2 - 3;
+    [[0, -half, CHUNK_WORLD_SIZE, 2], [0, half, CHUNK_WORLD_SIZE, 2], [-half, 0, 2, CHUNK_WORLD_SIZE], [half, 0, 2, CHUNK_WORLD_SIZE]].forEach(([x,z,w,d]) => {
+      const edge = BABYLON.MeshBuilder.CreateBox("territoryBoundary", { width:w, depth:d, height:0.5 }, scene);
+      edge.position.set(x, 1.0, z);
+      edge.material = boundaryMat;
+      edge.parent = root;
+      edge.isPickable = false;
+    });
+
+    camera.target.set(0, 8, 0);
+    camera.radius = 330;
+    camera.alpha = -Math.PI / 2.25;
+    camera.beta = 1.00;
+    setMode("TERRITORY");
+
+    const existingCapital = getCapitalForActiveTerritory();
+    if (existingCapital) {
+      state.capital = existingCapital;
+      renderCapital(existingCapital, true);
+      setStatus(`<b>${escapeHtml(existingCapital.name || "Capital")}</b> • ${BIOMES[biome].label} territory • development systems are locked in this alpha`);
+    } else {
+      setStatus(`${BIOMES[biome].label} territory • choose a stable capital site; the center is usually safest`);
+      setTimeout(() => beginCapitalPlacement(), 550);
+    }
+  }
+
+  function getCapitalForActiveTerritory() {
+    if (!state.activeTerritory) return null;
+    if (state.worldType === "central") {
+      const capitals = state.multiplayerState?.capitals || [];
+      return capitals.find(c => c.territory_id === state.activeTerritory.id) || null;
+    }
+    const saved = loadLocalState();
+    return saved.capital && saved.capital.territoryId === state.activeTerritory.id ? saved.capital : null;
+  }
+
+  // ==========================================================
+  // CAPITAL PLACEMENT — ONLY ACTIVE BUILD ACTION
+  // ==========================================================
+
+  function getGroundPointFromPointer(evt) {
+    if (!territoryGround) return null;
+    const pick = scene.pick(scene.pointerX, scene.pointerY, mesh => mesh === territoryGround);
+    if (!pick?.hit || !pick.pickedPoint) return null;
+    return pick.pickedPoint.clone();
+  }
+
+  function isCapitalSiteSafe(x, z) {
+    if (!state.activeTerritory) return false;
+    const h = territoryHeightFn(x, z, state.activeTerritory.biome, state.activeTerritory.x, state.activeTerritory.y);
+    const hx = territoryHeightFn(x + 18, z, state.activeTerritory.biome, state.activeTerritory.x, state.activeTerritory.y);
+    const hz = territoryHeightFn(x, z + 18, state.activeTerritory.biome, state.activeTerritory.x, state.activeTerritory.y);
+    const slope = Math.max(Math.abs(hx - h), Math.abs(hz - h));
+    if (Math.abs(x) > 400 || Math.abs(z) > 400) return false;
+    if (state.activeTerritory.biome === "coast" && z > 280) return false;
+    return slope < 10.5;
+  }
+
+  function beginCapitalPlacement() {
+    if (!state.activeTerritory || getCapitalForActiveTerritory()) return;
+    setMode("CAPITAL_PLACEMENT");
+    state.pendingCapitalXZ = null;
+    showCapitalDialog();
+    setStatus("Capital placement • click a suitable location in your territory • greener preview = safer site");
+  }
+
+  function makeCapitalGhost() {
+    const root = new BABYLON.TransformNode("capitalGhost", scene);
+    const mat = new BABYLON.StandardMaterial("capitalGhostMat", scene);
+    mat.diffuseColor = new BABYLON.Color3(0.20, 0.95, 0.62);
+    mat.emissiveColor = new BABYLON.Color3(0.06, 0.25, 0.15);
+    mat.alpha = 0.42;
+    const base = BABYLON.MeshBuilder.CreateBox("capitalGhostBase", { width: 78, depth: 62, height: 2 }, scene);
+    base.position.y = 1;
+    base.material = mat;
+    base.parent = root;
+    const hall = BABYLON.MeshBuilder.CreateBox("capitalGhostHall", { width: 42, depth: 30, height: 20 }, scene);
+    hall.position.y = 11;
+    hall.material = mat;
+    hall.parent = root;
+    root.setEnabled(false);
+    root.metadata = { ghost: true, material: mat };
+    return root;
+  }
+
+  scene.onPointerObservable.add(info => {
+    if (state.mode !== "CAPITAL_PLACEMENT") return;
+    if (info.type === BABYLON.PointerEventTypes.POINTERMOVE || info.type === BABYLON.PointerEventTypes.POINTERDOWN) {
+      const p = getGroundPointFromPointer(info.event);
+      if (!p) return;
+      const safe = isCapitalSiteSafe(p.x, p.z);
+      if (!state.capitalGhost) state.capitalGhost = makeCapitalGhost();
+      state.capitalGhost.setEnabled(true);
+      state.capitalGhost.position.set(p.x, p.y + 0.5, p.z);
+      const gm = state.capitalGhost.metadata.material;
+      gm.diffuseColor = safe ? new BABYLON.Color3(0.20,0.95,0.62) : new BABYLON.Color3(0.96,0.24,0.22);
+      gm.emissiveColor = safe ? new BABYLON.Color3(0.06,0.25,0.15) : new BABYLON.Color3(0.25,0.04,0.03);
+      if (info.type === BABYLON.PointerEventTypes.POINTERDOWN && safe) {
+        state.pendingCapitalXZ = { x:p.x, y:p.y, z:p.z };
+        updateCapitalDialog();
+      }
+    }
+  });
+
+  let capitalDialog = null;
+
+  function showCapitalDialog() {
+    if (!capitalDialog) {
+      capitalDialog = document.createElement("div");
+      capitalDialog.id = "mgCapitalDialog";
+      capitalDialog.className = "mg-floating-panel mg-capital-dialog";
+      capitalDialog.innerHTML = `
+        <div class="mg-kicker">FOUNDING YOUR CIVILIZATION</div>
+        <h3>Place the Capital</h3>
+        <p>Your capital becomes the center of your first city. Flat inland terrain is safest; steep mountains and water are unavailable.</p>
+        <label class="mg-field-label" for="mgCapitalName">CAPITAL NAME</label>
+        <input id="mgCapitalName" class="mg-input" maxlength="32" value="Nova Capital" />
+        <div id="mgCapitalCoords" class="mg-capital-coords">Click the terrain to choose a site.</div>
+        <div class="mg-dialog-actions">
+          <button class="mg-btn mg-btn-secondary" id="mgCapitalCancel">LATER</button>
+          <button class="mg-btn mg-btn-primary" id="mgCapitalConfirm" disabled>ESTABLISH CAPITAL</button>
+        </div>`;
+      document.body.appendChild(capitalDialog);
+      capitalDialog.querySelector("#mgCapitalCancel").onclick = () => {
+        capitalDialog.hidden = true;
+        state.pendingCapitalXZ = null;
+        if (state.capitalGhost) state.capitalGhost.setEnabled(false);
+        setMode("TERRITORY");
+        setStatus("Territory view • Capital placement paused • click Capital in the left dock when ready");
+      };
+      capitalDialog.querySelector("#mgCapitalConfirm").onclick = establishCapitalFromDialog;
+    }
+    capitalDialog.hidden = false;
+    updateCapitalDialog();
+  }
+
+  function updateCapitalDialog() {
+    if (!capitalDialog) return;
+    const coords = capitalDialog.querySelector("#mgCapitalCoords");
+    const confirm = capitalDialog.querySelector("#mgCapitalConfirm");
+    if (!state.pendingCapitalXZ) {
+      coords.textContent = "Click the terrain to choose a site.";
+      confirm.disabled = true;
+    } else {
+      coords.textContent = `Site selected • X ${Math.round(state.pendingCapitalXZ.x)} • Z ${Math.round(state.pendingCapitalXZ.z)}`;
+      confirm.disabled = false;
+    }
+  }
+
+  async function establishCapitalFromDialog() {
+    if (!state.activeTerritory || !state.pendingCapitalXZ) return;
+    const name = String(capitalDialog.querySelector("#mgCapitalName").value || "").trim();
+    if (name.length < 2) {
+      showToast("Capital name must be at least 2 characters.", "error");
+      return;
+    }
+    const p = state.pendingCapitalXZ;
+    try {
+      let capital;
+      if (state.worldType === "central") {
+        capital = await window.mapGameMultiplayer.establishCapital({
+          territoryId: state.activeTerritory.id,
+          name,
+          x: p.x,
+          z: p.z
+        });
+      } else {
+        capital = {
+          territory_id: state.activeTerritory.id,
+          territoryId: state.activeTerritory.id,
+          name,
+          x: p.x,
+          z: p.z,
+          owner_id: "local"
+        };
+        const save = loadLocalState();
+        save.capital = capital;
+        localStorage.setItem(localSaveKey, JSON.stringify(save));
+      }
+      state.capital = capital;
+      if (state.capitalGhost) {
+        disposeNode(state.capitalGhost);
+        state.capitalGhost = null;
+      }
+      capitalDialog.hidden = true;
+      renderCapital(capital, false);
+      setMode("TERRITORY");
+      setStatus(`<b>${escapeHtml(name)}</b> established • city development will unlock in the next construction update`);
+      showToast(`${name} established.`, "success");
+    } catch (error) {
+      showToast(error?.message || "Could not establish capital.", "error");
+    }
+  }
+
+  function removeVegetationNear(x, z, radius) {
+    if (!state.terrainRoot) return;
+    const children = state.terrainRoot.getChildren?.() || [];
+    children.forEach(node => {
+      if (!node?.metadata?.vegetation) return;
+      const world = node.getAbsolutePosition ? node.getAbsolutePosition() : node.position;
+      if (Math.hypot(world.x - x, world.z - z) <= radius) disposeNode(node);
     });
   }
 
-  function updateHUD() {
-    resourceBar.innerHTML =
-      resourceChip(
-        "CREDITS",
-        formatMoney(
-          money
-        ),
-        "#7fe9ff"
-      ) +
-      resourceChip(
-        "IRON",
-        Math.floor(
-          iron
-        ),
-        "#cbd3da"
-      ) +
-      resourceChip(
-        "STEEL",
-        Math.floor(
-          steel
-        ),
-        "#93bfe0"
-      ) +
-      resourceChip(
-        "POWER",
-        Math.floor(
-          energy
-        ),
-        "#ffd66c"
-      ) +
-      resourceChip(
-        "POP",
-        population.toLocaleString(),
-        "#a4ecc2"
-      ) +
-      resourceChip(
-        "INCOME",
-        "+$" +
-          incomePerMinute +
-          "/m",
-        "#7ee5a2"
-      ) +
-      resourceChip(
-        "TIME",
-        formatWorldTime(),
-        "#d6dcff"
-      );
-  }
-
-
-  function formatWorldTime() {
-    const totalMinutes =
-      Math.floor(
-        worldTime *
-        24 *
-        60
-      ) %
-      (24 * 60);
-
-    let hours =
-      Math.floor(
-        totalMinutes / 60
-      );
-
-    const minutes =
-      totalMinutes % 60;
-
-    const suffix =
-      hours >= 12
-        ? "PM"
-        : "AM";
-
-    let displayHour =
-      hours % 12;
-
-    if (
-      displayHour === 0
-    ) {
-      displayHour = 12;
-    }
-
-    return (
-      displayHour +
-      ":" +
-      String(minutes).padStart(
-        2,
-        "0"
-      ) +
-      " " +
-      suffix
-    );
-  }
-
-  function getNightAmount() {
-    const daylight =
-      Math.max(
-        0,
-        Math.sin(
-          (worldTime - 0.25) *
-          Math.PI *
-          2
-        )
-      );
-
-    return 1 - daylight;
-  }
-
-  // =========================================================
-  // LEFT DOCK
-  // =========================================================
-
-  const sideDock =
-    document.createElement(
-      "div"
-    );
-
-  sideDock.id = "mg-side-dock";
-
-  sideDock.style.cssText = `
-    position:absolute;
-
-    left:14px;
-    top:84px;
-
-    width:60px;
-
-    ${panelTheme()}
-
-    border-radius:14px;
-
-    padding:8px;
-
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-
-    z-index:80;
-  `;
-
-  document.body.appendChild(
-    sideDock
-  );
-
-  function createDockButton(
-    icon,
-    label
-  ) {
-    const button =
-      document.createElement(
-        "button"
-      );
-
-    button.innerHTML =
-      icon;
-
-    button.title =
-      label;
-
-    button.dataset.label =
-      label;
-
-    button.className =
-      "mg-dock-button";
-
-    button.style.cssText = `
-      width:44px;
-      height:44px;
-
-      border:
-        1px solid
-        rgba(255,255,255,0.07);
-
-      border-radius:10px;
-
-      background:
-        rgba(255,255,255,0.03);
-
-      color:white;
-
-      font-size:18px;
-
-      cursor:pointer;
-
-      transition:
-        background 0.15s ease,
-        border-color 0.15s ease,
-        transform 0.15s ease;
-    `;
-
-    button.onmouseenter =
-      () => {
-        button.style.background =
-          "rgba(38,164,230,0.17)";
-
-        button.style.borderColor =
-          "rgba(88,218,255,0.30)";
-
-        button.style.transform =
-          "translateY(-1px)";
-      };
-
-    button.onmouseleave =
-      () => {
-        button.style.background =
-          "rgba(255,255,255,0.03)";
-
-        button.style.borderColor =
-          "rgba(255,255,255,0.07)";
-
-        button.style.transform =
-          "translateY(0)";
-      };
-
-    sideDock.appendChild(
-      button
-    );
-
-    return button;
-  }
-
-  const buildButton =
-    createDockButton(
-      "🏗️",
-      "Construction"
-    );
-
-  const worldButton =
-    createDockButton(
-      "🌍",
-      "World"
-    );
-
-  const economyButton =
-    createDockButton(
-      "📊",
-      "Economy"
-    );
-
-  const regionButton =
-    createDockButton(
-      "🗺️",
-      "Regions"
-    );
-
-  const researchButton =
-    createDockButton(
-      "🔬",
-      "Research"
-    );
-
-  const settingsButton =
-    createDockButton(
-      "⚙️",
-      "Settings"
-    );
-
-  // =========================================================
-  // RIGHT INSPECTOR
-  // =========================================================
-
-  const inspector =
-    document.createElement(
-      "div"
-    );
-
-  inspector.id = "mg-inspector";
-
-  inspector.style.cssText = `
-    position:absolute;
-
-    right:16px;
-    top:84px;
-
-    width:320px;
-
-    max-height:
-      calc(100vh - 135px);
-
-    overflow-y:auto;
-
-    ${panelTheme()}
-
-    border-radius:14px;
-
-    padding:16px;
-
-    z-index:76;
-
-    display:none;
-  `;
-
-  document.body.appendChild(
-    inspector
-  );
-
-  function hideInspector() {
-    inspector.style.display =
-      "none";
-  }
-
-  function inspectorHeader(
-    title,
-    subtitle,
-    accent =
-      "#87eaff"
-  ) {
-    return `
-      <div
-        style="
-          display:flex;
-          justify-content:
-            space-between;
-          align-items:flex-start;
-          gap:12px;
-        "
-      >
-        <div>
-          <div
-            style="
-              color:${accent};
-              font-size:20px;
-              font-weight:850;
-            "
-          >
-            ${title}
-          </div>
-
-          <div
-            style="
-              margin-top:3px;
-              font-size:10px;
-              letter-spacing:0.6px;
-              opacity:0.48;
-            "
-          >
-            ${subtitle}
-          </div>
-        </div>
-
-        <button
-          id="closeInspector"
-          style="
-            border:none;
-            background:none;
-            color:white;
-            font-size:18px;
-            cursor:pointer;
-            opacity:0.8;
-          "
-        >
-          ✕
-        </button>
-      </div>
-    `;
-  }
-
-  function wireInspectorClose() {
-    const closeButton =
-      document.getElementById(
-        "closeInspector"
-      );
-
-    if (
-      closeButton instanceof
-      HTMLButtonElement
-    ) {
-      closeButton.onclick =
-        hideInspector;
-    }
-  }
-
-  function showBuildingInspector(
-    mesh
-  ) {
-    if (
-      !mesh ||
-      !mesh.metadata
-    ) {
-      return;
-    }
-
-    const data =
-      mesh.metadata;
-
-    inspector.style.display =
-      "block";
-
-    let productionBlock =
-      "";
-
-    if (
-      data.production
-    ) {
-      productionBlock += `
-        <div
-          style="
-            margin-top:12px;
-            padding:10px;
-            border-radius:9px;
-            background:
-              rgba(126,229,162,0.07);
-            border:
-              1px solid
-              rgba(126,229,162,0.12);
-          "
-        >
-          <div
-            style="
-              font-size:9px;
-              opacity:0.48;
-            "
-          >
-            PRODUCTION
-          </div>
-
-          <div
-            style="
-              margin-top:4px;
-              color:#8debae;
-              font-weight:bold;
-            "
-          >
-            ${data.production}
-          </div>
-        </div>
-      `;
-    }
-
-    if (
-      data.consumption
-    ) {
-      productionBlock += `
-        <div
-          style="
-            margin-top:8px;
-            padding:10px;
-            border-radius:9px;
-            background:
-              rgba(255,209,103,0.06);
-            border:
-              1px solid
-              rgba(255,209,103,0.10);
-          "
-        >
-          <div
-            style="
-              font-size:9px;
-              opacity:0.48;
-            "
-          >
-            CONSUMPTION
-          </div>
-
-          <div
-            style="
-              margin-top:4px;
-              color:#ffd66f;
-              font-weight:bold;
-            "
-          >
-            ${data.consumption}
-          </div>
-        </div>
-      `;
-    }
-
-    inspector.innerHTML =
-      inspectorHeader(
-        data.displayName ||
-          "Building",
-        (
-          data.interactiveType ||
-          "BUILDING"
-        ).toUpperCase()
-      ) +
-      `
-        <div
-          style="
-            margin-top:14px;
-            display:grid;
-            grid-template-columns:
-              1fr 1fr;
-            gap:8px;
-          "
-        >
-          <div
-            style="
-              padding:10px;
-              border-radius:9px;
-              background:
-                rgba(255,255,255,0.035);
-            "
-          >
-            <div
-              style="
-                font-size:9px;
-                opacity:0.48;
-              "
-            >
-              LEVEL
-            </div>
-
-            <b>
-              ${data.level || 1}
-            </b>
-          </div>
-
-          <div
-            style="
-              padding:10px;
-              border-radius:9px;
-              background:
-                rgba(255,255,255,0.035);
-            "
-          >
-            <div
-              style="
-                font-size:9px;
-                opacity:0.48;
-              "
-            >
-              EFFICIENCY
-            </div>
-
-            <b>
-              100%
-            </b>
-          </div>
-        </div>
-
-        ${productionBlock}
-
-        <button
-          id="upgradeSelected"
-          style="
-            width:100%;
-
-            margin-top:14px;
-
-            padding:10px;
-
-            border:
-              1px solid
-              rgba(80,210,255,0.32);
-
-            border-radius:9px;
-
-            background:
-              linear-gradient(
-                180deg,
-                rgba(31,145,210,0.85),
-                rgba(18,105,168,0.85)
-              );
-
-            color:white;
-            font-weight:bold;
-            cursor:pointer;
-          "
-        >
-          UPGRADE BUILDING
-        </button>
-
-        <button
-          id="demolishSelected"
-          style="
-            width:100%;
-
-            margin-top:8px;
-
-            padding:9px;
-
-            border:
-              1px solid
-              rgba(255,110,110,0.14);
-
-            border-radius:9px;
-
-            background:
-              rgba(125,35,42,0.35);
-
-            color:#ffb4b4;
-
-            font-weight:bold;
-            cursor:pointer;
-          "
-        >
-          DEMOLISH
-        </button>
-      `;
-
-    wireInspectorClose();
-
-    const upgradeButton =
-      document.getElementById(
-        "upgradeSelected"
-      );
-
-    if (
-      upgradeButton instanceof
-      HTMLButtonElement
-    ) {
-      upgradeButton.onclick =
-        () => {
-          const currentLevel =
-            data.level ||
-            1;
-
-          const cost =
-            1000 *
-            currentLevel;
-
-          if (
-            money < cost
-          ) {
-            showToast(
-              "Not enough credits.",
-              "warning"
-            );
-
-            return;
-          }
-
-          money -= cost;
-
-          data.level =
-            currentLevel +
-            1;
-
-          mesh.scaling.y *=
-            1.035;
-
-          updateHUD();
-          saveGame();
-
-          showBuildingInspector(
-            mesh
-          );
-
-          showToast(
-            data.displayName +
-              " upgraded to Level " +
-              data.level,
-            "success"
-          );
-        };
-    }
-
-    const demolishButton =
-      document.getElementById(
-        "demolishSelected"
-      );
-
-    if (
-      demolishButton instanceof
-      HTMLButtonElement
-    ) {
-      demolishButton.onclick =
-        () => {
-          showToast(
-            "Demolition will activate with full construction placement.",
-            "info"
-          );
-        };
-    }
-  }
-
-  // =========================================================
-  // TERRAIN / REGION INSPECTOR
-  // =========================================================
-
-  function closestRegionTo(
-    point
-  ) {
-    let closest = null;
-    let best = Infinity;
-
-    for (
-      const region of regions
-    ) {
-      const dx =
-        point.x -
-        region.x;
-
-      const dz =
-        point.z -
-        region.z;
-
-      const distance =
-        Math.sqrt(
-          dx * dx +
-          dz * dz
-        );
-
-      if (
-        distance < best
-      ) {
-        best = distance;
-        closest = region;
-      }
-    }
-
-    return {
-      region: closest,
-      distance: best
-    };
-  }
-
-  function showTerrainInspector(
-    point
-  ) {
-    const result =
-      closestRegionTo(
-        point
-      );
-
-    const region =
-      result.region;
-
-    const inside =
-      region &&
-      result.distance <=
-        region.radius;
-
-    const name =
-      inside
-        ? region.name
-        : "Open Territory";
-
-    const type =
-      inside
-        ? region.type
-        : "Grassland";
-
-    const accent =
-      inside
-        ? region.color
-        : "#bfe09a";
-
-    const description =
-      inside
-        ? region.description
-        : "Open land available for future expansion and development.";
-
-    inspector.style.display =
-      "block";
-
-    inspector.innerHTML =
-      inspectorHeader(
-        name,
-        "REGION • " +
-          type.toUpperCase(),
-        accent
-      ) +
-      `
-        <div
-          style="
-            margin-top:14px;
-            line-height:1.55;
-            font-size:13px;
-            opacity:0.82;
-          "
-        >
-          ${description}
-        </div>
-
-        <div
-          style="
-            margin-top:14px;
-
-            display:grid;
-            grid-template-columns:
-              1fr 1fr;
-            gap:8px;
-          "
-        >
-          <div
-            style="
-              padding:10px;
-              border-radius:9px;
-              background:
-                rgba(255,255,255,0.035);
-            "
-          >
-            <div
-              style="
-                font-size:9px;
-                opacity:0.48;
-              "
-            >
-              X
-            </div>
-
-            <b>
-              ${point.x.toFixed(0)}
-            </b>
-          </div>
-
-          <div
-            style="
-              padding:10px;
-              border-radius:9px;
-              background:
-                rgba(255,255,255,0.035);
-            "
-          >
-            <div
-              style="
-                font-size:9px;
-                opacity:0.48;
-              "
-            >
-              Z
-            </div>
-
-            <b>
-              ${point.z.toFixed(0)}
-            </b>
-          </div>
-        </div>
-
-        <div
-          style="
-            margin-top:8px;
-            padding:10px;
-            border-radius:9px;
-            background:
-              rgba(255,255,255,0.035);
-          "
-        >
-          <div
-            style="
-              font-size:9px;
-              opacity:0.48;
-            "
-          >
-            CONSTRUCTION
-          </div>
-
-          <div
-            style="
-              margin-top:3px;
-              color:#8debae;
-              font-weight:bold;
-            "
-          >
-            BUILDABLE
-          </div>
-        </div>
-      `;
-
-    wireInspectorClose();
-  }
-
-  // =========================================================
-  // BOTTOM STATUS BAR
-  // =========================================================
-
-  const bottomBar =
-    document.createElement(
-      "div"
-    );
-
-  bottomBar.id = "mg-bottom-bar";
-
-  bottomBar.style.cssText = `
-    position:absolute;
-
-    left:50%;
-    bottom:15px;
-
-    transform:
-      translateX(-50%);
-
-    min-width:420px;
-    max-width:68vw;
-
-    ${panelTheme()}
-
-    border-radius:11px;
-
-    padding:
-      9px 14px;
-
-    text-align:center;
-
-    font-size:11px;
-
-    z-index:78;
-  `;
-
-  document.body.appendChild(
-    bottomBar
-  );
-
-  function setBottomStatus(
-    text
-  ) {
-    bottomBar.innerHTML =
-      text;
-  }
-
-  setBottomStatus(
-    "Explore the expanded world • Click buildings or terrain for details"
-  );
-
-  // =========================================================
-  // TOASTS
-  // =========================================================
-
-  const toastHost =
-    document.createElement(
-      "div"
-    );
-
-  toastHost.style.cssText = `
-    position:absolute;
-
-    top:82px;
-    left:50%;
-
-    transform:
-      translateX(-50%);
-
-    display:flex;
-    flex-direction:column;
-    gap:7px;
-
-    z-index:120;
-
-    pointer-events:none;
-  `;
-
-  document.body.appendChild(
-    toastHost
-  );
-
-  function showToast(
-    text,
-    type =
-      "info"
-  ) {
-    const toast =
-      document.createElement(
-        "div"
-      );
-
-    let accent =
-      "#7fe9ff";
-
-    if (
-      type ===
-      "success"
-    ) {
-      accent =
-        "#88e8a9";
-    }
-
-    if (
-      type ===
-      "warning"
-    ) {
-      accent =
-        "#ffd46d";
-    }
-
-    toast.style.cssText = `
-      padding:
-        9px 13px;
-
-      border-radius:9px;
-
-      background:
-        rgba(5,12,23,0.94);
-
-      border:
-        1px solid
-        ${accent}44;
-
-      color:white;
-
-      font-family:
-        Arial,
-        sans-serif;
-
-      font-size:11px;
-
-      box-shadow:
-        0 8px 24px
-        rgba(0,0,0,0.22);
-
-      pointer-events:none;
-    `;
-
-    toast.innerHTML = `
-      <span
-        style="
-          color:${accent};
-          font-weight:bold;
-        "
-      >
-        ${text}
-      </span>
-    `;
-
-    toastHost.appendChild(
-      toast
-    );
-
-    setTimeout(
-      () => {
-        toast.remove();
-      },
-      2600
-    );
-  }
-
-
-  // =========================================================
-  // BUILD MODE ACTION CONTROLS
-  // =========================================================
-
-  const buildActionControls =
-    document.createElement(
-      "div"
-    );
-
-  buildActionControls.style.cssText = `
-    position:absolute;
-    right:18px;
-    bottom:248px;
-
-    display:none;
-    flex-direction:column;
-    gap:7px;
-
-    z-index:96;
-  `;
-
-  document.body.appendChild(
-    buildActionControls
-  );
-
-  function createBuildActionButton(
-    label
-  ) {
-    const button =
-      document.createElement(
-        "button"
-      );
-
-    button.innerText =
-      label;
-
-    button.style.cssText = `
-      min-width:112px;
-
-      padding:
-        9px 12px;
-
-      border:
-        1px solid
-        rgba(90,215,255,0.30);
-
-      border-radius:9px;
-
-      background:
-        rgba(5,14,25,0.88);
-
-      color:white;
-
-      font-size:11px;
-      font-weight:bold;
-
-      cursor:pointer;
-      touch-action:none;
-
-      backdrop-filter:
-        blur(6px);
-    `;
-
-    buildActionControls.appendChild(
-      button
-    );
-
-    return button;
-  }
-
-  const rotateBuildButton =
-    createBuildActionButton(
-      "↻ ROTATE"
-    );
-
-  const cancelBuildButton =
-    createBuildActionButton(
-      "✕ CANCEL"
-    );
-
-  // =========================================================
-  // CONSTRUCTION TERMINAL
-  // =========================================================
-
-  const shop =
-    document.createElement(
-      "div"
-    );
-
-  shop.id = "mg-shop";
-
-  shop.style.cssText = `
-    position:absolute;
-
-    left:86px;
-    top:84px;
-
-    width:520px;
-
-    max-height:
-      calc(100vh - 125px);
-
-    overflow-y:auto;
-
-    ${panelTheme()}
-
-    border-radius:15px;
-
-    padding:18px;
-
-    z-index:84;
-
-    display:none;
-  `;
-
-  document.body.appendChild(
-    shop
-  );
-
-  let activeCategory =
-    "industry";
-
-  const shopItems = {
-    industry: [
-      {
-        name:
-          "Iron Mine",
-        buildType:
-          "ironMine",
-        type:
-          "RESOURCE EXTRACTION",
-        cost: 750,
-        accent:
-          "#c8d0d6",
-        description:
-          "Extracts iron ore for industrial production.",
-        stats:
-          "+3 Iron / cycle • -1 Power"
-      },
-      {
-        name:
-          "Steel Mill",
-        buildType:
-          "steelMill",
-        type:
-          "HEAVY INDUSTRY",
-        cost: 1200,
-        accent:
-          "#94bddb",
-        description:
-          "Refines iron into construction-grade steel.",
-        stats:
-          "+1 Steel / cycle • -3 Iron • -2 Power"
-      },
-      {
-        name:
-          "Fabrication Plant",
-        buildType:
-          "fabricationPlant",
-        type:
-          "MANUFACTURING",
-        cost: 1800,
-        accent:
-          "#88c8ec",
-        description:
-          "Future manufacturing center for advanced goods.",
-        stats:
-          "Advanced production"
-      },
-      {
-        name:
-          "Warehouse",
-        buildType:
-          "warehouse",
-        type:
-          "STORAGE",
-        cost: 650,
-        accent:
-          "#d1d7dc",
-        description:
-          "Future storage and logistics buffer.",
-        stats:
-          "Storage infrastructure"
-      }
-    ],
-
-    civil: [
-      {
-        name:
-          "Residential Block",
-        buildType:
-          "residential",
-        type:
-          "RESIDENTIAL",
-        cost: 500,
-        accent:
-          "#9fecc0",
-        description:
-          "Expands housing and population capacity.",
-        stats:
-          "+500 population capacity"
-      },
-      {
-        name:
-          "Commercial Center",
-        buildType:
-          "commercial",
-        type:
-          "COMMERCIAL",
-        cost: 900,
-        accent:
-          "#8de5dc",
-        description:
-          "Future local income and employment hub.",
-        stats:
-          "Income infrastructure"
-      },
-      {
-        name:
-          "Town Hall Upgrade",
-        type:
-          "ADMINISTRATION",
-        cost:
-          2000 *
-          townHallLevel,
-        accent:
-          "#82eaff",
-        description:
-          "Improves government capacity and offline income.",
-        stats:
-          "Current Level " +
-          townHallLevel
-      }
-    ],
-
-    power: [
-      {
-        name:
-          "Power Plant",
-        buildType:
-          "powerPlant",
-        type:
-          "ENERGY",
-        cost: 950,
-        accent:
-          "#ffd76e",
-        description:
-          "Generates power for industrial buildings.",
-        stats:
-          "+8 Power / cycle"
-      },
-      {
-        name:
-          "Grid Substation",
-        buildType:
-          "substation",
-        type:
-          "POWER GRID",
-        cost: 700,
-        accent:
-          "#ffe8a0",
-        description:
-          "Future power distribution and efficiency structure.",
-        stats:
-          "Grid infrastructure"
-      }
-    ],
-
-    infrastructure: [
-      {
-        name:
-          "Road",
-        type:
-          "TRANSPORT",
-        cost: 100,
-        accent:
-          "#c9ced4",
-        description:
-          "Connects districts and future logistics systems.",
-        stats:
-          "Placement coming next"
-      },
-      {
-        name:
-          "Bridge",
-        type:
-          "TRANSPORT",
-        cost: 450,
-        accent:
-          "#dde2e6",
-        description:
-          "Connects development across rivers.",
-        stats:
-          "Placement coming next"
-      },
-      {
-        name:
-          "Power Pylon",
-        buildType:
-          "pylon",
-        type:
-          "UTILITIES",
-        cost: 220,
-        accent:
-          "#c4cbd1",
-        description:
-          "Future transmission network component.",
-        stats:
-          "Grid infrastructure"
-      }
-    ]
-  };
-
-
-  // =========================================================
-  // CONSTRUCTION CORE
-  // =========================================================
-
-  const buildingDefinitions = {
-    ironMine: {
-      name: "Iron Mine",
-      width: 28,
-      depth: 24,
-      height: 8,
-      cost: 750,
-      production: "+3 Iron / cycle",
-      consumption: "-1 Power"
-    },
-
-    steelMill: {
-      name: "Steel Mill",
+  function renderCapital(capital, existing) {
+    if (!state.terrainRoot || !state.activeTerritory) return;
+    const x = Number(capital.x) || 0;
+    const z = Number(capital.z) || 0;
+    const y = territoryHeightFn(x, z, state.activeTerritory.biome, state.activeTerritory.x, state.activeTerritory.y);
+
+    // Capital placement automatically clears a civic footprint for now.
+    // Manual clearing remains disabled until the next system update.
+    removeVegetationNear(x, z, 95);
+
+    const root = new BABYLON.TransformNode("playerCapital", scene);
+    root.parent = state.terrainRoot;
+    root.position.set(x, y, z);
+    root.metadata = { playerCapital: true };
+
+    const plaza = BABYLON.MeshBuilder.CreateCylinder("capitalPlaza", {
+      diameter: 104,
+      height: 0.55,
+      tessellation: 48
+    }, scene);
+    plaza.position.y = 0.30;
+    plaza.material = concreteLightMat;
+    plaza.parent = root;
+
+    const hall = BABYLON.MeshBuilder.CreateBox("capitalHall", {
+      width: 54,
+      height: 22,
+      depth: 34
+    }, scene);
+    hall.position.y = 11.3;
+    hall.material = buildingWallMaterial();
+    hall.parent = root;
+    shadowGenerator.addShadowCaster(hall);
+
+    const glass = BABYLON.MeshBuilder.CreateBox("capitalHallGlass", {
       width: 36,
-      depth: 28,
-      height: 11,
-      cost: 1200,
-      production: "+1 Steel / cycle",
-      consumption: "-3 Iron, -2 Power"
-    },
+      height: 13,
+      depth: 0.24
+    }, scene);
+    glass.position.set(0, 11.8, -17.15);
+    glass.material = buildingGlassMaterial();
+    glass.parent = root;
 
-    fabricationPlant: {
-      name: "Fabrication Plant",
-      width: 30,
-      depth: 24,
-      height: 9,
-      cost: 1800,
-      production: "Advanced manufacturing",
-      consumption: "-4 Power"
-    },
-
-    warehouse: {
-      name: "Warehouse",
-      width: 28,
-      depth: 22,
-      height: 8,
-      cost: 650,
-      production: "Storage infrastructure"
-    },
-
-    residential: {
-      name: "Residential Block",
-      width: 18,
-      depth: 18,
-      height: 14,
-      cost: 500,
-      production: "+500 population capacity"
-    },
-
-    commercial: {
-      name: "Commercial Center",
-      width: 22,
-      depth: 20,
-      height: 17,
-      cost: 900,
-      production: "Commercial income"
-    },
-
-    powerPlant: {
-      name: "Power Plant",
-      width: 34,
-      depth: 28,
-      height: 11,
-      cost: 950,
-      production: "+8 Power / cycle"
-    },
-
-    substation: {
-      name: "Grid Substation",
-      width: 22,
-      depth: 18,
-      height: 6,
-      cost: 700,
-      production: "Power-grid infrastructure"
-    },
-
-    pylon: {
-      name: "Power Pylon",
-      width: 10,
-      depth: 10,
-      height: 20,
-      cost: 220,
-      production: "Power-grid infrastructure"
-    }
-  };
-
-  const ghostGoodMat =
-    new BABYLON.StandardMaterial(
-      "ghostGoodMat",
-      scene
-    );
-
-  ghostGoodMat.diffuseColor =
-    new BABYLON.Color3(
-      0.10,
-      0.92,
-      0.48
-    );
-
-  ghostGoodMat.emissiveColor =
-    new BABYLON.Color3(
-      0.03,
-      0.32,
-      0.13
-    );
-
-  ghostGoodMat.alpha = 0.44;
-
-  const ghostBadMat =
-    new BABYLON.StandardMaterial(
-      "ghostBadMat",
-      scene
-    );
-
-  ghostBadMat.diffuseColor =
-    new BABYLON.Color3(
-      0.95,
-      0.13,
-      0.16
-    );
-
-  ghostBadMat.emissiveColor =
-    new BABYLON.Color3(
-      0.32,
-      0.02,
-      0.03
-    );
-
-  ghostBadMat.alpha = 0.44;
-
-  const blockedInfrastructureZones = [
-    // Main roads
-    { x: 0, z: -70, width: 20, depth: 475, rotation: 0 },
-    { x: 0, z: -65, width: 505, depth: 20, rotation: 0 },
-    { x: 285, z: -115, width: 18, depth: 275, rotation: 0 },
-    { x: -280, z: 25, width: 18, depth: 285, rotation: 0 },
-    { x: 0, z: 285, width: 505, depth: 19, rotation: 0 },
-    { x: -250, z: -230, width: 18, depth: 245, rotation: -Math.PI / 7 },
-    { x: 310, z: 270, width: 18, depth: 265, rotation: -Math.PI / 12 },
-
-    // River and lake
-    { x: -270, z: 125, width: 305, depth: 48, rotation: Math.PI / 20 },
-    { x: 0, z: 150, width: 335, depth: 52, rotation: -Math.PI / 28 },
-    { x: 300, z: 175, width: 315, depth: 48, rotation: Math.PI / 18 },
-    { x: -365, z: 330, width: 158, depth: 108, rotation: Math.PI / 10 }
-  ];
-
-  function getRotatedFootprint(
-    definition,
-    rotation
-  ) {
-    const turns =
-      Math.round(
-        rotation /
-        (Math.PI / 2)
-      );
-
-    const odd =
-      Math.abs(turns % 2) === 1;
-
-    return odd
-      ? {
-          width: definition.depth,
-          depth: definition.width
-        }
-      : {
-          width: definition.width,
-          depth: definition.depth
-        };
-  }
-
-  function pointInRotatedRectangle(
-    px,
-    pz,
-    cx,
-    cz,
-    width,
-    depth,
-    rotation
-  ) {
-    const dx = px - cx;
-    const dz = pz - cz;
-
-    const cos =
-      Math.cos(-rotation);
-
-    const sin =
-      Math.sin(-rotation);
-
-    const localX =
-      dx * cos -
-      dz * sin;
-
-    const localZ =
-      dx * sin +
-      dz * cos;
-
-    return (
-      Math.abs(localX) <=
-        width / 2 &&
-      Math.abs(localZ) <=
-        depth / 2
-    );
-  }
-
-  function footprintHitsBlockedZone(
-    x,
-    z,
-    width,
-    depth
-  ) {
-    const points = [
-      [x, z],
-      [x - width / 2, z - depth / 2],
-      [x + width / 2, z - depth / 2],
-      [x - width / 2, z + depth / 2],
-      [x + width / 2, z + depth / 2]
-    ];
-
-    return blockedInfrastructureZones.some(
-      zone =>
-        points.some(
-          point =>
-            pointInRotatedRectangle(
-              point[0],
-              point[1],
-              zone.x,
-              zone.z,
-              zone.width,
-              zone.depth,
-              zone.rotation
-            )
-        )
-    );
-  }
-
-  function rectangleOverlap(
-    ax,
-    az,
-    aw,
-    ad,
-    bx,
-    bz,
-    bw,
-    bd,
-    padding = 3
-  ) {
-    return (
-      Math.abs(ax - bx) <
-        (aw + bw) / 2 +
-          padding &&
-      Math.abs(az - bz) <
-        (ad + bd) / 2 +
-          padding
-    );
-  }
-
-  function overlapsExistingStructure(
-    x,
-    z,
-    width,
-    depth
-  ) {
-    for (
-      const building of placedBuildings
-    ) {
-      const definition =
-        buildingDefinitions[
-          building.type
-        ];
-
-      if (!definition) {
-        continue;
-      }
-
-      const fp =
-        getRotatedFootprint(
-          definition,
-          building.rotation || 0
-        );
-
-      if (
-        rectangleOverlap(
-          x,
-          z,
-          width,
-          depth,
-          building.x,
-          building.z,
-          fp.width,
-          fp.depth,
-          4
-        )
-      ) {
-        return true;
-      }
+    for (let xR = -15; xR <= 15; xR += 6) {
+      const rib = BABYLON.MeshBuilder.CreateBox("capitalRib", {
+        width: 0.36,
+        height: 14,
+        depth: 0.3
+      }, scene);
+      rib.position.set(xR, 11.8, -17.35);
+      rib.material = darkMat;
+      rib.parent = root;
     }
 
-    for (
-      const mesh of scene.meshes
-    ) {
-      if (
-        !mesh.metadata ||
-        !mesh.metadata
-          .blocksConstruction ||
-        mesh.metadata
-          .placedBuildingId
-      ) {
-        continue;
-      }
-
-      const info =
-        mesh.getBoundingInfo();
-
-      if (!info) {
-        continue;
-      }
-
-      const bounds =
-        info.boundingBox;
-
-      const min =
-        bounds.minimumWorld;
-
-      const max =
-        bounds.maximumWorld;
-
-      const meshWidth =
-        Math.max(
-          1,
-          max.x - min.x
-        );
-
-      const meshDepth =
-        Math.max(
-          1,
-          max.z - min.z
-        );
-
-      const centerX =
-        (min.x + max.x) / 2;
-
-      const centerZ =
-        (min.z + max.z) / 2;
-
-      if (
-        rectangleOverlap(
-          x,
-          z,
-          width,
-          depth,
-          centerX,
-          centerZ,
-          meshWidth,
-          meshDepth,
-          4
-        )
-      ) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  function isPlacementValid(
-    x,
-    z,
-    type,
-    rotation
-  ) {
-    const definition =
-      buildingDefinitions[
-        type
-      ];
-
-    if (!definition) {
-      return false;
-    }
-
-    const fp =
-      getRotatedFootprint(
-        definition,
-        rotation
-      );
-
-    if (
-      Math.abs(x) +
-        fp.width / 2 >
-        WORLD_LIMIT ||
-      Math.abs(z) +
-        fp.depth / 2 >
-        WORLD_LIMIT
-    ) {
-      return false;
-    }
-
-    if (
-      money <
-      definition.cost
-    ) {
-      return false;
-    }
-
-    if (
-      footprintHitsBlockedZone(
-        x,
-        z,
-        fp.width,
-        fp.depth
-      )
-    ) {
-      return false;
-    }
-
-    if (
-      overlapsExistingStructure(
-        x,
-        z,
-        fp.width,
-        fp.depth
-      )
-    ) {
-      return false;
-    }
-
-    return true;
-  }
-
-  function createGhost(
-    type
-  ) {
-    const definition =
-      buildingDefinitions[
-        type
-      ];
-
-    if (!definition) {
-      return null;
-    }
-
-    const ghost =
-      BABYLON.MeshBuilder.CreateBox(
-        "buildGhost",
-        {
-          width:
-            definition.width,
-          height:
-            definition.height,
-          depth:
-            definition.depth
-        },
-        scene
-      );
-
-    ghost.material =
-      ghostBadMat;
-
-    ghost.isPickable =
-      false;
-
-    ghost.renderingGroupId = 2;
-
-    return ghost;
-  }
-
-  function createPlacedBuildingVisual(
-    data
-  ) {
-    const definition =
-      buildingDefinitions[
-        data.type
-      ];
-
-    if (!definition) {
-      return null;
-    }
-
-    const root =
-      new BABYLON.TransformNode(
-        "playerBuildingRoot_" +
-          data.id,
-        scene
-      );
-
-    root.position =
-      new BABYLON.Vector3(
-        data.x,
-        data.y || 0,
-        data.z
-      );
-
-    root.rotation.y =
-      data.rotation || 0;
-
-    let bodyMaterial =
-      concreteMat;
-
-    if (
-      data.type ===
-      "ironMine"
-    ) {
-      bodyMaterial =
-        mineMat;
-    }
-
-    if (
-      data.type ===
-        "steelMill" ||
-      data.type ===
-        "fabricationPlant" ||
-      data.type ===
-        "warehouse" ||
-      data.type ===
-        "substation"
-    ) {
-      bodyMaterial =
-        industrialMat;
-    }
-
-    if (
-      data.type ===
-      "powerPlant"
-    ) {
-      bodyMaterial =
-        powerMat;
-    }
-
-    if (
-      data.type ===
-      "pylon"
-    ) {
-      bodyMaterial =
-        pylonMat;
-    }
-
-    const body =
-      BABYLON.MeshBuilder.CreateBox(
-        "playerBuilding_" +
-          data.id,
-        {
-          width:
-            definition.width,
-          height:
-            definition.height,
-          depth:
-            definition.depth
-        },
-        scene
-      );
-
-    body.parent = root;
-
-    body.position.y =
-      definition.height / 2;
-
-    body.material =
-      bodyMaterial;
-
-    shadowGenerator.addShadowCaster(
-      body
-    );
-
-    markInteractive(
-      body,
-      data.type,
-      definition.name,
-      {
-        level:
-          data.level || 1,
-        production:
-          definition.production,
-        consumption:
-          definition.consumption,
-        placedBuildingId:
-          data.id
-      }
-    );
-
-    body.metadata
-      .blocksConstruction =
-      true;
-
-    if (
-      data.type ===
-        "residential" ||
-      data.type ===
-        "commercial"
-    ) {
-      const glass =
-        BABYLON.MeshBuilder.CreateBox(
-          "playerGlass_" +
-            data.id,
-          {
-            width:
-              definition.width *
-              0.68,
-            height:
-              definition.height *
-              0.58,
-            depth: 0.25
-          },
-          scene
-        );
-
-      glass.parent = root;
-
-      glass.position =
-        new BABYLON.Vector3(
-          0,
-          definition.height *
-            0.52,
-          -definition.depth /
-            2 -
-            0.14
-        );
-
-      glass.material =
-        glassMat;
-
-      glass.isPickable =
-        false;
-
-      const roof =
-        BABYLON.MeshBuilder.CreateBox(
-          "playerRoof_" +
-            data.id,
-          {
-            width:
-              definition.width +
-              0.8,
-            height: 0.7,
-            depth:
-              definition.depth +
-              0.8
-          },
-          scene
-        );
-
-      roof.parent = root;
-
-      roof.position.y =
-        definition.height +
-        0.35;
-
-      roof.material =
-        darkMat;
-
-      roof.isPickable =
-        false;
-    }
-
-    if (
-      data.type ===
-      "ironMine"
-    ) {
-      const tower =
-        BABYLON.MeshBuilder.CreateCylinder(
-          "playerMineTower_" +
-            data.id,
-          {
-            diameter:
-              definition.width *
-              0.34,
-            height:
-              definition.height *
-              1.7,
-            tessellation: 8
-          },
-          scene
-        );
-
-      tower.parent =
-        root;
-
-      tower.position.y =
-        definition.height +
-        3;
-
-      tower.material =
-        darkMat;
-
-      tower.isPickable =
-        false;
-    }
-
-    if (
-      data.type ===
-        "steelMill" ||
-      data.type ===
-        "fabricationPlant"
-    ) {
-      for (
-        let i = 0;
-        i < 3;
-        i++
-      ) {
-        const stack =
-          BABYLON.MeshBuilder.CreateCylinder(
-            "playerStack_" +
-              data.id +
-              "_" +
-              i,
-            {
-              diameter: 2.5,
-              height:
-                definition.height *
-                1.7,
-              tessellation: 12
-            },
-            scene
-          );
-
-        stack.parent =
-          root;
-
-        stack.position =
-          new BABYLON.Vector3(
-            -definition.width *
-              0.28 +
-              i * 7,
-            definition.height +
-              4,
-            -definition.depth *
-              0.22
-          );
-
-        stack.material =
-          darkMat;
-
-        stack.isPickable =
-          false;
-      }
-    }
-
-    if (
-      data.type ===
-      "powerPlant"
-    ) {
-      for (
-        let i = 0;
-        i < 2;
-        i++
-      ) {
-        const tower =
-          BABYLON.MeshBuilder.CreateCylinder(
-            "playerCooling_" +
-              data.id +
-              "_" +
-              i,
-            {
-              diameterTop: 6,
-              diameterBottom: 9,
-              height: 15,
-              tessellation: 16
-            },
-            scene
-          );
-
-        tower.parent =
-          root;
-
-        tower.position =
-          new BABYLON.Vector3(
-            -8 + i * 16,
-            12,
-            0
-          );
-
-        tower.material =
-          concreteMat;
-
-        tower.isPickable =
-          false;
-      }
-    }
-
-    if (
-      data.type ===
-      "pylon"
-    ) {
-      body.scaling.x =
-        0.24;
-
-      body.scaling.z =
-        0.24;
-
-      const arm =
-        BABYLON.MeshBuilder.CreateBox(
-          "playerPylonArm_" +
-            data.id,
-          {
-            width: 9,
-            height: 1,
-            depth: 1
-          },
-          scene
-        );
-
-      arm.parent =
-        root;
-
-      arm.position.y =
-        definition.height *
-        0.72;
-
-      arm.material =
-        pylonMat;
-
-      arm.isPickable =
-        false;
-    }
-
-    return {
-      root,
-      body
-    };
-  }
-
-  function beginBuildMode(
-    type
-  ) {
-    const definition =
-      buildingDefinitions[
-        type
-      ];
-
-    if (!definition) {
-      showToast(
-        "This structure is not placeable yet.",
-        "warning"
-      );
-
-      return;
-    }
-
-    cancelBuildMode(
-      false
-    );
-
-    buildMode = {
-      type
-    };
-
-    buildRotation = 0;
-
-    buildGhost =
-      createGhost(
-        type
-      );
-
-    buildActionControls
-      .style.display =
-      "flex";
-
-    setBottomStatus(
-      "<b>" +
-        definition.name +
-        "</b> • " +
-        formatMoney(
-          definition.cost
-        ) +
-        " • Click/tap to place • R rotate • Esc cancel"
-    );
-
-    showToast(
-      definition.name +
-        " ready to place",
-      "info"
-    );
-  }
-
-  function cancelBuildMode(
-    notify = true
-  ) {
-    if (
-      buildGhost
-    ) {
-      buildGhost.dispose();
-      buildGhost = null;
-    }
-
-    buildMode = null;
-
-    buildGhostValid =
-      false;
-
-    buildActionControls
-      .style.display =
-      "none";
-
-    if (notify) {
-      setBottomStatus(
-        "Construction cancelled • choose another building or continue exploring"
-      );
+    const crown = BABYLON.MeshBuilder.CreateBox("capitalCrown", {
+      width: 38,
+      height: 3.0,
+      depth: 24
+    }, scene);
+    crown.position.y = 24.0;
+    crown.material = darkMat;
+    crown.parent = root;
+
+    // short ceremonial access road only; not a player road-building tool
+    createRoad(root, 0, 85, 20, 118, 0);
+    populateRoadLamps(root, "z", 36, 132, 0, 34);
+
+    // future zoning rings / previews are intentionally NOT created.
+    if (!existing) {
+      camera.target.set(x, y + 10, z);
+      camera.radius = 180;
     }
   }
 
-  function rotateBuildGhost() {
-    if (
-      !buildMode ||
-      !buildGhost
-    ) {
-      return;
-    }
-
-    buildRotation +=
-      Math.PI / 2;
-
-    if (
-      buildRotation >=
-      Math.PI * 2
-    ) {
-      buildRotation = 0;
-    }
-
-    buildGhost.rotation.y =
-      buildRotation;
-  }
-
-  function updateBuildGhost() {
-    if (
-      !buildMode ||
-      !buildGhost
-    ) {
-      return;
-    }
-
-    const pick =
-      scene.pick(
-        scene.pointerX,
-        scene.pointerY,
-        mesh =>
-          mesh === ground
-      );
-
-    if (
-      !pick ||
-      !pick.hit ||
-      !pick.pickedPoint
-    ) {
-      buildGhost.setEnabled(
-        false
-      );
-
-      buildGhostValid =
-        false;
-
-      return;
-    }
-
-    const point =
-      pick.pickedPoint;
-
-    buildGhost.setEnabled(
-      true
-    );
-
-    const definition =
-      buildingDefinitions[
-        buildMode.type
-      ];
-
-    buildGhost.position =
-      new BABYLON.Vector3(
-        point.x,
-        point.y +
-          definition.height /
-            2,
-        point.z
-      );
-
-    buildGhost.rotation.y =
-      buildRotation;
-
-    buildGhostValid =
-      isPlacementValid(
-        point.x,
-        point.z,
-        buildMode.type,
-        buildRotation
-      );
-
-    buildGhost.material =
-      buildGhostValid
-        ? ghostGoodMat
-        : ghostBadMat;
-  }
-
-  function placeCurrentBuilding() {
-    if (
-      !buildMode ||
-      !buildGhost ||
-      !buildGhostValid
-    ) {
-      showToast(
-        "That location is blocked.",
-        "warning"
-      );
-
-      return;
-    }
-
-    const definition =
-      buildingDefinitions[
-        buildMode.type
-      ];
-
-    if (
-      money <
-      definition.cost
-    ) {
-      showToast(
-        "Not enough credits.",
-        "warning"
-      );
-
-      return;
-    }
-
-    const id =
-      "building_" +
-      nextBuildingId++;
-
-    const data = {
-      id,
-      type:
-        buildMode.type,
-      x:
-        buildGhost.position.x,
-      y:
-        buildGhost.position.y -
-        definition.height / 2,
-      z:
-        buildGhost.position.z,
-      rotation:
-        buildRotation,
-      level: 1
-    };
-
-    money -=
-      definition.cost;
-
-    placedBuildings.push(
-      data
-    );
-
-    createPlacedBuildingVisual(
-      data
-    );
-
-    updateHUD();
-    saveGame();
-
-    showToast(
-      definition.name +
-        " constructed",
-      "success"
-    );
-
-    // Keep placing the same type until cancelled, like a real strategy game.
-    updateBuildGhost();
-  }
-
-  rotateBuildButton.onclick =
-    rotateBuildGhost;
-
-  cancelBuildButton.onclick =
-    () => {
-      cancelBuildMode();
-    };
-
-  function shopCard(
-    item,
-    index
-  ) {
-    return `
-      <div
-        style="
-          padding:13px;
-
-          border-radius:11px;
-
-          background:
-            linear-gradient(
-              180deg,
-              rgba(255,255,255,0.04),
-              rgba(255,255,255,0.022)
-            );
-
-          border:
-            1px solid
-            rgba(255,255,255,0.07);
-        "
-      >
-        <div
-          style="
-            color:${item.accent};
-            font-size:16px;
-            font-weight:850;
-          "
-        >
-          ${item.name}
-        </div>
-
-        <div
-          style="
-            margin-top:3px;
-            font-size:9px;
-            opacity:0.46;
-            letter-spacing:0.5px;
-          "
-        >
-          ${item.type}
-        </div>
-
-        <div
-          style="
-            margin-top:9px;
-            font-size:12px;
-            line-height:1.45;
-            opacity:0.80;
-          "
-        >
-          ${item.description}
-        </div>
-
-        <div
-          style="
-            margin-top:9px;
-            color:#9bdff5;
-            font-size:10px;
-          "
-        >
-          ${item.stats}
-        </div>
-
-        <div
-          style="
-            margin-top:12px;
-
-            display:flex;
-            align-items:center;
-            justify-content:
-              space-between;
-          "
-        >
-          <b>
-            ${formatMoney(
-              item.cost
-            )}
-          </b>
-
-          <button
-            class="shopSelect"
-            data-index="${index}"
-
-            style="
-              padding:
-                7px 13px;
-
-              border:
-                1px solid
-                rgba(80,210,255,0.30);
-
-              border-radius:8px;
-
-              background:
-                linear-gradient(
-                  180deg,
-                  rgba(31,145,210,0.86),
-                  rgba(18,105,168,0.86)
-                );
-
-              color:white;
-
-              font-weight:bold;
-
-              cursor:pointer;
-            "
-          >
-            SELECT
-          </button>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderShop() {
-    const items =
-      shopItems[
-        activeCategory
-      ] || [];
-
-    shop.innerHTML = `
-      <div
-        style="
-          display:flex;
-          justify-content:
-            space-between;
-          align-items:flex-start;
-          gap:12px;
-        "
-      >
-        <div>
-          <div
-            style="
-              font-size:21px;
-              font-weight:850;
-              color:#84eaff;
-            "
-          >
-            CONSTRUCTION NETWORK
-          </div>
-
-          <div
-            style="
-              margin-top:2px;
-              font-size:9px;
-              letter-spacing:0.6px;
-              opacity:0.48;
-            "
-          >
-            CIVILIZATION DEVELOPMENT TERMINAL
-          </div>
-        </div>
-
-        <button
-          id="closeShop"
-          style="
-            border:none;
-            background:none;
-            color:white;
-            font-size:20px;
-            cursor:pointer;
-            opacity:0.8;
-          "
-        >
-          ✕
-        </button>
-      </div>
-
-      <div
-        style="
-          display:flex;
-          flex-wrap:wrap;
-          gap:7px;
-          margin-top:15px;
-        "
-      >
-        <button
-          class="shopTab"
-          data-category="industry"
-        >
-          INDUSTRY
-        </button>
-
-        <button
-          class="shopTab"
-          data-category="civil"
-        >
-          CIVIL
-        </button>
-
-        <button
-          class="shopTab"
-          data-category="power"
-        >
-          POWER
-        </button>
-
-        <button
-          class="shopTab"
-          data-category="infrastructure"
-        >
-          INFRASTRUCTURE
-        </button>
-      </div>
-
-      <div
-        style="
-          display:grid;
-          grid-template-columns:
-            1fr 1fr;
-          gap:10px;
-          margin-top:14px;
-        "
-      >
-        ${items
-          .map(
-            (item, index) =>
-              shopCard(
-                item,
-                index
-              )
-          )
-          .join("")}
-      </div>
-    `;
-
-    const closeButton =
-      document.getElementById(
-        "closeShop"
-      );
-
-    if (
-      closeButton instanceof
-      HTMLButtonElement
-    ) {
-      closeButton.onclick =
-        () => {
-          shop.style.display =
-            "none";
-        };
-    }
-
-    const tabs =
-      shop.querySelectorAll(
-        ".shopTab"
-      );
-
-    tabs.forEach(
-      tab => {
-        if (
-          !(
-            tab instanceof
-            HTMLButtonElement
-          )
-        ) {
-          return;
-        }
-
-        const category =
-          tab.dataset.category;
-
-        const active =
-          category ===
-          activeCategory;
-
-        tab.style.cssText = `
-          padding:
-            7px 10px;
-
-          border:
-            1px solid
-            ${
-              active
-                ? "rgba(86,218,255,0.42)"
-                : "rgba(255,255,255,0.07)"
-            };
-
-          border-radius:8px;
-
-          background:
-            ${
-              active
-                ? "rgba(32,154,220,0.16)"
-                : "rgba(255,255,255,0.025)"
-            };
-
-          color:
-            ${
-              active
-                ? "#8beaff"
-                : "white"
-            };
-
-          font-size:10px;
-          font-weight:bold;
-
-          cursor:pointer;
-        `;
-
-        tab.onclick =
-          () => {
-            if (
-              !category
-            ) {
-              return;
-            }
-
-            activeCategory =
-              category;
-
-            renderShop();
-          };
-      }
-    );
-
-    const selectButtons =
-      shop.querySelectorAll(
-        ".shopSelect"
-      );
-
-    selectButtons.forEach(
-      button => {
-        if (
-          !(
-            button instanceof
-            HTMLButtonElement
-          )
-        ) {
-          return;
-        }
-
-        button.onclick =
-          () => {
-            const index =
-              Number(
-                button.dataset.index
-              );
-
-            const item =
-              items[
-                index
-              ];
-
-            if (!item) {
-              return;
-            }
-
-            shop.style.display =
-              "none";
-
-            if (
-              item.buildType
-            ) {
-              beginBuildMode(
-                item.buildType
-              );
-
-              return;
-            }
-
-            showToast(
-              item.name +
-                " is not placeable yet.",
-              "warning"
-            );
-          };
-      }
-    );
-  }
-
-  buildButton.onclick =
-    () => {
-      const open =
-        shop.style.display ===
-        "block";
-
-      shop.style.display =
-        open
-          ? "none"
-          : "block";
-
-      if (!open) {
-        renderShop();
-      }
-    };
-
-
-  // =========================================================
-  // STRATEGIC WORLD MAP + ZONING FOUNDATION
-  // =========================================================
-
-  const worldMapOverlay =
-    document.createElement(
-      "div"
-    );
-
-  worldMapOverlay.style.cssText = `
-    position:absolute;
-    inset:74px 18px 20px 86px;
-
-    display:none;
-
-    background:
-      linear-gradient(
-        180deg,
-        rgba(5,12,23,0.985),
-        rgba(6,16,27,0.98)
-      );
-
-    border:
-      1px solid
-      rgba(90,218,255,0.28);
-
-    border-radius:16px;
-
-    box-shadow:
-      0 18px 55px
-      rgba(0,0,0,0.35);
-
-    overflow:hidden;
-
-    z-index:130;
-  `;
-
-  document.body.appendChild(
-    worldMapOverlay
-  );
-
-  worldMapOverlay.innerHTML = `
-    <div
-      style="
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:14px;
-        padding:13px 16px;
-        border-bottom:
-          1px solid
-          rgba(255,255,255,0.06);
-      "
-    >
-      <div>
-        <div
-          style="
-            color:#87eaff;
-            font-size:18px;
-            font-weight:850;
-          "
-        >
-          STRATEGIC WORLD MAP
-        </div>
-
-        <div
-          style="
-            margin-top:2px;
-            font-size:9px;
-            opacity:0.48;
-            letter-spacing:0.7px;
-          "
-        >
-          CONTINENT • COAST • CITIES • REGIONS • ZONES
-        </div>
-      </div>
-
-      <div
-        style="
-          display:flex;
-          align-items:center;
-          gap:7px;
-        "
-      >
-        <select
-          id="zoneTypeSelect"
-          style="
-            padding:8px;
-            border-radius:8px;
-            border:
-              1px solid
-              rgba(255,255,255,0.08);
-            background:#0b1724;
-            color:white;
-          "
-        >
-          <option value="residential">Residential Zone</option>
-          <option value="industrial">Industrial Zone</option>
-          <option value="tourism">Tourism Zone</option>
-          <option value="military">Military Zone</option>
-        </select>
-
-        <button
-          id="armZonePlacement"
-          style="
-            padding:8px 11px;
-            border-radius:8px;
-            border:
-              1px solid
-              rgba(90,218,255,0.28);
-            background:
-              rgba(27,132,194,0.62);
-            color:white;
-            font-weight:bold;
-            cursor:pointer;
-          "
-        >
-          + CREATE ZONE
-        </button>
-
-        <button
-          id="closeWorldMap"
-          style="
-            width:36px;
-            height:36px;
-            border:none;
-            border-radius:8px;
-            background:
-              rgba(255,255,255,0.035);
-            color:white;
-            font-size:17px;
-            cursor:pointer;
-          "
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-
-    <div
-      style="
-        display:grid;
-        grid-template-columns:
-          minmax(0, 1fr)
-          250px;
-        height:
-          calc(100% - 63px);
-      "
-    >
-      <div
-        style="
-          position:relative;
-          min-width:0;
-          min-height:0;
-          padding:14px;
-        "
-      >
-        <canvas
-          id="worldMapCanvas"
-          width="900"
-          height="620"
-          style="
-            width:100%;
-            height:100%;
-            display:block;
-            border-radius:11px;
-            background:#10251d;
-            cursor:crosshair;
-          "
-        ></canvas>
-      </div>
-
-      <div
-        id="worldMapInfo"
-        style="
-          border-left:
-            1px solid
-            rgba(255,255,255,0.06);
-          padding:14px;
-          overflow-y:auto;
-          font-family:Arial,sans-serif;
-          color:white;
-        "
-      ></div>
-    </div>
-  `;
-
-  let zonePlacementArmed = false;
-
-  const worldMapCanvas =
-    document.getElementById(
-      "worldMapCanvas"
-    );
-
-  const worldMapInfo =
-    document.getElementById(
-      "worldMapInfo"
-    );
-
-  function worldToMapX(
-    x,
-    width
-  ) {
-    return (
-      (x + MAP_HALF) /
-      MAP_SIZE *
-      width
-    );
-  }
-
-  function worldToMapY(
-    z,
-    height
-  ) {
-    return (
-      (z + MAP_HALF) /
-      MAP_SIZE *
-      height
-    );
-  }
-
-  function mapToWorldX(
-    x,
-    width
-  ) {
-    return (
-      x / width *
-      MAP_SIZE -
-      MAP_HALF
-    );
-  }
-
-  function mapToWorldZ(
-    y,
-    height
-  ) {
-    return (
-      y / height *
-      MAP_SIZE -
-      MAP_HALF
-    );
-  }
-
-  function zoneColor(
-    type
-  ) {
-    if (
-      type === "residential"
-    ) return "#77dca2";
-
-    if (
-      type === "industrial"
-    ) return "#799fbb";
-
-    if (
-      type === "tourism"
-    ) return "#e6c66e";
-
-    if (
-      type === "military"
-    ) return "#d26f72";
-
-    return "#77dcff";
-  }
-
-  function renderWorldMap() {
-    if (
-      !(worldMapCanvas instanceof HTMLCanvasElement)
-    ) {
-      return;
-    }
-
-    const ctx =
-      worldMapCanvas.getContext(
-        "2d"
-      );
-
-    if (!ctx) {
-      return;
-    }
-
-    const w =
-      worldMapCanvas.width;
-
-    const h =
-      worldMapCanvas.height;
-
-    ctx.clearRect(
-      0,
-      0,
-      w,
-      h
-    );
-
-    // Ocean-first strategic map.
-    const oceanGradient=ctx.createRadialGradient(w*.5,h*.5,Math.min(w,h)*.14,w*.5,h*.5,Math.max(w,h)*.7);
-    oceanGradient.addColorStop(0,"#0d3b52"); oceanGradient.addColorStop(.55,"#08283b"); oceanGradient.addColorStop(1,"#03131f");
-    ctx.fillStyle=oceanGradient; ctx.fillRect(0,0,w,h);
-
-    // Continental shelf.
-    ctx.beginPath();
-    for(let i=0;i<=120;i++){const a=i/120*Math.PI*2;const x=worldToMapX(Math.cos(a)*SHALLOW_WATER_RADIUS,w);const y=worldToMapY(Math.sin(a)*SHALLOW_WATER_RADIUS,h);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
-    ctx.closePath(); ctx.fillStyle="rgba(37,137,178,.18)"; ctx.fill();
-
-    // Main continent.
-    ctx.beginPath();
-    for(let i=0;i<=160;i++){const a=i/160*Math.PI*2;const r=coastRadiusAtAngle(a);const x=worldToMapX(Math.cos(a)*r,w);const y=worldToMapY(Math.sin(a)*r,h);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
-    ctx.closePath();
-    const landGradient=ctx.createLinearGradient(0,0,0,h);landGradient.addColorStop(0,"#1b3828");landGradient.addColorStop(1,"#2b4328");
-    ctx.fillStyle=landGradient;ctx.fill();ctx.strokeStyle="rgba(150,222,197,.50)";ctx.lineWidth=2;ctx.stroke();
-
-    // Navigation/world boundary.
-    ctx.beginPath();ctx.arc(w/2,h/2,WORLD_BORDER_RADIUS/MAP_SIZE*w,0,Math.PI*2);ctx.strokeStyle="rgba(118,221,255,.32)";ctx.lineWidth=2;ctx.setLineDash([7,9]);ctx.stroke();ctx.setLineDash([]);
-
-    // River
-    ctx.strokeStyle =
-      "rgba(72,156,220,0.92)";
-
-    ctx.lineWidth = 18;
-    ctx.lineCap = "round";
-
-    ctx.beginPath();
-    ctx.moveTo(
-      worldToMapX(-500, w),
-      worldToMapY(95, h)
-    );
-    ctx.bezierCurveTo(
-      worldToMapX(-250, w),
-      worldToMapY(115, h),
-      worldToMapX(70, w),
-      worldToMapY(165, h),
-      worldToMapX(500, w),
-      worldToMapY(190, h)
-    );
-    ctx.stroke();
-
-    // Major roads
-    ctx.strokeStyle =
-      "rgba(225,225,225,0.36)";
-    ctx.lineWidth = 4;
-
-    const roads = [
-      [[0,-880],[0,1020]],
-      [[-920,-65],[1120,-65]],
-      [[-760,620],[860,620]],
-      [[-1080,-670],[0,-65]],
-      [[0,-65],[980,-620]],
-      [[-850,900],[0,285]],
-      [[330,-115],[1040,850]]
-    ];
-
-    roads.forEach(
-      road => {
-        ctx.beginPath();
-        ctx.moveTo(
-          worldToMapX(
-            road[0][0],
-            w
-          ),
-          worldToMapY(
-            road[0][1],
-            h
-          )
-        );
-        ctx.lineTo(
-          worldToMapX(
-            road[1][0],
-            w
-          ),
-          worldToMapY(
-            road[1][1],
-            h
-          )
-        );
-        ctx.stroke();
-      }
-    );
-
-    // Strategic regions
-    regions.forEach(
-      region => {
-        const x =
-          worldToMapX(
-            region.x,
-            w
-          );
-
-        const y =
-          worldToMapY(
-            region.z,
-            h
-          );
-
-        const radius =
-          region.radius /
-          MAP_SIZE *
-          w *
-          0.42;
-
-        ctx.beginPath();
-        ctx.arc(
-          x,
-          y,
-          Math.max(
-            14,
-            radius
-          ),
-          0,
-          Math.PI * 2
-        );
-
-        ctx.fillStyle =
-          region.color + "18";
-        ctx.fill();
-
-        ctx.strokeStyle =
-          region.color + "66";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      }
-    );
-
-    // Zones
-    strategicZones.forEach(
-      zone => {
-        const x =
-          worldToMapX(
-            zone.x,
-            w
-          );
-
-        const y =
-          worldToMapY(
-            zone.z,
-            h
-          );
-
-        const radius =
-          Math.max(
-            13,
-            zone.radius /
-            MAP_SIZE *
-            w
-          );
-
-        const color =
-          zoneColor(
-            zone.type
-          );
-
-        ctx.beginPath();
-        ctx.arc(
-          x,
-          y,
-          radius,
-          0,
-          Math.PI * 2
-        );
-
-        ctx.fillStyle =
-          color + "26";
-        ctx.fill();
-
-        ctx.strokeStyle = color;
-        ctx.lineWidth =
-          1.5 +
-          Math.min(
-            3,
-            zone.attention *
-            0.45
-          );
-        ctx.stroke();
-      }
-    );
-
-    // City markers
-    const cities = [
-      { name: "NOVA", x: 0, z: -65, capital: true },
-      { name: "SOUTHBANK", x: 0, z: 285 },
-      { name: "FORGE CITY", x: 330, z: -115 }
-    ];
-
-    cities.forEach(
-      city => {
-        const x =
-          worldToMapX(
-            city.x,
-            w
-          );
-
-        const y =
-          worldToMapY(
-            city.z,
-            h
-          );
-
-        ctx.beginPath();
-        ctx.arc(
-          x,
-          y,
-          city.capital
-            ? 8
-            : 6,
-          0,
-          Math.PI * 2
-        );
-
-        ctx.fillStyle =
-          city.capital
-            ? "#fff0a1"
-            : "#e7edf2";
-        ctx.fill();
-
-        ctx.fillStyle = "white";
-        ctx.font =
-          city.capital
-            ? "bold 12px Arial"
-            : "11px Arial";
-        ctx.fillText(
-          city.capital
-            ? "★ " + city.name
-            : city.name,
-          x + 11,
-          y - 8
-        );
-      }
-    );
-
-    if (
-      worldMapInfo instanceof HTMLElement
-    ) {
-      const averageAttention =
-        strategicZones.length
-          ? (
-              strategicZones.reduce(
-                (sum, zone) =>
-                  sum +
-                  zone.attention,
-                0
-              ) /
-              strategicZones.length
-            ).toFixed(1)
-          : "0.0";
-
-      worldMapInfo.innerHTML = `
-        <div
-          style="
-            color:#88eaff;
-            font-size:14px;
-            font-weight:bold;
-          "
-        >
-          NOVA CIVILIZATION
-        </div>
-
-        <div
-          style="
-            margin-top:3px;
-            font-size:9px;
-            opacity:0.45;
-          "
-        >
-          STRATEGIC OVERVIEW
-        </div>
-
-        <div
-          style="
-            margin-top:12px;
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:7px;
-          "
-        >
-          <div style="padding:8px;background:rgba(255,255,255,.035);border-radius:8px;">
-            <div style="font-size:8px;opacity:.45;">CITIES</div>
-            <b>3</b>
-          </div>
-          <div style="padding:8px;background:rgba(255,255,255,.035);border-radius:8px;">
-            <div style="font-size:8px;opacity:.45;">ZONES</div>
-            <b>${strategicZones.length}</b>
-          </div>
-          <div style="padding:8px;background:rgba(255,255,255,.035);border-radius:8px;">
-            <div style="font-size:8px;opacity:.45;">AVG FOCUS</div>
-            <b>${averageAttention}</b>
-          </div>
-          <div style="padding:8px;background:rgba(255,255,255,.035);border-radius:8px;">
-            <div style="font-size:8px;opacity:.45;">CAPITAL</div>
-            <b>Nova</b>
-          </div>
-        </div>
-
-        <div
-          style="
-            margin-top:13px;
-            font-size:10px;
-            line-height:1.55;
-            opacity:.62;
-          "
-        >
-          Click the map to move the camera. Arm zone placement first to create a new strategic zone instead.
-          Higher attention will later make zones grow faster and visually denser.
-        </div>
-
-        <div
-          style="
-            margin-top:12px;
-            display:flex;
-            flex-direction:column;
-            gap:6px;
-          "
-        >
-          ${strategicZones.map(zone => `
-            <button
-              class="zoneFocusButton"
-              data-zone-id="${zone.id}"
-              style="
-                padding:8px;
-                text-align:left;
-                border-radius:8px;
-                border:1px solid rgba(255,255,255,.06);
-                background:rgba(255,255,255,.025);
-                color:white;
-                cursor:pointer;
-              "
-            >
-              <b style="color:${zoneColor(zone.type)};">${zone.name}</b>
-              <div style="margin-top:2px;font-size:9px;opacity:.48;">
-                ${zone.type.toUpperCase()} • Level ${zone.level} • Attention ${zone.attention}
-              </div>
-            </button>
-          `).join("")}
-        </div>
-      `;
-
-      worldMapInfo
-        .querySelectorAll(
-          ".zoneFocusButton"
-        )
-        .forEach(
-          button => {
-            if (
-              !(button instanceof HTMLButtonElement)
-            ) return;
-
-            button.onclick = () => {
-              const id =
-                button.dataset.zoneId;
-
-              const zone =
-                strategicZones.find(
-                  item =>
-                    item.id === id
-                );
-
-              if (!zone) return;
-
-              zone.attention =
-                Math.min(
-                  10,
-                  zone.attention + 1
-                );
-
-              zone.level =
-                Math.max(
-                  zone.level,
-                  Math.ceil(
-                    zone.attention / 2
-                  )
-                );
-
-              showToast(
-                zone.name +
-                  " attention increased",
-                "success"
-              );
-
-              saveGame();
-              renderWorldMap();
-            };
-          }
-        );
-    }
-  }
-
-  function openWorldMap() {
-    worldMapOverlay.style.display =
-      "block";
-
-    renderWorldMap();
-  }
-
-  const closeWorldMapButton =
-    document.getElementById(
-      "closeWorldMap"
-    );
-
-  if (
-    closeWorldMapButton instanceof
-    HTMLButtonElement
-  ) {
-    closeWorldMapButton.onclick =
-      () => {
-        worldMapOverlay.style.display =
-          "none";
-        zonePlacementArmed = false;
-      };
-  }
-
-  const armZonePlacementButton =
-    document.getElementById(
-      "armZonePlacement"
-    );
-
-  if (
-    armZonePlacementButton instanceof
-    HTMLButtonElement
-  ) {
-    armZonePlacementButton.onclick =
-      () => {
-        zonePlacementArmed =
-          !zonePlacementArmed;
-
-        armZonePlacementButton.innerText =
-          zonePlacementArmed
-            ? "CLICK MAP TO PLACE"
-            : "+ CREATE ZONE";
-      };
-  }
-
-  if (
-    worldMapCanvas instanceof
-    HTMLCanvasElement
-  ) {
-    worldMapCanvas.addEventListener(
-      "click",
-      event => {
-        const rect =
-          worldMapCanvas.getBoundingClientRect();
-
-        const mapX =
-          (event.clientX - rect.left) /
-          rect.width *
-          worldMapCanvas.width;
-
-        const mapY =
-          (event.clientY - rect.top) /
-          rect.height *
-          worldMapCanvas.height;
-
-        const worldX =
-          mapToWorldX(
-            mapX,
-            worldMapCanvas.width
-          );
-
-        const worldZ =
-          mapToWorldZ(
-            mapY,
-            worldMapCanvas.height
-          );
-
-        if (
-          zonePlacementArmed
-        ) {
-          const select =
-            document.getElementById(
-              "zoneTypeSelect"
-            );
-
-          const type =
-            select instanceof HTMLSelectElement
-              ? select.value
-              : "residential";
-
-          strategicZones.push({
-            id:
-              "zone_custom_" +
-              nextZoneId++,
-            name:
-              type.charAt(0).toUpperCase() +
-              type.slice(1) +
-              " Zone " +
-              nextZoneId,
-            type,
-            x: worldX,
-            z: worldZ,
-            radius: 65,
-            attention: 1,
-            level: 1
-          });
-
-          zonePlacementArmed = false;
-
-          if (
-            armZonePlacementButton instanceof
-            HTMLButtonElement
-          ) {
-            armZonePlacementButton.innerText =
-              "+ CREATE ZONE";
-          }
-
-          showToast(
-            "New " +
-              type +
-              " zone created",
-            "success"
-          );
-
-          saveGame();
-          renderWorldMap();
-          return;
-        }
-
-        const mapTarget = clampPointToWorld(worldX,worldZ,25);
-        camera.target.x = mapTarget.x;
-        camera.target.z = mapTarget.z;
-        camera.radius = 260;
-
-        worldMapOverlay.style.display =
-          "none";
-      }
-    );
-  }
-
-  // =========================================================
-  // WORLD OVERVIEW
-  // =========================================================
-
-  function showWorldOverview() {
-    inspector.style.display =
-      "block";
-
-    inspector.innerHTML =
-      inspectorHeader(
-        "World Overview",
-        regions.length +
-          " DEVELOPMENT REGIONS"
-      ) +
-      `
-        <div
-          style="
-            margin-top:14px;
-
-            display:flex;
-            flex-direction:column;
-            gap:8px;
-          "
-        >
-          ${regions
-            .map(
-              region => `
-                <button
-                  class="regionJump"
-                  data-region="${region.id}"
-
-                  style="
-                    padding:10px;
-
-                    text-align:left;
-
-                    border:
-                      1px solid
-                      rgba(255,255,255,0.06);
-
-                    border-radius:9px;
-
-                    background:
-                      rgba(255,255,255,0.03);
-
-                    color:white;
-
-                    cursor:pointer;
-                  "
-                >
-                  <div
-                    style="
-                      color:${region.color};
-                      font-weight:bold;
-                    "
-                  >
-                    ${region.name}
-                  </div>
-
-                  <div
-                    style="
-                      margin-top:2px;
-                      font-size:9px;
-                      opacity:0.48;
-                    "
-                  >
-                    ${region.type.toUpperCase()}
-                  </div>
-                </button>
-              `
-            )
-            .join("")}
-        </div>
-      `;
-
-    wireInspectorClose();
-
-    const jumpButtons =
-      inspector.querySelectorAll(
-        ".regionJump"
-      );
-
-    jumpButtons.forEach(
-      button => {
-        if (
-          !(
-            button instanceof
-            HTMLButtonElement
-          )
-        ) {
-          return;
-        }
-
-        button.onclick =
-          () => {
-            const id =
-              button.dataset.region;
-
-            const region =
-              regions.find(
-                r =>
-                  r.id ===
-                  id
-              );
-
-            if (!region) {
-              return;
-            }
-
-            camera.target.x =
-              region.x;
-
-            camera.target.z =
-              region.z;
-
-            camera.radius =
-              Math.max(
-                115,
-                region.radius *
-                  1.3
-              );
-
-            showToast(
-              "Camera moved to " +
-                region.name,
-              "info"
-            );
-          };
-      }
-    );
-  }
-
-  worldButton.onclick =
-    openWorldMap;
-
-  regionButton.onclick =
-    showWorldOverview;
-
-  // =========================================================
-  // ECONOMY PANEL
-  // =========================================================
-
-  economyButton.onclick =
-    () => {
-      inspector.style.display =
-        "block";
-
-      inspector.innerHTML =
-        inspectorHeader(
-          "Economy",
-          "CIVILIZATION FINANCIAL NETWORK",
-          "#82e8b0"
-        ) +
-        `
-          <div
-            style="
-              margin-top:14px;
-              display:grid;
-              grid-template-columns:
-                1fr 1fr;
-              gap:8px;
-            "
-          >
-            <div
-              style="
-                padding:10px;
-                border-radius:9px;
-                background:
-                  rgba(255,255,255,0.035);
-              "
-            >
-              <div
-                style="
-                  font-size:9px;
-                  opacity:0.48;
-                "
-              >
-                TREASURY
-              </div>
-
-              <b>
-                ${formatMoney(
-                  money
-                )}
-              </b>
-            </div>
-
-            <div
-              style="
-                padding:10px;
-                border-radius:9px;
-                background:
-                  rgba(255,255,255,0.035);
-              "
-            >
-              <div
-                style="
-                  font-size:9px;
-                  opacity:0.48;
-                "
-              >
-                INCOME
-              </div>
-
-              <b
-                style="
-                  color:#82e8b0;
-                "
-              >
-                +$${incomePerMinute}/m
-              </b>
-            </div>
-
-            <div
-              style="
-                padding:10px;
-                border-radius:9px;
-                background:
-                  rgba(255,255,255,0.035);
-              "
-            >
-              <div
-                style="
-                  font-size:9px;
-                  opacity:0.48;
-                "
-              >
-                IRON
-              </div>
-
-              <b>
-                ${Math.floor(
-                  iron
-                )}
-              </b>
-            </div>
-
-            <div
-              style="
-                padding:10px;
-                border-radius:9px;
-                background:
-                  rgba(255,255,255,0.035);
-              "
-            >
-              <div
-                style="
-                  font-size:9px;
-                  opacity:0.48;
-                "
-              >
-                STEEL
-              </div>
-
-              <b>
-                ${Math.floor(
-                  steel
-                )}
-              </b>
-            </div>
-          </div>
-
-          <div
-            style="
-              margin-top:9px;
-              padding:10px;
-              border-radius:9px;
-              background:
-                rgba(255,255,255,0.035);
-            "
-          >
-            <div
-              style="
-                font-size:9px;
-                opacity:0.48;
-              "
-            >
-              GRID POWER
-            </div>
-
-            <b
-              style="
-                color:#ffd66f;
-              "
-            >
-              ${Math.floor(
-                energy
-              )}
-            </b>
-          </div>
-        `;
-
-      wireInspectorClose();
-    };
-
-  researchButton.onclick =
-    () => {
-      showToast(
-        "Research comes after the construction foundation.",
-        "info"
-      );
-    };
-
-  settingsButton.onclick =
-    () => {
-      inspector.style.display =
-        "block";
-
-      inspector.innerHTML =
-        inspectorHeader(
-          "Settings",
-          "DISPLAY + CONTROLS"
-        ) +
-        `
-          <div
-            style="
-              margin-top:14px;
-              padding:10px;
-              border-radius:9px;
-              background:
-                rgba(255,255,255,0.035);
-            "
-          >
-            <div
-              style="
-                font-size:9px;
-                opacity:0.48;
-              "
-            >
-              GRAPHICS QUALITY
-            </div>
-            <div style="margin-top:8px;display:flex;gap:7px;">
-              <button id="graphicsBasicButton" style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);color:white;font-weight:850;cursor:pointer;">BASIC</button>
-              <button id="graphicsRegularButton" style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);color:white;font-weight:850;cursor:pointer;">REGULAR</button>
-            </div>
-            <div style="margin-top:7px;font-size:10px;line-height:1.45;opacity:.58;">Basic prioritizes Chromebook performance. Regular increases clarity, shadow softness, water highlights, and view depth.</div>
-          </div>
-
-          <div
-            style="
-              margin-top:8px;
-              padding:10px;
-              border-radius:9px;
-              background:
-                rgba(255,255,255,0.035);
-              line-height:1.5;
-              font-size:11px;
-            "
-          >
-            <b>Controls</b>
-            <br>
-            WASD / Arrow Keys / Touch pad — move
-            <br>
-            Mouse / touch drag — orbit
-            <br>
-            Wheel / pinch — zoom
-          </div>
-        `;
-
-      wireInspectorClose();
-      const gb=document.getElementById("graphicsBasicButton");
-      const gr=document.getElementById("graphicsRegularButton");
-      if (gb) gb.onclick=()=>{applyGraphicsPreset("BASIC");refreshGraphicsToggle();settingsButton.click();};
-      if (gr) gr.onclick=()=>{applyGraphicsPreset("REGULAR");refreshGraphicsToggle();settingsButton.click();};
-    };
-
-  // =========================================================
-  // CLICK / TAP INSPECTION + CONSTRUCTION
-  // =========================================================
-
-  scene.onPointerObservable.add(
-    pointerInfo => {
-      if (
-        pointerInfo.type ===
-        BABYLON.PointerEventTypes
-          .POINTERMOVE
-      ) {
-        updateBuildGhost();
-        return;
-      }
-
-      if (
-        pointerInfo.type !==
-        BABYLON.PointerEventTypes
-          .POINTERPICK
-      ) {
-        return;
-      }
-
-      if (
-        buildMode
-      ) {
-        updateBuildGhost();
-
-        if (
-          buildGhostValid
-        ) {
-          placeCurrentBuilding();
-        }
-
-        return;
-      }
-
-      const pickInfo =
-        pointerInfo.pickInfo;
-
-      if (
-        !pickInfo ||
-        !pickInfo.hit
-      ) {
-        return;
-      }
-
-      const mesh =
-        pickInfo.pickedMesh;
-
-      if (
-        mesh &&
-        mesh.metadata &&
-        mesh.metadata
-          .interactiveType
-      ) {
-        showBuildingInspector(
-          mesh
-        );
-
-        return;
-      }
-
-      if (
-        mesh === ground &&
-        pickInfo.pickedPoint
-      ) {
-        showTerrainInspector(
-          pickInfo.pickedPoint
-        );
-      }
-    }
-  );
-
-  // =========================================================
-  // TOUCH MOVEMENT PAD
-  // =========================================================
-
-  const touchControls =
-    document.createElement(
-      "div"
-    );
-
-  touchControls.id = "mg-touch-controls";
-
-  touchControls.style.cssText = `
-    position:absolute;
-
-    right:18px;
-    bottom:78px;
-
-    display:grid;
-
-    grid-template-columns:
-      52px 52px 52px;
-
-    grid-template-rows:
-      52px 52px 52px;
-
-    gap:6px;
-
-    z-index:82;
-  `;
-
-  document.body.appendChild(
-    touchControls
-  );
-
-  function makeTouchButton(
-    text,
-    col,
-    row
-  ) {
-    const button =
-      document.createElement(
-        "button"
-      );
-
-    button.innerText =
-      text;
-
-    button.style.cssText = `
-      grid-column:${col};
-      grid-row:${row};
-
-      width:52px;
-      height:52px;
-
-      border-radius:13px;
-
-      border:
-        1px solid
-        rgba(90,215,255,0.30);
-
-      background:
-        rgba(5,14,25,0.76);
-
-      color:white;
-
-      font-size:21px;
-      font-weight:bold;
-
-      touch-action:none;
-      user-select:none;
-
-      cursor:pointer;
-
-      backdrop-filter:
-        blur(5px);
-    `;
-
-    touchControls.appendChild(
-      button
-    );
-
-    return button;
-  }
-
-  const touchUp =
-    makeTouchButton(
-      "▲",
-      2,
-      1
-    );
-
-  const touchLeft =
-    makeTouchButton(
-      "◀",
-      1,
-      2
-    );
-
-  const touchRight =
-    makeTouchButton(
-      "▶",
-      3,
-      2
-    );
-
-  const touchDown =
-    makeTouchButton(
-      "▼",
-      2,
-      3
-    );
-
-  const touchMove = {
-    up: false,
-    down: false,
-    left: false,
-    right: false
-  };
-
-  function bindTouchHold(
-    button,
-    direction
-  ) {
-    button.addEventListener(
-      "pointerdown",
-      event => {
-        event.preventDefault();
-
-        touchMove[
-          direction
-        ] = true;
-
-        button.style.background =
-          "rgba(29,145,210,0.90)";
-
-        try {
-          button.setPointerCapture(
-            event.pointerId
-          );
-        } catch {}
-      }
-    );
-
-    function stop() {
-      touchMove[
-        direction
-      ] = false;
-
-      button.style.background =
-        "rgba(5,14,25,0.76)";
-    }
-
-    button.addEventListener(
-      "pointerup",
-      stop
-    );
-
-    button.addEventListener(
-      "pointercancel",
-      stop
-    );
-
-    button.addEventListener(
-      "lostpointercapture",
-      stop
-    );
-  }
-
-  bindTouchHold(
-    touchUp,
-    "up"
-  );
-
-  bindTouchHold(
-    touchDown,
-    "down"
-  );
-
-  bindTouchHold(
-    touchLeft,
-    "left"
-  );
-
-  bindTouchHold(
-    touchRight,
-    "right"
-  );
-
-  // =========================================================
-  // KEYBOARD + CAMERA MOVEMENT
-  // =========================================================
-
-  const keys = {};
-
-  window.addEventListener(
-    "keydown",
-    event => {
-      const key =
-        event.key.toLowerCase();
-
-      keys[
-        key
-      ] = true;
-
-      if (
-        key === "r" &&
-        buildMode
-      ) {
-        rotateBuildGhost();
-      }
-
-      if (
-        key === "escape" &&
-        buildMode
-      ) {
-        cancelBuildMode();
-      }
-    }
-  );
-
-  window.addEventListener(
-    "keyup",
-    event => {
-      keys[
-        event.key.toLowerCase()
-      ] = false;
-    }
-  );
-
-  scene
-    .onBeforeRenderObservable
-    .add(
-      () => {
-        const speed =
-          0.78 *
-          (
-            camera.radius /
-            150
-          );
-
-        if (
-          keys["w"] ||
-          keys["arrowup"] ||
-          touchMove.up
-        ) {
-          camera.target.z +=
-            speed;
-        }
-
-        if (
-          keys["s"] ||
-          keys["arrowdown"] ||
-          touchMove.down
-        ) {
-          camera.target.z -=
-            speed;
-        }
-
-        if (
-          keys["a"] ||
-          keys["arrowleft"] ||
-          touchMove.left
-        ) {
-          camera.target.x -=
-            speed;
-        }
-
-        if (
-          keys["d"] ||
-          keys["arrowright"] ||
-          touchMove.right
-        ) {
-          camera.target.x +=
-            speed;
-        }
-
-        {
-          const clamped = clampPointToWorld(camera.target.x,camera.target.z);
-          camera.target.x = clamped.x;
-          camera.target.z = clamped.z;
-        }
-      }
-    );
-
-
-  // =========================================================
-  // LIVE DAY / NIGHT CYCLE
-  // =========================================================
-
-  let lastHudMinute = -1;
-
-  scene
-    .onBeforeRenderObservable
-    .add(
-      () => {
-        const dt =
-          Math.min(
-            0.05,
-            engine.getDeltaTime() /
-            1000
-          );
-
-        worldTime +=
-          dt /
-          DAY_LENGTH_SECONDS;
-
-        if (
-          worldTime >= 1
-        ) {
-          worldTime -= 1;
-        }
-
-        const angle =
-          (worldTime - 0.25) *
-          Math.PI *
-          2;
-
-        const sunHeight =
-          Math.sin(angle);
-
-        const daylight =
-          BABYLON.Scalar.Clamp(
-            sunHeight * 1.35 +
-            0.08,
-            0,
-            1
-          );
-
-        const twilight =
-          BABYLON.Scalar.Clamp(
-            1 -
-            Math.abs(sunHeight) *
-            4,
-            0,
-            1
-          );
-
-        const night =
-          1 - daylight;
-
-        const sunDirection =
-          new BABYLON.Vector3(
-            Math.cos(angle),
-            -Math.max(
-              0.08,
-              sunHeight
-            ),
-            Math.sin(angle) *
-            0.55
-          );
-
-        sun.direction =
-          sunDirection.normalize();
-
-        sun.intensity =
-          0.08 +
-          daylight * 0.98;
-
-        moon.intensity =
-          night * 0.22;
-
-        hemi.intensity =
-          0.14 +
-          daylight * 0.48;
-
-        const daySky =
-          new BABYLON.Color3(
-            0.48,
-            0.68,
-            0.90
-          );
-
-        const nightSky =
-          new BABYLON.Color3(
-            0.015,
-            0.025,
-            0.075
-          );
-
-        const sunsetSky =
-          new BABYLON.Color3(
-            0.92,
-            0.39,
-            0.19
-          );
-
-        let skyColor =
-          BABYLON.Color3.Lerp(
-            nightSky,
-            daySky,
-            daylight
-          );
-
-        skyColor =
-          BABYLON.Color3.Lerp(
-            skyColor,
-            sunsetSky,
-            twilight * 0.34
-          );
-
-        skyMat.emissiveColor =
-          skyColor;
-
-        scene.clearColor =
-          new BABYLON.Color4(
-            skyColor.r,
-            skyColor.g,
-            skyColor.b,
-            1
-          );
-
-        scene.fogColor =
-          BABYLON.Color3.Lerp(
-            new BABYLON.Color3(
-              0.025,
-              0.04,
-              0.08
-            ),
-            new BABYLON.Color3(
-              0.66,
-              0.79,
-              0.91
-            ),
-            daylight
-          );
-
-        // Glass becomes city light at night.
-        glassMat.emissiveColor =
-          new BABYLON.Color3(
-            0.12 * night,
-            0.20 * night,
-            0.28 * night
-          );
-
-        darkGlassMat.emissiveColor =
-          new BABYLON.Color3(
-            0.10 * night,
-            0.17 * night,
-            0.24 * night
-          );
-
-        streetLampMat.emissiveColor =
-          new BABYLON.Color3(
-            1.0 * night,
-            0.62 * night,
-            0.18 * night
-          );
-
-        glowLayer.intensity =
-          0.08 +
-          night * 0.34;
-
-        nightPointLights.forEach(
-          light => {
-            light.intensity =
-              night * 0.62;
-          }
-        );
-
-        const hudMinute =
-          Math.floor(
-            worldTime *
-            24 *
-            60
-          );
-
-        if (
-          hudMinute !==
-          lastHudMinute
-        ) {
-          lastHudMinute =
-            hudMinute;
-          updateHUD();
-        }
-      }
-    );
-
-  // =========================================================
-  // SAVE / LOAD
-  // =========================================================
-
-  function saveGame() {
-    const data = {
-      money,
-      iron,
-      steel,
-      energy,
-      population,
-      townHallLevel,
-      placedBuildings,
-      nextBuildingId,
-      worldTime,
-      strategicZones,
-      nextZoneId,
-      lastSaved:
-        Date.now()
-    };
-
-    localStorage.setItem(
-      SAVE_KEY,
-      JSON.stringify(
-        data
-      )
-    );
-  }
-
-  function loadGame() {
-    const raw =
-      localStorage.getItem(
-        SAVE_KEY
-      );
-
-    if (!raw) {
-      return;
-    }
-
+  // ==========================================================
+  // LOCAL SAVE
+  // ==========================================================
+
+  function loadLocalState() {
     try {
-      const data =
-        JSON.parse(
-          raw
-        );
+      return JSON.parse(localStorage.getItem(localSaveKey) || "{}") || {};
+    } catch (_) {
+      return {};
+    }
+  }
 
-      money =
-        data.money ??
-        money;
+  function saveLocalState() {
+    const old = loadLocalState();
+    old.claims = Array.from(state.claimedTerritories.values()).filter(v => v.localOwner);
+    localStorage.setItem(localSaveKey, JSON.stringify(old));
+  }
 
-      iron =
-        data.iron ??
-        iron;
+  function restoreLocalClaims() {
+    const save = loadLocalState();
+    (save.claims || []).forEach(row => state.claimedTerritories.set(row.territory_id, row));
+  }
 
-      steel =
-        data.steel ??
-        steel;
+  // ==========================================================
+  // MAIN HUD
+  // ==========================================================
 
-      energy =
-        data.energy ??
-        energy;
+  let hudRoot = null;
 
-      population =
-        data.population ??
-        population;
+  function buildHUD() {
+    hudRoot = document.createElement("div");
+    hudRoot.id = "mgHUD";
+    hudRoot.innerHTML = `
+      <header class="mg-topbar">
+        <div class="mg-brand-lockup">
+          <div class="mg-brand-mark">M</div>
+          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • FIRST PLAYABLE RESTRUCTURE</span></div>
+        </div>
+        <div class="mg-top-status">
+          <div class="mg-status-chip"><span>WORLD</span><b id="mgWorldLabel">SINGLEPLAYER</b></div>
+          <div class="mg-status-chip"><span>ONLINE</span><b id="mgOnlineCount">—</b></div>
+          <div class="mg-status-chip"><span>TIME</span><b id="mgTime">12:30 PM</b></div>
+          <button class="mg-graphics-toggle" id="mgGraphicsToggle">GRAPHICS • ${state.graphics}</button>
+        </div>
+      </header>
 
-      townHallLevel =
-        data.townHallLevel ??
-        townHallLevel;
+      <nav class="mg-dock" id="mgDock">
+        <button data-action="hub" title="Neutral Central Hub">⌂<span>HUB</span></button>
+        <button data-action="map" title="World Map">◈<span>WORLD</span></button>
+        <button data-action="capital" title="Capital">◆<span>CAPITAL</span></button>
+        <button data-action="development" class="locked" title="Development — coming soon">▦<span>BUILD</span></button>
+        <button data-action="defense" class="locked" title="Defense — coming soon">⬡<span>DEFENSE</span></button>
+      </nav>
 
-      placedBuildings =
-        Array.isArray(
-          data.placedBuildings
-        )
-          ? data.placedBuildings
-          : [];
+      <div class="mg-location-pill" id="mgLocationPill">NEUTRAL CENTRAL HUB • PROTECTED</div>
 
-      nextBuildingId =
-        data.nextBuildingId ??
-        (
-          placedBuildings.length +
-          1
-        );
+      <div class="mg-bottom-status"><span id="mgBottomStatusText">Welcome to Map Game.</span></div>
+    `;
+    document.body.appendChild(hudRoot);
 
-      worldTime =
-        typeof data.worldTime === "number"
-          ? data.worldTime
-          : worldTime;
-
-      strategicZones =
-        Array.isArray(
-          data.strategicZones
-        )
-          ? data.strategicZones
-          : strategicZones;
-
-      nextZoneId =
-        data.nextZoneId ??
-        nextZoneId;
-
-      for (
-        const building of placedBuildings
-      ) {
-        createPlacedBuildingVisual(
-          building
-        );
+    hudRoot.querySelector("[data-action='hub']").onclick = () => {
+      hideWorldMap();
+      buildNeutralHub();
+    };
+    hudRoot.querySelector("[data-action='map']").onclick = showWorldMap;
+    hudRoot.querySelector("[data-action='capital']").onclick = () => {
+      if (!state.activeTerritory) {
+        showToast("Claim and enter a territory first.", "info");
+        return;
       }
-
-      const lastSaved =
-        data.lastSaved ??
-        Date.now();
-
-      const secondsAway =
-        Math.min(
-          Math.floor(
-            (
-              Date.now() -
-              lastSaved
-            ) /
-            1000
-          ),
-          12 *
-            60 *
-            60
-        );
-
-      const offlineCash =
-        secondsAway *
-        (
-          2 *
-          townHallLevel
-        );
-
-      money +=
-        offlineCash;
-
-      if (
-        offlineCash >
-        0
-      ) {
-        setTimeout(
-          () => {
-            showToast(
-              "Offline earnings: " +
-                formatMoney(
-                  offlineCash
-                ),
-              "success"
-            );
-          },
-          450
-        );
+      if (getCapitalForActiveTerritory()) {
+        showToast("Your capital is already established in this alpha.", "info");
+        return;
       }
-    } catch {
-      console.log(
-        "Save data could not be loaded."
-      );
-    }
+      beginCapitalPlacement();
+    };
+    hudRoot.querySelector("[data-action='development']").onclick = () => showToast("Development, zones, factories and power are the next major system.", "info");
+    hudRoot.querySelector("[data-action='defense']").onclick = () => showToast("Defense, walls and military are intentionally locked for now.", "info");
+    hudRoot.querySelector("#mgGraphicsToggle").onclick = toggleGraphics;
   }
 
-  // =========================================================
-  // PASSIVE ECONOMY
-  // =========================================================
-
-  const productionTimer =
-    setInterval(
-      () => {
-        const playerPowerPlants =
-          placedBuildings.filter(
-            building =>
-              building.type ===
-              "powerPlant"
-          ).length;
-
-        const playerMines =
-          placedBuildings.filter(
-            building =>
-              building.type ===
-              "ironMine"
-          ).length;
-
-        const playerMills =
-          placedBuildings.filter(
-            building =>
-              building.type ===
-              "steelMill"
-          ).length;
-
-        const playerCommercial =
-          placedBuildings.filter(
-            building =>
-              building.type ===
-              "commercial"
-          ).length;
-
-        const playerResidential =
-          placedBuildings.filter(
-            building =>
-              building.type ===
-              "residential"
-          ).length;
-
-        energy +=
-          8 +
-          playerPowerPlants *
-          8;
-
-        const mineCount =
-          1 +
-          playerMines;
-
-        for (
-          let i = 0;
-          i < mineCount;
-          i++
-        ) {
-          if (
-            energy >= 1
-          ) {
-            energy -= 1;
-            iron += 3;
-            money += 24;
-          }
-        }
-
-        const millCount =
-          1 +
-          playerMills;
-
-        for (
-          let i = 0;
-          i < millCount;
-          i++
-        ) {
-          if (
-            iron >= 3 &&
-            energy >= 2
-          ) {
-            iron -= 3;
-            energy -= 2;
-
-            steel += 1;
-            money += 75;
-          }
-        }
-
-        money +=
-          playerCommercial *
-          18;
-
-        population =
-          Math.max(
-            population,
-            3800 +
-              playerResidential *
-              500
-          );
-
-        // Approximate UI income rate. Mines are now a real cash source too,
-        // not merely raw-resource producers.
-        incomePerMinute =
-          60 +
-          (1 + playerMines) * 72 +
-          playerCommercial * 54 +
-          (1 + playerMills) * 45;
-
-        updateHUD();
-      },
-      2000
-    );
-
-
-  // =========================================================
-  // HOME SCREEN — ACCOUNTS + CENTRAL WORLD
-  // =========================================================
-
-  const homeScreen = document.createElement("div");
-
-  homeScreen.style.cssText = `
-    position:fixed;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:24px;
-    background:
-      radial-gradient(circle at 50% 25%, rgba(17,71,104,0.78), rgba(3,9,17,0.97) 64%);
-    color:white;
-    font-family:Arial,sans-serif;
-    z-index:500;
-    overflow:auto;
-  `;
-
-  homeScreen.innerHTML = `
-    <div style="
-      width:min(920px,94vw);
-      border:1px solid rgba(92,218,255,0.24);
-      border-radius:20px;
-      background:linear-gradient(180deg,rgba(7,17,30,0.97),rgba(5,12,23,0.97));
-      box-shadow:0 30px 90px rgba(0,0,0,0.48),0 0 70px rgba(0,160,255,0.08);
-      overflow:hidden;
-    ">
-      <div style="
-        padding:26px 28px 18px;
-        border-bottom:1px solid rgba(255,255,255,0.06);
-        display:flex;
-        align-items:flex-start;
-        justify-content:space-between;
-        gap:18px;
-        flex-wrap:wrap;
-      ">
-        <div>
-          <div style="color:#84eaff;font-size:12px;font-weight:bold;letter-spacing:2px;">
-            MAP GAME
-          </div>
-          <div style="
-            margin-top:7px;
-            font-size:clamp(30px,5vw,52px);
-            font-weight:900;
-            letter-spacing:-1.5px;
-          ">
-            BUILD A CIVILIZATION.
-          </div>
-          <div style="
-            margin-top:8px;
-            max-width:650px;
-            line-height:1.55;
-            font-size:13px;
-            opacity:0.64;
-          ">
-            Build cities, develop territory, grow zones, manage resources,
-            and prepare your civilization for the shared Central World.
-          </div>
-        </div>
-
-        <div id="accountSummary" style="
-          min-width:210px;
-          padding:11px 13px;
-          border-radius:12px;
-          border:1px solid rgba(255,255,255,0.08);
-          background:rgba(255,255,255,0.035);
-          font-size:11px;
-          line-height:1.5;
-        ">
-          <div style="opacity:.5;font-size:9px;letter-spacing:1px;">ACCOUNT</div>
-          <div id="accountSummaryText" style="margin-top:3px;font-weight:800;">Checking...</div>
-          <button id="accountActionButton" style="
-            margin-top:8px;
-            width:100%;
-            padding:7px 9px;
-            border-radius:8px;
-            border:1px solid rgba(112,223,255,0.18);
-            background:rgba(61,174,226,0.09);
-            color:#a9efff;
-            font-size:10px;
-            font-weight:800;
-            cursor:pointer;
-          ">ACCOUNT</button>
-        </div>
-      </div>
-
-      <div style="
-        padding:22px 28px 28px;
-        display:grid;
-        grid-template-columns:minmax(0,1.45fr) minmax(240px,.75fr);
-        gap:16px;
-      ">
-        <div style="
-          padding:20px;
-          border:1px solid rgba(87,217,255,0.24);
-          border-radius:14px;
-          background:linear-gradient(145deg,rgba(23,112,164,0.16),rgba(255,255,255,0.025));
-        ">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-            <div>
-              <div style="font-size:10px;color:#82eaff;letter-spacing:1px;font-weight:bold;">
-                OFFICIAL WORLD
-              </div>
-              <div style="margin-top:4px;font-size:25px;font-weight:850;">
-                Central World
-              </div>
-            </div>
-
-            <div id="centralWorldStatusBadge" style="
-              padding:6px 9px;
-              border-radius:999px;
-              background:rgba(112,227,157,0.10);
-              border:1px solid rgba(112,227,157,0.18);
-              color:#8debae;
-              font-size:10px;
-              font-weight:bold;
-            ">ACCOUNT REQUIRED</div>
-          </div>
-
-          <div style="
-            margin-top:14px;
-            display:grid;
-            grid-template-columns:repeat(3,1fr);
-            gap:8px;
-          ">
-            <div style="padding:9px;border-radius:8px;background:rgba(255,255,255,0.035);">
-              <div style="font-size:8px;opacity:.45;">RULESET</div>
-              <b style="font-size:11px;">Official</b>
-            </div>
-            <div style="padding:9px;border-radius:8px;background:rgba(255,255,255,0.035);">
-              <div style="font-size:8px;opacity:.45;">MODS</div>
-              <b style="font-size:11px;">Disabled</b>
-            </div>
-            <div style="padding:9px;border-radius:8px;background:rgba(255,255,255,0.035);">
-              <div style="font-size:8px;opacity:.45;">EMAIL</div>
-              <b id="centralEmailStatus" style="font-size:11px;">Required</b>
-            </div>
-          </div>
-
-          <div id="centralWorldMessage" style="
-            margin-top:13px;
-            min-height:32px;
-            padding:9px 10px;
-            border-radius:8px;
-            background:rgba(0,0,0,0.16);
-            font-size:10px;
-            line-height:1.45;
-            opacity:.72;
-          ">
-            Sign in with a verified email to enter multiplayer.
-          </div>
-
-          <button id="joinCentralWorld" style="
-            width:100%;
-            margin-top:12px;
-            padding:13px;
-            border:1px solid rgba(99,226,255,0.40);
-            border-radius:10px;
-            background:linear-gradient(180deg,#208fcf,#1168a7);
-            color:white;
-            font-size:13px;
-            font-weight:850;
-            cursor:pointer;
-            box-shadow:0 7px 22px rgba(0,136,210,0.18);
-          ">
-            SIGN IN TO JOIN
-          </button>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <div style="
-            padding:14px;
-            border-radius:12px;
-            background:rgba(255,255,255,0.025);
-            border:1px solid rgba(255,255,255,0.06);
-          ">
-            <div style="font-size:11px;font-weight:bold;">SINGLEPLAYER</div>
-            <div style="margin-top:5px;font-size:10px;line-height:1.5;opacity:.52;">
-              Play locally without an account. Your current browser save continues to work.
-            </div>
-            <button id="playSingleplayer" style="
-              width:100%;
-              margin-top:10px;
-              padding:9px;
-              border:1px solid rgba(255,255,255,0.12);
-              border-radius:8px;
-              background:rgba(255,255,255,0.055);
-              color:white;
-              font-size:10px;
-              font-weight:800;
-              cursor:pointer;
-            ">PLAY SINGLEPLAYER</button>
-          </div>
-
-          <div style="
-            padding:14px;
-            border-radius:12px;
-            background:rgba(255,255,255,0.025);
-            border:1px solid rgba(255,255,255,0.06);
-          ">
-            <div style="font-size:11px;font-weight:bold;">PRIVATE WORLDS</div>
-            <div style="margin-top:5px;font-size:10px;line-height:1.5;opacity:.52;">
-              Planned ownership limit:
-              <b style="color:#8beaff;">${PRIVATE_WORLD_LIMIT}</b>
-              worlds per account. Multiplayer support comes after account testing.
-            </div>
-            <button disabled style="
-              width:100%;
-              margin-top:10px;
-              padding:9px;
-              border:1px solid rgba(255,255,255,0.06);
-              border-radius:8px;
-              background:rgba(255,255,255,0.03);
-              color:rgba(255,255,255,0.38);
-            ">COMING LATER</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="authModal" style="
-      position:absolute;
-      inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-      background:rgba(1,5,10,0.78);
-      backdrop-filter:blur(8px);
-      z-index:10;
-    ">
-      <div style="
-        width:min(430px,94vw);
-        border:1px solid rgba(112,226,255,.24);
-        border-radius:16px;
-        background:linear-gradient(180deg,#0a1725,#07111d);
-        box-shadow:0 24px 80px rgba(0,0,0,.55);
-        overflow:hidden;
-      ">
-        <div style="
-          padding:18px 20px 14px;
-          border-bottom:1px solid rgba(255,255,255,.06);
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
-          gap:12px;
-        ">
-          <div>
-            <div style="font-size:10px;color:#83e9ff;letter-spacing:1.5px;font-weight:800;">
-              MAP GAME ACCOUNT
-            </div>
-            <div id="authModalTitle" style="margin-top:4px;font-size:23px;font-weight:900;">
-              Sign in
-            </div>
-          </div>
-          <button id="closeAuthModal" aria-label="Close account window" style="
-            width:34px;height:34px;
-            border-radius:9px;
-            border:1px solid rgba(255,255,255,.08);
-            background:rgba(255,255,255,.04);
-            color:white;
-            font-size:18px;
-            cursor:pointer;
-          ">×</button>
-        </div>
-
-        <div style="padding:18px 20px 20px;">
-          <div id="authTabs" style="display:flex;gap:8px;margin-bottom:14px;">
-            <button id="showSignIn" style="
-              flex:1;padding:9px;border-radius:8px;border:1px solid rgba(94,220,255,.28);
-              background:rgba(37,151,202,.16);color:white;font-weight:800;cursor:pointer;
-            ">SIGN IN</button>
-            <button id="showCreateAccount" style="
-              flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.08);
-              background:rgba(255,255,255,.035);color:white;font-weight:800;cursor:pointer;
-            ">CREATE ACCOUNT</button>
-          </div>
-
-          <form id="authForm">
-            <div id="usernameField" style="display:none;margin-bottom:10px;">
-              <label style="font-size:10px;opacity:.65;">USERNAME</label>
-              <input id="authUsername" autocomplete="username" maxlength="20" style="
-                box-sizing:border-box;width:100%;margin-top:5px;padding:11px 12px;
-                border-radius:8px;border:1px solid rgba(255,255,255,.10);
-                background:#07101a;color:white;outline:none;font-size:14px;
-              " placeholder="3–20 characters" />
-            </div>
-
-            <div style="margin-bottom:10px;">
-              <label style="font-size:10px;opacity:.65;">EMAIL</label>
-              <input id="authEmail" type="email" autocomplete="email" required style="
-                box-sizing:border-box;width:100%;margin-top:5px;padding:11px 12px;
-                border-radius:8px;border:1px solid rgba(255,255,255,.10);
-                background:#07101a;color:white;outline:none;font-size:14px;
-              " placeholder="you@example.com" />
-            </div>
-
-            <div id="passwordField">
-              <label style="font-size:10px;opacity:.65;">PASSWORD</label>
-              <input id="authPassword" type="password" autocomplete="current-password" required style="
-                box-sizing:border-box;width:100%;margin-top:5px;padding:11px 12px;
-                border-radius:8px;border:1px solid rgba(255,255,255,.10);
-                background:#07101a;color:white;outline:none;font-size:14px;
-              " placeholder="At least 8 characters" />
-            </div>
-
-            <div id="authMessage" role="status" aria-live="polite" style="
-              min-height:34px;
-              margin-top:12px;
-              padding:9px 10px;
-              border-radius:8px;
-              background:rgba(255,255,255,.035);
-              font-size:10px;
-              line-height:1.45;
-              color:rgba(255,255,255,.72);
-            ">
-              Sign in to your Map Game account.
-            </div>
-
-            <button id="authSubmit" type="submit" style="
-              width:100%;margin-top:12px;padding:12px;border-radius:9px;
-              border:1px solid rgba(94,220,255,.34);
-              background:linear-gradient(180deg,#218fce,#1267a4);
-              color:white;font-weight:900;cursor:pointer;
-            ">SIGN IN</button>
-          </form>
-
-          <div id="verificationActions" style="display:none;margin-top:10px;gap:8px;">
-            <button id="resendVerification" type="button" style="
-              flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.09);
-              background:rgba(255,255,255,.04);color:white;font-size:10px;font-weight:800;cursor:pointer;
-            ">RESEND EMAIL</button>
-            <button id="verificationDone" type="button" style="
-              flex:1;padding:9px;border-radius:8px;border:1px solid rgba(94,220,255,.20);
-              background:rgba(31,141,191,.12);color:#a8efff;font-size:10px;font-weight:800;cursor:pointer;
-            ">I VERIFIED</button>
-          </div>
-
-          <div style="display:flex;justify-content:space-between;gap:10px;margin-top:12px;flex-wrap:wrap;">
-            <button id="forgotPassword" type="button" style="
-              border:0;background:none;color:#8feaff;font-size:10px;cursor:pointer;padding:4px 0;
-            ">Forgot password?</button>
-
-            <button id="signOutInsideModal" type="button" style="
-              display:none;border:0;background:none;color:#ffb8b8;font-size:10px;cursor:pointer;padding:4px 0;
-            ">Sign out</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(homeScreen);
-  canvas.style.pointerEvents = "none";
-
-  const joinCentralWorldButton = document.getElementById("joinCentralWorld");
-  const playSingleplayerButton = document.getElementById("playSingleplayer");
-  const accountActionButton = document.getElementById("accountActionButton");
-  const accountSummaryText = document.getElementById("accountSummaryText");
-  const centralWorldStatusBadge = document.getElementById("centralWorldStatusBadge");
-  const centralEmailStatus = document.getElementById("centralEmailStatus");
-  const centralWorldMessage = document.getElementById("centralWorldMessage");
-
-  const authModal = document.getElementById("authModal");
-  const authModalTitle = document.getElementById("authModalTitle");
-  const closeAuthModal = document.getElementById("closeAuthModal");
-  const showSignIn = document.getElementById("showSignIn");
-  const showCreateAccount = document.getElementById("showCreateAccount");
-  const authForm = document.getElementById("authForm");
-  const usernameField = document.getElementById("usernameField");
-  const authUsername = document.getElementById("authUsername");
-  const authEmail = document.getElementById("authEmail");
-  const authPassword = document.getElementById("authPassword");
-  const authMessage = document.getElementById("authMessage");
-  const authSubmit = document.getElementById("authSubmit");
-  const verificationActions = document.getElementById("verificationActions");
-  const resendVerification = document.getElementById("resendVerification");
-  const verificationDone = document.getElementById("verificationDone");
-  const forgotPassword = document.getElementById("forgotPassword");
-  const signOutInsideModal = document.getElementById("signOutInsideModal");
-
-  let authMode = "signin";
-  let currentAccountUser = null;
-  let lastSignupEmail = "";
-
-  function usernameFromUser(user) {
-    if (!user) return "";
-    const metaName =
-      user.user_metadata &&
-      typeof user.user_metadata.username === "string"
-        ? user.user_metadata.username.trim()
-        : "";
-
-    if (metaName) return metaName;
-
-    if (typeof user.email === "string" && user.email.includes("@")) {
-      return user.email.split("@")[0];
-    }
-
-    return "Player";
+  function updateModeUI() {
+    const pill = document.getElementById("mgLocationPill");
+    if (!pill) return;
+    if (state.mode === "HUB") pill.textContent = "NEUTRAL CENTRAL HUB • PROTECTED • NO OWNER";
+    else if (state.mode === "MAP") pill.textContent = "STRATEGIC WORLD MAP";
+    else if (state.activeTerritory) pill.textContent = `TERRITORY ${state.activeTerritory.x}-${state.activeTerritory.y} • ${BIOMES[state.activeTerritory.biome].label.toUpperCase()}`;
   }
 
-  function userEmailVerified(user) {
-    if (!user) return false;
-
-    if (
-      window.mapGameAuth &&
-      typeof window.mapGameAuth.isVerified === "function"
-    ) {
-      return window.mapGameAuth.isVerified(user);
-    }
-
-    return Boolean(user.email_confirmed_at || user.confirmed_at);
+  function updateOnlineUI() {
+    const el = document.getElementById("mgOnlineCount");
+    if (el) el.textContent = state.worldType === "central" ? String(state.multiplayerState?.onlineCount ?? 1) : "LOCAL";
+    const world = document.getElementById("mgWorldLabel");
+    if (world) world.textContent = state.worldType === "central" ? "CENTRAL WORLD" : "SINGLEPLAYER";
   }
 
-  function setAuthMessage(message, type = "info") {
-    if (!(authMessage instanceof HTMLElement)) return;
+  function toggleGraphics() {
+    state.graphics = state.graphics === "BASIC" ? "REGULAR" : "BASIC";
+    localStorage.setItem("mapgame_graphics", state.graphics);
+    const btn = document.getElementById("mgGraphicsToggle");
+    if (btn) btn.textContent = `GRAPHICS • ${state.graphics}`;
 
-    authMessage.textContent = message;
-
-    if (type === "error") {
-      authMessage.style.color = "#ffb4b4";
-      authMessage.style.background = "rgba(207,70,70,.08)";
-    } else if (type === "success") {
-      authMessage.style.color = "#a7efbd";
-      authMessage.style.background = "rgba(78,184,117,.08)";
+    if (state.graphics === "REGULAR") {
+      engine.setHardwareScalingLevel(window.devicePixelRatio >= 2 ? 1.15 : 1.0);
+      shadowGenerator.mapSize = 2048;
+      scene.imageProcessingConfiguration.contrast = 1.12;
+      scene.imageProcessingConfiguration.exposure = 1.06;
+      glowLayer.intensity = 0.37;
     } else {
-      authMessage.style.color = "rgba(255,255,255,.72)";
-      authMessage.style.background = "rgba(255,255,255,.035)";
+      engine.setHardwareScalingLevel(window.devicePixelRatio >= 2 ? 1.38 : 1.16);
+      scene.imageProcessingConfiguration.contrast = 1.06;
+      scene.imageProcessingConfiguration.exposure = 1.02;
+      glowLayer.intensity = 0.28;
     }
+
+    window.mapGameRuntime.graphicsPreset = state.graphics;
+    window.dispatchEvent(new CustomEvent("mapgame:graphics", { detail: { preset: state.graphics } }));
+
+    // Rebuild active view so architecture actually changes, not just the label.
+    if (state.mode === "HUB") buildNeutralHub();
+    else if (state.activeTerritory) enterTerritory(state.activeTerritory);
+    showToast(`${state.graphics} graphics active.`, "success");
   }
 
-  function setAuthMode(mode) {
-    authMode = mode;
+  // ==========================================================
+  // HOME / AUTH
+  // ==========================================================
 
-    const creating = mode === "signup";
+  let home = null;
+  let authModal = null;
 
-    if (authModalTitle instanceof HTMLElement) {
-      authModalTitle.textContent =
-        creating ? "Create account" : "Sign in";
-    }
+  function createHome() {
+    home = document.createElement("div");
+    home.id = "mgHome";
+    home.innerHTML = `
+      <div class="mg-home-backdrop"></div>
+      <div class="mg-home-grid"></div>
+      <main class="mg-home-shell">
+        <section class="mg-home-hero">
+          <div class="mg-home-kicker">MAP GAME • ALPHA ${VERSION}</div>
+          <h1>Build a civilization<br><span>from one territory.</span></h1>
+          <p>Start in a protected neutral metropolis, explore a huge strategic world, claim land, and establish your first capital.</p>
+          <div class="mg-home-feature-row">
+            <span>PROCEDURAL BIOMES</span><span>SHARED TERRITORIES</span><span>CAPITAL FOUNDING</span>
+          </div>
+        </section>
+        <section class="mg-home-cards">
+          <article class="mg-world-card mg-world-card-primary">
+            <div class="mg-card-badge">OFFICIAL WORLD</div>
+            <h2>Central World</h2>
+            <p>Shared territory ownership and capitals. No attacks or construction beyond the capital yet.</p>
+            <div id="mgAccountState" class="mg-account-state">Checking account…</div>
+            <button class="mg-btn mg-btn-primary mg-btn-large" id="mgJoinCentral">JOIN CENTRAL WORLD</button>
+          </article>
+          <article class="mg-world-card">
+            <div class="mg-card-badge muted">LOCAL</div>
+            <h2>Singleplayer</h2>
+            <p>Explore the same world flow locally while the larger civilization systems are being built.</p>
+            <button class="mg-btn mg-btn-secondary mg-btn-large" id="mgStartSingle">START SINGLEPLAYER</button>
+          </article>
+        </section>
+      </main>`;
+    document.body.appendChild(home);
 
-    if (usernameField instanceof HTMLElement) {
-      usernameField.style.display =
-        creating ? "block" : "none";
-    }
-
-    if (authSubmit instanceof HTMLButtonElement) {
-      authSubmit.textContent =
-        creating ? "CREATE ACCOUNT" : "SIGN IN";
-    }
-
-    if (authPassword instanceof HTMLInputElement) {
-      authPassword.autocomplete =
-        creating ? "new-password" : "current-password";
-    }
-
-    if (showSignIn instanceof HTMLButtonElement) {
-      showSignIn.style.background =
-        creating
-          ? "rgba(255,255,255,.035)"
-          : "rgba(37,151,202,.16)";
-    }
-
-    if (showCreateAccount instanceof HTMLButtonElement) {
-      showCreateAccount.style.background =
-        creating
-          ? "rgba(37,151,202,.16)"
-          : "rgba(255,255,255,.035)";
-    }
-
-    if (verificationActions instanceof HTMLElement) {
-      verificationActions.style.display = "none";
-    }
-
-    setAuthMessage(
-      creating
-        ? "Create an account. We will email you a verification link."
-        : "Sign in to your Map Game account."
-    );
+    home.querySelector("#mgStartSingle").onclick = () => startGame("singleplayer");
+    home.querySelector("#mgJoinCentral").onclick = joinCentralFromHome;
+    refreshHomeAccount();
   }
 
-  function openAuthModal(mode = "signin") {
-    setAuthMode(mode);
-
-    if (authModal instanceof HTMLElement) {
-      authModal.style.display = "flex";
-    }
-
-    if (currentAccountUser && signOutInsideModal instanceof HTMLElement) {
-      signOutInsideModal.style.display = "inline-block";
-    }
-  }
-
-  function closeAuth() {
-    if (authModal instanceof HTMLElement) {
-      authModal.style.display = "none";
-    }
-  }
-
-  function enterGame(label) {
-    homeScreen.style.opacity = "0";
-    homeScreen.style.transition = "opacity .18s ease";
-
-    setTimeout(() => {
-      homeScreen.style.display = "none";
-      canvas.style.pointerEvents = "auto";
-      canvas.focus();
-
-      showToast(label, "success");
-    }, 190);
-  }
-
-  function refreshHomeAccountUI(user) {
-    currentAccountUser = user || null;
-
-    const verified = userEmailVerified(user);
-
-    if (!user) {
-      if (accountSummaryText instanceof HTMLElement) {
-        accountSummaryText.textContent = "Not signed in";
-      }
-
-      if (accountActionButton instanceof HTMLButtonElement) {
-        accountActionButton.textContent = "SIGN IN / CREATE";
-      }
-
-      if (centralWorldStatusBadge instanceof HTMLElement) {
-        centralWorldStatusBadge.textContent = "ACCOUNT REQUIRED";
-        centralWorldStatusBadge.style.color = "#ffd69a";
-      }
-
-      if (centralEmailStatus instanceof HTMLElement) {
-        centralEmailStatus.textContent = "Required";
-      }
-
-      if (centralWorldMessage instanceof HTMLElement) {
-        centralWorldMessage.textContent =
-          "Create an account or sign in with a verified email to enter Central World.";
-      }
-
-      if (joinCentralWorldButton instanceof HTMLButtonElement) {
-        joinCentralWorldButton.textContent = "SIGN IN TO JOIN";
-      }
-
-      if (signOutInsideModal instanceof HTMLElement) {
-        signOutInsideModal.style.display = "none";
-      }
-
+  async function refreshHomeAccount() {
+    const status = document.getElementById("mgAccountState");
+    const button = document.getElementById("mgJoinCentral");
+    if (!status || !button) return;
+    if (!window.mapGameAuth?.getCurrentUser) {
+      status.textContent = "Account service not ready.";
+      button.textContent = "TRY AGAIN";
       return;
     }
-
-    const name = usernameFromUser(user);
-
-    if (accountSummaryText instanceof HTMLElement) {
-      accountSummaryText.textContent =
-        `${name} · ${verified ? "Verified" : "Email not verified"}`;
-    }
-
-    if (accountActionButton instanceof HTMLButtonElement) {
-      accountActionButton.textContent = "ACCOUNT";
-    }
-
-    if (signOutInsideModal instanceof HTMLElement) {
-      signOutInsideModal.style.display = "inline-block";
-    }
-
-    if (verified) {
-      if (centralWorldStatusBadge instanceof HTMLElement) {
-        centralWorldStatusBadge.textContent = "READY";
-        centralWorldStatusBadge.style.color = "#8debae";
-      }
-
-      if (centralEmailStatus instanceof HTMLElement) {
-        centralEmailStatus.textContent = "Verified";
-      }
-
-      if (centralWorldMessage instanceof HTMLElement) {
-        centralWorldMessage.textContent =
-          `Signed in as ${name}. Your account is ready for Central World.`;
-      }
-
-      if (joinCentralWorldButton instanceof HTMLButtonElement) {
-        joinCentralWorldButton.textContent = "JOIN CENTRAL WORLD";
-      }
-    } else {
-      if (centralWorldStatusBadge instanceof HTMLElement) {
-        centralWorldStatusBadge.textContent = "VERIFY EMAIL";
-        centralWorldStatusBadge.style.color = "#ffd69a";
-      }
-
-      if (centralEmailStatus instanceof HTMLElement) {
-        centralEmailStatus.textContent = "Not verified";
-      }
-
-      if (centralWorldMessage instanceof HTMLElement) {
-        centralWorldMessage.textContent =
-          "Your account exists, but Central World stays locked until your email is verified.";
-      }
-
-      if (joinCentralWorldButton instanceof HTMLButtonElement) {
-        joinCentralWorldButton.textContent = "VERIFY EMAIL";
-      }
-    }
-  }
-
-  async function loadCurrentAccount() {
-    if (
-      !window.mapGameAuth ||
-      typeof window.mapGameAuth.getCurrentUser !== "function"
-    ) {
-      refreshHomeAccountUI(null);
-
-      if (accountSummaryText instanceof HTMLElement) {
-        accountSummaryText.textContent = "Account service unavailable";
-      }
-
-      return;
-    }
-
     try {
       const user = await window.mapGameAuth.getCurrentUser();
-      refreshHomeAccountUI(user);
-    } catch (error) {
-      console.error("Map Game auth check failed:", error);
-      refreshHomeAccountUI(null);
+      if (!user) {
+        status.innerHTML = `<b>Not signed in</b><span>An account is required for Central World.</span>`;
+        button.textContent = "SIGN IN / CREATE ACCOUNT";
+      } else if (!window.mapGameAuth.isVerified?.(user)) {
+        status.innerHTML = `<b>${escapeHtml(user.email || "Account")}</b><span>Email verification required.</span>`;
+        button.textContent = "VERIFY EMAIL";
+      } else {
+        status.innerHTML = `<b>${escapeHtml(user.email || "Verified player")}</b><span>Verified and ready.</span>`;
+        button.textContent = "JOIN CENTRAL WORLD";
+      }
+    } catch (e) {
+      status.textContent = e?.message || "Could not check account.";
     }
   }
 
-  if (showSignIn instanceof HTMLButtonElement) {
-    showSignIn.addEventListener("click", () => {
-      setAuthMode("signin");
-    });
-  }
-
-  if (showCreateAccount instanceof HTMLButtonElement) {
-    showCreateAccount.addEventListener("click", () => {
-      setAuthMode("signup");
-    });
-  }
-
-  if (closeAuthModal instanceof HTMLButtonElement) {
-    closeAuthModal.addEventListener("click", closeAuth);
-  }
-
-  if (accountActionButton instanceof HTMLButtonElement) {
-    accountActionButton.addEventListener("click", () => {
-      openAuthModal(currentAccountUser ? "signin" : "signin");
-
-      if (currentAccountUser) {
-        setAuthMessage(
-          `${usernameFromUser(currentAccountUser)} is currently signed in${userEmailVerified(currentAccountUser) ? " and verified." : ", but the email is not verified yet."}`,
-          userEmailVerified(currentAccountUser) ? "success" : "info"
-        );
-
-        if (
-          !userEmailVerified(currentAccountUser) &&
-          verificationActions instanceof HTMLElement
-        ) {
-          verificationActions.style.display = "flex";
-        }
-      }
-    });
-  }
-
-  if (authForm instanceof HTMLFormElement) {
-    authForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-
-      if (!window.mapGameAuth) {
-        setAuthMessage(
-          "The account service did not load. Check auth.js and the Supabase script.",
-          "error"
-        );
+  async function joinCentralFromHome() {
+    try {
+      const user = await window.mapGameAuth?.getCurrentUser?.();
+      if (!user) {
+        showAuthModal();
         return;
       }
-
-      const email =
-        authEmail instanceof HTMLInputElement
-          ? authEmail.value.trim()
-          : "";
-
-      const password =
-        authPassword instanceof HTMLInputElement
-          ? authPassword.value
-          : "";
-
-      if (!email || !email.includes("@")) {
-        setAuthMessage("Enter a valid email address.", "error");
+      if (!window.mapGameAuth.isVerified?.(user)) {
+        showToast("Verify your email, then return and try again.", "info");
         return;
       }
+      const btn = document.getElementById("mgJoinCentral");
+      if (btn) { btn.disabled = true; btn.textContent = "CONNECTING…"; }
+      await window.mapGameMultiplayer.joinCentralWorld();
+      state.worldType = "central";
+      const snapshot = window.mapGameMultiplayer.getState();
+      syncClaimsFromMultiplayer(snapshot);
+      startGame("central");
+    } catch (e) {
+      showToast(e?.message || "Could not join Central World.", "error");
+      const btn = document.getElementById("mgJoinCentral");
+      if (btn) { btn.disabled = false; btn.textContent = "JOIN CENTRAL WORLD"; }
+    }
+  }
 
-      if (password.length < 8) {
-        setAuthMessage(
-          "Use a password with at least 8 characters.",
-          "error"
-        );
-        return;
-      }
-
-      if (authSubmit instanceof HTMLButtonElement) {
-        authSubmit.disabled = true;
-        authSubmit.style.opacity = ".62";
-      }
-
-      try {
-        if (authMode === "signup") {
-          const username =
-            authUsername instanceof HTMLInputElement
-              ? authUsername.value.trim()
-              : "";
-
-          if (
-            username.length < 3 ||
-            username.length > 20
-          ) {
-            throw new Error(
-              "Username must be between 3 and 20 characters."
-            );
-          }
-
-          if (!/^[A-Za-z0-9_-]+$/.test(username)) {
-            throw new Error(
-              "Username can use letters, numbers, _ and - only."
-            );
-          }
-
-          await window.mapGameAuth.signUp(
-            email,
-            password,
-            username
-          );
-
-          lastSignupEmail = email;
-
-          setAuthMessage(
-            `Account created. Check ${email} and click the verification link.`,
-            "success"
-          );
-
-          if (verificationActions instanceof HTMLElement) {
-            verificationActions.style.display = "flex";
-          }
-        } else {
-          await window.mapGameAuth.signIn(
-            email,
-            password
-          );
-
-          const user =
-            await window.mapGameAuth.getCurrentUser();
-
-          refreshHomeAccountUI(user);
-
-          if (userEmailVerified(user)) {
-            setAuthMessage(
-              `Signed in as ${usernameFromUser(user)}.`,
-              "success"
-            );
-
-            setTimeout(closeAuth, 450);
+  function showAuthModal() {
+    if (!authModal) {
+      authModal = document.createElement("div");
+      authModal.id = "mgAuthModal";
+      authModal.className = "mg-modal-backdrop";
+      authModal.innerHTML = `
+        <div class="mg-auth-card">
+          <button class="mg-modal-close" id="mgAuthClose">×</button>
+          <div class="mg-kicker">CENTRAL WORLD ACCOUNT</div>
+          <h2>Sign in or create an account</h2>
+          <div class="mg-auth-tabs"><button class="active" data-tab="signin">SIGN IN</button><button data-tab="signup">CREATE</button></div>
+          <label class="mg-field-label">EMAIL</label>
+          <input class="mg-input" id="mgAuthEmail" type="email" autocomplete="email" />
+          <label class="mg-field-label">PASSWORD</label>
+          <input class="mg-input" id="mgAuthPassword" type="password" autocomplete="current-password" />
+          <button class="mg-btn mg-btn-primary mg-btn-large" id="mgAuthSubmit">SIGN IN</button>
+          <div class="mg-auth-message" id="mgAuthMessage"></div>
+        </div>`;
+      document.body.appendChild(authModal);
+      let tab = "signin";
+      authModal.querySelectorAll("[data-tab]").forEach(btn => btn.onclick = () => {
+        tab = btn.dataset.tab;
+        authModal.querySelectorAll("[data-tab]").forEach(x => x.classList.toggle("active", x === btn));
+        authModal.querySelector("#mgAuthSubmit").textContent = tab === "signin" ? "SIGN IN" : "CREATE ACCOUNT";
+      });
+      authModal.querySelector("#mgAuthClose").onclick = () => authModal.hidden = true;
+      authModal.querySelector("#mgAuthSubmit").onclick = async () => {
+        const email = authModal.querySelector("#mgAuthEmail").value.trim();
+        const password = authModal.querySelector("#mgAuthPassword").value;
+        const msg = authModal.querySelector("#mgAuthMessage");
+        try {
+          if (tab === "signup") {
+            await window.mapGameAuth.signUp(email, password);
+            msg.textContent = "Account created. Check your email for the verification link; delivery can take a few minutes.";
           } else {
-            lastSignupEmail = email;
-
-            setAuthMessage(
-              "Signed in, but this email still needs verification.",
-              "info"
-            );
-
-            if (verificationActions instanceof HTMLElement) {
-              verificationActions.style.display = "flex";
-            }
+            await window.mapGameAuth.signIn(email, password);
+            msg.textContent = "Signed in.";
+            setTimeout(() => { authModal.hidden = true; refreshHomeAccount(); }, 450);
           }
+        } catch (e) {
+          msg.textContent = e?.message || "Account action failed.";
         }
-      } catch (error) {
-        console.error("Map Game auth error:", error);
-
-        const rawMessage =
-          error && typeof error.message === "string"
-            ? error.message
-            : "Account request failed.";
-
-        let friendlyMessage = rawMessage;
-
-        if (
-          rawMessage.toLowerCase().includes("invalid login")
-        ) {
-          friendlyMessage =
-            "Incorrect email or password.";
-        } else if (
-          rawMessage.toLowerCase().includes("email not confirmed")
-        ) {
-          friendlyMessage =
-            "Your password is correct, but your email still needs verification.";
-          lastSignupEmail = email;
-
-          if (verificationActions instanceof HTMLElement) {
-            verificationActions.style.display = "flex";
-          }
-        }
-
-        setAuthMessage(friendlyMessage, "error");
-      } finally {
-        if (authSubmit instanceof HTMLButtonElement) {
-          authSubmit.disabled = false;
-          authSubmit.style.opacity = "1";
-        }
-      }
-    });
+      };
+    }
+    authModal.hidden = false;
   }
 
-  if (resendVerification instanceof HTMLButtonElement) {
-    resendVerification.addEventListener("click", async () => {
-      const email =
-        lastSignupEmail ||
-        (
-          authEmail instanceof HTMLInputElement
-            ? authEmail.value.trim()
-            : ""
-        );
-
-      if (!email) {
-        setAuthMessage(
-          "Enter the email address you used for the account first.",
-          "error"
-        );
-        return;
-      }
-
-      try {
-        await window.mapGameAuth.resendVerification(email);
-
-        setAuthMessage(
-          `Another verification email was sent to ${email}.`,
-          "success"
-        );
-      } catch (error) {
-        setAuthMessage(
-          error && error.message
-            ? error.message
-            : "Could not resend the verification email.",
-          "error"
-        );
-      }
-    });
+  function startGame(worldType) {
+    state.worldType = worldType;
+    if (worldType === "singleplayer") {
+      state.claimedTerritories.clear();
+      restoreLocalClaims();
+    }
+    if (home) home.remove();
+    home = null;
+    if (!hudRoot) buildHUD();
+    updateOnlineUI();
+    buildNeutralHub();
   }
 
-  if (verificationDone instanceof HTMLButtonElement) {
-    verificationDone.addEventListener("click", async () => {
-      try {
-        const user =
-          await window.mapGameAuth.refreshUser();
+  // ==========================================================
+  // ESCAPE / NAVIGATION
+  // ==========================================================
 
-        refreshHomeAccountUI(user);
-
-        if (userEmailVerified(user)) {
-          setAuthMessage(
-            "Email verified. Central World is unlocked.",
-            "success"
-          );
-          setTimeout(closeAuth, 500);
-        } else {
-          setAuthMessage(
-            "Verification is not showing yet. If you verified in another tab, sign in again.",
-            "info"
-          );
-        }
-      } catch (error) {
-        setAuthMessage(
-          "Sign in again after clicking the verification link.",
-          "info"
-        );
+  window.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+      if (mapOverlay && !mapOverlay.hidden) {
+        hideWorldMap();
+        setMode(state.activeTerritory ? "TERRITORY" : "HUB");
+      } else if (state.mode === "CAPITAL_PLACEMENT") {
+        if (capitalDialog) capitalDialog.hidden = true;
+        if (state.capitalGhost) state.capitalGhost.setEnabled(false);
+        setMode("TERRITORY");
       }
-    });
+    }
+  });
+
+  // ==========================================================
+  // MULTIPLAYER STATE
+  // ==========================================================
+
+  if (window.mapGameMultiplayer?.onStateChange) {
+    window.mapGameMultiplayer.onStateChange(snapshot => syncClaimsFromMultiplayer(snapshot));
   }
 
-  if (forgotPassword instanceof HTMLButtonElement) {
-    forgotPassword.addEventListener("click", async () => {
-      const email =
-        authEmail instanceof HTMLInputElement
-          ? authEmail.value.trim()
-          : "";
-
-      if (!email || !email.includes("@")) {
-        setAuthMessage(
-          "Enter your account email above first.",
-          "error"
-        );
-        return;
-      }
-
-      try {
-        await window.mapGameAuth.resetPassword(email);
-
-        setAuthMessage(
-          `Password reset instructions were sent to ${email}.`,
-          "success"
-        );
-      } catch (error) {
-        setAuthMessage(
-          error && error.message
-            ? error.message
-            : "Could not send the password reset email.",
-          "error"
-        );
-      }
-    });
-  }
-
-  if (signOutInsideModal instanceof HTMLButtonElement) {
-    signOutInsideModal.addEventListener("click", async () => {
-      try {
-        await window.mapGameAuth.signOut();
-        refreshHomeAccountUI(null);
-        setAuthMessage("Signed out.", "success");
-      } catch (error) {
-        setAuthMessage(
-          error && error.message
-            ? error.message
-            : "Could not sign out.",
-          "error"
-        );
-      }
-    });
-  }
-
-  if (joinCentralWorldButton instanceof HTMLButtonElement) {
-    joinCentralWorldButton.addEventListener("click", async () => {
-      if (!currentAccountUser) {
-        openAuthModal("signin");
-        return;
-      }
-
-      if (!userEmailVerified(currentAccountUser)) {
-        openAuthModal("signin");
-
-        setAuthMessage(
-          "Verify your email before entering Central World.",
-          "info"
-        );
-
-        if (verificationActions instanceof HTMLElement) {
-          verificationActions.style.display = "flex";
-        }
-
-        return;
-      }
-
-      if (
-        !window.mapGameMultiplayer ||
-        typeof window.mapGameMultiplayer.joinCentralWorld !== "function"
-      ) {
-        if (centralWorldMessage instanceof HTMLElement) {
-          centralWorldMessage.textContent =
-            "Multiplayer did not load. Check multiplayer.js and refresh.";
-        }
-        return;
-      }
-
-      const oldText = joinCentralWorldButton.textContent;
-      joinCentralWorldButton.disabled = true;
-      joinCentralWorldButton.textContent = "CONNECTING...";
-
-      if (centralWorldMessage instanceof HTMLElement) {
-        centralWorldMessage.textContent =
-          "Connecting securely to Central World...";
-      }
-
-      try {
-        const result =
-          await window.mapGameMultiplayer.joinCentralWorld();
-
-        if (centralWorldMessage instanceof HTMLElement) {
-          centralWorldMessage.textContent =
-            `Connected to Central World • ${result.onlineCount} online`;
-        }
-
-        enterGame(
-          `Central World connected • ${result.onlineCount} online`
-        );
-      } catch (error) {
-        console.error("Central World connection failed:", error);
-
-        if (centralWorldMessage instanceof HTMLElement) {
-          centralWorldMessage.textContent =
-            error && error.message
-              ? error.message
-              : "Could not connect to Central World.";
-        }
-
-        joinCentralWorldButton.disabled = false;
-        joinCentralWorldButton.textContent = oldText || "JOIN CENTRAL WORLD";
-      }
-    });
-  }
-
-  if (playSingleplayerButton instanceof HTMLButtonElement) {
-    playSingleplayerButton.addEventListener("click", () => {
-      enterGame("Singleplayer started");
-    });
-  }
-
-  if (
-    window.mapGameAuth &&
-    typeof window.mapGameAuth.onAuthChange === "function"
-  ) {
-    window.mapGameAuth.onAuthChange((event, session) => {
-      const user =
-        session && session.user
-          ? session.user
-          : null;
-
-      refreshHomeAccountUI(user);
-
-      if (event === "PASSWORD_RECOVERY") {
-        openAuthModal("signin");
-        setAuthMessage(
-          "Password recovery link accepted. Password-changing UI is the next account step.",
-          "success"
-        );
-      }
-    });
-  }
-
-  loadCurrentAccount();
-
-  // =========================================================
-  // START
-  // =========================================================
-
-  loadGame();
-  updateHUD();
-
-  const saveTimer =
-    setInterval(
-      saveGame,
-      5000
-    );
-
-  window.addEventListener(
-    "beforeunload",
-    saveGame
-  );
-
-  // =========================================================
-  // MODULAR VISUAL/UI RUNTIME
-  // =========================================================
+  // ==========================================================
+  // RUNTIME EXPORT FOR terrain.js / materials.js
+  // ==========================================================
 
   window.mapGameRuntime = {
     engine,
@@ -8975,12 +2096,13 @@ const createScene = () => {
     hemi,
     shadowGenerator,
     glowLayer,
-    ground,
+    ground: null,
     grassMaterial: grassMat,
     grassLightMaterial: grassLightMat,
     dirtMaterial: dirtMat,
     rockMaterial: rockMat,
     snowMaterial: snowMat,
+    sandMaterial: sandMat,
     roadMaterial: roadMat,
     roadEdgeMaterial: roadEdgeMat,
     concreteMaterial: concreteMat,
@@ -8989,83 +2111,72 @@ const createScene = () => {
     treeLeafAltMaterial: treeLeafAltMat,
     treeTrunkMaterial: treeTrunkMat,
     waterMaterial: waterMat,
-    shallowOceanMaterial: shallowOceanMat,
-    deepOceanMaterial: deepOceanMat,
-    glassMaterial: glassMat,
-    graphicsPreset: currentGraphicsPreset,
-    mapSize: MAP_SIZE,
-    worldBorderRadius: WORLD_BORDER_RADIUS,
-    playableLandRadius: PLAYABLE_LAND_RADIUS,
+    shallowOceanMaterial: waterMat,
+    deepOceanMaterial: waterMat,
+    glassMaterial: glassBasic,
+    graphicsPreset: state.graphics,
+    mapSize: CHUNK_WORLD_SIZE,
+    worldBorderRadius: CHUNK_WORLD_SIZE / 2,
+    playableLandRadius: CHUNK_WORLD_SIZE / 2 - 20,
     showToast,
-    setBottomStatus
+    setBottomStatus: setStatus
   };
 
-  window.dispatchEvent(
-    new CustomEvent(
-      "mapgame:runtime-ready",
-      {
-        detail: window.mapGameRuntime
-      }
-    )
-  );
+  // Keep runtime ground current whenever territory/hub changes.
+  const groundWatcher = scene.onNewMeshAddedObservable.add(mesh => {
+    if (mesh.name === "territoryGround" || mesh.name === "hubGround") {
+      window.mapGameRuntime.ground = mesh;
+    }
+  });
 
-  // =========================================================
-  // CLEANUP
-  // =========================================================
+  window.dispatchEvent(new CustomEvent("mapgame:runtime-ready", { detail: window.mapGameRuntime }));
 
-  scene
-    .onDisposeObservable
-    .add(
-      () => {
-        clearInterval(
-          productionTimer
-        );
+  // ==========================================================
+  // HELPERS
+  // ==========================================================
 
-        clearInterval(
-          saveTimer
-        );
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
 
-        topBar.remove();
-        sideDock.remove();
-        inspector.remove();
-        bottomBar.remove();
-        toastHost.remove();
-        shop.remove();
-        touchControls.remove();
-        buildActionControls.remove();
-        worldMapOverlay.remove();
-        homeScreen.remove();
-      }
-    );
+  // ==========================================================
+  // START
+  // ==========================================================
 
-  return scene;
-};
+  scene.imageProcessingConfiguration.toneMappingEnabled = true;
+  scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+  scene.imageProcessingConfiguration.exposure = state.graphics === "REGULAR" ? 1.06 : 1.02;
+  scene.imageProcessingConfiguration.contrast = state.graphics === "REGULAR" ? 1.12 : 1.06;
 
-// ============================================================
-// START ENGINE
-// ============================================================
+  if (state.graphics === "REGULAR") {
+    engine.setHardwareScalingLevel(window.devicePixelRatio >= 2 ? 1.15 : 1.0);
+  } else {
+    engine.setHardwareScalingLevel(window.devicePixelRatio >= 2 ? 1.38 : 1.16);
+  }
 
-const scene =
-  createScene();
+  createHome();
 
-engine.runRenderLoop(
-  () => {
+  const loading = document.getElementById("loadingScreen");
+  if (loading) {
+    loading.classList.add("loading-finish");
+    setTimeout(() => loading.remove(), 420);
+  }
+
+  engine.runRenderLoop(() => {
+    const now = performance.now();
+    const dt = now - lastFrame;
+    lastFrame = now;
+    updateDayNight(dt);
     scene.render();
-  }
-);
+  });
 
-const loadingScreen =
-  document.getElementById(
-    "loadingScreen"
-  );
+  window.addEventListener("resize", () => engine.resize());
+  window.addEventListener("beforeunload", saveLocalState);
 
-if (loadingScreen) {
-  loadingScreen.remove();
-}
-
-window.addEventListener(
-  "resize",
-  () => {
-    engine.resize();
-  }
-);
+  console.log("Map Game Alpha 0.2.0 restructure loaded.");
+})();

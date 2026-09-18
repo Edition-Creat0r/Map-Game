@@ -3,80 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#06101a" />
-  <meta name="description" content="Map Game — build cities, command territory, and grow a civilization." />
-
+  <meta name="theme-color" content="#07111c" />
+  <meta name="description" content="Map Game - build a civilization from one territory." />
   <title>Map Game</title>
 
-  <!-- UI / shell -->
-  <link rel="stylesheet" href="styles.css?v=1117" />
+  <!-- Keep your existing polished base styles. -->
+  <link rel="stylesheet" href="styles.css?v=1200" />
+  <!-- New 0.2.0 world-map / hub / territory UI. -->
+  <link rel="stylesheet" href="phase2.css?v=1200" />
 
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="auth.js?v=1117" defer></script>
-  <script src="multiplayer.js?v=1117" defer></script>
-
-  <!-- Babylon -->
+  <script src="auth.js?v=1200" defer></script>
+  <script src="multiplayer.js?v=1200" defer></script>
   <script src="https://cdn.babylonjs.com/babylon.js" defer></script>
 
-  <!-- Core game -->
-  <script src="game.js?v=1117" defer></script>
+  <!-- IMPORTANT: 0.2.0 replaces the old game scene. -->
+  <script src="game.js?v=1200" defer></script>
 
-  <!-- Presentation / world systems -->
-  <script src="ui.js?v=1117" defer></script>
-  <script src="materials.js?v=1117" defer></script>
-  <script src="terrain.js?v=1117" defer></script>
-  <script src="buildings.js?v=1117" defer></script>
-  <script src="world_visuals.js?v=1117" defer></script>
+  <!-- 0.2.0 loads the grass / rock / sand textures directly inside game.js. -->
 
-  <!-- Final visual pass: keep LAST -->
-  <script src="visual_overhaul.js?v=1117" defer></script>
+  <!-- DO NOT load the old visual files in this restructure:
+       terrain.js
+       materials.js
+       buildings.js
+       world_visuals.js
+       visual_overhaul.js
+       They would repopulate / alter the old scene. -->
 </head>
-
 <body>
-  <!-- Static atmosphere behind the 3D canvas and menus. -->
-  <div id="backgroundGlow" aria-hidden="true"></div>
-  <div id="shellGrid" aria-hidden="true"></div>
-  <div id="shellVignette" aria-hidden="true"></div>
-
-  <div id="loadingScreen" role="status" aria-live="polite" aria-label="Loading Map Game">
+  <div id="loadingScreen" aria-live="polite">
     <div class="loading-card">
-      <div class="loading-brand-row">
-        <div class="loading-logo" aria-hidden="true">M</div>
-        <div class="loading-brand-copy">
-          <div class="loading-kicker">NOVA COMMAND NETWORK</div>
-          <div class="loading-title">MAP GAME</div>
-        </div>
+      <div class="loading-logo">M</div>
+      <div class="loading-copy">
+        <div class="loading-title">MAP GAME</div>
+        <div class="loading-subtitle">BUILDING THE WORLD</div>
       </div>
-
-      <div class="loading-rule"></div>
-
-      <div class="loading-subtitle">
-        Preparing terrain, cities, and civilization systems…
-      </div>
-
-      <div class="loading-line" aria-hidden="true">
-        <span></span>
-      </div>
-
-      <div class="loading-meta">
-        <span>ALPHA 0.1.1</span>
-        <span class="loading-meta-dot"></span>
-        <span>VISUAL WORLD PASS</span>
-      </div>
+      <div class="loading-track"><div class="loading-bar"></div></div>
     </div>
   </div>
 
-  <canvas
-    id="gameCanvas"
-    tabindex="0"
-    aria-label="Map Game 3D civilization world">
-  </canvas>
-
-  <noscript>
-    <div class="noscript-card">
-      Map Game requires JavaScript to run.
-    </div>
-  </noscript>
+  <canvas id="gameCanvas" touch-action="none" aria-label="Map Game 3D world"></canvas>
 </body>
 </html>
