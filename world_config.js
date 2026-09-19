@@ -10,7 +10,7 @@
   const SECTOR_SIZE = 512;
 
   window.mapGameWorldConfig = Object.freeze({
-    VERSION: "0.2.2A1",
+    VERSION: "0.2.2A1.2",
     WORLD_COLS,
     WORLD_ROWS,
     TERRITORY_SIZE,

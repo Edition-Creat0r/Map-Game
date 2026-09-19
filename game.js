@@ -96,8 +96,9 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.2A1.1";
+  const VERSION = "0.2.2A1.2";
   const CHUNK_WORLD_SIZE = window.mapGameWorldConfig?.TERRITORY_SIZE || 8192;
+  const TERRITORY_RENDER_SIZE = window.mapGameWorldConfig?.RENDER_WINDOW_SIZE || 2048;
   const WORLD_COLS = window.mapGameWorldConfig?.WORLD_COLS || 316;
   const WORLD_ROWS = window.mapGameWorldConfig?.WORLD_ROWS || 316;
   const CENTRAL_X = Math.floor(WORLD_COLS / 2);
@@ -2045,10 +2046,10 @@
   }
 
   function createTerritoryGround(root, cell, biome) {
-    const sub = state.graphics === "REGULAR" ? 112 : 80;
+    const sub = state.graphics === "REGULAR" ? 88 : 64;
     const ground = BABYLON.MeshBuilder.CreateGround("territoryGround", {
-      width: CHUNK_WORLD_SIZE,
-      height: CHUNK_WORLD_SIZE,
+      width: TERRITORY_RENDER_SIZE,
+      height: TERRITORY_RENDER_SIZE,
       subdivisions: sub,
       updatable: true
     }, scene);
@@ -2060,9 +2061,9 @@
     // Deep terrain base under every territory. This gives the region
     // visual thickness and guarantees a non-sky fallback below valleys.
     const territoryBase = BABYLON.MeshBuilder.CreateBox("territoryTerrainBase", {
-      width: CHUNK_WORLD_SIZE + 22,
+      width: TERRITORY_RENDER_SIZE + 22,
       height: 22,
-      depth: CHUNK_WORLD_SIZE + 22
+      depth: TERRITORY_RENDER_SIZE + 22
     }, scene);
     territoryBase.position.y = -15;
     territoryBase.material = terrainBaseMat;
@@ -2095,22 +2096,29 @@
         state.graphics
       ) || [];
 
-    points.forEach((point, i) => {
-      const tree = createTree(
-        root,
-        point.x,
-        point.z,
-        point.scale,
-        point.conifer ? 1 : 0
-      );
-      tree.position.y = territoryHeightFn(
-        point.x,
-        point.z,
-        biome,
-        cell.x,
-        cell.y
-      );
-    });
+    const renderHalf = TERRITORY_RENDER_SIZE / 2 + 90;
+
+    points
+      .filter(point =>
+        Math.abs(point.x) <= renderHalf &&
+        Math.abs(point.z) <= renderHalf
+      )
+      .forEach((point, i) => {
+        const tree = createTree(
+          root,
+          point.x,
+          point.z,
+          point.scale,
+          point.conifer ? 1 : 0
+        );
+        tree.position.y = territoryHeightFn(
+          point.x,
+          point.z,
+          biome,
+          cell.x,
+          cell.y
+        );
+      });
   }
 
   function placeTerritoryRocks(root, cell, biome) {
@@ -2122,7 +2130,14 @@
         state.graphics
       ) || [];
 
-    points.forEach((point, i) => {
+    const renderHalf = TERRITORY_RENDER_SIZE / 2 + 90;
+
+    points
+      .filter(point =>
+        Math.abs(point.x) <= renderHalf &&
+        Math.abs(point.z) <= renderHalf
+      )
+      .forEach((point, i) => {
       const rock = BABYLON.MeshBuilder.CreatePolyhedron(
         `territoryRock_${i}`,
         {
@@ -2152,8 +2167,8 @@
   function placeTerritoryMountains(root, cell, biome) {
     // Main mountain mass now comes from the terrain heightfield.
     // These ranges are distant silhouette/edge formations, not the terrain itself.
-    const edge = CHUNK_WORLD_SIZE * 0.43;
-    const mountainScale = Math.max(1, CHUNK_WORLD_SIZE / 1800);
+    const edge = TERRITORY_RENDER_SIZE * 0.43;
+    const mountainScale = Math.max(1, TERRITORY_RENDER_SIZE / 1800);
     const amp = Math.sqrt(mountainScale);
 
     if (biome === "mountain") {
@@ -2170,11 +2185,11 @@
 
     if (biome === "coast") {
       const water = BABYLON.MeshBuilder.CreateGround("territoryWater", {
-        width: CHUNK_WORLD_SIZE,
-        height: CHUNK_WORLD_SIZE * 0.43,
+        width: TERRITORY_RENDER_SIZE,
+        height: TERRITORY_RENDER_SIZE * 0.43,
         subdivisions: 1
       }, scene);
-      water.position.set(0, -7.5, CHUNK_WORLD_SIZE * 0.39);
+      water.position.set(0, -7.5, TERRITORY_RENDER_SIZE * 0.39);
       water.material = waterMat;
       water.parent = root;
       water.isPickable = false;
@@ -2182,9 +2197,10 @@
     } else {
       // Wetland river ribbon — broad enough to influence city placement
       // without turning the entire territory into water.
-      const segments = 28;
+      const segments = 14;
       for (let i = 0; i < segments; i++) {
-        const x = -CHUNK_WORLD_SIZE * 0.46 + i * (CHUNK_WORLD_SIZE * 0.92 / (segments - 1));
+        const x = -TERRITORY_RENDER_SIZE * 0.46 +
+          i * (TERRITORY_RENDER_SIZE * 0.92 / (segments - 1));
         const info = window.mapGameTerritory?.waterBandAt?.(
           x,
           0,
@@ -2394,82 +2410,70 @@
     requestAnimationFrame(() => {
       if (state.terrainRoot !== root) return;
 
-      setLoadingState("ADDING LANDSCAPE", 60);
+      setLoadingState("RESTORING YOUR WORLD", 68);
 
       setTimeout(() => {
         if (state.terrainRoot !== root) return;
 
-        placeTerritoryMountains(root, cell, biome);
-        addCoast(root, cell, biome);
+        // Essential state first.
+        buildTerritoryPlanner(root, cell, biome);
+        restorePlacedBuildingsForTerritory();
 
+        const existingCapital =
+          getCapitalForActiveTerritory();
+
+        if (existingCapital) {
+          state.capital = existingCapital;
+          renderCapital(existingCapital, true);
+
+          setStatus(
+            `<b>${escapeHtml(existingCapital.name || "Capital")}</b> • ` +
+            `${BIOMES[biome].label} territory • compact render window active`
+          );
+        } else {
+          const anyLocalCapital =
+            state.worldType === "singleplayer"
+              ? loadLocalState()?.capital
+              : null;
+
+          if (anyLocalCapital) {
+            state.capital = anyLocalCapital;
+
+            setStatus(
+              `${BIOMES[biome].label} territory • no city here yet • ` +
+              `connect this region to your civilization before founding a secondary city`
+            );
+          } else {
+            setStatus(
+              `${BIOMES[biome].label} territory • choose a stable capital site`
+            );
+            setTimeout(() => beginCapitalPlacement(), 500);
+          }
+        }
+
+        // The world is playable now. Do not hold the player behind
+        // a loading screen just to add decoration.
+        setLoadingState("WORLD READY", 100);
+        hideWorldLoading();
+
+        // Decorative visuals arrive quietly after first paint.
         requestAnimationFrame(() => {
           if (state.terrainRoot !== root) return;
 
-          setLoadingState("ADDING VEGETATION", 74);
-
           setTimeout(() => {
             if (state.terrainRoot !== root) return;
-
-            placeTerritoryVegetation(root, cell, biome);
-            placeTerritoryRocks(root, cell, biome);
+            placeTerritoryMountains(root, cell, biome);
+            addCoast(root, cell, biome);
 
             requestAnimationFrame(() => {
               if (state.terrainRoot !== root) return;
-
-              setLoadingState("RESTORING YOUR WORLD", 88);
-
               setTimeout(() => {
                 if (state.terrainRoot !== root) return;
-
-                buildTerritoryPlanner(root, cell, biome);
-                restorePlacedBuildingsForTerritory();
-
-                const existingCapital =
-                  getCapitalForActiveTerritory();
-
-                if (existingCapital) {
-                  state.capital = existingCapital;
-                  renderCapital(existingCapital, true);
-
-                  setStatus(
-                    `<b>${escapeHtml(existingCapital.name || "Capital")}</b> • ` +
-                    `${BIOMES[biome].label} territory • huge-world systems active`
-                  );
-                } else {
-                  const anyLocalCapital =
-                    state.worldType === "singleplayer"
-                      ? loadLocalState()?.capital
-                      : null;
-
-                  if (anyLocalCapital) {
-                    state.capital = anyLocalCapital;
-
-                    setStatus(
-                      `${BIOMES[biome].label} territory • no city here yet • ` +
-                      `connect this region to your civilization before founding a secondary city`
-                    );
-
-                    showToast(
-                      "Secondary cities will require a road/highway connection to your capital.",
-                      "info"
-                    );
-                  } else {
-                    setStatus(
-                      `${BIOMES[biome].label} territory • choose a stable capital site; the center is usually safest`
-                    );
-
-                    setTimeout(
-                      () => beginCapitalPlacement(),
-                      500
-                    );
-                  }
-                }
-
-                setLoadingState("WORLD READY", 100);
-                hideWorldLoading();
-              }, 0);
+                placeTerritoryVegetation(root, cell, biome);
+                placeTerritoryRocks(root, cell, biome);
+              }, 30);
             });
-          }, 0);
+          }, 30);
         });
       }, 0);
     });
@@ -4266,6 +4270,7 @@
     glassMaterial: glassBasic,
     graphicsPreset: state.graphics,
     mapSize: CHUNK_WORLD_SIZE,
+    renderWindowSize: TERRITORY_RENDER_SIZE,
     worldBorderRadius: CHUNK_WORLD_SIZE / 2,
     playableLandRadius: CHUNK_WORLD_SIZE / 2 - 20,
     showToast,
