@@ -8,29 +8,29 @@
   <title>Map Game</title>
 
   <!-- Keep your existing polished base styles. -->
-  <link rel="stylesheet" href="styles.css?v=2201" />
+  <link rel="stylesheet" href="styles.css?v=2202" />
   <!-- 0.2.2A1 The Big World Update: huge territories, world navigation, local maps and movement. -->
-  <link rel="stylesheet" href="phase2.css?v=2201" />
+  <link rel="stylesheet" href="phase2.css?v=2202" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="auth.js?v=2201" defer></script>
-  <script src="multiplayer.js?v=2201" defer></script>
+  <script src="auth.js?v=2202" defer></script>
+  <script src="multiplayer.js?v=2202" defer></script>
   <script src="https://cdn.babylonjs.com/babylon.js" defer></script>
   <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js" defer></script>
-  <script src="world_config.js?v=2201" defer></script>
-  <script src="materials.js?v=2201" defer></script>
-  <script src="territory.js?v=2201" defer></script>
-  <script src="buildings.js?v=2201" defer></script>
-  <script src="economy.js?v=2201" defer></script>
-  <script src="traffic.js?v=2201" defer></script>
-  <script src="shop.js?v=2201" defer></script>
-  <script src="roads.js?v=2201" defer></script>
-  <script src="movement.js?v=2201" defer></script>
-  <script src="territory_map.js?v=2201" defer></script>
-  <script src="navigation.js?v=2201" defer></script>
+  <script src="world_config.js?v=2202" defer></script>
+  <script src="materials.js?v=2202" defer></script>
+  <script src="territory.js?v=2202" defer></script>
+  <script src="buildings.js?v=2202" defer></script>
+  <script src="economy.js?v=2202" defer></script>
+  <script src="traffic.js?v=2202" defer></script>
+  <script src="shop.js?v=2202" defer></script>
+  <script src="roads.js?v=2202" defer></script>
+  <script src="movement.js?v=2202" defer></script>
+  <script src="territory_map.js?v=2202" defer></script>
+  <script src="navigation.js?v=2202" defer></script>
 
   <!-- IMPORTANT: 0.2.2A1 begins huge-world architecture: 8K territories, Singleplayer world ownership, navigation and road graph foundation. -->
-  <script src="game.js?v=2201" defer></script>
+  <script src="game.js?v=2202" defer></script>
 
   <!-- 0.2.2A1 active modules:
        world_config, materials, territory, buildings, economy, traffic,
@@ -38,16 +38,43 @@
 </head>
 <body>
   <div id="loadingScreen" aria-live="polite">
-    <div class="loading-card">
-      <div class="loading-logo">M</div>
-      <div class="loading-copy">
-        <div class="loading-title">MAP GAME</div>
-        <div class="loading-subtitle">BUILDING THE WORLD</div>
-      </div>
-      <div class="loading-track"><div class="loading-bar"></div></div>
+    <div class="mg-loader-field" aria-hidden="true">
+      <span></span><span></span><span></span>
     </div>
+
+    <div class="mg-loader-core">
+      <div class="mg-loader-orbit mg-loader-orbit-a"></div>
+      <div class="mg-loader-orbit mg-loader-orbit-b"></div>
+      <div class="mg-loader-orbit mg-loader-orbit-c"></div>
+      <div class="mg-loader-mark">M</div>
+    </div>
+
+    <div class="mg-loader-copy">
+      <div class="mg-loader-title">MAP GAME</div>
+      <div class="mg-loader-status" data-loading-status>INITIALIZING WORLD</div>
+    </div>
+
+    <div class="mg-loader-progress">
+      <div class="mg-loader-progress-fill"></div>
+    </div>
+
+    <div class="mg-loader-tip">WORLD • TERRITORY • CIVILIZATION</div>
   </div>
 
   <canvas id="gameCanvas" touch-action="none" aria-label="Map Game 3D world"></canvas>
+
+  <script>
+    window.addEventListener("load", () => {
+      const screen = document.getElementById("loadingScreen");
+      if (!screen) return;
+      setTimeout(() => {
+        if (!window.mapGameRuntime && !screen.hidden) {
+          const status = screen.querySelector("[data-loading-status]");
+          if (status) status.textContent = "STILL LOADING • CHECKING GAME MODULES";
+        }
+      }, 6500);
+    });
+  </script>
+
 </body>
 </html>

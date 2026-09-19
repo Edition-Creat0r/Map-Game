@@ -163,6 +163,8 @@
   }
 
   function citySites(cell, biome, chunkSize = 8192) {
+    const cacheKey = `${cell.x}:${cell.y}:${biome}:${chunkSize}`;
+    if (citySiteCache.has(cacheKey)) return citySiteCache.get(cacheKey);
     const half = chunkSize / 2;
     const margin = Math.max(220, chunkSize * 0.17);
 
@@ -174,7 +176,7 @@
       [ 0.00,  0.02]
     ];
 
-    return anchors.map((pair, i) => {
+    const result = anchors.map((pair, i) => {
       const jitterX = (hash(cell.x, cell.y, 100 + i * 7) - 0.5) * chunkSize * 0.08;
       const jitterZ = (hash(cell.x, cell.y, 103 + i * 7) - 0.5) * chunkSize * 0.08;
 
@@ -198,6 +200,8 @@
           hash(cell.x, cell.y, 200 + i) > 0.34
       };
     });
+    citySiteCache.set(cacheKey, result);
+    return result;
   }
 
   function terrainClassAt(x, z, biome, cellX, cellY, chunkSize = 8192) {

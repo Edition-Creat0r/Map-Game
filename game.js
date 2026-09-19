@@ -96,7 +96,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.2A1";
+  const VERSION = "0.2.2A1.1";
   const CHUNK_WORLD_SIZE = window.mapGameWorldConfig?.TERRITORY_SIZE || 8192;
   const WORLD_COLS = window.mapGameWorldConfig?.WORLD_COLS || 316;
   const WORLD_ROWS = window.mapGameWorldConfig?.WORLD_ROWS || 316;
@@ -137,6 +137,42 @@
 
   function lerp(a, b, t) {
     return a + (b - a) * t;
+  }
+
+  function setLoadingState(label, progress = null) {
+    const screen = document.getElementById("loadingScreen");
+    if (!screen) return;
+
+    const status = screen.querySelector("[data-loading-status]");
+    if (status && label) status.textContent = label;
+
+    if (progress !== null) {
+      screen.style.setProperty(
+        "--mg-load-progress",
+        `${clamp(Number(progress) || 0, 0, 100)}%`
+      );
+    }
+  }
+
+  function showWorldLoading(label = "PREPARING TERRITORY") {
+    const screen = document.getElementById("loadingScreen");
+    if (!screen) return;
+    screen.hidden = false;
+    screen.classList.remove("loading-finish");
+    screen.dataset.worldLoading = "true";
+    setLoadingState(label, 12);
+  }
+
+  function hideWorldLoading() {
+    const screen = document.getElementById("loadingScreen");
+    if (!screen) return;
+    screen.classList.add("loading-finish");
+    screen.dataset.worldLoading = "false";
+    setTimeout(() => {
+      if (screen.dataset.worldLoading === "false") {
+        screen.hidden = true;
+      }
+    }, 360);
   }
 
   function hash2(x, y, salt = 0) {
@@ -2009,7 +2045,7 @@
   }
 
   function createTerritoryGround(root, cell, biome) {
-    const sub = state.graphics === "REGULAR" ? 196 : 128;
+    const sub = state.graphics === "REGULAR" ? 112 : 80;
     const ground = BABYLON.MeshBuilder.CreateGround("territoryGround", {
       width: CHUNK_WORLD_SIZE,
       height: CHUNK_WORLD_SIZE,
@@ -2282,72 +2318,161 @@
 
   function enterTerritory(cell) {
     clearWorldRoots();
+
     const biome = getBiome(cell.x, cell.y);
-    const root = new BABYLON.TransformNode(`Territory_${cell.x}_${cell.y}`, scene);
+    const root =
+      new BABYLON.TransformNode(
+        `Territory_${cell.x}_${cell.y}`,
+        scene
+      );
+
     state.terrainRoot = root;
-    state.activeTerritory = { ...cell, id: cell.id || territoryId(cell.x, cell.y), biome };
+    state.activeTerritory = {
+      ...cell,
+      id: cell.id || territoryId(cell.x, cell.y),
+      biome
+    };
 
-    territoryGround = createTerritoryGround(root, cell, biome);
-    placeTerritoryVegetation(root, cell, biome);
-    placeTerritoryRocks(root, cell, biome);
-    placeTerritoryMountains(root, cell, biome);
-    addCoast(root, cell, biome);
-    buildTerritoryPlanner(root, cell, biome);
-    restorePlacedBuildingsForTerritory();
+    showWorldLoading("GENERATING TERRAIN");
+    setLoadingState("GENERATING TERRAIN", 22);
 
-    // subtle chunk boundary markers, visible but not walls
-    const boundaryMat = new BABYLON.StandardMaterial("boundaryMat", scene);
-    boundaryMat.diffuseColor = new BABYLON.Color3(0.2, 0.72, 0.96);
-    boundaryMat.emissiveColor = new BABYLON.Color3(0.04, 0.18, 0.28);
-    boundaryMat.alpha = 0.28;
-    const half = CHUNK_WORLD_SIZE / 2 - 3;
-    [[0, -half, CHUNK_WORLD_SIZE, 2], [0, half, CHUNK_WORLD_SIZE, 2], [-half, 0, 2, CHUNK_WORLD_SIZE], [half, 0, 2, CHUNK_WORLD_SIZE]].forEach(([x,z,w,d]) => {
-      const edge = BABYLON.MeshBuilder.CreateBox("territoryBoundary", { width:w, depth:d, height:0.5 }, scene);
+    territoryGround =
+      createTerritoryGround(
+        root,
+        cell,
+        biome
+      );
+
+    setLoadingState("OPENING TERRITORY", 46);
+
+    const boundaryMat =
+      new BABYLON.StandardMaterial(
+        "boundaryMat",
+        scene
+      );
+
+    boundaryMat.diffuseColor =
+      new BABYLON.Color3(0.2, 0.72, 0.96);
+
+    boundaryMat.emissiveColor =
+      new BABYLON.Color3(0.04, 0.18, 0.28);
+
+    boundaryMat.alpha = 0.20;
+
+    const half =
+      CHUNK_WORLD_SIZE / 2 - 3;
+
+    [
+      [0, -half, CHUNK_WORLD_SIZE, 2],
+      [0, half, CHUNK_WORLD_SIZE, 2],
+      [-half, 0, 2, CHUNK_WORLD_SIZE],
+      [half, 0, 2, CHUNK_WORLD_SIZE]
+    ].forEach(([x, z, w, d]) => {
+      const edge =
+        BABYLON.MeshBuilder.CreateBox(
+          "territoryBoundary",
+          {
+            width: w,
+            depth: d,
+            height: 0.5
+          },
+          scene
+        );
+
       edge.position.set(x, 1.0, z);
       edge.material = boundaryMat;
       edge.parent = root;
       edge.isPickable = false;
     });
 
-    // Enter the territory closer to the surface so a 980x980 region
-    // feels large instead of looking like a miniature board.
     camera.target.set(0, 18, -120);
     camera.radius = 620;
     camera.alpha = -Math.PI / 2.25;
     camera.beta = 1.04;
     setMode("TERRITORY");
 
-    const existingCapital = getCapitalForActiveTerritory();
-    if (existingCapital) {
-      state.capital = existingCapital;
-      renderCapital(existingCapital, true);
-      setStatus(
-        `<b>${escapeHtml(existingCapital.name || "Capital")}</b> • ` +
-        `${BIOMES[biome].label} territory • 0.2.2A huge-world systems active`
-      );
-    } else {
-      const anyLocalCapital =
-        state.worldType === "singleplayer"
-          ? loadLocalState()?.capital
-          : null;
+    requestAnimationFrame(() => {
+      if (state.terrainRoot !== root) return;
 
-      if (anyLocalCapital) {
-        state.capital = anyLocalCapital;
-        setStatus(
-          `${BIOMES[biome].label} territory • no city here yet • ` +
-          `connect this region to your civilization before founding a secondary city`
-        );
-        showToast(
-          "This is part of your Singleplayer world. Secondary cities will require a road/highway connection to your capital.",
-          "info"
-        );
-      } else {
-        setStatus(
-          `${BIOMES[biome].label} territory • choose a stable capital site; the center is usually safest`
-        );
-        setTimeout(() => beginCapitalPlacement(), 550);
-      }
-    }
+      setLoadingState("ADDING LANDSCAPE", 60);
+
+      setTimeout(() => {
+        if (state.terrainRoot !== root) return;
+
+        placeTerritoryMountains(root, cell, biome);
+        addCoast(root, cell, biome);
+
+        requestAnimationFrame(() => {
+          if (state.terrainRoot !== root) return;
+
+          setLoadingState("ADDING VEGETATION", 74);
+
+          setTimeout(() => {
+            if (state.terrainRoot !== root) return;
+
+            placeTerritoryVegetation(root, cell, biome);
+            placeTerritoryRocks(root, cell, biome);
+
+            requestAnimationFrame(() => {
+              if (state.terrainRoot !== root) return;
+
+              setLoadingState("RESTORING YOUR WORLD", 88);
+
+              setTimeout(() => {
+                if (state.terrainRoot !== root) return;
+
+                buildTerritoryPlanner(root, cell, biome);
+                restorePlacedBuildingsForTerritory();
+
+                const existingCapital =
+                  getCapitalForActiveTerritory();
+
+                if (existingCapital) {
+                  state.capital = existingCapital;
+                  renderCapital(existingCapital, true);
+
+                  setStatus(
+                    `<b>${escapeHtml(existingCapital.name || "Capital")}</b> • ` +
+                    `${BIOMES[biome].label} territory • huge-world systems active`
+                  );
+                } else {
+                  const anyLocalCapital =
+                    state.worldType === "singleplayer"
+                      ? loadLocalState()?.capital
+                      : null;
+
+                  if (anyLocalCapital) {
+                    state.capital = anyLocalCapital;
+
+                    setStatus(
+                      `${BIOMES[biome].label} territory • no city here yet • ` +
+                      `connect this region to your civilization before founding a secondary city`
+                    );
+
+                    showToast(
+                      "Secondary cities will require a road/highway connection to your capital.",
+                      "info"
+                    );
+                  } else {
+                    setStatus(
+                      `${BIOMES[biome].label} territory • choose a stable capital site; the center is usually safest`
+                    );
+
+                    setTimeout(
+                      () => beginCapitalPlacement(),
+                      500
+                    );
+                  }
+                }
+
+                setLoadingState("WORLD READY", 100);
+                hideWorldLoading();
+              }, 0);
+            });
+          }, 0);
+        });
+      }, 0);
+    });
   }
 
   function getCapitalForActiveTerritory() {
@@ -4205,8 +4330,14 @@
 
   const loading = document.getElementById("loadingScreen");
   if (loading) {
+    setLoadingState("READY", 100);
+    loading.dataset.worldLoading = "false";
     loading.classList.add("loading-finish");
-    setTimeout(() => loading.remove(), 420);
+    setTimeout(() => {
+      if (loading.dataset.worldLoading === "false") {
+        loading.hidden = true;
+      }
+    }, 420);
   }
 
   engine.runRenderLoop(() => {
