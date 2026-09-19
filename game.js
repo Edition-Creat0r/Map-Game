@@ -96,7 +96,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.2B1";
+  const VERSION = "0.2.2B1.1";
   const CHUNK_WORLD_SIZE = window.mapGameWorldConfig?.TERRITORY_SIZE || 32768;
   const TERRITORY_RENDER_SIZE = window.mapGameWorldConfig?.SECTOR_SIZE || 512;
   const WORLD_COLS = window.mapGameWorldConfig?.WORLD_COLS || 316;
@@ -1915,9 +1915,10 @@
     } else {
       const myStart = getMyStartingTerritory();
       if (myStart) {
-        claim.disabled = true;
-        claim.textContent = "EXPANSION LOCKED";
-        claim.title = "You already have your free starting territory. Expansion comes later.";
+        claim.disabled = false;
+        claim.textContent = "GO TO MY TERRITORY";
+        claim.title =
+          "Expansion is locked, but your existing territory is still available.";
       } else {
         claim.disabled = false;
         claim.textContent = "CLAIM THIS TERRITORY";
@@ -1942,17 +1943,58 @@
 
   function getMyStartingTerritory() {
     if (state.worldType === "central") {
-      const direct = window.mapGameMultiplayer?.getMyTerritories?.() || [];
-      if (direct.length) return direct[0];
+      const direct =
+        window.mapGameMultiplayer
+          ?.getMyTerritories?.() || [];
 
-      const uid = state.multiplayerState?.user?.id;
-      if (!uid) return null;
-      return Array.from(state.claimedTerritories.values())
-        .find(row => row && row.owner_id === uid) || null;
+      if (direct.length) {
+        return direct[0];
+      }
+
+      const uid =
+        state.multiplayerState?.user?.id;
+
+      if (uid) {
+        const cached =
+          Array.from(
+            state.claimedTerritories.values()
+          ).find(
+            row =>
+              row &&
+              row.owner_id === uid
+          );
+
+        if (cached) {
+          return cached;
+        }
+      }
+
+      const capital =
+        window.mapGameMultiplayer
+          ?.getMyCapital?.();
+
+      if (capital?.territory_id) {
+        return {
+          territory_id:
+            capital.territory_id,
+          owner_id:
+            uid || capital.owner_id,
+          owner_username:
+            capital.owner_username,
+          recoveredFromCapital: true
+        };
+      }
+
+      return null;
     }
 
-    return Array.from(state.claimedTerritories.values())
-      .find(row => row && row.localOwner) || null;
+    return Array.from(
+      state.claimedTerritories.values()
+    ).find(
+      row =>
+        row &&
+        row.localOwner
+    ) || null;
   }
 
   async function claimSelectedTerritory() {
@@ -1968,11 +2010,34 @@
     // economy/government system exists.
     const existing = getMyStartingTerritory();
     if (existing) {
-      const existingId = existing.territory_id || existing.id || "your first territory";
+      const existingId =
+        existing.territory_id ||
+        existing.id;
+
+      const parsed =
+        parseTerritoryId(existingId);
+
+      if (parsed) {
+        hideWorldMap();
+
+        showToast(
+          `Opening your territory ${existingId}. Expansion is still locked.`,
+          "info"
+        );
+
+        enterTerritory({
+          ...parsed,
+          id: existingId
+        });
+
+        return;
+      }
+
       showToast(
-        `You already claimed ${existingId}. Additional territory expansion is coming later.`,
-        "info"
+        "Your territory exists on the server, but its saved ID could not be read.",
+        "error"
       );
+
       return;
     }
 
@@ -2383,14 +2448,41 @@
 
     setLoadingState("LOADING CENTER SECTOR", 52);
 
-    await streamer.start(
-      state.activeTerritory,
-      biome,
-      root
-    );
+    try {
+      await streamer.start(
+        state.activeTerritory,
+        biome,
+        root
+      );
+    } catch (error) {
+      console.error(
+        "Territory stream failed:",
+        error
+      );
+
+      hideWorldLoading();
+
+      showToast(
+        `Could not render territory: ${error?.message || error}`,
+        "error"
+      );
+
+      return;
+    }
 
     territoryGround =
       streamer.allGroundMeshes?.()[0] || null;
+
+    if (!territoryGround) {
+      hideWorldLoading();
+
+      showToast(
+        "The territory opened, but no terrain sector was generated.",
+        "error"
+      );
+
+      return;
+    }
 
     setLoadingState("RESTORING WORLD STATE", 76);
 
@@ -4077,10 +4169,27 @@
       const btn = document.getElementById("mgJoinCentral");
       if (btn) { btn.disabled = true; btn.textContent = "CONNECTING…"; }
       await window.mapGameMultiplayer.joinCentralWorld();
+
+      await window.mapGameMultiplayer
+        .refreshMyOwnership?.();
+
       state.worldType = "central";
-      const snapshot = window.mapGameMultiplayer.getState();
+
+      const snapshot =
+        window.mapGameMultiplayer.getState();
+
       syncClaimsFromMultiplayer(snapshot);
       startGame("central");
+
+      const recovered =
+        getMyStartingTerritory();
+
+      if (recovered?.territory_id) {
+        showToast(
+          `Territory ownership restored: ${recovered.territory_id}`,
+          "success"
+        );
+      }
     } catch (e) {
       showToast(e?.message || "Could not join Central World.", "error");
       const btn = document.getElementById("mgJoinCentral");
@@ -4377,5 +4486,5 @@
   window.addEventListener("resize", () => engine.resize());
   window.addEventListener("beforeunload", saveLocalState);
 
-  console.log("Map Game Alpha 0.2.2B1 sector-streaming build loaded.");
+  console.log("Map Game Alpha 0.2.2B1.1 ownership + territory-entry fix loaded.");
 })();

@@ -1,6 +1,6 @@
 // ============================================================
 // MAP GAME — multiplayer.js
-// Alpha 0.2.1G2 multiplayer + safer Central session guard
+// Alpha 0.2.2B1.1 multiplayer + durable Central ownership recovery
 //
 // Current responsibilities:
 // - Join / leave Central World
@@ -337,6 +337,143 @@
     });
   }
 
+  async function refreshMyOwnership() {
+    if (!currentUser) return [];
+
+    const db = requireClient();
+
+    const {
+      data: ownedRows,
+      error: ownedError
+    } =
+      await db
+        .from("territory_claims")
+        .select("*")
+        .eq("world_id", WORLD_ID)
+        .eq("owner_id", currentUser.id);
+
+    if (ownedError) {
+      console.warn(
+        "Map Game direct ownership recovery failed:",
+        ownedError.message
+      );
+    } else {
+      (ownedRows || []).forEach(row => {
+        if (row?.territory_id) {
+          territoryClaims.set(
+            row.territory_id,
+            row
+          );
+        }
+      });
+    }
+
+    let mine =
+      Array.from(territoryClaims.values())
+        .filter(
+          row =>
+            row &&
+            row.owner_id === currentUser.id
+        );
+
+    // Legacy recovery from an existing capital record.
+    if (!mine.length) {
+      const {
+        data: capitalRow,
+        error: capitalError
+      } =
+        await db
+          .from("capitals")
+          .select("*")
+          .eq("world_id", WORLD_ID)
+          .eq("owner_id", currentUser.id)
+          .maybeSingle();
+
+      if (!capitalError && capitalRow?.territory_id) {
+        capitals.set(
+          currentUser.id,
+          capitalRow
+        );
+
+        const {
+          data: territoryRow,
+          error: territoryError
+        } =
+          await db
+            .from("territory_claims")
+            .select("*")
+            .eq("world_id", WORLD_ID)
+            .eq(
+              "territory_id",
+              capitalRow.territory_id
+            )
+            .maybeSingle();
+
+        if (
+          !territoryError &&
+          territoryRow?.owner_id === currentUser.id
+        ) {
+          territoryClaims.set(
+            territoryRow.territory_id,
+            territoryRow
+          );
+        } else if (
+          !territoryError &&
+          !territoryRow
+        ) {
+          const recoveryRow = {
+            world_id: WORLD_ID,
+            territory_id:
+              capitalRow.territory_id,
+            owner_id:
+              currentUser.id,
+            owner_username:
+              usernameFromUser(currentUser)
+          };
+
+          const {
+            data: repaired,
+            error: repairError
+          } =
+            await db
+              .from("territory_claims")
+              .insert(recoveryRow)
+              .select()
+              .single();
+
+          if (!repairError && repaired) {
+            territoryClaims.set(
+              repaired.territory_id,
+              repaired
+            );
+
+            console.log(
+              "Map Game restored legacy territory ownership:",
+              repaired.territory_id
+            );
+          } else if (repairError) {
+            console.warn(
+              "Map Game could not restore legacy territory claim:",
+              repairError.message
+            );
+          }
+        }
+      }
+    }
+
+    mine =
+      Array.from(territoryClaims.values())
+        .filter(
+          row =>
+            row &&
+            row.owner_id === currentUser.id
+        );
+
+    emitState();
+    return mine;
+  }
+
+
   async function loadCapitals() {
     const db = requireClient();
 
@@ -642,6 +779,8 @@
         loadTerritories(),
         loadCapitals()
       ]);
+
+      await refreshMyOwnership();
 
       await createRealtimeChannel();
 
@@ -1024,12 +1163,13 @@
     getTerritory,
     getMyTerritories,
     getMyCapital,
+    refreshMyOwnership,
     getState:
       stateSnapshot,
     onStateChange
   };
 
   console.log(
-    "Map Game multiplayer 0.2.1G2 safer session guard ready."
+    "Map Game multiplayer 0.2.2B1.1 durable ownership recovery ready."
   );
 })();
