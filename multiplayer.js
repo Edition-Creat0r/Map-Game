@@ -1,6 +1,6 @@
 // ============================================================
 // MAP GAME — multiplayer.js
-// Alpha 0.2.1D multiplayer + session guard
+// Alpha 0.2.1G2 multiplayer + safer Central session guard
 //
 // Current responsibilities:
 // - Join / leave Central World
@@ -9,9 +9,11 @@
 // - Shared territory claims
 // - Shared capital records
 // - Realtime territory/capital change events
+// - One active Central session per account
 //
 // IMPORTANT:
-// This is the first strategic multiplayer layer.
+// The old browser-device "alternate account" heuristic was removed because
+// it can falsely flag normal relogins and stale browser sessions.
 // Fast combat and authoritative simulation come later.
 // ============================================================
 
@@ -29,7 +31,6 @@
   let heartbeatTimer = null;
   let sessionHeartbeatTimer = null;
   let sessionId = null;
-  let deviceId = null;
   let sessionConflictHandling = false;
 
   const onlinePlayers = new Map();
@@ -74,24 +75,6 @@
     return "Player";
   }
 
-  function getDeviceId() {
-    if (deviceId) return deviceId;
-
-    const key = "mapgame_device_id";
-    let existing = localStorage.getItem(key);
-
-    if (!existing) {
-      existing =
-        (crypto && typeof crypto.randomUUID === "function")
-          ? crypto.randomUUID()
-          : "device_" + Date.now() + "_" + Math.random().toString(36).slice(2);
-      localStorage.setItem(key, existing);
-    }
-
-    deviceId = existing;
-    return deviceId;
-  }
-
   function createSessionId() {
     return (
       (crypto && typeof crypto.randomUUID === "function")
@@ -103,14 +86,12 @@
   async function startProtectedSession(user) {
     const db = requireClient();
     sessionId = createSessionId();
-    const device = getDeviceId();
 
     const { data, error } = await db.rpc(
       "map_game_start_session",
       {
         p_world_id: WORLD_ID,
         p_session_id: sessionId,
-        p_device_id: device,
         p_username: usernameFromUser(user)
       }
     );
@@ -124,7 +105,7 @@
 
     if (data !== true) {
       throw new Error(
-        "Another active Map Game session was detected. For fairness, conflicting sessions were removed. Sign in again after closing the other session."
+        "Central World could not start this session. Please try joining again."
       );
     }
   }
@@ -188,7 +169,7 @@
           {
             detail: {
               message:
-                "Multiple active Central World sessions were detected. Both sessions have been kicked."
+                "This account joined Central World in another session, so this older session was disconnected."
             }
           }
         )
@@ -647,9 +628,8 @@
         data.user;
 
       // Server-backed duplicate-session guard.
-      // Same account on another device OR a second account in the same
-      // browser profile causes all conflicting Central World sessions
-      // to be marked invalid.
+      // Exactly one active Central World session is kept per account.
+      // A new join replaces any stale/older session for the same account.
       await startProtectedSession(
         currentUser
       );
@@ -1050,6 +1030,6 @@
   };
 
   console.log(
-    "Map Game multiplayer foundation ready."
+    "Map Game multiplayer 0.2.1G2 safer session guard ready."
   );
 })();
