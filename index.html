@@ -8,29 +8,29 @@
   <title>Map Game</title>
 
   <!-- Keep your existing polished base styles. -->
-  <link rel="stylesheet" href="styles.css?v=2203" />
+  <link rel="stylesheet" href="styles.css?v=2204" />
   <!-- 0.2.2A1 The Big World Update: huge territories, world navigation, local maps and movement. -->
-  <link rel="stylesheet" href="phase2.css?v=2203" />
+  <link rel="stylesheet" href="phase2.css?v=2204" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="auth.js?v=2203" defer></script>
-  <script src="multiplayer.js?v=2203" defer></script>
+  <script src="auth.js?v=2204" defer></script>
+  <script src="multiplayer.js?v=2204" defer></script>
   <script src="https://cdn.babylonjs.com/babylon.js" defer></script>
   <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js" defer></script>
-  <script src="world_config.js?v=2203" defer></script>
-  <script src="materials.js?v=2203" defer></script>
-  <script src="territory.js?v=2203" defer></script>
-  <script src="buildings.js?v=2203" defer></script>
-  <script src="economy.js?v=2203" defer></script>
-  <script src="traffic.js?v=2203" defer></script>
-  <script src="shop.js?v=2203" defer></script>
-  <script src="roads.js?v=2203" defer></script>
-  <script src="movement.js?v=2203" defer></script>
-  <script src="territory_map.js?v=2203" defer></script>
-  <script src="navigation.js?v=2203" defer></script>
+  <script src="world_config.js?v=2204" defer></script>
+  <script src="materials.js?v=2204" defer></script>
+  <script src="territory.js?v=2204" defer></script>
+  <script src="buildings.js?v=2204" defer></script>
+  <script src="economy.js?v=2204" defer></script>
+  <script src="traffic.js?v=2204" defer></script>
+  <script src="shop.js?v=2204" defer></script>
+  <script src="roads.js?v=2204" defer></script>
+  <script src="movement.js?v=2204" defer></script>
+  <script src="territory_map.js?v=2204" defer></script>
+  <script src="navigation.js?v=2204" defer></script>
 
   <!-- IMPORTANT: 0.2.2A1 begins huge-world architecture: 8K territories, Singleplayer world ownership, navigation and road graph foundation. -->
-  <script src="game.js?v=2203" defer></script>
+  <script src="game.js?v=2204" defer></script>
 
   <!-- 0.2.2A1 active modules:
        world_config, materials, territory, buildings, economy, traffic,
@@ -63,17 +63,296 @@
 
   <canvas id="gameCanvas" touch-action="none" aria-label="Map Game 3D world"></canvas>
 
+  <div id="mgHome" class="mg-static-home">
+    <div class="mg-home-backdrop"></div>
+    <div class="mg-home-grid"></div>
+
+    <button
+      id="mgOpenSettings"
+      class="mg-home-settings-button"
+      type="button"
+      aria-label="Open settings"
+    >
+      ⚙ SETTINGS
+    </button>
+
+    <main class="mg-home-shell">
+      <section class="mg-home-hero">
+        <div class="mg-home-kicker">MAP GAME • ALPHA 0.2.2A</div>
+        <h1>Build a civilization<br><span>across a huge world.</span></h1>
+        <p>
+          The home screen loads first. Worlds only generate after you choose one.
+        </p>
+        <div class="mg-home-feature-row">
+          <span>99,856 TERRITORIES</span>
+          <span>CHUNK STREAMING</span>
+          <span>CITY SYSTEMS</span>
+        </div>
+        <div class="mg-boot-state" id="mgBootState" data-state="starting">
+          STARTING ENGINE…
+        </div>
+      </section>
+
+      <section class="mg-home-cards">
+        <article class="mg-world-card mg-world-card-primary">
+          <div class="mg-card-badge">OFFICIAL WORLD</div>
+          <h2>Central World</h2>
+          <p>
+            Shared territories, capitals, cities and multiplayer progression.
+          </p>
+          <div id="mgAccountState" class="mg-account-state">
+            Engine starting…
+          </div>
+          <button
+            class="mg-btn mg-btn-primary mg-btn-large"
+            id="mgJoinCentral"
+            disabled
+          >
+            STARTING…
+          </button>
+        </article>
+
+        <article class="mg-world-card">
+          <div class="mg-card-badge muted">LOCAL WORLD</div>
+          <h2>Singleplayer</h2>
+          <p>
+            No neutral spawn. The entire strategic world belongs to your save.
+          </p>
+          <button
+            class="mg-btn mg-btn-secondary mg-btn-large"
+            id="mgStartSingle"
+            disabled
+          >
+            STARTING…
+          </button>
+        </article>
+      </section>
+    </main>
+
+    <aside id="mgSettingsPanel" class="mg-home-settings" hidden>
+      <header>
+        <div>
+          <div class="mg-kicker">CLIENT SETTINGS</div>
+          <h2>Settings</h2>
+        </div>
+        <button id="mgCloseSettings" class="mg-settings-close" type="button">×</button>
+      </header>
+
+      <section class="mg-settings-group">
+        <label>GRAPHICS</label>
+        <div class="mg-setting-segmented" data-setting="graphics">
+          <button data-value="BASIC" type="button">BASIC</button>
+          <button data-value="REGULAR" type="button">REGULAR</button>
+        </div>
+        <p>Basic is tuned for Chromebooks. Regular adds richer materials and detail.</p>
+      </section>
+
+      <section class="mg-settings-group">
+        <label>RENDER DISTANCE</label>
+        <div class="mg-setting-segmented" data-setting="renderDistance">
+          <button data-value="low" type="button">LOW</button>
+          <button data-value="medium" type="button">MEDIUM</button>
+          <button data-value="high" type="button">HIGH</button>
+        </div>
+        <p>
+          Controls how many 512m terrain sectors are loaded around you.
+          Low is recommended while chunk streaming is being built.
+        </p>
+      </section>
+
+      <section class="mg-settings-group mg-settings-toggle-row">
+        <div>
+          <label>TRAFFIC</label>
+          <p>Moving and parked visual vehicles.</p>
+        </div>
+        <button id="mgTrafficToggle" class="mg-switch" type="button" aria-pressed="true">
+          <span></span>
+        </button>
+      </section>
+
+      <section class="mg-settings-group mg-settings-toggle-row">
+        <div>
+          <label>SHADOWS</label>
+          <p>Disable for extra performance on low-end devices.</p>
+        </div>
+        <button id="mgShadowsToggle" class="mg-switch" type="button" aria-pressed="true">
+          <span></span>
+        </button>
+      </section>
+
+      <footer>
+        Settings are saved on this device.
+      </footer>
+    </aside>
+  </div>
+
+
   <script>
-    window.addEventListener("load", () => {
-      const screen = document.getElementById("loadingScreen");
-      if (!screen) return;
-      setTimeout(() => {
-        if (!window.mapGameRuntime && !screen.hidden) {
-          const status = screen.querySelector("[data-loading-status]");
-          if (status) status.textContent = "STILL LOADING • CHECKING GAME MODULES";
+    (() => {
+      const loader = document.getElementById("loadingScreen");
+      const home = document.getElementById("mgHome");
+      const bootState = document.getElementById("mgBootState");
+      const single = document.getElementById("mgStartSingle");
+      const central = document.getElementById("mgJoinCentral");
+
+      const revealHome = () => {
+        if (home) home.hidden = false;
+        if (loader && loader.dataset.worldLoading !== "true") {
+          loader.classList.add("loading-finish");
+          setTimeout(() => {
+            if (loader.dataset.worldLoading !== "true") {
+              loader.hidden = true;
+            }
+          }, 340);
         }
-      }, 6500);
-    });
+      };
+
+      // IMPORTANT:
+      // The home screen is not allowed to depend on world generation.
+      // Even if Babylon or another game module fails, the player gets the
+      // shell/settings instead of an infinite loading screen.
+      setTimeout(revealHome, 850);
+
+      window.addEventListener("mapgame:boot-ready", () => {
+        if (bootState) {
+          bootState.textContent = "ENGINE READY";
+          bootState.dataset.state = "ready";
+        }
+        revealHome();
+      });
+
+      window.addEventListener("error", event => {
+        revealHome();
+        if (bootState) {
+          bootState.textContent =
+            "ENGINE ERROR • " +
+            (event.message || "CHECK CONSOLE");
+          bootState.dataset.state = "error";
+        }
+      });
+
+      window.addEventListener("unhandledrejection", event => {
+        revealHome();
+        if (bootState) {
+          const msg =
+            event.reason?.message ||
+            String(event.reason || "UNKNOWN ERROR");
+          bootState.textContent =
+            "ENGINE ERROR • " + msg.slice(0, 110);
+          bootState.dataset.state = "error";
+        }
+      });
+
+      const notReady = button => {
+        button?.addEventListener("click", () => {
+          if (!window.mapGameRuntime && bootState) {
+            bootState.textContent =
+              "GAME ENGINE IS STILL STARTING • CHECK CONSOLE IF THIS PERSISTS";
+          }
+        });
+      };
+
+      notReady(single);
+      notReady(central);
+
+      // ---------------- SETTINGS ----------------
+      const panel = document.getElementById("mgSettingsPanel");
+      document.getElementById("mgOpenSettings")?.addEventListener("click", () => {
+        panel.hidden = false;
+      });
+
+      document.getElementById("mgCloseSettings")?.addEventListener("click", () => {
+        panel.hidden = true;
+      });
+
+      const graphics =
+        localStorage.getItem("mapgame_graphics") || "BASIC";
+
+      const renderDistance =
+        localStorage.getItem("mapgame_render_distance") || "low";
+
+      function markSegmented(name, value) {
+        document
+          .querySelectorAll(`[data-setting="${name}"] [data-value]`)
+          .forEach(btn => {
+            btn.classList.toggle(
+              "active",
+              btn.dataset.value === value
+            );
+          });
+      }
+
+      markSegmented("graphics", graphics);
+      markSegmented("renderDistance", renderDistance);
+
+      document
+        .querySelectorAll('[data-setting="graphics"] [data-value]')
+        .forEach(btn => {
+          btn.addEventListener("click", () => {
+            localStorage.setItem(
+              "mapgame_graphics",
+              btn.dataset.value
+            );
+            markSegmented("graphics", btn.dataset.value);
+          });
+        });
+
+      document
+        .querySelectorAll('[data-setting="renderDistance"] [data-value]')
+        .forEach(btn => {
+          btn.addEventListener("click", () => {
+            localStorage.setItem(
+              "mapgame_render_distance",
+              btn.dataset.value
+            );
+            markSegmented(
+              "renderDistance",
+              btn.dataset.value
+            );
+          });
+        });
+
+      function setupToggle(id, key, defaultValue = true) {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+
+        let enabled =
+          localStorage.getItem(key) === null
+            ? defaultValue
+            : localStorage.getItem(key) !== "false";
+
+        const paint = () => {
+          btn.setAttribute(
+            "aria-pressed",
+            String(enabled)
+          );
+          btn.classList.toggle("active", enabled);
+        };
+
+        paint();
+
+        btn.addEventListener("click", () => {
+          enabled = !enabled;
+          localStorage.setItem(key, String(enabled));
+          paint();
+        });
+      }
+
+      setupToggle(
+        "mgTrafficToggle",
+        "mapgame_traffic_enabled",
+        true
+      );
+
+      setupToggle(
+        "mgShadowsToggle",
+        "mapgame_shadows_enabled",
+        true
+      );
+
+      // Absolute fail-safe: never keep the player behind the initial loader.
+      setTimeout(revealHome, 2500);
+    })();
   </script>
 
 </body>

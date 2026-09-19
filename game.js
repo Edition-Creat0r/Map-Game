@@ -96,7 +96,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.2A1.2";
+  const VERSION = "0.2.2A1.3";
   const CHUNK_WORLD_SIZE = window.mapGameWorldConfig?.TERRITORY_SIZE || 8192;
   const TERRITORY_RENDER_SIZE = window.mapGameWorldConfig?.RENDER_WINDOW_SIZE || 2048;
   const WORLD_COLS = window.mapGameWorldConfig?.WORLD_COLS || 316;
@@ -1472,11 +1472,13 @@
 
     // Visual traffic uses the real external sedan model.
     // Failure to load it never blocks the hub.
-    window.mapGameTraffic
-      ?.startHubTraffic?.(root, state.graphics)
-      ?.catch?.(error =>
-        console.warn("Map Game traffic start failed:", error)
-      );
+    if (localStorage.getItem("mapgame_traffic_enabled") !== "false") {
+      window.mapGameTraffic
+        ?.startHubTraffic?.(root, state.graphics)
+        ?.catch?.(error =>
+          console.warn("Map Game traffic start failed:", error)
+        );
+    }
 
     camera.target.set(0, 30, -28);
     camera.alpha = -Math.PI / 2.2;
@@ -4027,40 +4029,60 @@
   let authModal = null;
 
   function createHome() {
-    home = document.createElement("div");
-    home.id = "mgHome";
-    home.innerHTML = `
-      <div class="mg-home-backdrop"></div>
-      <div class="mg-home-grid"></div>
-      <main class="mg-home-shell">
-        <section class="mg-home-hero">
-          <div class="mg-home-kicker">MAP GAME • ALPHA ${VERSION}</div>
-          <h1>Build a civilization<br><span>from one territory.</span></h1>
-          <p>Start in a protected neutral metropolis, explore a huge strategic world, claim land, and establish your first capital.</p>
-          <div class="mg-home-feature-row">
-            <span>PROCEDURAL BIOMES</span><span>SHARED TERRITORIES</span><span>CAPITAL FOUNDING</span>
-          </div>
-        </section>
-        <section class="mg-home-cards">
-          <article class="mg-world-card mg-world-card-primary">
-            <div class="mg-card-badge">OFFICIAL WORLD</div>
-            <h2>Central World</h2>
-            <p>Shared territory ownership and capitals. No attacks or construction beyond the capital yet.</p>
-            <div id="mgAccountState" class="mg-account-state">Checking account…</div>
-            <button class="mg-btn mg-btn-primary mg-btn-large" id="mgJoinCentral">JOIN CENTRAL WORLD</button>
-          </article>
-          <article class="mg-world-card">
-            <div class="mg-card-badge muted">LOCAL</div>
-            <h2>Singleplayer</h2>
-            <p>Explore the same world flow locally while the larger civilization systems are being built.</p>
-            <button class="mg-btn mg-btn-secondary mg-btn-large" id="mgStartSingle">START SINGLEPLAYER</button>
-          </article>
-        </section>
-      </main>`;
-    document.body.appendChild(home);
+    home = document.getElementById("mgHome");
 
-    home.querySelector("#mgStartSingle").onclick = () => startGame("singleplayer");
-    home.querySelector("#mgJoinCentral").onclick = joinCentralFromHome;
+    if (!home) {
+      home = document.createElement("div");
+      home.id = "mgHome";
+      home.innerHTML = `
+        <div class="mg-home-backdrop"></div>
+        <div class="mg-home-grid"></div>
+        <main class="mg-home-shell">
+          <section class="mg-home-hero">
+            <div class="mg-home-kicker">MAP GAME • ALPHA ${VERSION}</div>
+            <h1>Build a civilization<br><span>from one territory.</span></h1>
+            <p>Explore a huge strategic world, build cities, and expand your civilization.</p>
+          </section>
+          <section class="mg-home-cards">
+            <article class="mg-world-card mg-world-card-primary">
+              <div class="mg-card-badge">OFFICIAL WORLD</div>
+              <h2>Central World</h2>
+              <p>Shared territories, capitals and multiplayer progression.</p>
+              <div id="mgAccountState" class="mg-account-state">Checking account…</div>
+              <button class="mg-btn mg-btn-primary mg-btn-large" id="mgJoinCentral">JOIN CENTRAL WORLD</button>
+            </article>
+            <article class="mg-world-card">
+              <div class="mg-card-badge muted">LOCAL</div>
+              <h2>Singleplayer</h2>
+              <p>No spawn. The entire strategic world belongs to your local save.</p>
+              <button class="mg-btn mg-btn-secondary mg-btn-large" id="mgStartSingle">START SINGLEPLAYER</button>
+            </article>
+          </section>
+        </main>`;
+      document.body.appendChild(home);
+    }
+
+    home.hidden = false;
+
+    const single = home.querySelector("#mgStartSingle");
+    const central = home.querySelector("#mgJoinCentral");
+
+    if (single) {
+      single.disabled = false;
+      single.onclick = () => startGame("singleplayer");
+    }
+
+    if (central) {
+      central.disabled = false;
+      central.onclick = joinCentralFromHome;
+    }
+
+    const bootState = home.querySelector("#mgBootState");
+    if (bootState) {
+      bootState.textContent = "ENGINE READY";
+      bootState.dataset.state = "ready";
+    }
+
     refreshHomeAccount();
   }
 
@@ -4181,6 +4203,29 @@
 
   function startGame(worldType) {
     state.worldType = worldType;
+
+    state.graphics =
+      localStorage.getItem("mapgame_graphics") || "BASIC";
+
+    document.body.dataset.graphics =
+      String(state.graphics).toLowerCase();
+
+    window.mapGameRuntime.graphicsPreset =
+      state.graphics;
+
+    scene.shadowsEnabled =
+      localStorage.getItem("mapgame_shadows_enabled") !== "false";
+
+    if (state.graphics === "REGULAR") {
+      engine.setHardwareScalingLevel(
+        window.devicePixelRatio >= 2 ? 1.15 : 1.0
+      );
+    } else {
+      engine.setHardwareScalingLevel(
+        window.devicePixelRatio >= 2 ? 1.38 : 1.16
+      );
+    }
+
     document.body.dataset.world = worldType;
 
     if (worldType === "singleplayer") {
@@ -4288,7 +4333,21 @@
     showWorldMap,
     enterTerritory,
     enterSingleplayerHome,
-    buildNeutralHub
+    buildNeutralHub,
+
+    getRenderDistance: () =>
+      localStorage.getItem("mapgame_render_distance") || "low",
+
+    getSettings: () => ({
+      graphics:
+        localStorage.getItem("mapgame_graphics") || "BASIC",
+      renderDistance:
+        localStorage.getItem("mapgame_render_distance") || "low",
+      traffic:
+        localStorage.getItem("mapgame_traffic_enabled") !== "false",
+      shadows:
+        localStorage.getItem("mapgame_shadows_enabled") !== "false"
+    })
   };
 
   // Keep runtime ground current whenever territory/hub changes.
@@ -4334,16 +4393,14 @@
   createHome();
 
   const loading = document.getElementById("loadingScreen");
-  if (loading) {
+  if (loading && loading.dataset.worldLoading !== "true") {
     setLoadingState("READY", 100);
     loading.dataset.worldLoading = "false";
-    loading.classList.add("loading-finish");
-    setTimeout(() => {
-      if (loading.dataset.worldLoading === "false") {
-        loading.hidden = true;
-      }
-    }, 420);
   }
+
+  window.dispatchEvent(
+    new CustomEvent("mapgame:boot-ready")
+  );
 
   engine.runRenderLoop(() => {
     const now = performance.now();
@@ -4356,5 +4413,5 @@
   window.addEventListener("resize", () => engine.resize());
   window.addEventListener("beforeunload", saveLocalState);
 
-  console.log("Map Game Alpha 0.2.2A1 Big World Update loaded.");
+  console.log("Map Game Alpha 0.2.2A1.3 boot-safe build loaded.");
 })();

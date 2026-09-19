@@ -2477,3 +2477,240 @@ body[data-world="singleplayer"] [data-action="hub"]{display:none!important}
     animation-duration: 5s !important;
   }
 }
+
+
+/* ============================================================
+   0.2.2A1.3 — BOOT-SAFE HOME + SETTINGS
+   ============================================================ */
+
+.mg-static-home {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+}
+
+.mg-home-settings-button {
+  position: fixed;
+  right: 22px;
+  top: 20px;
+  z-index: 170;
+  min-width: 112px;
+  height: 38px;
+  border: 1px solid rgba(112,221,250,.18);
+  border-radius: 9px;
+  background: rgba(5,21,33,.76);
+  color: rgba(225,244,250,.78);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .10em;
+  backdrop-filter: blur(14px);
+  cursor: pointer;
+}
+
+.mg-home-settings-button:hover {
+  border-color: rgba(112,221,250,.40);
+  color: #eafbff;
+}
+
+.mg-boot-state {
+  display: inline-flex;
+  margin-top: 16px;
+  padding: 7px 10px;
+  border: 1px solid rgba(107,212,240,.12);
+  border-radius: 7px;
+  background: rgba(4,20,31,.50);
+  color: rgba(177,222,234,.54);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.mg-boot-state[data-state="ready"] {
+  color: rgba(111,232,185,.78);
+  border-color: rgba(111,232,185,.18);
+}
+
+.mg-boot-state[data-state="error"] {
+  max-width: min(620px, 85vw);
+  color: rgba(255,156,146,.88);
+  border-color: rgba(255,120,110,.22);
+  white-space: normal;
+}
+
+.mg-home-settings {
+  position: fixed;
+  right: 18px;
+  top: 68px;
+  z-index: 190;
+  width: min(390px, calc(100vw - 36px));
+  max-height: calc(100vh - 88px);
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid rgba(104,219,250,.20);
+  border-radius: 15px;
+  background:
+    linear-gradient(
+      160deg,
+      rgba(8,31,45,.97),
+      rgba(4,16,27,.97)
+    );
+  box-shadow:
+    0 30px 90px rgba(0,0,0,.48),
+    inset 0 1px rgba(255,255,255,.035);
+  backdrop-filter: blur(22px);
+}
+
+.mg-home-settings[hidden] {
+  display: none !important;
+}
+
+.mg-home-settings > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 17px;
+}
+
+.mg-home-settings h2 {
+  margin: 3px 0 0;
+  font-size: 22px;
+}
+
+.mg-settings-close {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(120,220,247,.12);
+  border-radius: 8px;
+  background: rgba(255,255,255,.025);
+  color: rgba(230,246,251,.70);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.mg-settings-group {
+  padding: 15px 0;
+  border-top: 1px solid rgba(112,216,245,.08);
+}
+
+.mg-settings-group > label,
+.mg-settings-toggle-row label {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(210,239,247,.82);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+
+.mg-settings-group p {
+  margin: 8px 0 0;
+  color: rgba(190,220,230,.48);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.mg-setting-segmented {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 5px;
+}
+
+.mg-setting-segmented button {
+  min-height: 36px;
+  border: 1px solid rgba(105,215,244,.11);
+  border-radius: 8px;
+  background: rgba(255,255,255,.025);
+  color: rgba(206,232,239,.57);
+  font: inherit;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  cursor: pointer;
+}
+
+.mg-setting-segmented button.active {
+  color: #dffaff;
+  border-color: rgba(99,222,255,.38);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37,143,177,.27),
+      rgba(22,83,108,.16)
+    );
+  box-shadow:
+    inset 0 0 18px rgba(77,205,238,.05);
+}
+
+.mg-settings-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.mg-settings-toggle-row p {
+  margin-top: 4px;
+}
+
+.mg-switch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 25px;
+  border: 1px solid rgba(116,216,243,.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,.045);
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease;
+}
+
+.mg-switch span {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: rgba(210,229,236,.62);
+  transition: transform .18s ease, background .18s ease;
+}
+
+.mg-switch.active {
+  background: rgba(39,156,188,.28);
+  border-color: rgba(104,225,255,.35);
+}
+
+.mg-switch.active span {
+  transform: translateX(21px);
+  background: #9cecff;
+  box-shadow: 0 0 12px rgba(95,218,250,.35);
+}
+
+.mg-home-settings footer {
+  padding-top: 13px;
+  border-top: 1px solid rgba(112,216,245,.08);
+  color: rgba(180,213,222,.35);
+  font-size: 9px;
+  letter-spacing: .07em;
+}
+
+#mgHome .mg-btn:disabled {
+  opacity: .42;
+  cursor: wait;
+}
+
+@media (max-width: 720px) {
+  .mg-home-settings-button {
+    right: 10px;
+    top: 10px;
+  }
+
+  .mg-home-settings {
+    right: 10px;
+    top: 56px;
+    width: calc(100vw - 20px);
+  }
+}
