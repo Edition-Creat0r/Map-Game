@@ -351,7 +351,7 @@
     return CATALOG.find(v => v.id === id) || CATALOG[0];
   }
 
-  function createMaterials(B, scene, regular, preset = null) {
+  function createMaterials(B, scene, regular, preset = null, category = "General") {
     const graphics =
       preset ||
       (regular ? "REGULAR" : "BASIC");
@@ -360,7 +360,8 @@
       const palette =
         window.mapGameMaterials.createBuildingPalette(
           scene,
-          graphics
+          graphics,
+          category
         );
       palette.__regular =
         graphics === "REGULAR" || graphics === "DEEP";
@@ -781,7 +782,8 @@
         B,
         scene,
         regular,
-        runtime.graphicsPreset || "BASIC"
+        runtime.graphicsPreset || "BASIC",
+        data.category || def.category || "General"
       );
 
     const root = new B.TransformNode("neutralNeighborhoodDemo", scene);
@@ -1063,7 +1065,7 @@
   }
 
   window.mapGameBuildings = {
-    VERSION: "0.2.1G",
+    VERSION: "0.2.2A1",
     CATALOG,
     item,
     buildNeighborhoodDemo,
@@ -1071,5 +1073,5 @@
     addFoundation
   };
 
-  console.log("Map Game buildings 0.2.1G ready.");
+  console.log("Map Game buildings 0.2.2A1 category-style foundation ready.");
 })();

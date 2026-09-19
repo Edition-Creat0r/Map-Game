@@ -2213,3 +2213,73 @@ body[data-graphics="regular"] .mg-shop-list-item.active {
     content: "  •  DRAG TO ROTATE";
   }
 }
+
+
+/* ============================================================
+   MAP GAME 0.2.2A1 — THE BIG WORLD UPDATE
+   ============================================================ */
+
+.mg-quick-travel-card{
+  position:fixed;right:20px;top:76px;z-index:34;width:min(310px,calc(100vw - 110px));
+  padding:16px;border:1px solid rgba(100,220,255,.22);border-radius:14px;
+  background:linear-gradient(150deg,rgba(9,33,49,.94),rgba(5,19,31,.91));
+  box-shadow:0 24px 70px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.035);
+  backdrop-filter:blur(18px);
+}
+.mg-quick-travel-card[hidden]{display:none!important}
+.mg-quick-travel-card strong{display:block;margin:4px 0 6px;font-size:18px}
+.mg-quick-travel-card p{margin:0 0 12px;color:rgba(218,236,244,.62);font-size:12px;line-height:1.5}
+.mg-quick-travel-card .mg-btn{width:100%;margin-top:8px}
+
+.mg-territory-map-overlay{
+  position:fixed;inset:54px 0 0 0;z-index:80;background:rgba(2,10,17,.91);
+  backdrop-filter:blur(18px)
+}
+.mg-territory-map-overlay[hidden]{display:none!important}
+.mg-territory-map-shell{height:100%;display:grid;grid-template-rows:auto 1fr;padding:28px;gap:18px}
+.mg-territory-map-shell>header{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.mg-territory-map-shell>header h2{margin:3px 0 5px;font-size:26px}
+.mg-territory-map-shell>header p{margin:0;color:rgba(218,236,244,.58);font-size:12px}
+.mg-territory-map-shell>header>div:last-child{display:flex;gap:8px}
+.mg-territory-map-stage{
+  position:relative;min-height:0;border:1px solid rgba(97,211,241,.17);
+  border-radius:15px;overflow:hidden;background:#07161d
+}
+#mgTerritoryMapCanvas{width:100%;height:100%;display:block;cursor:crosshair}
+.mg-territory-map-legend{
+  position:absolute;left:14px;bottom:14px;display:flex;gap:14px;padding:9px 11px;
+  border-radius:9px;background:rgba(3,14,23,.78);border:1px solid rgba(111,222,255,.13);
+  color:rgba(225,241,247,.68);font-size:10px;letter-spacing:.06em
+}
+
+.mg-touch-move{
+  position:fixed;left:84px;bottom:22px;z-index:42;display:none;
+  grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px);gap:5px;
+  user-select:none;touch-action:none
+}
+.mg-touch-move button{
+  border:1px solid rgba(113,220,250,.19);border-radius:13px;
+  background:rgba(4,21,33,.78);color:rgba(226,246,252,.84);font-size:16px;
+  backdrop-filter:blur(12px)
+}
+.mg-touch-move [data-dir="up"]{grid-column:2;grid-row:1}
+.mg-touch-move [data-dir="left"]{grid-column:1;grid-row:2}
+.mg-touch-move [data-dir="stop"]{grid-column:2;grid-row:2;opacity:.65}
+.mg-touch-move [data-dir="right"]{grid-column:3;grid-row:2}
+.mg-touch-move [data-dir="down"]{grid-column:2;grid-row:3}
+
+.mg-shop-category-heading{
+  position:sticky;top:0;z-index:2;margin:5px 0 4px;padding:9px 10px 6px;
+  background:linear-gradient(180deg,rgba(5,18,29,.96),rgba(5,18,29,.82));
+  color:rgba(117,221,249,.76);font-size:9px;font-weight:800;
+  letter-spacing:.15em;text-transform:uppercase;border-bottom:1px solid rgba(110,220,250,.09)
+}
+
+body[data-world="singleplayer"] [data-action="hub"]{display:none!important}
+
+@media (pointer:coarse){.mg-touch-move{display:grid}}
+@media (max-width:900px){
+  .mg-quick-travel-card{right:10px;top:66px;width:min(260px,calc(100vw - 92px))}
+  .mg-territory-map-shell{padding:14px}
+  .mg-territory-map-shell>header{align-items:flex-start}
+}

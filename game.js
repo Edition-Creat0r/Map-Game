@@ -52,11 +52,11 @@
   );
   camera.attachControl(canvas, true);
   camera.lowerRadiusLimit = 35;
-  camera.upperRadiusLimit = 650;
+  camera.upperRadiusLimit = 4200;
   camera.lowerBetaLimit = 0.35;
   camera.upperBetaLimit = 1.36;
-  camera.wheelPrecision = 28;
-  camera.panningSensibility = 80;
+  camera.wheelPrecision = 34;
+  camera.panningSensibility = 52;
   camera.inertia = 0.83;
   camera.panningInertia = 0.85;
 
@@ -96,10 +96,10 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.1G FINAL";
-  const CHUNK_WORLD_SIZE = 1800;
-  const WORLD_COLS = 316;
-  const WORLD_ROWS = 316;
+  const VERSION = "0.2.2A1";
+  const CHUNK_WORLD_SIZE = window.mapGameWorldConfig?.TERRITORY_SIZE || 8192;
+  const WORLD_COLS = window.mapGameWorldConfig?.WORLD_COLS || 316;
+  const WORLD_ROWS = window.mapGameWorldConfig?.WORLD_ROWS || 316;
   const CENTRAL_X = Math.floor(WORLD_COLS / 2);
   const CENTRAL_Y = Math.floor(WORLD_ROWS / 2);
   const HUB_RADIUS = 430;
@@ -166,6 +166,7 @@
   }
 
   function isCentralReserved(x, y) {
+    if (state.worldType === "singleplayer") return false;
     return Math.abs(x - CENTRAL_X) <= 1 && Math.abs(y - CENTRAL_Y) <= 1;
   }
 
@@ -1501,6 +1502,15 @@
   let mapViewStart = null;
 
   function ownerForTerritory(id) {
+    if (state.worldType === "singleplayer") {
+      return {
+        territory_id: id,
+        owner_id: "local",
+        owner_username: "You",
+        localOwner: true,
+        entireWorldOwner: true
+      };
+    }
     return state.claimedTerritories.get(id) || null;
   }
 
@@ -1513,6 +1523,7 @@
     });
     if (mapOverlay && !mapOverlay.hidden) drawWorldMap();
     updateOnlineUI();
+    window.dispatchEvent(new CustomEvent("mapgame:claims"));
   }
 
   function createMapOverlay() {
@@ -1525,11 +1536,11 @@
           <div>
             <div class="mg-kicker">STRATEGIC WORLD</div>
             <h2>Strategic World</h2>
-            <p>≈99,856 territories • drag to explore • scroll to zoom • hover to inspect.</p>
+            <p>99,856 territories • drag to explore • scroll to zoom • select any rectangle to inspect.</p>
           </div>
           <div class="mg-map-header-actions">
             <button class="mg-btn mg-btn-secondary" id="mgMapRecenter">RECENTER</button>
-            <button class="mg-btn mg-btn-secondary" id="mgMapClose">RETURN TO HUB</button>
+            <button class="mg-btn mg-btn-secondary" id="mgMapClose">RETURN</button>
           </div>
         </header>
         <div class="mg-map-body">
@@ -1548,7 +1559,7 @@
             <div class="mg-territory-stats" id="mgTerritoryStats"></div>
             <button class="mg-btn mg-btn-primary" id="mgClaimTerritory" disabled>SELECT A TERRITORY</button>
             <button class="mg-btn mg-btn-secondary" id="mgEnterTerritory" hidden>ENTER TERRITORY</button>
-            <div class="mg-panel-note">Only territory claiming and capital placement are enabled in this alpha. Building, clearing, defense and attacks remain locked.</div>
+            <div class="mg-panel-note">0.2.2A1 World Map • Central claims territory; Singleplayer owns the entire world.</div>
           </aside>
         </div>
       </div>`;
@@ -1559,7 +1570,8 @@
 
     mapOverlay.querySelector("#mgMapClose").onclick = () => {
       hideWorldMap();
-      setMode(state.activeTerritory ? "TERRITORY" : "HUB");
+      if (state.activeTerritory) setMode("TERRITORY");
+      else if (state.worldType === "central") setMode("HUB");
     };
     mapOverlay.querySelector("#mgMapRecenter").onclick = () => {
       state.mapCamera.x = CENTRAL_X;
@@ -1782,10 +1794,13 @@
         // spreadsheet of flat colors.
         drawBiomeMapDetail(mapCtx, biome, x, y, px, py, cell);
 
-        if (owner) {
+        if (owner && state.worldType !== "singleplayer") {
           mapCtx.fillStyle = "rgba(25,58,85,0.46)";
           mapCtx.fillRect(px + 2, py + 2, cell - 4, cell - 4);
-          mapCtx.strokeStyle = owner.owner_id === state.multiplayerState?.user?.id ? "#51e3a7" : "#78bfff";
+          mapCtx.strokeStyle =
+            owner.owner_id === state.multiplayerState?.user?.id
+              ? "#51e3a7"
+              : "#78bfff";
           mapCtx.lineWidth = 2.2;
           mapCtx.strokeRect(px + 2.5, py + 2.5, cell - 5, cell - 5);
         }
@@ -1808,16 +1823,17 @@
       }
     }
 
-    // neutral center marker
-    const cpx = w / 2 + (CENTRAL_X - state.mapCamera.x) * cell;
-    const cpy = h / 2 + (CENTRAL_Y - state.mapCamera.y) * cell;
-    mapCtx.beginPath();
-    mapCtx.arc(cpx, cpy, Math.max(7, cell * 0.22), 0, Math.PI * 2);
-    mapCtx.fillStyle = "#8be8ff";
-    mapCtx.fill();
-    mapCtx.strokeStyle = "rgba(255,255,255,.9)";
-    mapCtx.lineWidth = 2;
-    mapCtx.stroke();
+    if (state.worldType === "central") {
+      const cpx = w / 2 + (CENTRAL_X - state.mapCamera.x) * cell;
+      const cpy = h / 2 + (CENTRAL_Y - state.mapCamera.y) * cell;
+      mapCtx.beginPath();
+      mapCtx.arc(cpx, cpy, Math.max(7, cell * 0.22), 0, Math.PI * 2);
+      mapCtx.fillStyle = "#8be8ff";
+      mapCtx.fill();
+      mapCtx.strokeStyle = "rgba(255,255,255,.9)";
+      mapCtx.lineWidth = 2;
+      mapCtx.stroke();
+    }
   }
 
   function updateTerritoryInspector(cell) {
@@ -1844,11 +1860,15 @@
 
     claim.hidden = false;
     enter.hidden = true;
-    if (reserved) {
+    if (state.worldType === "singleplayer") {
+      claim.disabled = true;
+      claim.textContent = "YOUR WORLD";
+      enter.hidden = false;
+    } else if (reserved) {
       claim.disabled = true;
       claim.textContent = "NEUTRAL — CANNOT CLAIM";
     } else if (owner) {
-      const mine = state.worldType === "singleplayer" || owner.owner_id === state.multiplayerState?.user?.id;
+      const mine = owner.owner_id === state.multiplayerState?.user?.id;
       claim.disabled = true;
       claim.textContent = mine ? "YOUR TERRITORY" : "ALREADY CLAIMED";
       enter.hidden = !mine;
@@ -1989,7 +2009,7 @@
   }
 
   function createTerritoryGround(root, cell, biome) {
-    const sub = state.graphics === "REGULAR" ? 128 : 88;
+    const sub = state.graphics === "REGULAR" ? 196 : 128;
     const ground = BABYLON.MeshBuilder.CreateGround("territoryGround", {
       width: CHUNK_WORLD_SIZE,
       height: CHUNK_WORLD_SIZE,
@@ -2096,12 +2116,16 @@
   function placeTerritoryMountains(root, cell, biome) {
     // Main mountain mass now comes from the terrain heightfield.
     // These ranges are distant silhouette/edge formations, not the terrain itself.
+    const edge = CHUNK_WORLD_SIZE * 0.43;
+    const mountainScale = Math.max(1, CHUNK_WORLD_SIZE / 1800);
+    const amp = Math.sqrt(mountainScale);
+
     if (biome === "mountain") {
-      createMountainRange(root, -760, -680, 5, 86, 154, cell.x * 19 + cell.y * 7 + 5);
-      createMountainRange(root, 720, 650, 5, 92, 166, cell.x * 23 + cell.y * 11 + 17);
+      createMountainRange(root, -edge, -edge * 0.84, 7, 86 * amp, 154 * amp, cell.x * 19 + cell.y * 7 + 5);
+      createMountainRange(root, edge, edge * 0.82, 7, 92 * amp, 166 * amp, cell.x * 23 + cell.y * 11 + 17);
     } else if (biome !== "wetland" && biome !== "coast") {
-      createMountainRange(root, -820, -760, 3, 64, 92, cell.x * 17 + cell.y * 19 + 9);
-      createMountainRange(root, 810, 750, 3, 58, 84, cell.x * 31 + cell.y * 5 + 12);
+      createMountainRange(root, -edge, -edge * 0.90, 4, 64 * amp, 92 * amp, cell.x * 17 + cell.y * 19 + 9);
+      createMountainRange(root, edge, edge * 0.88, 4, 58 * amp, 84 * amp, cell.x * 31 + cell.y * 5 + 12);
     }
   }
 
@@ -2287,8 +2311,8 @@
 
     // Enter the territory closer to the surface so a 980x980 region
     // feels large instead of looking like a miniature board.
-    camera.target.set(0, 16, -70);
-    camera.radius = 285;
+    camera.target.set(0, 18, -120);
+    camera.radius = 620;
     camera.alpha = -Math.PI / 2.25;
     camera.beta = 1.04;
     setMode("TERRITORY");
@@ -2297,10 +2321,32 @@
     if (existingCapital) {
       state.capital = existingCapital;
       renderCapital(existingCapital, true);
-      setStatus(`<b>${escapeHtml(existingCapital.name || "Capital")}</b> • ${BIOMES[biome].label} territory • development systems are locked in this alpha`);
+      setStatus(
+        `<b>${escapeHtml(existingCapital.name || "Capital")}</b> • ` +
+        `${BIOMES[biome].label} territory • 0.2.2A huge-world systems active`
+      );
     } else {
-      setStatus(`${BIOMES[biome].label} territory • choose a stable capital site; the center is usually safest`);
-      setTimeout(() => beginCapitalPlacement(), 550);
+      const anyLocalCapital =
+        state.worldType === "singleplayer"
+          ? loadLocalState()?.capital
+          : null;
+
+      if (anyLocalCapital) {
+        state.capital = anyLocalCapital;
+        setStatus(
+          `${BIOMES[biome].label} territory • no city here yet • ` +
+          `connect this region to your civilization before founding a secondary city`
+        );
+        showToast(
+          "This is part of your Singleplayer world. Secondary cities will require a road/highway connection to your capital.",
+          "info"
+        );
+      } else {
+        setStatus(
+          `${BIOMES[biome].label} territory • choose a stable capital site; the center is usually safest`
+        );
+        setTimeout(() => beginCapitalPlacement(), 550);
+      }
     }
   }
 
@@ -3103,8 +3149,23 @@
 
   function saveLocalState() {
     const old = loadLocalState();
-    old.claims = Array.from(state.claimedTerritories.values()).filter(v => v.localOwner);
-    localStorage.setItem(localSaveKey, JSON.stringify(old));
+    old.claims =
+      Array.from(state.claimedTerritories.values())
+        .filter(v => v.localOwner);
+
+    if (state.activeTerritory) {
+      old.activeTerritoryId =
+        state.activeTerritory.id ||
+        territoryId(
+          state.activeTerritory.x,
+          state.activeTerritory.y
+        );
+    }
+
+    localStorage.setItem(
+      localSaveKey,
+      JSON.stringify(old)
+    );
   }
 
   function restoreLocalClaims() {
@@ -3355,24 +3416,49 @@
     const count = shopOverlay.querySelector("#mgShopCount");
     if (count) count.textContent = String(items.length);
 
-    list.innerHTML = items.map(item => `
-      <button
-        class="mg-shop-list-item ${item.id === shopSelection.itemId ? "active" : ""}"
-        data-shop-item="${escapeHtml(item.id)}"
-      >
-        <i class="mg-shop-item-icon">${item.icon || "◆"}</i>
-        <span class="mg-shop-item-copy">
-          <small>${escapeHtml(item.category)}</small>
-          <strong>${escapeHtml(item.name)}</strong>
-          <em>
-            $${Number(item.cost?.money || 0).toLocaleString()}
-            ${item.incomePerMin
-              ? ` • +$${Number(item.incomePerMin).toLocaleString()}/min`
-              : ""}
-          </em>
-        </span>
-      </button>
-    `).join("");
+    const categoryOrder = [
+      "Residential",
+      "Commercial",
+      "Industrial",
+      "Infrastructure",
+      "Government",
+      "Parks"
+    ];
+
+    const orderedItems = [...items].sort((a, b) => {
+      const ai = categoryOrder.indexOf(a.category);
+      const bi = categoryOrder.indexOf(b.category);
+      if (ai !== bi) return ai - bi;
+      return a.name.localeCompare(b.name);
+    });
+
+    let previousCategory = "";
+    list.innerHTML = orderedItems.map(item => {
+      const heading =
+        category === "All" && item.category !== previousCategory
+          ? `<div class="mg-shop-category-heading">${escapeHtml(item.category)}</div>`
+          : "";
+      previousCategory = item.category;
+      return `
+        ${heading}
+        <button
+          class="mg-shop-list-item ${item.id === shopSelection.itemId ? "active" : ""}"
+          data-shop-item="${escapeHtml(item.id)}"
+        >
+          <i class="mg-shop-item-icon">${item.icon || "◆"}</i>
+          <span class="mg-shop-item-copy">
+            <small>${escapeHtml(item.category)}</small>
+            <strong>${escapeHtml(item.name)}</strong>
+            <em>
+              $${Number(item.cost?.money || 0).toLocaleString()}
+              ${item.incomePerMin
+                ? ` • +$${Number(item.incomePerMin).toLocaleString()}/min`
+                : ""}
+            </em>
+          </span>
+        </button>
+      `;
+    }).join("");
 
     if (!items.length) {
       list.innerHTML = `
@@ -3560,7 +3646,7 @@
       <header class="mg-topbar">
         <div class="mg-brand-lockup">
           <div class="mg-brand-mark">M</div>
-          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • FINAL CITY LIFE + MATERIALS + TRAFFIC</span></div>
+          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • THE BIG WORLD UPDATE</span></div>
         </div>
         <div class="mg-top-status">
           <div class="mg-status-chip"><span>WORLD</span><b id="mgWorldLabel">SINGLEPLAYER</b></div>
@@ -3579,11 +3665,12 @@
       <nav class="mg-dock" id="mgDock">
         <button data-action="hub" title="Neutral Central Hub">⌂<span>HUB</span></button>
         <button data-action="map" title="World Map">◈<span>WORLD</span></button>
+        <button data-action="territory-map" title="Territory Map">◇<span>LOCAL</span></button>
         <button data-action="capital" title="Capital">◆<span>CAPITAL</span></button>
         <button data-action="shop" title="Construction Shop">▤<span>SHOP</span></button>
         <button data-action="development" title="Land Planner — inspect separated buildable areas">▦<span>LAND</span></button>
         <button data-action="economy" title="Economy summary">◎<span>ECONOMY</span></button>
-        <button data-action="infrastructure" class="locked" title="Roads and utilities — next construction pass">⌁<span>ROADS</span></button>
+        <button data-action="infrastructure" title="Road network foundation">⌁<span>ROADS</span></button>
         <button data-action="defense" class="locked" title="Defense — coming later">⬡<span>DEFENSE</span></button>
         <button data-action="settings" title="Interface and graphics settings">⚙<span>SETTINGS</span></button>
       </nav>
@@ -3596,9 +3683,20 @@
 
     hudRoot.querySelector("[data-action='hub']").onclick = () => {
       hideWorldMap();
+      if (state.worldType === "singleplayer") {
+        showToast("Singleplayer has no neutral spawn. The entire world belongs to this save.", "info");
+        return;
+      }
       buildNeutralHub();
     };
     hudRoot.querySelector("[data-action='map']").onclick = showWorldMap;
+    hudRoot.querySelector("[data-action='territory-map']").onclick = () => {
+      if (!state.activeTerritory) {
+        showToast("Enter a territory first.", "info");
+        return;
+      }
+      window.mapGameTerritoryMap?.show?.();
+    };
     hudRoot.querySelector("[data-action='capital']").onclick = () => {
       if (!state.activeTerritory) {
         showToast("Claim and enter a territory first.", "info");
@@ -3625,7 +3723,7 @@
       );
     };
     hudRoot.querySelector("[data-action='infrastructure']").onclick = () =>
-      showToast("Road building and utilities unlock in the next construction pass.", "info");
+      showToast("0.2.2A1 road graph is active. Interactive road drawing is the next A patch.", "info");
     hudRoot.querySelector("[data-action='defense']").onclick = () =>
       showToast("Defense, walls and military are intentionally locked for now.", "info");
     hudRoot.querySelector("[data-action='settings']").onclick = () =>
@@ -3935,17 +4033,45 @@
     authModal.hidden = false;
   }
 
+  function enterSingleplayerHome() {
+    const saved = loadLocalState();
+    const savedId =
+      saved?.capital?.territoryId ||
+      saved?.activeTerritoryId ||
+      territoryId(CENTRAL_X, CENTRAL_Y);
+
+    const parsed =
+      parseTerritoryId(savedId) ||
+      { x: CENTRAL_X, y: CENTRAL_Y };
+
+    enterTerritory({
+      ...parsed,
+      id: territoryId(parsed.x, parsed.y)
+    });
+  }
+
   function startGame(worldType) {
     state.worldType = worldType;
+    document.body.dataset.world = worldType;
+
     if (worldType === "singleplayer") {
       state.claimedTerritories.clear();
       restoreLocalClaims();
     }
+
     if (home) home.remove();
     home = null;
     if (!hudRoot) buildHUD();
     updateOnlineUI();
-    buildNeutralHub();
+
+    const hubButton = hudRoot?.querySelector("[data-action='hub']");
+    if (worldType === "singleplayer") {
+      if (hubButton) hubButton.hidden = true;
+      enterSingleplayerHome();
+    } else {
+      if (hubButton) hubButton.hidden = false;
+      buildNeutralHub();
+    }
   }
 
   // ==========================================================
@@ -3956,7 +4082,8 @@
     if (e.key === "Escape") {
       if (mapOverlay && !mapOverlay.hidden) {
         hideWorldMap();
-        setMode(state.activeTerritory ? "TERRITORY" : "HUB");
+        if (state.activeTerritory) setMode("TERRITORY");
+        else if (state.worldType === "central") setMode("HUB");
       } else if (state.mode === "CAPITAL_PLACEMENT") {
         if (capitalDialog) capitalDialog.hidden = true;
         if (state.capitalGhost) state.capitalGhost.setEnabled(false);
@@ -4020,7 +4147,18 @@
     setBottomStatus: setStatus,
     createRoad,
     createStreetLamp,
-    populateRoadLamps
+    populateRoadLamps,
+
+    getMode: () => state.mode,
+    worldType: () => state.worldType,
+    getActiveTerritory: () => state.activeTerritory,
+    getActiveCapital: () => getCapitalForActiveTerritory(),
+    getMyStartingTerritory,
+    parseTerritoryId,
+    showWorldMap,
+    enterTerritory,
+    enterSingleplayerHome,
+    buildNeutralHub
   };
 
   // Keep runtime ground current whenever territory/hub changes.
@@ -4082,5 +4220,5 @@
   window.addEventListener("resize", () => engine.resize());
   window.addEventListener("beforeunload", saveLocalState);
 
-  console.log("Map Game Alpha 0.2.0 restructure loaded.");
+  console.log("Map Game Alpha 0.2.2A1 Big World Update loaded.");
 })();

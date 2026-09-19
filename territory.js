@@ -1,6 +1,6 @@
 // ============================================================
 // MAP GAME — territory.js
-// Alpha 0.2.1D territory planning + terrain rules
+// Alpha 0.2.2A1 huge territory planning + terrain rules
 //
 // This file is deliberately data/math focused.
 // Babylon meshes remain in game.js for now; this module owns:
@@ -94,20 +94,21 @@
     return { isWater: false, depth: 0, shoreZ: null };
   }
 
-  function heightAt(x, z, biome, cellX, cellY, chunkSize = 1800) {
+  function heightAt(x, z, biome, cellX, cellY, chunkSize = 8192) {
     const p = biomeProfile(biome);
+    const scaleFix = 1800 / Math.max(1800, chunkSize);
 
     const macro =
-      smoothNoise(x, z, cellX, cellY, 0.0026, 4) * p.macro;
+      smoothNoise(x, z, cellX, cellY, 0.0026 * scaleFix, 4) * p.macro;
 
     const broad =
-      smoothNoise(x, z, cellX, cellY, 0.0056, 9) * 0.52;
+      smoothNoise(x, z, cellX, cellY, 0.0056 * scaleFix, 9) * 0.52;
 
     const medium =
-      smoothNoise(x, z, cellX, cellY, 0.0135, 17) * p.detail;
+      smoothNoise(x, z, cellX, cellY, 0.0135 * scaleFix, 17) * p.detail;
 
     const tiny =
-      smoothNoise(x, z, cellX, cellY, 0.031, 29) * 0.11;
+      smoothNoise(x, z, cellX, cellY, 0.031 * scaleFix, 29) * 0.11;
 
     let height =
       (macro * 0.62 + broad * 0.25 + medium * 0.11 + tiny * 0.02) *
@@ -154,14 +155,14 @@
     return height;
   }
 
-  function slopeAt(x, z, biome, cellX, cellY, chunkSize = 1800, sample = 22) {
+  function slopeAt(x, z, biome, cellX, cellY, chunkSize = 8192, sample = 22) {
     const h = heightAt(x, z, biome, cellX, cellY, chunkSize);
     const hx = heightAt(x + sample, z, biome, cellX, cellY, chunkSize);
     const hz = heightAt(x, z + sample, biome, cellX, cellY, chunkSize);
     return Math.max(Math.abs(hx - h), Math.abs(hz - h));
   }
 
-  function citySites(cell, biome, chunkSize = 1800) {
+  function citySites(cell, biome, chunkSize = 8192) {
     const half = chunkSize / 2;
     const margin = Math.max(220, chunkSize * 0.17);
 
@@ -191,7 +192,7 @@
         id: `site_${i}`,
         x,
         z,
-        radius: chunkSize * (i === 4 ? 0.115 : 0.095),
+        radius: chunkSize * (i === 4 ? 0.085 : 0.070),
         recommended:
           i === 4 ||
           hash(cell.x, cell.y, 200 + i) > 0.34
@@ -199,7 +200,7 @@
     });
   }
 
-  function terrainClassAt(x, z, biome, cellX, cellY, chunkSize = 1800) {
+  function terrainClassAt(x, z, biome, cellX, cellY, chunkSize = 8192) {
     const slope = slopeAt(x, z, biome, cellX, cellY, chunkSize, 18);
     const h = heightAt(x, z, biome, cellX, cellY, chunkSize);
     const rocky =
@@ -221,7 +222,7 @@
     biome,
     cellX,
     cellY,
-    chunkSize = 1800,
+    chunkSize = 8192,
     footprint = 90
   }) {
     const half = chunkSize / 2;
@@ -284,7 +285,7 @@
     };
   }
 
-  function vegetationPoints(cell, biome, chunkSize = 1800, graphics = "BASIC") {
+  function vegetationPoints(cell, biome, chunkSize = 8192, graphics = "BASIC") {
     const p = biomeProfile(biome);
     const baseCount = graphics === "REGULAR" ? 420 : 250;
     const target = Math.round(baseCount * p.trees);
@@ -293,10 +294,10 @@
 
     // Cluster centers produce real forest stands with open meadows between.
     const clusterCount =
-      biome === "forest" ? 15 :
-      biome === "wetland" ? 11 :
-      biome === "plains" ? 9 :
-      6;
+      biome === "forest" ? 24 :
+      biome === "wetland" ? 18 :
+      biome === "plains" ? 16 :
+      10;
 
     const clusters = [];
     for (let c = 0; c < clusterCount; c++) {
@@ -337,7 +338,7 @@
     return points;
   }
 
-  function rockPoints(cell, biome, chunkSize = 1800, graphics = "BASIC") {
+  function rockPoints(cell, biome, chunkSize = 8192, graphics = "BASIC") {
     const count =
       biome === "mountain"
         ? (graphics === "REGULAR" ? 90 : 56)
@@ -362,7 +363,7 @@
   }
 
   window.mapGameTerritory = {
-    VERSION: "0.2.1F",
+    VERSION: "0.2.2A1",
     heightAt,
     slopeAt,
     waterBandAt,
@@ -373,5 +374,5 @@
     terrainClassAt
   };
 
-  console.log("Map Game territory planner 0.2.1F ready.");
+  console.log("Map Game territory planner 0.2.2A1 huge-world rules ready.");
 })();

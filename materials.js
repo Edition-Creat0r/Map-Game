@@ -165,6 +165,22 @@
     const regular = preset === "REGULAR" || preset === "DEEP";
     const deep = preset === "DEEP";
 
+    const categoryKey = String(category || "General").toLowerCase();
+    const categoryStyle =
+      categoryKey === "residential"
+        ? { primary: "#d6c7b1", secondary: "#8e7e6d", accent: "#66584d" }
+      : categoryKey === "commercial"
+        ? { primary: "#c7d0d2", secondary: "#71848b", accent: "#355d6a" }
+      : categoryKey === "industrial"
+        ? { primary: "#a9aaa3", secondary: "#6d716c", accent: "#665844" }
+      : categoryKey === "government"
+        ? { primary: "#d8d5cc", secondary: "#8a9195", accent: "#546776" }
+      : categoryKey === "infrastructure"
+        ? { primary: "#b9c0bc", secondary: "#66716f", accent: "#496f70" }
+      : categoryKey === "parks"
+        ? { primary: "#c9c4ad", secondary: "#7e806d", accent: "#52674f" }
+      : { primary: "#c7c2b7", secondary: "#8a9397", accent: "#6d7f83" };
+
     if (!regular) {
       return {
         asphalt: simpleMaterial(B, scene, "mgAsphaltBasic", "#242a2e", 0.05),
@@ -216,20 +232,20 @@
     };
   }
 
-  function createBuildingPalette(scene, preset = "BASIC") {
+  function createBuildingPalette(scene, preset = "BASIC", category = "General") {
     const B = window.BABYLON;
     const regular = preset === "REGULAR" || preset === "DEEP";
     const deep = preset === "DEEP";
 
     if (!regular) {
       return {
-        wall: simpleMaterial(B, scene, "mgWallBasic", "#c7c2b7", 0.08),
-        wall2: simpleMaterial(B, scene, "mgWall2Basic", "#8a9397", 0.08),
+        wall: simpleMaterial(B, scene, `mgWallBasic_${categoryKey}`, categoryStyle.primary, 0.08),
+        wall2: simpleMaterial(B, scene, `mgWall2Basic_${categoryKey}`, categoryStyle.secondary, 0.08),
         roof: simpleMaterial(B, scene, "mgRoofBasic", "#303942", 0.06),
         dark: simpleMaterial(B, scene, "mgDarkBasic", "#18242c", 0.12),
         storefront: glassMaterial(B, scene, false),
         warm: simpleMaterial(B, scene, "mgWarmBasic", "#d7c5a5", 0.06),
-        accent: simpleMaterial(B, scene, "mgAccentBasic", "#6d7f83", 0.08),
+        accent: simpleMaterial(B, scene, `mgAccentBasic_${categoryKey}`, categoryStyle.accent, 0.08),
         pavement: getRoadSet(scene, preset).pavement
       };
     }
@@ -238,10 +254,10 @@
       wall: pbrSurface(
         B,
         scene,
-        "mgConcretePrimary",
+        `mgConcretePrimary_${categoryKey}`,
         ASSETS.concrete,
         {
-          baseColor: "#d7d2c7",
+          baseColor: categoryStyle.primary,
           roughness: 0.84,
           uScale: deep ? 3.4 : 2.4,
           vScale: deep ? 3.4 : 2.4,
@@ -251,10 +267,10 @@
       wall2: pbrSurface(
         B,
         scene,
-        "mgConcreteSecondary",
+        `mgConcreteSecondary_${categoryKey}`,
         ASSETS.concrete,
         {
-          baseColor: "#9aa0a1",
+          baseColor: categoryStyle.secondary,
           roughness: 0.86,
           uScale: deep ? 3.0 : 2.0,
           vScale: deep ? 3.0 : 2.0,
@@ -277,7 +293,7 @@
           bumpLevel: 0.50
         }
       ),
-      accent: simpleMaterial(B, scene, "mgAccentRegular", "#617278", 0.20),
+      accent: simpleMaterial(B, scene, `mgAccentRegular_${categoryKey}`, categoryStyle.accent, 0.20),
       pavement: getRoadSet(scene, preset).pavement
     };
   }
@@ -287,7 +303,7 @@
   }
 
   window.mapGameMaterials = {
-    VERSION: "0.2.1G",
+    VERSION: "0.2.2A1",
     ASSETS,
     getRoadSet,
     createBuildingPalette,
@@ -295,5 +311,5 @@
     assetReport
   };
 
-  console.log("Map Game materials 0.2.1G ready.");
+  console.log("Map Game materials 0.2.2A1 category styles ready.");
 })();
