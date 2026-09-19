@@ -1,6 +1,6 @@
 // ============================================================
 // MAP GAME — territory.js
-// Alpha 0.2.2A1 huge territory planning + terrain rules
+// Alpha 0.2.2B1.2 huge territory planning + terrain rules
 //
 // This file is deliberately data/math focused.
 // Babylon meshes remain in game.js for now; this module owns:
@@ -15,6 +15,11 @@
 
 (() => {
   "use strict";
+
+  // Cache deterministic city-site layouts per territory/biome/size.
+  // This declaration was accidentally dropped during the 0.2.2B1 size/streaming migration,
+  // which caused heightAt() -> citySites() to throw before the first sector could render.
+  const citySiteCache = new Map();
 
   function clamp(v, lo, hi) {
     return Math.max(lo, Math.min(hi, v));
@@ -367,7 +372,7 @@
   }
 
   window.mapGameTerritory = {
-    VERSION: "0.2.2B1",
+    VERSION: "0.2.2B1.2",
     heightAt,
     slopeAt,
     waterBandAt,
@@ -378,5 +383,5 @@
     terrainClassAt
   };
 
-  console.log("Map Game territory planner 0.2.2B1 32km streamed-world rules ready.");
+  console.log("Map Game territory planner 0.2.2B1.2 city-site cache hotfix ready.");
 })();
