@@ -96,9 +96,9 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.2A1.3";
-  const CHUNK_WORLD_SIZE = window.mapGameWorldConfig?.TERRITORY_SIZE || 8192;
-  const TERRITORY_RENDER_SIZE = window.mapGameWorldConfig?.RENDER_WINDOW_SIZE || 2048;
+  const VERSION = "0.2.2B1";
+  const CHUNK_WORLD_SIZE = window.mapGameWorldConfig?.TERRITORY_SIZE || 32768;
+  const TERRITORY_RENDER_SIZE = window.mapGameWorldConfig?.SECTOR_SIZE || 512;
   const WORLD_COLS = window.mapGameWorldConfig?.WORLD_COLS || 316;
   const WORLD_ROWS = window.mapGameWorldConfig?.WORLD_ROWS || 316;
   const CENTRAL_X = Math.floor(WORLD_COLS / 2);
@@ -2334,10 +2334,11 @@
     );
   }
 
-  function enterTerritory(cell) {
+  async function enterTerritory(cell) {
     clearWorldRoots();
 
     const biome = getBiome(cell.x, cell.y);
+
     const root =
       new BABYLON.TransformNode(
         `Territory_${cell.x}_${cell.y}`,
@@ -2351,134 +2352,96 @@
       biome
     };
 
-    showWorldLoading("GENERATING TERRAIN");
-    setLoadingState("GENERATING TERRAIN", 22);
-
-    territoryGround =
-      createTerritoryGround(
-        root,
-        cell,
-        biome
-      );
-
-    setLoadingState("OPENING TERRITORY", 46);
-
-    const boundaryMat =
-      new BABYLON.StandardMaterial(
-        "boundaryMat",
-        scene
-      );
-
-    boundaryMat.diffuseColor =
-      new BABYLON.Color3(0.2, 0.72, 0.96);
-
-    boundaryMat.emissiveColor =
-      new BABYLON.Color3(0.04, 0.18, 0.28);
-
-    boundaryMat.alpha = 0.20;
-
-    const half =
-      CHUNK_WORLD_SIZE / 2 - 3;
-
-    [
-      [0, -half, CHUNK_WORLD_SIZE, 2],
-      [0, half, CHUNK_WORLD_SIZE, 2],
-      [-half, 0, 2, CHUNK_WORLD_SIZE],
-      [half, 0, 2, CHUNK_WORLD_SIZE]
-    ].forEach(([x, z, w, d]) => {
-      const edge =
-        BABYLON.MeshBuilder.CreateBox(
-          "territoryBoundary",
-          {
-            width: w,
-            depth: d,
-            height: 0.5
-          },
-          scene
-        );
-
-      edge.position.set(x, 1.0, z);
-      edge.material = boundaryMat;
-      edge.parent = root;
-      edge.isPickable = false;
-    });
+    showWorldLoading("OPENING TERRITORY");
+    setLoadingState("STARTING SECTOR STREAM", 28);
 
     camera.target.set(0, 18, -120);
     camera.radius = 620;
     camera.alpha = -Math.PI / 2.25;
     camera.beta = 1.04;
+
     setMode("TERRITORY");
 
-    requestAnimationFrame(() => {
-      if (state.terrainRoot !== root) return;
+    const streamer =
+      window.mapGameTerritoryStream;
 
-      setLoadingState("RESTORING YOUR WORLD", 68);
+    if (!streamer) {
+      setLoadingState("STREAMER MISSING", 100);
+      hideWorldLoading();
 
-      setTimeout(() => {
-        if (state.terrainRoot !== root) return;
+      showToast(
+        "Territory streamer did not load. Check territory_stream.js.",
+        "error"
+      );
 
-        // Essential state first.
-        buildTerritoryPlanner(root, cell, biome);
-        restorePlacedBuildingsForTerritory();
+      return;
+    }
 
-        const existingCapital =
-          getCapitalForActiveTerritory();
+    streamer.setRuntime?.(
+      window.mapGameRuntime
+    );
 
-        if (existingCapital) {
-          state.capital = existingCapital;
-          renderCapital(existingCapital, true);
+    setLoadingState("LOADING CENTER SECTOR", 52);
 
-          setStatus(
-            `<b>${escapeHtml(existingCapital.name || "Capital")}</b> • ` +
-            `${BIOMES[biome].label} territory • compact render window active`
-          );
-        } else {
-          const anyLocalCapital =
-            state.worldType === "singleplayer"
-              ? loadLocalState()?.capital
-              : null;
+    await streamer.start(
+      state.activeTerritory,
+      biome,
+      root
+    );
 
-          if (anyLocalCapital) {
-            state.capital = anyLocalCapital;
+    territoryGround =
+      streamer.allGroundMeshes?.()[0] || null;
 
-            setStatus(
-              `${BIOMES[biome].label} territory • no city here yet • ` +
-              `connect this region to your civilization before founding a secondary city`
-            );
-          } else {
-            setStatus(
-              `${BIOMES[biome].label} territory • choose a stable capital site`
-            );
-            setTimeout(() => beginCapitalPlacement(), 500);
-          }
-        }
+    setLoadingState("RESTORING WORLD STATE", 76);
 
-        // The world is playable now. Do not hold the player behind
-        // a loading screen just to add decoration.
-        setLoadingState("WORLD READY", 100);
-        hideWorldLoading();
+    buildTerritoryPlanner(
+      root,
+      cell,
+      biome
+    );
 
-        // Decorative visuals arrive quietly after first paint.
-        requestAnimationFrame(() => {
-          if (state.terrainRoot !== root) return;
+    restorePlacedBuildingsForTerritory();
 
-          setTimeout(() => {
-            if (state.terrainRoot !== root) return;
-            placeTerritoryMountains(root, cell, biome);
-            addCoast(root, cell, biome);
+    const existingCapital =
+      getCapitalForActiveTerritory();
 
-            requestAnimationFrame(() => {
-              if (state.terrainRoot !== root) return;
-              setTimeout(() => {
-                if (state.terrainRoot !== root) return;
-                placeTerritoryVegetation(root, cell, biome);
-                placeTerritoryRocks(root, cell, biome);
-              }, 30);
-            });
-          }, 30);
-        });
-      }, 0);
-    });
+    if (existingCapital) {
+      state.capital = existingCapital;
+      renderCapital(existingCapital, true);
+
+      setStatus(
+        `<b>${escapeHtml(existingCapital.name || "Capital")}</b> • ` +
+        `${BIOMES[biome].label} territory • sector streaming active`
+      );
+    } else {
+      const anyLocalCapital =
+        state.worldType === "singleplayer"
+          ? loadLocalState()?.capital
+          : null;
+
+      if (anyLocalCapital) {
+        state.capital = anyLocalCapital;
+
+        setStatus(
+          `${BIOMES[biome].label} territory • undeveloped region • ` +
+          `connect this area before founding a secondary city`
+        );
+      } else {
+        setStatus(
+          `${BIOMES[biome].label} territory • choose a stable capital site`
+        );
+
+        setTimeout(
+          () => beginCapitalPlacement(),
+          420
+        );
+      }
+    }
+
+    setLoadingState("WORLD READY", 100);
+    hideWorldLoading();
+
+    streamer.rebuildQueue?.();
   }
 
   function getCapitalForActiveTerritory() {
@@ -2495,56 +2458,27 @@
   // 0.2.1F — TERRAIN GRADING + REAL CONSTRUCTION
   // ==========================================================
 
-  function flattenTerrainForStructure(x, z, width, depth, targetY, padding = 10) {
-    if (!territoryGround) return;
-
-    const positions =
-      territoryGround.getVerticesData(BABYLON.VertexBuffer.PositionKind);
-    if (!positions) return;
-
-    const halfW = width / 2;
-    const halfD = depth / 2;
-    const outerW = halfW + padding;
-    const outerD = halfD + padding;
-
-    for (let i = 0; i < positions.length; i += 3) {
-      const vx = positions[i];
-      const vz = positions[i + 2];
-      const dx = Math.abs(vx - x);
-      const dz = Math.abs(vz - z);
-
-      if (dx > outerW || dz > outerD) continue;
-
-      if (dx <= halfW && dz <= halfD) {
-        positions[i + 1] = targetY;
-      } else {
-        const wx = clamp((outerW - dx) / Math.max(1, padding), 0, 1);
-        const wz = clamp((outerD - dz) / Math.max(1, padding), 0, 1);
-        const blend = Math.min(wx, wz);
-        positions[i + 1] = lerp(
-          positions[i + 1],
-          targetY,
-          blend * blend * (3 - 2 * blend)
-        );
-      }
+  function flattenTerrainForStructure(
+    x,
+    z,
+    width,
+    depth,
+    targetY,
+    padding = 10
+  ) {
+    if (window.mapGameTerritoryStream?.flattenTerrainForStructure) {
+      window.mapGameTerritoryStream.flattenTerrainForStructure(
+        x,
+        z,
+        width,
+        depth,
+        targetY,
+        padding
+      );
+      return;
     }
 
-    territoryGround.updateVerticesData(
-      BABYLON.VertexBuffer.PositionKind,
-      positions
-    );
-
-    const normals = [];
-    BABYLON.VertexData.ComputeNormals(
-      positions,
-      territoryGround.getIndices(),
-      normals
-    );
-    territoryGround.updateVerticesData(
-      BABYLON.VertexBuffer.NormalKind,
-      normals
-    );
-    territoryGround.refreshBoundingInfo();
+    if (!territoryGround) return;
   }
 
   function removeTerrainDetailsNear(x, z, radius) {
@@ -2913,8 +2847,25 @@
   // ==========================================================
 
   function getGroundPointFromPointer(evt) {
+    const streamed =
+      window.mapGameTerritoryStream?.pickGround?.(
+        scene.pointerX,
+        scene.pointerY
+      );
+
+    if (streamed) return streamed;
+
     if (!territoryGround) return null;
-    const pick = scene.pick(scene.pointerX, scene.pointerY, mesh => mesh === territoryGround);
+
+    const pick =
+      scene.pick(
+        scene.pointerX,
+        scene.pointerY,
+        mesh =>
+          mesh === territoryGround ||
+          Boolean(mesh?.metadata?.terrainSector)
+      );
+
     if (!pick?.hit || !pick.pickedPoint) return null;
     return pick.pickedPoint.clone();
   }
@@ -3777,7 +3728,7 @@
       <header class="mg-topbar">
         <div class="mg-brand-lockup">
           <div class="mg-brand-mark">M</div>
-          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • THE BIG WORLD UPDATE</span></div>
+          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • WORLD STREAMING</span></div>
         </div>
         <div class="mg-top-status">
           <div class="mg-status-chip"><span>WORLD</span><b id="mgWorldLabel">SINGLEPLAYER</b></div>
@@ -4315,7 +4266,11 @@
     glassMaterial: glassBasic,
     graphicsPreset: state.graphics,
     mapSize: CHUNK_WORLD_SIZE,
-    renderWindowSize: TERRITORY_RENDER_SIZE,
+    renderWindowSize:
+      (window.mapGameWorldConfig?.SECTOR_SIZE || 512) *
+      ((window.mapGameWorldConfig?.RENDER_DISTANCE_PRESETS?.[
+        localStorage.getItem("mapgame_render_distance") || "low"
+      ] || 2) * 2 + 1),
     worldBorderRadius: CHUNK_WORLD_SIZE / 2,
     playableLandRadius: CHUNK_WORLD_SIZE / 2 - 20,
     showToast,
@@ -4351,11 +4306,20 @@
   };
 
   // Keep runtime ground current whenever territory/hub changes.
-  const groundWatcher = scene.onNewMeshAddedObservable.add(mesh => {
-    if (mesh.name === "territoryGround" || mesh.name === "hubGround") {
-      window.mapGameRuntime.ground = mesh;
-    }
-  });
+  const groundWatcher =
+    scene.onNewMeshAddedObservable.add(mesh => {
+      if (
+        mesh.name === "territoryGround" ||
+        mesh.name === "hubGround" ||
+        mesh?.metadata?.terrainSector
+      ) {
+        window.mapGameRuntime.ground = mesh;
+
+        if (mesh?.metadata?.terrainSector) {
+          territoryGround = mesh;
+        }
+      }
+    });
 
   window.dispatchEvent(new CustomEvent("mapgame:runtime-ready", { detail: window.mapGameRuntime }));
 
@@ -4413,5 +4377,5 @@
   window.addEventListener("resize", () => engine.resize());
   window.addEventListener("beforeunload", saveLocalState);
 
-  console.log("Map Game Alpha 0.2.2A1.3 boot-safe build loaded.");
+  console.log("Map Game Alpha 0.2.2B1 sector-streaming build loaded.");
 })();

@@ -2714,3 +2714,29 @@ body[data-world="singleplayer"] [data-action="hub"]{display:none!important}
     width: calc(100vw - 20px);
   }
 }
+
+
+/* ============================================================
+   0.2.2B1 — TERRITORY STREAM STATUS
+   ============================================================ */
+
+.mg-stream-status {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 38;
+  padding: 6px 8px;
+  border: 1px solid rgba(111,220,248,.10);
+  border-radius: 7px;
+  background: rgba(4,17,27,.62);
+  color: rgba(191,226,235,.42);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+}
+
+.mg-stream-status[hidden] {
+  display: none !important;
+}

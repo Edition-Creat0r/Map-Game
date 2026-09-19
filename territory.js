@@ -94,7 +94,7 @@
     return { isWater: false, depth: 0, shoreZ: null };
   }
 
-  function heightAt(x, z, biome, cellX, cellY, chunkSize = 8192) {
+  function heightAt(x, z, biome, cellX, cellY, chunkSize = 32768) {
     const p = biomeProfile(biome);
     const scaleFix = 1800 / Math.max(1800, chunkSize);
 
@@ -155,14 +155,14 @@
     return height;
   }
 
-  function slopeAt(x, z, biome, cellX, cellY, chunkSize = 8192, sample = 22) {
+  function slopeAt(x, z, biome, cellX, cellY, chunkSize = 32768, sample = 22) {
     const h = heightAt(x, z, biome, cellX, cellY, chunkSize);
     const hx = heightAt(x + sample, z, biome, cellX, cellY, chunkSize);
     const hz = heightAt(x, z + sample, biome, cellX, cellY, chunkSize);
     return Math.max(Math.abs(hx - h), Math.abs(hz - h));
   }
 
-  function citySites(cell, biome, chunkSize = 8192) {
+  function citySites(cell, biome, chunkSize = 32768) {
     const cacheKey = `${cell.x}:${cell.y}:${biome}:${chunkSize}`;
     if (citySiteCache.has(cacheKey)) return citySiteCache.get(cacheKey);
     const half = chunkSize / 2;
@@ -204,7 +204,7 @@
     return result;
   }
 
-  function terrainClassAt(x, z, biome, cellX, cellY, chunkSize = 8192) {
+  function terrainClassAt(x, z, biome, cellX, cellY, chunkSize = 32768) {
     const slope = slopeAt(x, z, biome, cellX, cellY, chunkSize, 18);
     const h = heightAt(x, z, biome, cellX, cellY, chunkSize);
     const rocky =
@@ -226,7 +226,7 @@
     biome,
     cellX,
     cellY,
-    chunkSize = 8192,
+    chunkSize = 32768,
     footprint = 90
   }) {
     const half = chunkSize / 2;
@@ -289,7 +289,7 @@
     };
   }
 
-  function vegetationPoints(cell, biome, chunkSize = 8192, graphics = "BASIC") {
+  function vegetationPoints(cell, biome, chunkSize = 32768, graphics = "BASIC") {
     const p = biomeProfile(biome);
     const baseCount = graphics === "REGULAR" ? 420 : 250;
     const target = Math.round(baseCount * p.trees);
@@ -342,7 +342,7 @@
     return points;
   }
 
-  function rockPoints(cell, biome, chunkSize = 8192, graphics = "BASIC") {
+  function rockPoints(cell, biome, chunkSize = 32768, graphics = "BASIC") {
     const count =
       biome === "mountain"
         ? (graphics === "REGULAR" ? 90 : 56)
@@ -367,7 +367,7 @@
   }
 
   window.mapGameTerritory = {
-    VERSION: "0.2.2A1",
+    VERSION: "0.2.2B1",
     heightAt,
     slopeAt,
     waterBandAt,
@@ -378,5 +378,5 @@
     terrainClassAt
   };
 
-  console.log("Map Game territory planner 0.2.2A1 huge-world rules ready.");
+  console.log("Map Game territory planner 0.2.2B1 32km streamed-world rules ready.");
 })();
