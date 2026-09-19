@@ -165,22 +165,6 @@
     const regular = preset === "REGULAR" || preset === "DEEP";
     const deep = preset === "DEEP";
 
-    const categoryKey = String(category || "General").toLowerCase();
-    const categoryStyle =
-      categoryKey === "residential"
-        ? { primary: "#d6c7b1", secondary: "#8e7e6d", accent: "#66584d" }
-      : categoryKey === "commercial"
-        ? { primary: "#c7d0d2", secondary: "#71848b", accent: "#355d6a" }
-      : categoryKey === "industrial"
-        ? { primary: "#a9aaa3", secondary: "#6d716c", accent: "#665844" }
-      : categoryKey === "government"
-        ? { primary: "#d8d5cc", secondary: "#8a9195", accent: "#546776" }
-      : categoryKey === "infrastructure"
-        ? { primary: "#b9c0bc", secondary: "#66716f", accent: "#496f70" }
-      : categoryKey === "parks"
-        ? { primary: "#c9c4ad", secondary: "#7e806d", accent: "#52674f" }
-      : { primary: "#c7c2b7", secondary: "#8a9397", accent: "#6d7f83" };
-
     if (!regular) {
       return {
         asphalt: simpleMaterial(B, scene, "mgAsphaltBasic", "#242a2e", 0.05),
@@ -236,6 +220,24 @@
     const B = window.BABYLON;
     const regular = preset === "REGULAR" || preset === "DEEP";
     const deep = preset === "DEEP";
+
+    const categoryKey =
+      String(category || "General").toLowerCase();
+
+    const categoryStyle =
+      categoryKey === "residential"
+        ? { primary: "#d6c7b1", secondary: "#8e7e6d", accent: "#66584d" }
+      : categoryKey === "commercial"
+        ? { primary: "#c7d0d2", secondary: "#71848b", accent: "#355d6a" }
+      : categoryKey === "industrial"
+        ? { primary: "#a9aaa3", secondary: "#6d716c", accent: "#665844" }
+      : categoryKey === "government"
+        ? { primary: "#d8d5cc", secondary: "#8a9195", accent: "#546776" }
+      : categoryKey === "infrastructure"
+        ? { primary: "#b9c0bc", secondary: "#66716f", accent: "#496f70" }
+      : categoryKey === "parks"
+        ? { primary: "#c9c4ad", secondary: "#7e806d", accent: "#52674f" }
+      : { primary: "#c7c2b7", secondary: "#8a9397", accent: "#6d7f83" };
 
     if (!regular) {
       return {
@@ -303,7 +305,7 @@
   }
 
   window.mapGameMaterials = {
-    VERSION: "0.2.2A1",
+    VERSION: "0.2.2A1.4",
     ASSETS,
     getRoadSet,
     createBuildingPalette,
@@ -311,5 +313,5 @@
     assetReport
   };
 
-  console.log("Map Game materials 0.2.2A1 category styles ready.");
+  console.log("Map Game materials 0.2.2A1.4 category-style hotfix ready.");
 })();
