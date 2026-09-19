@@ -2102,3 +2102,114 @@ body[data-mapgame-mode="building_placement"] .mg-location-pill {
     top: 60px !important;
   }
 }
+
+
+/* ============================================================
+   MAP GAME — 0.2.1G FINAL VISUAL PASS
+   REAL SHOP PREVIEW / MATERIALS / TRAFFIC / BASIC-vs-REGULAR
+   ============================================================ */
+
+.mg-shop-preview-stage {
+  overflow: hidden;
+  min-height: 440px;
+}
+
+.mg-shop-preview-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  outline: 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.mg-shop-preview-canvas:active {
+  cursor: grabbing;
+}
+
+.mg-shop-preview-grid,
+.mg-shop-preview-sky,
+.mg-shop-model {
+  display: none !important;
+}
+
+.mg-shop-preview-label,
+.mg-shop-preview-quality {
+  z-index: 3;
+  pointer-events: none;
+}
+
+.mg-shop-preview-label::after {
+  content: "  •  DRAG TO ROTATE  •  SCROLL TO ZOOM";
+  color: rgba(222,244,251,.30);
+}
+
+/* BASIC is intentionally clean and readable rather than "bad". */
+body[data-graphics="basic"] .mg-topbar,
+body[data-graphics="basic"] .mg-dock,
+body[data-graphics="basic"] .mg-shop-shell {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+body[data-graphics="basic"] .mg-shop-shell {
+  box-shadow: 0 24px 60px rgba(0,0,0,.34);
+}
+
+/* REGULAR has stronger depth, glass and edge treatment. */
+body[data-graphics="regular"] .mg-topbar,
+body[data-graphics="regular"] .mg-dock,
+body[data-graphics="regular"] .mg-shop-shell {
+  backdrop-filter: blur(18px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+}
+
+body[data-graphics="regular"] .mg-shop-shell {
+  box-shadow:
+    0 30px 90px rgba(0,0,0,.45),
+    0 0 0 1px rgba(117,220,255,.05);
+}
+
+body[data-graphics="regular"] .mg-shop-preview-stage {
+  box-shadow:
+    inset 0 0 90px rgba(82,188,225,.08),
+    inset 0 -90px 100px rgba(0,0,0,.20);
+}
+
+body[data-graphics="regular"] .mg-shop-list-item.active {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(62,191,230,.16),
+      rgba(62,191,230,.025)
+    );
+}
+
+/* Final command rail alignment */
+.mg-dock {
+  left: 0 !important;
+  border-radius: 0 13px 13px 0 !important;
+  border-left: 0 !important;
+}
+
+/* Small visual quality label so the player knows the preview is real. */
+.mg-shop-preview-quality {
+  color: rgba(190,237,250,.62);
+  background: rgba(3,14,23,.68);
+  border-color: rgba(108,221,255,.16);
+}
+
+/* Do not allow the header to become a debug wall on smaller screens. */
+@media (max-width: 1260px) {
+  .mg-status-chip.mg-utility-chip {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .mg-shop-preview-label::after {
+    content: "  •  DRAG TO ROTATE";
+  }
+}

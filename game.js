@@ -96,7 +96,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.1F";
+  const VERSION = "0.2.1G FINAL";
   const CHUNK_WORLD_SIZE = 1800;
   const WORLD_COLS = 316;
   const WORLD_ROWS = 316;
@@ -584,6 +584,19 @@
 
   function createRoad(root, x, z, width, depth, rotation = 0, opts = {}) {
     const roadRoot = new BABYLON.TransformNode("roadRoot", scene);
+
+    const externalRoadSet =
+      window.mapGameMaterials?.getRoadSet?.(
+        scene,
+        state.graphics
+      );
+
+    const activeRoadMaterial =
+      externalRoadSet?.asphalt || roadMat;
+    const activePavementMaterial =
+      externalRoadSet?.pavement || concreteLightMat;
+    const activeCurbMaterial =
+      externalRoadSet?.curb || roadEdgeMat;
     roadRoot.parent = root;
     roadRoot.position.set(x, 0, z);
     roadRoot.rotation.y = rotation;
@@ -596,7 +609,7 @@
         height: 0.45
       }, scene);
       sidewalk.position.y = 0.20;
-      sidewalk.material = concreteLightMat;
+      sidewalk.material = activePavementMaterial;
       sidewalk.parent = roadRoot;
       sidewalk.receiveShadows = true;
       sidewalk.isPickable = false;
@@ -608,7 +621,7 @@
       height: 0.28
     }, scene);
     curb.position.y = 0.33;
-    curb.material = roadEdgeMat;
+    curb.material = activeCurbMaterial;
     curb.parent = roadRoot;
     curb.isPickable = false;
 
@@ -618,7 +631,7 @@
       height: 0.24
     }, scene);
     road.position.y = 0.48;
-    road.material = roadMat;
+    road.material = activeRoadMaterial;
     road.parent = roadRoot;
     road.receiveShadows = true;
     road.isPickable = false;
@@ -1418,6 +1431,14 @@
         root
       );
     }
+
+    // Visual traffic uses the real external sedan model.
+    // Failure to load it never blocks the hub.
+    window.mapGameTraffic
+      ?.startHubTraffic?.(root, state.graphics)
+      ?.catch?.(error =>
+        console.warn("Map Game traffic start failed:", error)
+      );
 
     camera.target.set(0, 30, -28);
     camera.alpha = -Math.PI / 2.2;
@@ -3188,13 +3209,11 @@
               <div class="mg-shop-preview-sky"></div>
               <div class="mg-shop-preview-grid"></div>
 
-              <div class="mg-shop-model" id="mgShopModel">
-                <div class="mg-shop-model-shadow"></div>
-                <div class="mg-shop-model-base"></div>
-                <div class="mg-shop-model-tower">
-                  <span></span><span></span><span></span><span></span>
-                </div>
-              </div>
+              <canvas
+                id="mgShopPreviewCanvas"
+                class="mg-shop-preview-canvas"
+                aria-label="Interactive 3D building preview"
+              ></canvas>
 
               <div class="mg-shop-preview-label">
                 STRUCTURE PREVIEW
@@ -3265,6 +3284,10 @@
     `;
 
     document.body.appendChild(shopOverlay);
+
+    window.mapGameShopPreview?.mount?.(
+      shopOverlay.querySelector("#mgShopPreviewCanvas")
+    );
 
     shopOverlay.querySelector("#mgShopClose").onclick = hideShop;
     shopOverlay.querySelector("#mgShopCancelPlacement").onclick = hideShop;
@@ -3435,9 +3458,17 @@
       };
     });
 
-    const model = shopOverlay.querySelector("#mgShopModel");
-    model.dataset.category = item.category.toLowerCase();
-    model.style.setProperty("--mg-model-variant", String(shopSelection.variant));
+    window.mapGameShopPreview?.preview?.({
+      itemId: item.id,
+      variant: shopSelection.variant,
+      graphicsPreset: state.graphics
+    });
+
+    const quality =
+      shopOverlay.querySelector(".mg-shop-preview-quality");
+    if (quality) {
+      quality.textContent = `${state.graphics} • LIVE 3D MODEL`;
+    }
   }
 
   function changeShopVariant(delta) {
@@ -3451,12 +3482,14 @@
     if (!shopOverlay) buildShopOverlay();
     shopOverlay.hidden = false;
     document.body.dataset.shopOpen = "true";
+    window.mapGameShopPreview?.setVisible?.(true);
     renderShopList();
     renderShopSelection();
   }
 
   function hideShop() {
     if (shopOverlay) shopOverlay.hidden = true;
+    window.mapGameShopPreview?.setVisible?.(false);
     delete document.body.dataset.shopOpen;
   }
 
@@ -3527,7 +3560,7 @@
       <header class="mg-topbar">
         <div class="mg-brand-lockup">
           <div class="mg-brand-mark">M</div>
-          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • CONSTRUCTION + UTILITIES + CITY GROWTH</span></div>
+          <div><strong>MAP GAME</strong><span>ALPHA ${VERSION} • FINAL CITY LIFE + MATERIALS + TRAFFIC</span></div>
         </div>
         <div class="mg-top-status">
           <div class="mg-status-chip"><span>WORLD</span><b id="mgWorldLabel">SINGLEPLAYER</b></div>
@@ -3646,6 +3679,7 @@
   function toggleGraphics() {
     state.graphics = state.graphics === "BASIC" ? "REGULAR" : "BASIC";
     localStorage.setItem("mapgame_graphics", state.graphics);
+    document.body.dataset.graphics = state.graphics.toLowerCase();
     const btn = document.getElementById("mgGraphicsToggle");
     if (btn) btn.textContent = `GRAPHICS • ${state.graphics}`;
 
@@ -3663,7 +3697,13 @@
     }
 
     window.mapGameRuntime.graphicsPreset = state.graphics;
-    window.dispatchEvent(new CustomEvent("mapgame:graphics", { detail: { preset: state.graphics } }));
+    window.dispatchEvent(
+      new CustomEvent(
+        "mapgame:graphics",
+        { detail: { preset: state.graphics } }
+      )
+    );
+    window.mapGameShopPreview?.refresh?.();
 
     // Rebuild active view so architecture actually changes, not just the label.
     if (state.mode === "HUB") buildNeutralHub();
@@ -3953,8 +3993,16 @@
     rockMaterial: rockMat,
     snowMaterial: snowMat,
     sandMaterial: sandMat,
-    roadMaterial: roadMat,
-    roadEdgeMaterial: roadEdgeMat,
+    roadMaterial:
+      window.mapGameMaterials?.getRoadSet?.(
+        scene,
+        state.graphics
+      )?.asphalt || roadMat,
+    roadEdgeMaterial:
+      window.mapGameMaterials?.getRoadSet?.(
+        scene,
+        state.graphics
+      )?.curb || roadEdgeMat,
     concreteMaterial: concreteMat,
     darkMaterial: darkMat,
     treeLeafMaterial: treeLeafMat,
@@ -4000,6 +4048,9 @@
   // ==========================================================
   // START
   // ==========================================================
+
+  document.body.dataset.graphics =
+    String(state.graphics || "BASIC").toLowerCase();
 
   scene.imageProcessingConfiguration.toneMappingEnabled = true;
   scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;

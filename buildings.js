@@ -351,7 +351,22 @@
     return CATALOG.find(v => v.id === id) || CATALOG[0];
   }
 
-  function createMaterials(B, scene, regular) {
+  function createMaterials(B, scene, regular, preset = null) {
+    const graphics =
+      preset ||
+      (regular ? "REGULAR" : "BASIC");
+
+    if (window.mapGameMaterials?.createBuildingPalette) {
+      const palette =
+        window.mapGameMaterials.createBuildingPalette(
+          scene,
+          graphics
+        );
+      palette.__regular =
+        graphics === "REGULAR" || graphics === "DEEP";
+      return palette;
+    }
+
     const mat = (name, color, spec = 0.1) => {
       const m = new B.StandardMaterial(name, scene);
       m.diffuseColor = B.Color3.FromHexString(color);
@@ -366,11 +381,19 @@
     const dark = mat("mgNeighborhoodDark", "#18242c", 0.18);
     const storefront = mat("mgNeighborhoodStorefront", "#1b5369", 0.35);
     storefront.alpha = regular ? 0.78 : 0.92;
-
     const warm = mat("mgNeighborhoodWarm", "#d7c5a5", 0.08);
     const accent = mat("mgNeighborhoodAccent", "#6d7f83", 0.12);
 
-    return { wall, wall2, roof, dark, storefront, warm, accent };
+    return {
+      wall,
+      wall2,
+      roof,
+      dark,
+      storefront,
+      warm,
+      accent,
+      pavement: accent
+    };
   }
 
   function addFoundation(B, scene, root, w, d, material, depth = 2.6) {
@@ -386,6 +409,131 @@
     f.receiveShadows = true;
     f.isPickable = false;
     return f;
+  }
+
+  function seededVariation(seed, salt = 0) {
+    const n = Math.sin((seed + 1) * 91.733 + salt * 43.17) * 43758.5453;
+    return n - Math.floor(n);
+  }
+
+  function addRegularHouseDetails(B, scene, node, w, d, mats, variant) {
+    // Porch / entry canopy
+    const porch =
+      B.MeshBuilder.CreateBox(
+        "housePorch",
+        {
+          width: w * 0.42,
+          height: 0.38,
+          depth: 3.8
+        },
+        scene
+      );
+    porch.position.set(-w * 0.15, 0.28, -d / 2 - 1.6);
+    porch.material = mats.pavement || mats.accent;
+    porch.parent = node;
+
+    const canopy =
+      B.MeshBuilder.CreateBox(
+        "houseEntryCanopy",
+        {
+          width: w * 0.32,
+          height: 0.28,
+          depth: 2.6
+        },
+        scene
+      );
+    canopy.position.set(-w * 0.18, 5.3, -d / 2 - 1.0);
+    canopy.material = mats.roof;
+    canopy.parent = node;
+
+    // Chimney or roof vent moves between variants.
+    const chimney =
+      B.MeshBuilder.CreateBox(
+        "houseChimney",
+        {
+          width: 1.5,
+          height: 4.0,
+          depth: 1.5
+        },
+        scene
+      );
+    chimney.position.set(
+      variant % 2 ? -w * 0.28 : w * 0.25,
+      10.1,
+      variant % 3 === 0 ? 2.0 : -1.2
+    );
+    chimney.material = mats.dark;
+    chimney.parent = node;
+
+    // Two smaller windows break the "one blue rectangle" look.
+    for (let i = 0; i < 2; i++) {
+      const sideWindow =
+        B.MeshBuilder.CreateBox(
+          "houseDetailWindow",
+          {
+            width: 2.3,
+            height: 1.7,
+            depth: 0.13
+          },
+          scene
+        );
+      sideWindow.position.set(
+        -w * 0.24 + i * w * 0.46,
+        5.0,
+        -d / 2 - 0.13
+      );
+      sideWindow.material = mats.storefront;
+      sideWindow.parent = node;
+    }
+  }
+
+  function addTowerSetbacks(B, scene, root, w, h, d, mats, variant) {
+    const podium =
+      B.MeshBuilder.CreateBox(
+        "towerPodium",
+        {
+          width: w * 1.16,
+          height: 7.2,
+          depth: d * 1.16
+        },
+        scene
+      );
+    podium.position.y = 3.2;
+    podium.material = variant % 2 ? mats.warm : mats.wall;
+    podium.parent = root;
+
+    const crown =
+      B.MeshBuilder.CreateBox(
+        "towerCrown",
+        {
+          width: w * 0.64,
+          height: 4.6,
+          depth: d * 0.60
+        },
+        scene
+      );
+    crown.position.y = h + 2.3;
+    crown.material = mats.dark;
+    crown.parent = root;
+
+    // Offset mechanical volume creates controlled asymmetry.
+    const mech =
+      B.MeshBuilder.CreateBox(
+        "towerMechanicalPenthouse",
+        {
+          width: w * 0.24,
+          height: 5.2,
+          depth: d * 0.28
+        },
+        scene
+      );
+    mech.position.set(
+      variant % 2 ? w * 0.24 : -w * 0.22,
+      h + 6.8,
+      variant % 3 === 0 ? d * 0.12 : -d * 0.10
+    );
+    mech.material = mats.dark;
+    mech.parent = root;
   }
 
   function house(B, scene, root, x, z, rot, mats, variant = 0) {
@@ -436,6 +584,10 @@
     window.material = mats.storefront;
     window.parent = node;
 
+    if (mats.__regular || node.getScene()?.metadata?.mapGameRegularPreview) {
+      addRegularHouseDetails(B, scene, node, w, d, mats, variant);
+    }
+
     return node;
   }
 
@@ -474,6 +626,49 @@
       win.parent = node;
     }
 
+    if (mats.__regular) {
+      const balconyRows = Math.max(2, Math.floor(h / 11));
+      for (let r = 0; r < balconyRows; r++) {
+        const balcony =
+          B.MeshBuilder.CreateBox(
+            "apartmentBalcony",
+            {
+              width: w * 0.72,
+              height: 0.28,
+              depth: 2.4
+            },
+            scene
+          );
+        balcony.position.set(
+          variant % 2 ? w * 0.04 : -w * 0.04,
+          7 + r * 8.2,
+          d / 2 + 1.0
+        );
+        balcony.material = mats.dark;
+        balcony.parent = node;
+      }
+
+      for (const side of [-1, 1]) {
+        const sideGlass =
+          B.MeshBuilder.CreateBox(
+            "apartmentSideGlass",
+            {
+              width: 0.13,
+              height: h * 0.58,
+              depth: d * 0.38
+            },
+            scene
+          );
+        sideGlass.position.set(
+          side * (w / 2 + 0.08),
+          h * 0.55,
+          variant % 2 ? d * 0.12 : -d * 0.08
+        );
+        sideGlass.material = mats.storefront;
+        sideGlass.parent = node;
+      }
+    }
+
     const roof = B.MeshBuilder.CreateBox("apartmentRoof", {
       width:w * .72, height:1.8, depth:d * .64
     }, scene);
@@ -510,6 +705,40 @@
     canopy.material = mats.dark;
     canopy.parent = node;
 
+    if (mats.__regular) {
+      const sign =
+        B.MeshBuilder.CreateBox(
+          "retailSignBand",
+          {
+            width: w * 0.54,
+            height: 1.15,
+            depth: 0.22
+          },
+          scene
+        );
+      sign.position.set(
+        variant % 2 ? w * 0.08 : -w * 0.08,
+        7.2,
+        -d / 2 - 0.18
+      );
+      sign.material = mats.accent;
+      sign.parent = node;
+
+      const roofUnit =
+        B.MeshBuilder.CreateBox(
+          "retailRoofUnit",
+          {
+            width: w * 0.20,
+            height: 1.6,
+            depth: d * 0.22
+          },
+          scene
+        );
+      roofUnit.position.set(w * 0.22, 9.0, d * 0.08);
+      roofUnit.material = mats.dark;
+      roofUnit.parent = node;
+    }
+
     return node;
   }
 
@@ -544,8 +773,16 @@
 
     const B = window.BABYLON;
     const scene = runtime.scene;
-    const regular = runtime.graphicsPreset === "REGULAR";
-    const mats = createMaterials(B, scene, regular);
+    const regular =
+      runtime.graphicsPreset === "REGULAR" ||
+      runtime.graphicsPreset === "DEEP";
+    const mats =
+      createMaterials(
+        B,
+        scene,
+        regular,
+        runtime.graphicsPreset || "BASIC"
+      );
 
     const root = new B.TransformNode("neutralNeighborhoodDemo", scene);
     root.parent = parent || null;
@@ -565,8 +802,39 @@
     for (const streetX of [-460, -340]) {
       for (let row = 0; row < 6; row++) {
         const z = -340 + row * 58;
-        house(B, scene, root, streetX, z, 0, mats, n++);
-        house(B, scene, root, streetX - 60, z, Math.PI, mats, n++);
+        const a = n++;
+        const b = n++;
+
+        const jitterA =
+          regular
+            ? (seededVariation(a, 3) - 0.5) * 5.5
+            : 0;
+        const jitterB =
+          regular
+            ? (seededVariation(b, 7) - 0.5) * 5.5
+            : 0;
+
+        house(
+          B,
+          scene,
+          root,
+          streetX + jitterA,
+          z + (regular ? (seededVariation(a, 9) - 0.5) * 5 : 0),
+          regular ? (seededVariation(a, 11) - 0.5) * 0.05 : 0,
+          mats,
+          a
+        );
+
+        house(
+          B,
+          scene,
+          root,
+          streetX - 60 + jitterB,
+          z + (regular ? (seededVariation(b, 13) - 0.5) * 5 : 0),
+          Math.PI + (regular ? (seededVariation(b, 15) - 0.5) * 0.05 : 0),
+          mats,
+          b
+        );
       }
     }
 
@@ -680,7 +948,28 @@
       if (["officeTower","hotel"].includes(data.type)) {
         const h = data.type === "officeTower" ? 96 : 72;
         visual = apartment(B, scene, root, 0, 0, w * 0.78, h, d * 0.76, mats, data.variant || 0);
-        if (regular) addRegularFacadeDetail(B, scene, visual, w * 0.78, h, d * 0.76, mats, "tower");
+        if (regular) {
+          addRegularFacadeDetail(
+            B,
+            scene,
+            visual,
+            w * 0.78,
+            h,
+            d * 0.76,
+            mats,
+            "tower"
+          );
+          addTowerSetbacks(
+            B,
+            scene,
+            visual,
+            w * 0.78,
+            h,
+            d * 0.76,
+            mats,
+            data.variant || 0
+          );
+        }
       } else {
         visual = retail(B, scene, root, 0, 0, w * 0.90, d * 0.82, mats, data.variant || 0);
         if (regular && data.type === "officeLow") {
@@ -774,7 +1063,7 @@
   }
 
   window.mapGameBuildings = {
-    VERSION: "0.2.1F",
+    VERSION: "0.2.1G",
     CATALOG,
     item,
     buildNeighborhoodDemo,
@@ -782,5 +1071,5 @@
     addFoundation
   };
 
-  console.log("Map Game buildings 0.2.1F ready.");
+  console.log("Map Game buildings 0.2.1G ready.");
 })();
