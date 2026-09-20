@@ -2740,3 +2740,232 @@ body[data-world="singleplayer"] [data-action="hub"]{display:none!important}
 .mg-stream-status[hidden] {
   display: none !important;
 }
+
+
+/* ============================================================
+   MAP GAME — 0.2.2C1 ROAD TOOL
+   ============================================================ */
+
+.mg-road-tool {
+  position: fixed;
+  left: 78px;
+  top: 82px;
+  z-index: 76;
+  width: 330px;
+  max-height: calc(100vh - 110px);
+  overflow: auto;
+  padding: 14px;
+  border: 1px solid rgba(112,215,244,.17);
+  border-radius: 12px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(6,24,38,.97),
+      rgba(4,15,25,.985)
+    );
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.38),
+    inset 0 1px rgba(255,255,255,.025);
+  backdrop-filter: blur(16px);
+}
+
+.mg-road-tool[hidden] {
+  display: none !important;
+}
+
+.mg-road-tool-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 2px 12px;
+}
+
+.mg-road-tool-head h2 {
+  margin: 3px 0 0;
+  font-size: 20px;
+}
+
+.mg-road-close {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(111,214,243,.11);
+  border-radius: 8px;
+  background: rgba(255,255,255,.025);
+  color: rgba(222,242,248,.68);
+  font: inherit;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.mg-road-mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  padding-bottom: 13px;
+}
+
+.mg-road-mode-tabs button {
+  min-height: 35px;
+  padding: 0 5px;
+  border: 1px solid rgba(111,214,243,.09);
+  border-radius: 7px;
+  background: rgba(255,255,255,.02);
+  color: rgba(213,236,243,.48);
+  font: inherit;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  cursor: pointer;
+}
+
+.mg-road-mode-tabs button.active {
+  color: #dff9ff;
+  border-color: rgba(104,220,250,.32);
+  background: rgba(46,145,178,.16);
+}
+
+.mg-road-section-label {
+  margin: 3px 2px 8px;
+  color: rgba(196,226,235,.38);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .13em;
+}
+
+.mg-road-type-list {
+  display: grid;
+  gap: 5px;
+}
+
+.mg-road-type {
+  width: 100%;
+  min-height: 48px;
+  padding: 7px 9px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  border: 1px solid rgba(111,214,243,.07);
+  border-radius: 8px;
+  background: rgba(255,255,255,.016);
+  color: inherit;
+  cursor: pointer;
+}
+
+.mg-road-type.active {
+  border-color: rgba(104,220,250,.28);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(50,151,184,.13),
+      rgba(255,255,255,.012)
+    );
+}
+
+.mg-road-type-line {
+  width: 42px;
+  height: var(--road-width, 3px);
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: rgba(202,223,229,.64);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.22);
+}
+
+.mg-road-type-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.mg-road-type-copy strong {
+  color: rgba(232,246,250,.86);
+  font-size: 10px;
+}
+
+.mg-road-type-copy small {
+  color: rgba(193,219,227,.38);
+  font-size: 8px;
+}
+
+.mg-road-readout {
+  margin-top: 13px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.mg-road-readout > div {
+  padding: 9px;
+  display: grid;
+  gap: 3px;
+  border-top: 1px solid rgba(112,215,244,.07);
+  border-bottom: 1px solid rgba(112,215,244,.07);
+}
+
+.mg-road-readout span {
+  color: rgba(188,219,228,.34);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .11em;
+}
+
+.mg-road-readout strong {
+  color: rgba(225,242,247,.78);
+  font-size: 10px;
+}
+
+.mg-road-message {
+  margin-top: 10px;
+  min-height: 42px;
+  padding: 9px 10px;
+  border: 1px solid rgba(111,214,243,.07);
+  border-radius: 8px;
+  background: rgba(0,0,0,.10);
+  color: rgba(207,232,239,.58);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.mg-road-message[data-kind="good"] {
+  color: rgba(157,234,196,.82);
+  border-color: rgba(95,211,157,.13);
+}
+
+.mg-road-message[data-kind="bad"] {
+  color: rgba(255,158,146,.84);
+  border-color: rgba(255,116,101,.14);
+}
+
+.mg-road-foot {
+  padding-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: rgba(186,214,223,.28);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .10em;
+}
+
+.mg-road-foot span + span::before {
+  content: "•";
+  margin-right: 8px;
+  color: rgba(104,220,250,.23);
+}
+
+@media (max-width: 760px) {
+  .mg-road-tool {
+    left: 68px;
+    top: 68px;
+    width: min(
+      320px,
+      calc(100vw - 82px)
+    );
+  }
+
+  .mg-road-mode-tabs {
+    grid-template-columns: 1fr 1fr;
+  }
+}

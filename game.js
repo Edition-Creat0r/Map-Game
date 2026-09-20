@@ -96,7 +96,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.2B1.1";
+  const VERSION = "0.2.2C1";
   const CHUNK_WORLD_SIZE = window.mapGameWorldConfig?.TERRITORY_SIZE || 32768;
   const TERRITORY_RENDER_SIZE = window.mapGameWorldConfig?.SECTOR_SIZE || 512;
   const WORLD_COLS = window.mapGameWorldConfig?.WORLD_COLS || 316;
@@ -2473,6 +2473,11 @@
     territoryGround =
       streamer.allGroundMeshes?.()[0] || null;
 
+    window.mapGameRoadTool
+      ?.enterTerritory?.(
+        state.activeTerritory.id
+      );
+
     if (!territoryGround) {
       hideWorldLoading();
 
@@ -2692,18 +2697,55 @@
     const collision =
       overlapsRoadOrBuilding(x, z, fp.width, fp.depth);
 
+    const roadAccessDistance =
+      Math.max(
+        30,
+        Math.max(
+          fp.width,
+          fp.depth
+        ) / 2 + 22
+      );
+
+    const roadAccess =
+      window.mapGameRoads
+        ?.pointHasRoadAccess?.(
+          state.activeTerritory.id,
+          x,
+          z,
+          roadAccessDistance
+        ) || {
+          allowed: false
+        };
+
     const reasons = [...(terrain.reasons || [])];
-    if (collision) reasons.push(collision);
+
+    if (collision) {
+      reasons.push(collision);
+    }
+
+    if (!roadAccess.allowed) {
+      reasons.push(
+        "No road access — connect this site to the road network first"
+      );
+    }
+
     if (terrainClass?.rocky) {
       reasons.push("Rocky terrain — foundation excavation required");
     }
 
     const affordable =
       window.mapGameEconomy?.canAfford?.(def.cost || {}) ?? true;
-    if (!affordable) reasons.push("Not enough money / resources");
+
+    if (!affordable) {
+      reasons.push("Not enough money / resources");
+    }
 
     return {
-      allowed: Boolean(terrain.allowed) && !collision && affordable,
+      allowed:
+        Boolean(terrain.allowed) &&
+        !collision &&
+        roadAccess.allowed &&
+        affordable,
       reasons,
       footprint: fp,
       terrainClass,
@@ -2818,7 +2860,7 @@
     if (!analysis.allowed) {
       showToast(
         analysis.reasons.find(v =>
-          /collision|water|steep|enough/i.test(v)
+          /road|collision|water|steep|enough/i.test(v)
         ) || "This site is not buildable.",
         "error"
       );
@@ -3896,8 +3938,17 @@
         "success"
       );
     };
-    hudRoot.querySelector("[data-action='infrastructure']").onclick = () =>
-      showToast("0.2.2A1 road graph is active. Interactive road drawing is the next A patch.", "info");
+    hudRoot.querySelector("[data-action='infrastructure']").onclick = () => {
+      if (!state.activeTerritory) {
+        showToast(
+          "Enter your territory before opening the Road Tool.",
+          "info"
+        );
+        return;
+      }
+
+      window.mapGameRoadTool?.open?.();
+    };
     hudRoot.querySelector("[data-action='defense']").onclick = () =>
       showToast("Defense, walls and military are intentionally locked for now.", "info");
     hudRoot.querySelector("[data-action='settings']").onclick = () =>
@@ -4392,6 +4443,7 @@
     worldType: () => state.worldType,
     getActiveTerritory: () => state.activeTerritory,
     getActiveCapital: () => getCapitalForActiveTerritory(),
+    getTerritoryRoot: () => state.terrainRoot,
     getMyStartingTerritory,
     parseTerritoryId,
     showWorldMap,
@@ -4486,5 +4538,5 @@
   window.addEventListener("resize", () => engine.resize());
   window.addEventListener("beforeunload", saveLocalState);
 
-  console.log("Map Game Alpha 0.2.2B1.1 ownership + territory-entry fix loaded.");
+  console.log("Map Game Alpha 0.2.2C1 roads + connectivity build loaded.");
 })();
