@@ -1,24 +1,48 @@
 // ============================================================
 // MAP GAME — road_tool.js
-// Alpha 0.2.2C1 — interactive road construction tool
+// Alpha 0.2.2C1.5 — Road Tool overhaul
+//
+// Features in this pass:
+// - curved roads
+// - full ghost preview
+// - sidewalks on city roads
+// - intersection pads
+// - yellow pedestrian crossings
+// - elevation control / overpasses
+// - bridge piers
+// - same-height crossing = intersection
+// - different-height crossing = grade separation
+//
+// Signs / props intentionally come later.
 // ============================================================
 (() => {
   "use strict";
 
-  const R = () => window.mapGameRoads;
-  const C = () => window.mapGameWorldConfig;
-  const runtime = () => window.mapGameRuntime;
+  const R =
+    () => window.mapGameRoads;
+
+  const C =
+    () => window.mapGameWorldConfig;
+
+  const runtime =
+    () => window.mapGameRuntime;
 
   let panel = null;
   let open = false;
   let mode = "build";
   let roadType = "road2";
+
   let startPoint = null;
-  let preview = null;
-  let previewMat = null;
+  let curveAmount = 0;
+  let elevationOffset = 0;
+
+  let previewRoot = null;
   let roadRoot = null;
   let activeTerritoryId = null;
+
   let rendered = new Map();
+  let renderedJunctions = new Map();
+
   let lastStreamRefresh = 0;
 
   const roadRank = {
@@ -29,65 +53,264 @@
     freeway: 4
   };
 
+  const roadRules = {
+    dirt: {
+      sidewalk: false,
+      crossings: false
+    },
+    road2: {
+      sidewalk: true,
+      crossings: true
+    },
+    avenue4: {
+      sidewalk: true,
+      crossings: true
+    },
+    highway: {
+      sidewalk: false,
+      crossings: false
+    },
+    freeway: {
+      sidewalk: false,
+      crossings: false
+    }
+  };
+
+  let mats = null;
+
   function activeTerritory() {
-    return runtime()?.getActiveTerritory?.() || null;
+    return (
+      runtime()
+        ?.getActiveTerritory?.() ||
+      null
+    );
   }
 
   function activeCapital() {
-    return runtime()?.getActiveCapital?.() || null;
+    return (
+      runtime()
+        ?.getActiveCapital?.() ||
+      null
+    );
   }
 
   function worldType() {
-    return runtime()?.worldType?.() || "singleplayer";
+    return (
+      runtime()
+        ?.worldType?.() ||
+      "singleplayer"
+    );
+  }
+
+  function graph() {
+    const t =
+      activeTerritory();
+
+    return t && R()
+      ? R().graphFor(t.id)
+      : null;
   }
 
   function terrainY(x, z) {
-    const t = activeTerritory();
+    const t =
+      activeTerritory();
+
     if (!t) return 0;
 
     return (
-      window.mapGameTerritory?.heightAt?.(
-        x,
-        z,
-        t.biome,
-        t.x,
-        t.y,
-        C()?.TERRITORY_SIZE || 32768
-      ) ?? 0
+      window.mapGameTerritory
+        ?.heightAt?.(
+          x,
+          z,
+          t.biome,
+          t.x,
+          t.y,
+          C()?.TERRITORY_SIZE ||
+            32768
+        ) ?? 0
     );
   }
 
   function disposeNode(node) {
     try {
-      node?.dispose?.(false, false);
+      node?.dispose?.(
+        false,
+        false
+      );
     } catch (_) {}
   }
 
-  function ensureRoadRoot() {
-    if (!runtime()?.scene) return null;
-
-    if (!roadRoot) {
-      roadRoot =
-        new BABYLON.TransformNode(
-          "playerRoadStreamRoot",
-          runtime().scene
-        );
+  function ensureMaterials() {
+    if (
+      mats ||
+      !runtime()?.scene
+    ) {
+      return mats;
     }
+
+    const scene =
+      runtime().scene;
+
+    const roadSet =
+      window.mapGameMaterials
+        ?.getRoadSet?.(
+          scene,
+          runtime().graphicsPreset ||
+            "BASIC"
+        );
+
+    function simple(
+      name,
+      color,
+      emissive = null,
+      alpha = 1
+    ) {
+      const m =
+        new BABYLON.StandardMaterial(
+          name,
+          scene
+        );
+
+      m.diffuseColor =
+        BABYLON.Color3.FromHexString(
+          color
+        );
+
+      m.specularColor =
+        new BABYLON.Color3(
+          0.05,
+          0.05,
+          0.05
+        );
+
+      if (emissive) {
+        m.emissiveColor =
+          BABYLON.Color3.FromHexString(
+            emissive
+          );
+      }
+
+      m.alpha = alpha;
+      return m;
+    }
+
+    mats = {
+      asphalt:
+        roadSet?.asphalt ||
+        simple(
+          "c15Asphalt",
+          "#2a2f33"
+        ),
+
+      sidewalk:
+        roadSet?.pavement ||
+        simple(
+          "c15Sidewalk",
+          "#9da3a2"
+        ),
+
+      curb:
+        roadSet?.curb ||
+        simple(
+          "c15Curb",
+          "#b9bebc"
+        ),
+
+      lane:
+        simple(
+          "c15Lane",
+          "#d8d5bd"
+        ),
+
+      crossing:
+        simple(
+          "c15Crossing",
+          "#e7bb2f",
+          "#4a3904"
+        ),
+
+      pier:
+        simple(
+          "c15Pier",
+          "#71787a"
+        ),
+
+      ghostValid:
+        simple(
+          "c15GhostValid",
+          "#46d9b0",
+          "#123f35",
+          0.48
+        ),
+
+      ghostWarn:
+        simple(
+          "c15GhostWarn",
+          "#e0ae3b",
+          "#4d3606",
+          0.50
+        ),
+
+      ghostBad:
+        simple(
+          "c15GhostBad",
+          "#ef625d",
+          "#4a1110",
+          0.50
+        )
+    };
+
+    return mats;
+  }
+
+  function ensureRoadRoot() {
+    if (
+      roadRoot ||
+      !runtime()?.scene
+    ) {
+      return roadRoot;
+    }
+
+    roadRoot =
+      new BABYLON.TransformNode(
+        "playerRoadStreamRoot",
+        runtime().scene
+      );
 
     return roadRoot;
   }
 
+  function clearPreview() {
+    disposeNode(
+      previewRoot
+    );
+
+    previewRoot = null;
+  }
+
   function clearRendered() {
-    for (const node of rendered.values()) {
+    for (
+      const node of
+      rendered.values()
+    ) {
+      disposeNode(node);
+    }
+
+    for (
+      const node of
+      renderedJunctions.values()
+    ) {
       disposeNode(node);
     }
 
     rendered.clear();
+    renderedJunctions.clear();
 
-    if (roadRoot) {
-      disposeNode(roadRoot);
-      roadRoot = null;
-    }
+    disposeNode(
+      roadRoot
+    );
+
+    roadRoot = null;
   }
 
   function visibleRadius() {
@@ -99,7 +322,9 @@
       ).toLowerCase();
 
     const radius =
-      C()?.RENDER_DISTANCE_PRESETS?.[preset] ??
+      C()
+        ?.RENDER_DISTANCE_PRESETS
+        ?.[preset] ??
       (
         preset === "high"
           ? 4
@@ -109,186 +334,1065 @@
       );
 
     return (
-      (Number(radius) + 1.25) *
-      Number(C()?.SECTOR_SIZE || 512)
+      (
+        Number(radius) +
+        1.5
+      ) *
+      Number(
+        C()?.SECTOR_SIZE ||
+        512
+      )
     );
   }
 
-  function segmentNearCamera(segment) {
-    const rt = runtime();
-    const t = activeTerritory();
+  function segmentNearCamera(
+    segment
+  ) {
+    const rt =
+      runtime();
 
-    if (!rt?.camera || !t) return false;
+    if (
+      !rt?.camera ||
+      !segment?.path?.length
+    ) {
+      return false;
+    }
 
-    const g =
-      R().graphFor(t.id);
+    let cx = 0;
+    let cz = 0;
 
-    const a = g.nodes.get(segment.a);
-    const b = g.nodes.get(segment.b);
+    for (
+      const p of
+      segment.path
+    ) {
+      cx += p.x;
+      cz += p.z;
+    }
 
-    if (!a || !b) return false;
+    cx /=
+      segment.path.length;
 
-    const cx = (a.x + b.x) / 2;
-    const cz = (a.z + b.z) / 2;
-    const half = segment.length / 2;
+    cz /=
+      segment.path.length;
 
-    const target = rt.camera.target;
     const distance =
       Math.hypot(
-        cx - target.x,
-        cz - target.z
+        cx -
+          rt.camera.target.x,
+        cz -
+          rt.camera.target.z
       );
 
     return (
       distance <=
-      visibleRadius() + half
+      visibleRadius() +
+        segment.length / 2
     );
   }
 
-  function buildRoadVisual(segment) {
-    const rt = runtime();
-    const t = activeTerritory();
+  function roadHasSidewalk(
+    type
+  ) {
+    return Boolean(
+      roadRules[type]
+        ?.sidewalk
+    );
+  }
 
-    if (!rt?.scene || !t) return null;
+  function roadHasCrossings(
+    type
+  ) {
+    return Boolean(
+      roadRules[type]
+        ?.crossings
+    );
+  }
 
-    const g =
-      R().graphFor(t.id);
+  function pathPiece(
+    parent,
+    a,
+    b,
+    width,
+    material,
+    {
+      height = 0.28,
+      yOffset = 0,
+      lateral = 0,
+      extraLength = 0.8,
+      name = "roadPiece"
+    } = {}
+  ) {
+    const scene =
+      runtime().scene;
 
-    const a = g.nodes.get(segment.a);
-    const b = g.nodes.get(segment.b);
+    const dx =
+      b.x - a.x;
 
-    if (!a || !b) return null;
+    const dz =
+      b.z - a.z;
+
+    const horizontal =
+      Math.hypot(
+        dx,
+        dz
+      );
+
+    if (
+      horizontal < 0.05
+    ) {
+      return null;
+    }
+
+    const angle =
+      Math.atan2(
+        dx,
+        dz
+      );
+
+    const nx =
+      Math.cos(angle);
+
+    const nz =
+      -Math.sin(angle);
+
+    const mesh =
+      BABYLON.MeshBuilder.CreateBox(
+        name,
+        {
+          width,
+          height,
+          depth:
+            horizontal +
+            extraLength
+        },
+        scene
+      );
+
+    mesh.position.set(
+      (a.x + b.x) / 2 +
+        nx * lateral,
+      (a.y + b.y) / 2 +
+        yOffset,
+      (a.z + b.z) / 2 +
+        nz * lateral
+    );
+
+    mesh.rotation.y =
+      angle;
+
+    // Tilt along vertical grade.
+    mesh.rotation.x =
+      -Math.atan2(
+        b.y - a.y,
+        horizontal
+      );
+
+    mesh.material =
+      material;
+
+    mesh.parent =
+      parent;
+
+    mesh.receiveShadows =
+      true;
+
+    mesh.isPickable =
+      false;
+
+    return mesh;
+  }
+
+  function laneDashes(
+    parent,
+    a,
+    b,
+    width,
+    material,
+    lanes
+  ) {
+    const horizontal =
+      Math.hypot(
+        b.x - a.x,
+        b.z - a.z
+      );
+
+    if (
+      horizontal < 14
+    ) {
+      return;
+    }
+
+    const dashCount =
+      Math.max(
+        1,
+        Math.floor(
+          horizontal / 18
+        )
+      );
+
+    const dx =
+      b.x - a.x;
+
+    const dz =
+      b.z - a.z;
+
+    const angle =
+      Math.atan2(
+        dx,
+        dz
+      );
+
+    for (
+      let i = 0;
+      i < dashCount;
+      i++
+    ) {
+      if (
+        i % 2 !== 0
+      ) {
+        continue;
+      }
+
+      const t =
+        (i + 0.5) /
+        dashCount;
+
+      const y =
+        a.y +
+        (b.y - a.y) * t;
+
+      const mesh =
+        BABYLON.MeshBuilder.CreateBox(
+          "roadLaneDash",
+          {
+            width: 0.45,
+            height: 0.05,
+            depth:
+              Math.min(
+                6,
+                horizontal /
+                  dashCount *
+                  0.72
+              )
+          },
+          runtime().scene
+        );
+
+      mesh.position.set(
+        a.x + dx * t,
+        y + 0.38,
+        a.z + dz * t
+      );
+
+      mesh.rotation.y =
+        angle;
+
+      mesh.rotation.x =
+        -Math.atan2(
+          b.y - a.y,
+          horizontal
+        );
+
+      mesh.material =
+        material;
+
+      mesh.parent =
+        parent;
+
+      mesh.isPickable =
+        false;
+    }
+  }
+
+  function buildBridgePiers(
+    parent,
+    segment
+  ) {
+    if (
+      !segment?.path?.length
+    ) {
+      return;
+    }
+
+    const points =
+      segment.path;
+
+    let accumulated = 0;
+    let nextPierAt = 42;
+
+    for (
+      let i = 1;
+      i < points.length;
+      i++
+    ) {
+      const a =
+        points[i - 1];
+
+      const b =
+        points[i];
+
+      const step =
+        Math.hypot(
+          b.x - a.x,
+          b.z - a.z
+        );
+
+      accumulated +=
+        step;
+
+      if (
+        accumulated <
+        nextPierAt
+      ) {
+        continue;
+      }
+
+      nextPierAt += 42;
+
+      const x =
+        (a.x + b.x) / 2;
+
+      const z =
+        (a.z + b.z) / 2;
+
+      const roadY =
+        (a.y + b.y) / 2;
+
+      const ground =
+        terrainY(x, z);
+
+      const clearance =
+        roadY - ground;
+
+      if (
+        clearance < 4.5
+      ) {
+        continue;
+      }
+
+      const pier =
+        BABYLON.MeshBuilder
+          .CreateBox(
+            "bridgePier",
+            {
+              width: 2.2,
+              height:
+                Math.max(
+                  1,
+                  clearance - 0.5
+                ),
+              depth: 2.2
+            },
+            runtime().scene
+          );
+
+      pier.position.set(
+        x,
+        ground +
+          clearance / 2,
+        z
+      );
+
+      pier.material =
+        ensureMaterials()
+          .pier;
+
+      pier.parent =
+        parent;
+
+      pier.isPickable =
+        false;
+    }
+  }
+
+  function buildRoadVisual(
+    segment,
+    {
+      ghost = false,
+      ghostState = "valid"
+    } = {}
+  ) {
+    const rt =
+      runtime();
+
+    if (
+      !rt?.scene ||
+      !segment?.path?.length
+    ) {
+      return null;
+    }
 
     const root =
       new BABYLON.TransformNode(
-        `roadVisual_${segment.id}`,
+        ghost
+          ? "roadGhost"
+          : `roadVisual_${segment.id}`,
         rt.scene
       );
 
-    root.parent = ensureRoadRoot();
-    root.metadata = {
-      road: true,
-      playerRoad: true,
-      roadSegmentId: segment.id
-    };
+    root.parent =
+      ghost
+        ? null
+        : ensureRoadRoot();
 
-    const dx = b.x - a.x;
-    const dz = b.z - a.z;
-    const length =
-      Math.hypot(dx, dz);
+    const materials =
+      ensureMaterials();
 
-    const angle =
-      Math.atan2(dx, dz);
+    const spec =
+      R().ROAD_TYPES[
+        segment.type
+      ] || {};
 
-    const chunkLength = 54;
-    const pieces =
-      Math.max(
-        1,
-        Math.ceil(length / chunkLength)
+    const width =
+      Number(
+        segment.width ||
+        spec.width ||
+        14
       );
 
-    for (let i = 0; i < pieces; i++) {
-      const t0 = i / pieces;
-      const t1 = (i + 1) / pieces;
-      const tm = (t0 + t1) / 2;
+    const sidewalk =
+      roadHasSidewalk(
+        segment.type
+      );
 
-      const x =
-        a.x + dx * tm;
+    const roadMaterial =
+      ghost
+        ? (
+            ghostState ===
+            "bad"
+              ? materials.ghostBad
+              : ghostState ===
+                "warn"
+                  ? materials.ghostWarn
+                  : materials.ghostValid
+          )
+        : materials.asphalt;
 
-      const z =
-        a.z + dz * tm;
+    for (
+      let i = 1;
+      i < segment.path.length;
+      i++
+    ) {
+      const a =
+        segment.path[i - 1];
 
-      const pieceLength =
-        length / pieces;
+      const b =
+        segment.path[i];
 
-      const y = terrainY(x, z);
+      pathPiece(
+        root,
+        a,
+        b,
+        width,
+        roadMaterial,
+        {
+          height:
+            ghost
+              ? 0.34
+              : 0.28,
+          yOffset:
+            ghost
+              ? 0.45
+              : 0.42,
+          name:
+            ghost
+              ? "roadGhostSurface"
+              : "roadSurface"
+        }
+      );
 
-      const piece =
-        rt.createRoad(
+      if (
+        sidewalk &&
+        !ghost
+      ) {
+        const sideOffset =
+          width / 2 + 3.1;
+
+        for (
+          const side of
+          [-1, 1]
+        ) {
+          pathPiece(
+            root,
+            a,
+            b,
+            5.4,
+            materials.sidewalk,
+            {
+              height: 0.30,
+              yOffset: 0.35,
+              lateral:
+                side *
+                sideOffset,
+              name:
+                "roadSidewalk"
+            }
+          );
+
+          pathPiece(
+            root,
+            a,
+            b,
+            0.58,
+            materials.curb,
+            {
+              height: 0.42,
+              yOffset: 0.42,
+              lateral:
+                side *
+                (
+                  width / 2 +
+                  0.35
+                ),
+              name:
+                "roadCurb"
+            }
+          );
+        }
+      }
+
+      if (
+        !ghost &&
+        segment.type !==
+          "dirt"
+      ) {
+        laneDashes(
           root,
-          x,
-          z,
-          Number(segment.width || 14),
-          pieceLength + 0.8,
-          angle,
-          {
-            playerBuilt: true,
-            type: segment.type
-          }
+          a,
+          b,
+          width,
+          materials.lane,
+          segment.lanes
         );
+      }
 
-      piece.position.y = y + 0.24;
-      piece.metadata = {
-        ...(piece.metadata || {}),
-        road: true,
-        playerRoad: true,
-        roadSegmentId: segment.id,
-        roadWidth: Number(segment.width || 14),
-        roadDepth: pieceLength + 1,
-        roadRotation: angle
-      };
+      if (
+        ghost &&
+        sidewalk
+      ) {
+        const sideOffset =
+          width / 2 + 3.1;
+
+        for (
+          const side of
+          [-1, 1]
+        ) {
+          pathPiece(
+            root,
+            a,
+            b,
+            5.0,
+            roadMaterial,
+            {
+              height: 0.18,
+              yOffset: 0.31,
+              lateral:
+                side *
+                sideOffset,
+              name:
+                "ghostSidewalk"
+            }
+          );
+        }
+      }
     }
 
-    // Invisible pick strip for Inspect / Upgrade / Delete.
-    const pick =
-      BABYLON.MeshBuilder.CreateBox(
-        `roadPick_${segment.id}`,
-        {
-          width:
-            Number(segment.width || 14) + 8,
-          height: 3,
-          depth: length
-        },
-        rt.scene
+    if (!ghost) {
+      buildBridgePiers(
+        root,
+        segment
       );
 
-    pick.position.set(
-      (a.x + b.x) / 2,
-      terrainY(
-        (a.x + b.x) / 2,
-        (a.z + b.z) / 2
-      ) + 1.5,
-      (a.z + b.z) / 2
-    );
+      // Invisible hit pieces for inspect/delete/upgrade.
+      for (
+        let i = 1;
+        i < segment.path.length;
+        i++
+      ) {
+        const a =
+          segment.path[i - 1];
 
-    pick.rotation.y = angle;
-    pick.visibility = 0.001;
-    pick.isPickable = true;
-    pick.parent = root;
-    pick.metadata = {
-      roadPick: true,
-      roadSegmentId: segment.id
-    };
+        const b =
+          segment.path[i];
+
+        const pick =
+          pathPiece(
+            root,
+            a,
+            b,
+            width + 7,
+            materials.asphalt,
+            {
+              height: 3,
+              yOffset: 1.4,
+              name:
+                `roadPick_${segment.id}`
+            }
+          );
+
+        if (pick) {
+          pick.visibility =
+            0.001;
+
+          pick.isPickable =
+            true;
+
+          pick.metadata = {
+            roadPick: true,
+            roadSegmentId:
+              segment.id
+          };
+        }
+      }
+    }
 
     return root;
   }
 
-  function refreshVisible(force = false) {
-    const t = activeTerritory();
+  function nodeConnections(
+    nodeId
+  ) {
+    const g = graph();
+    if (!g) return [];
 
-    if (!t || !R()) {
+    const out = [];
+
+    for (
+      const segment of
+      g.segments.values()
+    ) {
+      if (
+        segment.a ===
+        nodeId ||
+        segment.b ===
+        nodeId
+      ) {
+        out.push(
+          segment
+        );
+      }
+    }
+
+    return out;
+  }
+
+  function directionAwayFromNode(
+    segment,
+    nodeId
+  ) {
+    const path =
+      segment.path || [];
+
+    if (
+      path.length < 2
+    ) {
+      return null;
+    }
+
+    if (
+      segment.a ===
+      nodeId
+    ) {
+      const a = path[0];
+      const b = path[1];
+
+      return {
+        x: b.x - a.x,
+        z: b.z - a.z,
+        y: b.y - a.y
+      };
+    }
+
+    const a =
+      path[
+        path.length - 1
+      ];
+
+    const b =
+      path[
+        path.length - 2
+      ];
+
+    return {
+      x: b.x - a.x,
+      z: b.z - a.z,
+      y: b.y - a.y
+    };
+  }
+
+  function createCrosswalk(
+    parent,
+    node,
+    segment
+  ) {
+    if (
+      !roadHasCrossings(
+        segment.type
+      )
+    ) {
+      return;
+    }
+
+    const direction =
+      directionAwayFromNode(
+        segment,
+        node.id
+      );
+
+    if (!direction) return;
+
+    const length =
+      Math.hypot(
+        direction.x,
+        direction.z
+      );
+
+    if (
+      length < 0.01
+    ) {
+      return;
+    }
+
+    const tx =
+      direction.x / length;
+
+    const tz =
+      direction.z / length;
+
+    const nx = -tz;
+    const nz = tx;
+
+    const width =
+      Number(
+        segment.width ||
+        14
+      );
+
+    const setback =
+      width / 2 + 3.7;
+
+    const centerX =
+      node.x +
+      tx * setback;
+
+    const centerZ =
+      node.z +
+      tz * setback;
+
+    const stripeCount =
+      Math.max(
+        5,
+        Math.min(
+          9,
+          Math.round(
+            width / 3
+          )
+        )
+      );
+
+    for (
+      let i = 0;
+      i < stripeCount;
+      i++
+    ) {
+      const sideT =
+        stripeCount === 1
+          ? 0
+          : (
+              i /
+                (stripeCount - 1) -
+              0.5
+            );
+
+      const lateral =
+        sideT *
+        (
+          width -
+          1.5
+        );
+
+      const stripe =
+        BABYLON.MeshBuilder
+          .CreateBox(
+            "yellowPedCrossing",
+            {
+              width: 1.25,
+              height: 0.06,
+              depth: 3.2
+            },
+            runtime().scene
+          );
+
+      stripe.position.set(
+        centerX +
+          nx * lateral,
+        Number(
+          node.y || 0
+        ) + 0.63,
+        centerZ +
+          nz * lateral
+      );
+
+      stripe.rotation.y =
+        Math.atan2(
+          nx,
+          nz
+        );
+
+      stripe.material =
+        ensureMaterials()
+          .crossing;
+
+      stripe.parent =
+        parent;
+
+      stripe.isPickable =
+        false;
+    }
+  }
+
+  function buildIntersectionVisual(
+    node
+  ) {
+    const connections =
+      nodeConnections(
+        node.id
+      );
+
+    if (
+      connections.length < 3
+    ) {
+      return null;
+    }
+
+    // Freeway-only junctions will eventually get interchange geometry.
+    const urbanConnections =
+      connections.filter(
+        seg =>
+          roadHasSidewalk(
+            seg.type
+          )
+      );
+
+    const maxWidth =
+      Math.max(
+        14,
+        ...connections.map(
+          seg =>
+            Number(
+              seg.width || 14
+            )
+        )
+      );
+
+    const root =
+      new BABYLON.TransformNode(
+        `intersection_${node.id}`,
+        runtime().scene
+      );
+
+    root.parent =
+      ensureRoadRoot();
+
+    const materials =
+      ensureMaterials();
+
+    if (
+      urbanConnections.length
+    ) {
+      const sidewalkPad =
+        BABYLON.MeshBuilder
+          .CreateCylinder(
+            "intersectionSidewalkPad",
+            {
+              diameter:
+                maxWidth + 15,
+              height: 0.30,
+              tessellation: 20
+            },
+            runtime().scene
+          );
+
+      sidewalkPad.position.set(
+        node.x,
+        Number(
+          node.y || 0
+        ) + 0.32,
+        node.z
+      );
+
+      sidewalkPad.material =
+        materials.sidewalk;
+
+      sidewalkPad.parent =
+        root;
+
+      sidewalkPad.isPickable =
+        false;
+    }
+
+    const roadPad =
+      BABYLON.MeshBuilder
+        .CreateCylinder(
+          "intersectionRoadPad",
+          {
+            diameter:
+              maxWidth + 4,
+            height: 0.30,
+            tessellation: 22
+          },
+          runtime().scene
+        );
+
+    roadPad.position.set(
+      node.x,
+      Number(
+        node.y || 0
+      ) + 0.48,
+      node.z
+    );
+
+    roadPad.material =
+      materials.asphalt;
+
+    roadPad.parent =
+      root;
+
+    roadPad.isPickable =
+      false;
+
+    // Requested yellow pedestrian crossings.
+    for (
+      const segment of
+      connections
+    ) {
+      createCrosswalk(
+        root,
+        node,
+        segment
+      );
+    }
+
+    return root;
+  }
+
+  function refreshJunctions() {
+    const g = graph();
+    if (!g) return;
+
+    const needed =
+      new Set();
+
+    for (
+      const node of
+      g.nodes.values()
+    ) {
+      const count =
+        nodeConnections(
+          node.id
+        ).length;
+
+      if (
+        count >= 3 &&
+        Math.hypot(
+          node.x -
+            runtime().camera.target.x,
+          node.z -
+            runtime().camera.target.z
+        ) <=
+          visibleRadius()
+      ) {
+        needed.add(
+          node.id
+        );
+
+        if (
+          !renderedJunctions.has(
+            node.id
+          )
+        ) {
+          const visual =
+            buildIntersectionVisual(
+              node
+            );
+
+          if (visual) {
+            renderedJunctions.set(
+              node.id,
+              visual
+            );
+          }
+        }
+      }
+    }
+
+    for (
+      const [
+        id,
+        visual
+      ] of
+      renderedJunctions
+    ) {
+      if (
+        !needed.has(id)
+      ) {
+        disposeNode(
+          visual
+        );
+
+        renderedJunctions.delete(
+          id
+        );
+      }
+    }
+  }
+
+  function refreshVisible(
+    force = false
+  ) {
+    const t =
+      activeTerritory();
+
+    if (
+      !t ||
+      !R()
+    ) {
       clearRendered();
       return;
     }
 
-    if (activeTerritoryId !== t.id) {
-      enterTerritory(t.id);
+    if (
+      activeTerritoryId !==
+      t.id
+    ) {
+      enterTerritory(
+        t.id
+      );
       return;
     }
 
     const g =
       R().graphFor(t.id);
 
-    for (const segment of g.segments.values()) {
+    for (
+      const segment of
+      g.segments.values()
+    ) {
       const should =
-        segmentNearCamera(segment);
+        segmentNearCamera(
+          segment
+        );
 
       if (
         should &&
-        !rendered.has(segment.id)
+        !rendered.has(
+          segment.id
+        )
       ) {
         const visual =
-          buildRoadVisual(segment);
+          buildRoadVisual(
+            segment
+          );
 
         if (visual) {
           rendered.set(
@@ -298,68 +1402,61 @@
         }
       } else if (
         !should &&
-        rendered.has(segment.id)
+        rendered.has(
+          segment.id
+        )
       ) {
         disposeNode(
-          rendered.get(segment.id)
+          rendered.get(
+            segment.id
+          )
         );
 
-        rendered.delete(segment.id);
+        rendered.delete(
+          segment.id
+        );
       }
     }
 
-    for (const id of [...rendered.keys()]) {
-      if (!g.segments.has(id)) {
+    for (
+      const id of
+      [...rendered.keys()]
+    ) {
+      if (
+        !g.segments.has(id)
+      ) {
         disposeNode(
           rendered.get(id)
         );
+
         rendered.delete(id);
       }
     }
 
+    refreshJunctions();
     updateStats();
-  }
-
-  function rebuildSegmentVisual(segmentId) {
-    if (rendered.has(segmentId)) {
-      disposeNode(
-        rendered.get(segmentId)
-      );
-
-      rendered.delete(segmentId);
-    }
-
-    const t = activeTerritory();
-
-    if (!t) return;
-
-    const segment =
-      R().graphFor(t.id)
-        .segments.get(segmentId);
-
-    if (
-      segment &&
-      segmentNearCamera(segment)
-    ) {
-      rendered.set(
-        segment.id,
-        buildRoadVisual(segment)
-      );
-    }
   }
 
   function createPanel() {
     if (panel) return panel;
 
-    panel = document.createElement("aside");
-    panel.id = "mgRoadTool";
-    panel.className = "mg-road-tool";
+    panel =
+      document.createElement(
+        "aside"
+      );
+
+    panel.id =
+      "mgRoadTool";
+
+    panel.className =
+      "mg-road-tool mg-road-tool-c15";
+
     panel.hidden = true;
 
     panel.innerHTML = `
       <header class="mg-road-tool-head">
         <div>
-          <div class="mg-kicker">INFRASTRUCTURE</div>
+          <div class="mg-kicker">INFRASTRUCTURE • C1.5</div>
           <h2>Road Tool</h2>
         </div>
         <button type="button" class="mg-road-close" data-road-close>×</button>
@@ -377,6 +1474,34 @@
         <div id="mgRoadTypeList" class="mg-road-type-list"></div>
       </section>
 
+      <section class="mg-road-shape-panel">
+        <div class="mg-road-section-label">ALIGNMENT</div>
+
+        <label class="mg-road-range">
+          <span>
+            <b>CURVE</b>
+            <output id="mgRoadCurveValue">STRAIGHT</output>
+          </span>
+          <input id="mgRoadCurve" type="range" min="-100" max="100" step="5" value="0">
+        </label>
+
+        <div class="mg-road-elevation">
+          <div>
+            <b>ELEVATION</b>
+            <small id="mgRoadElevationValue">GROUND</small>
+          </div>
+          <div class="mg-road-stepper">
+            <button type="button" data-elev="-4">−4m</button>
+            <button type="button" data-elev="0">GROUND</button>
+            <button type="button" data-elev="4">+4m</button>
+          </div>
+        </div>
+
+        <p class="mg-road-help">
+          Raise a road before crossing another road to make an overpass. Start a new road from the elevated road to create a ramp back down.
+        </p>
+      </section>
+
       <section class="mg-road-readout">
         <div>
           <span>MODE</span>
@@ -389,40 +1514,152 @@
       </section>
 
       <div id="mgRoadMessage" class="mg-road-message">
-        Click near your capital to start the first road.
+        Click near your capital to start the road network.
       </div>
 
       <footer class="mg-road-foot">
         <span>CLICK START</span>
-        <span>CLICK END</span>
+        <span>MOVE FOR GHOST</span>
+        <span>CLICK BUILD</span>
         <span>ESC CANCEL</span>
       </footer>
     `;
 
-    document.body.appendChild(panel);
+    document.body.appendChild(
+      panel
+    );
 
     panel
-      .querySelector("[data-road-close]")
+      .querySelector(
+        "[data-road-close]"
+      )
       .addEventListener(
         "click",
         closeTool
       );
 
     panel
-      .querySelectorAll("[data-road-mode]")
+      .querySelectorAll(
+        "[data-road-mode]"
+      )
       .forEach(button => {
         button.addEventListener(
           "click",
           () => {
             setMode(
-              button.dataset.roadMode
+              button.dataset
+                .roadMode
             );
           }
         );
       });
 
+    const curve =
+      panel.querySelector(
+        "#mgRoadCurve"
+      );
+
+    curve.addEventListener(
+      "input",
+      () => {
+        curveAmount =
+          Number(
+            curve.value
+          ) / 100;
+
+        paintCurveValue();
+      }
+    );
+
+    panel
+      .querySelectorAll(
+        "[data-elev]"
+      )
+      .forEach(button => {
+        button.addEventListener(
+          "click",
+          () => {
+            const step =
+              Number(
+                button.dataset
+                  .elev
+              );
+
+            if (step === 0) {
+              elevationOffset = 0;
+            } else {
+              elevationOffset =
+                Math.max(
+                  -12,
+                  Math.min(
+                    40,
+                    elevationOffset +
+                      step
+                  )
+                );
+            }
+
+            paintElevation();
+          }
+        );
+      });
+
     buildRoadTypeButtons();
+    paintCurveValue();
+    paintElevation();
+
     return panel;
+  }
+
+  function paintCurveValue() {
+    const out =
+      panel?.querySelector(
+        "#mgRoadCurveValue"
+      );
+
+    if (!out) return;
+
+    if (
+      Math.abs(
+        curveAmount
+      ) < 0.02
+    ) {
+      out.textContent =
+        "STRAIGHT";
+      return;
+    }
+
+    out.textContent =
+      `${Math.round(
+        Math.abs(
+          curveAmount
+        ) * 100
+      )}% ${
+        curveAmount < 0
+          ? "LEFT"
+          : "RIGHT"
+      }`;
+  }
+
+  function paintElevation() {
+    const out =
+      panel?.querySelector(
+        "#mgRoadElevationValue"
+      );
+
+    if (!out) return;
+
+    out.textContent =
+      Math.abs(
+        elevationOffset
+      ) < 0.01
+        ? "GROUND"
+        : `${
+            elevationOffset >
+            0
+              ? "+"
+              : ""
+          }${elevationOffset}m`;
   }
 
   function buildRoadTypeButtons() {
@@ -435,23 +1672,39 @@
 
     list.innerHTML = "";
 
-    for (const id of R()?.ROAD_ORDER || []) {
-      const def = R().ROAD_TYPES[id];
+    for (
+      const id of
+      R()?.ROAD_ORDER || []
+    ) {
+      const def =
+        R().ROAD_TYPES[id];
+
       if (!def) continue;
 
       const button =
-        document.createElement("button");
+        document.createElement(
+          "button"
+        );
 
-      button.type = "button";
-      button.dataset.roadType = id;
+      button.type =
+        "button";
+
+      button.dataset
+        .roadType = id;
+
       button.className =
         "mg-road-type";
+
+      const sidewalk =
+        roadHasSidewalk(id)
+          ? " • sidewalks"
+          : "";
 
       button.innerHTML = `
         <span class="mg-road-type-line" style="--road-width:${Math.max(2, Math.min(7, def.lanes || 2))}px"></span>
         <span class="mg-road-type-copy">
           <strong>${def.label}</strong>
-          <small>${def.lanes} lanes • ${def.speed} • $${Number(def.costPer100m || 0).toLocaleString()}/100m</small>
+          <small>${def.lanes} lanes • ${def.speed}${sidewalk}</small>
         </span>
       `;
 
@@ -460,13 +1713,16 @@
         () => {
           roadType = id;
           paintRoadTypeSelection();
+
           updateMessage(
             `${def.label} selected.`
           );
         }
       );
 
-      list.appendChild(button);
+      list.appendChild(
+        button
+      );
     }
 
     paintRoadTypeSelection();
@@ -480,7 +1736,9 @@
       .forEach(button => {
         button.classList.toggle(
           "active",
-          button.dataset.roadType === roadType
+          button.dataset
+            .roadType ===
+            roadType
         );
       });
   }
@@ -496,7 +1754,9 @@
       .forEach(button => {
         button.classList.toggle(
           "active",
-          button.dataset.roadMode === mode
+          button.dataset
+            .roadMode ===
+            mode
         );
       });
 
@@ -512,24 +1772,31 @@
 
     if (mode === "build") {
       updateMessage(
-        "Click a connected start point, then click the endpoint."
+        "Click a connected start point. Move the cursor to preview the exact road."
       );
-    } else if (mode === "upgrade") {
+    } else if (
+      mode === "upgrade"
+    ) {
       updateMessage(
-        "Choose a higher road class, then click a road segment."
+        "Choose a higher road class, then click a road."
       );
-    } else if (mode === "delete") {
+    } else if (
+      mode === "delete"
+    ) {
       updateMessage(
         "Click a road segment to remove it."
       );
     } else {
       updateMessage(
-        "Click a road segment to inspect it."
+        "Click a road segment to inspect its length, grade and elevation."
       );
     }
   }
 
-  function updateMessage(text, kind = "") {
+  function updateMessage(
+    text,
+    kind = ""
+  ) {
     const el =
       panel?.querySelector(
         "#mgRoadMessage"
@@ -537,12 +1804,17 @@
 
     if (!el) return;
 
-    el.textContent = text;
-    el.dataset.kind = kind;
+    el.textContent =
+      text;
+
+    el.dataset.kind =
+      kind;
   }
 
   function updateStats() {
-    const t = activeTerritory();
+    const t =
+      activeTerritory();
+
     const el =
       panel?.querySelector(
         "#mgRoadNetworkReadout"
@@ -552,15 +1824,21 @@
 
     const count =
       t
-        ? R().graphFor(t.id).segments.size
+        ? R().graphFor(t.id)
+            .segments.size
         : 0;
 
     el.textContent =
-      `${count} SEGMENT${count === 1 ? "" : "S"}`;
+      `${count} SEGMENT${
+        count === 1
+          ? ""
+          : "S"
+      }`;
   }
 
   function canOpenHere() {
-    const t = activeTerritory();
+    const t =
+      activeTerritory();
 
     if (!t) {
       runtime()?.showToast?.(
@@ -571,7 +1849,8 @@
       return false;
     }
 
-    const capital = activeCapital();
+    const capital =
+      activeCapital();
 
     if (!capital) {
       runtime()?.showToast?.(
@@ -586,27 +1865,36 @@
   }
 
   function openTool() {
-    if (!canOpenHere()) return;
+    if (
+      !canOpenHere()
+    ) {
+      return;
+    }
 
     createPanel();
+
     enterTerritory(
       activeTerritory().id
     );
 
     open = true;
     panel.hidden = false;
+
     setMode(mode);
     refreshVisible(true);
 
-    runtime()?.setBottomStatus?.(
-      "<b>ROAD TOOL</b> • connected roads only • click start, then endpoint"
-    );
+    runtime()
+      ?.setBottomStatus?.(
+        "<b>ROAD TOOL</b> • curved roads • sidewalks • elevation • overpasses"
+      );
 
     document
       .querySelector(
         "#mgDock [data-action='infrastructure']"
       )
-      ?.classList.add("active");
+      ?.classList.add(
+        "active"
+      );
   }
 
   function closeTool() {
@@ -621,70 +1909,28 @@
       .querySelector(
         "#mgDock [data-action='infrastructure']"
       )
-      ?.classList.remove("active");
-
-    runtime()?.setBottomStatus?.(
-      "Road tool closed."
-    );
-  }
-
-  function makePreview() {
-    if (preview || !runtime()?.scene) {
-      return preview;
-    }
-
-    previewMat =
-      new BABYLON.StandardMaterial(
-        "roadPreviewMat",
-        runtime().scene
+      ?.classList.remove(
+        "active"
       );
 
-    previewMat.diffuseColor =
-      new BABYLON.Color3(
-        0.22,
-        0.88,
-        0.62
+    runtime()
+      ?.setBottomStatus?.(
+        "Road tool closed."
       );
-
-    previewMat.emissiveColor =
-      new BABYLON.Color3(
-        0.05,
-        0.18,
-        0.12
-      );
-
-    previewMat.alpha = 0.42;
-
-    preview =
-      BABYLON.MeshBuilder.CreateBox(
-        "roadPlacementPreview",
-        {
-          width: 1,
-          height: 0.8,
-          depth: 1
-        },
-        runtime().scene
-      );
-
-    preview.material = previewMat;
-    preview.isPickable = false;
-    preview.setEnabled(false);
-
-    return preview;
   }
 
   function clearStart() {
     startPoint = null;
-
-    if (preview) {
-      preview.setEnabled(false);
-    }
+    clearPreview();
   }
 
   function groundPoint() {
-    const rt = runtime();
+    const rt =
+      runtime();
 
-    if (!rt?.scene) return null;
+    if (!rt?.scene) {
+      return null;
+    }
 
     return (
       window.mapGameTerritoryStream
@@ -695,196 +1941,376 @@
     );
   }
 
-  function validateRoadPath(a, b) {
-    const t = activeTerritory();
+  function endRoadY(
+    point
+  ) {
+    return (
+      Number(
+        point.y ||
+        terrainY(
+          point.x,
+          point.z
+        )
+      ) +
+      elevationOffset
+    );
+  }
 
-    if (!t || !a || !b) {
+  function maxAllowedGrade(
+    type
+  ) {
+    if (
+      type === "freeway"
+    ) {
+      return 0.075;
+    }
+
+    if (
+      type === "highway"
+    ) {
+      return 0.09;
+    }
+
+    if (
+      type === "avenue4"
+    ) {
+      return 0.13;
+    }
+
+    if (
+      type === "road2"
+    ) {
+      return 0.17;
+    }
+
+    return 0.22;
+  }
+
+  function minimumCurveRadiusHint(
+    type
+  ) {
+    if (
+      type === "freeway"
+    ) {
+      return 0.58;
+    }
+
+    if (
+      type === "highway"
+    ) {
+      return 0.70;
+    }
+
+    return 1;
+  }
+
+  function validateRoadPath(
+    a,
+    b
+  ) {
+    const t =
+      activeTerritory();
+
+    if (
+      !t ||
+      !a ||
+      !b
+    ) {
       return {
         allowed: false,
-        reason: "No territory."
+        reason:
+          "No territory.",
+        state: "bad"
       };
     }
 
-    const length =
+    const straightLength =
       Math.hypot(
         b.x - a.x,
         b.z - a.z
       );
 
-    if (length < 12) {
+    if (
+      straightLength < 12
+    ) {
       return {
         allowed: false,
         reason:
-          "Road is too short."
+          "Road is too short.",
+        state: "bad"
       };
     }
 
-    if (length > 1400) {
+    if (
+      straightLength > 1800
+    ) {
       return {
         allowed: false,
         reason:
-          "Build roads in shorter sections (maximum 1.4 km per placement)."
+          "Build long roads in shorter sections (maximum 1.8 km per placement).",
+        state: "bad"
       };
     }
-
-    const capital =
-      activeCapital();
 
     const startCheck =
-      R().validateConnectedStart(
+      R()
+        .validateConnectedStart(
+          t.id,
+          a,
+          activeCapital(),
+          {
+            snapDistance: 36,
+            capitalStartDistance: 150
+          }
+        );
+
+    if (
+      !startCheck.allowed
+    ) {
+      return {
+        ...startCheck,
+        state: "bad"
+      };
+    }
+
+    const estimate =
+      R().estimateSegment(
         t.id,
-        a,
-        capital,
         {
-          snapDistance: 34,
-          capitalStartDistance: 145
+          ax: a.x,
+          ay: a.y,
+          az: a.z,
+          bx: b.x,
+          by: b.y,
+          bz: b.z,
+          type: roadType,
+          curve:
+            curveAmount
         }
       );
 
-    if (!startCheck.allowed) {
-      return startCheck;
-    }
-
-    // Sample terrain so impossible cliff roads are rejected.
-    const samples =
-      Math.max(
-        2,
-        Math.ceil(length / 64)
+    const gradeLimit =
+      maxAllowedGrade(
+        roadType
       );
 
-    let previousY =
-      terrainY(a.x, a.z);
+    if (
+      estimate.maxGrade >
+      gradeLimit
+    ) {
+      return {
+        allowed: false,
+        reason:
+          `Road grade is too steep (${Math.round(estimate.maxGrade * 100)}%).`,
+        state: "bad",
+        estimate
+      };
+    }
 
-    for (let i = 1; i <= samples; i++) {
-      const k = i / samples;
+    const curveLimit =
+      minimumCurveRadiusHint(
+        roadType
+      );
 
-      const x =
-        a.x + (b.x - a.x) * k;
+    if (
+      Math.abs(
+        curveAmount
+      ) >
+      curveLimit
+    ) {
+      return {
+        allowed: false,
+        reason:
+          `${R().ROAD_TYPES[roadType]?.label || "This road"} needs a gentler curve.`,
+        state: "bad",
+        estimate
+      };
+    }
 
-      const z =
-        a.z + (b.z - a.z) * k;
+    let state = "valid";
+    let reason =
+      startCheck.reason;
 
-      const y =
-        terrainY(x, z);
+    const elevated =
+      estimate.path.some(
+        p =>
+          p.y -
+            terrainY(
+              p.x,
+              p.z
+            ) >
+          4
+      );
 
-      const horizontal =
-        length / samples;
-
-      const grade =
-        Math.abs(y - previousY) /
-        Math.max(1, horizontal);
-
-      if (grade > 0.26) {
-        return {
-          allowed: false,
-          reason:
-            "Terrain is too steep for this road."
-        };
-      }
-
-      previousY = y;
+    if (elevated) {
+      state = "warn";
+      reason =
+        "Elevated road / bridge • crossings below will remain separate.";
     }
 
     return {
       allowed: true,
-      reason:
-        startCheck.reason
+      reason,
+      state,
+      estimate
     };
   }
 
-  function updatePreview(point) {
-    if (!startPoint || !point) return;
+  function ghostSegment(
+    endPoint
+  ) {
+    if (
+      !startPoint ||
+      !endPoint
+    ) {
+      return null;
+    }
 
-    const mesh = makePreview();
-    const def =
-      R().ROAD_TYPES[roadType];
+    const t =
+      activeTerritory();
 
-    const dx =
-      point.x - startPoint.x;
+    if (!t) return null;
 
-    const dz =
-      point.z - startPoint.z;
+    const end = {
+      x: endPoint.x,
+      y:
+        endRoadY(
+          endPoint
+        ),
+      z: endPoint.z
+    };
 
-    const length =
-      Math.hypot(dx, dz);
+    const estimate =
+      R().estimateSegment(
+        t.id,
+        {
+          ax: startPoint.x,
+          ay: startPoint.y,
+          az: startPoint.z,
+          bx: end.x,
+          by: end.y,
+          bz: end.z,
+          type: roadType,
+          curve:
+            curveAmount
+        }
+      );
 
-    const cx =
-      (point.x + startPoint.x) / 2;
+    return {
+      id: "GHOST",
+      a: "GHOST_A",
+      b: "GHOST_B",
+      type: roadType,
+      width:
+        estimate.width,
+      lanes:
+        estimate.lanes,
+      length:
+        estimate.length,
+      path:
+        estimate.path,
+      maxGrade:
+        estimate.maxGrade
+    };
+  }
 
-    const cz =
-      (point.z + startPoint.z) / 2;
+  function updatePreview(
+    point
+  ) {
+    if (
+      !startPoint ||
+      !point
+    ) {
+      return;
+    }
+
+    clearPreview();
+
+    const end = {
+      x: point.x,
+      y:
+        endRoadY(point),
+      z: point.z
+    };
 
     const check =
       validateRoadPath(
         startPoint,
+        end
+      );
+
+    const ghost =
+      ghostSegment(
         point
       );
 
-    mesh.scaling.set(
-      Number(def?.width || 14),
-      1,
-      Math.max(1, length)
-    );
+    if (!ghost) return;
 
-    mesh.position.set(
-      cx,
-      terrainY(cx, cz) + 0.8,
-      cz
-    );
-
-    mesh.rotation.y =
-      Math.atan2(dx, dz);
-
-    mesh.setEnabled(true);
-
-    previewMat.diffuseColor =
-      check.allowed
-        ? new BABYLON.Color3(
-            0.20,
-            0.92,
-            0.60
-          )
-        : new BABYLON.Color3(
-            0.95,
-            0.24,
-            0.20
-          );
-
-    previewMat.emissiveColor =
-      check.allowed
-        ? new BABYLON.Color3(
-            0.04,
-            0.18,
-            0.10
-          )
-        : new BABYLON.Color3(
-            0.20,
-            0.03,
-            0.03
-          );
+    previewRoot =
+      buildRoadVisual(
+        ghost,
+        {
+          ghost: true,
+          ghostState:
+            check.state ===
+            "bad"
+              ? "bad"
+              : check.state ===
+                "warn"
+                  ? "warn"
+                  : "valid"
+        }
+      );
 
     const estimate =
+      check.estimate ||
       R().estimateSegment(
         activeTerritory().id,
         {
           ax: startPoint.x,
+          ay: startPoint.y,
           az: startPoint.z,
-          bx: point.x,
-          bz: point.z,
-          type: roadType
+          bx: end.x,
+          by: end.y,
+          bz: end.z,
+          type: roadType,
+          curve:
+            curveAmount
         }
       );
 
+    const grade =
+      Math.round(
+        Number(
+          estimate.maxGrade || 0
+        ) * 100
+      );
+
+    const elevationText =
+      Math.abs(
+        elevationOffset
+      ) > 0.1
+        ? ` • ${elevationOffset > 0 ? "+" : ""}${elevationOffset}m`
+        : "";
+
     updateMessage(
       check.allowed
-        ? `${Math.round(estimate.length)}m • $${estimate.cost.toLocaleString()} • click to build`
+        ? `${Math.round(estimate.length)}m • ${grade}% max grade${elevationText} • $${estimate.cost.toLocaleString()} • click to build`
         : check.reason,
-      check.allowed ? "good" : "bad"
+      check.allowed
+        ? (
+            check.state ===
+            "warn"
+              ? "warn"
+              : "good"
+          )
+        : "bad"
     );
   }
 
   function save() {
-    const t = activeTerritory();
+    const t =
+      activeTerritory();
 
     if (!t) return;
 
@@ -894,41 +2320,70 @@
     );
   }
 
-  function buildRoad(endPoint) {
-    const t = activeTerritory();
+  function refundMoney(
+    amount
+  ) {
+    if (
+      !amount ||
+      amount <= 0
+    ) {
+      return;
+    }
 
-    if (!t || !startPoint) return;
+    window.mapGameEconomy
+      ?.credit?.(
+        "money",
+        amount
+      );
+  }
+
+  function buildRoad(
+    endPoint
+  ) {
+    const t =
+      activeTerritory();
+
+    if (
+      !t ||
+      !startPoint
+    ) {
+      return;
+    }
+
+    const end = {
+      x: endPoint.x,
+      y:
+        endRoadY(
+          endPoint
+        ),
+      z: endPoint.z
+    };
 
     const check =
       validateRoadPath(
         startPoint,
-        endPoint
+        end
       );
 
-    if (!check.allowed) {
+    if (
+      !check.allowed
+    ) {
       updateMessage(
         check.reason,
         "bad"
       );
+
       return;
     }
 
     const estimate =
-      R().estimateSegment(
-        t.id,
-        {
-          ax: startPoint.x,
-          az: startPoint.z,
-          bx: endPoint.x,
-          bz: endPoint.z,
-          type: roadType
-        }
-      );
+      check.estimate;
 
     if (
       !window.mapGameEconomy
         ?.spend?.({
-          money: estimate.cost
+          money:
+            estimate.cost
         })
     ) {
       updateMessage(
@@ -946,23 +2401,36 @@
         R().addConnectedSegment(
           t.id,
           {
-            ax: startPoint.x,
-            az: startPoint.z,
-            bx: endPoint.x,
-            bz: endPoint.z,
-            type: roadType,
+            ax:
+              startPoint.x,
+            ay:
+              startPoint.y,
+            az:
+              startPoint.z,
+            bx: end.x,
+            by: end.y,
+            bz: end.z,
+            type:
+              roadType,
+            curve:
+              curveAmount,
             capitalPoint:
               activeCapital(),
-            snapDistance: 34
+            snapDistance: 36,
+            metadata: {
+              elevationMode:
+                Math.abs(
+                  elevationOffset
+                ) > 0.1
+                  ? "elevated"
+                  : "surface"
+            }
           }
         );
     } catch (error) {
-      // Give the money back if graph construction fails.
-      window.mapGameEconomy
-        ?.credit?.(
-          "money",
-          estimate.cost
-        );
+      refundMoney(
+        estimate.cost
+      );
 
       updateMessage(
         error.message ||
@@ -975,34 +2443,39 @@
 
     save();
 
-    // New crossing points can split old segments, so do a clean visual refresh.
     clearRendered();
     ensureRoadRoot();
     refreshVisible(true);
 
     const last =
-      created?.[created.length - 1];
+      created?.[
+        created.length - 1
+      ];
 
     if (last) {
       const g =
         R().graphFor(t.id);
 
-      const endNode =
-        g.nodes.get(last.b);
+      const node =
+        g.nodes.get(
+          last.b
+        );
 
-      startPoint =
-        endNode
-          ? {
-              x: endNode.x,
-              z: endNode.z
-            }
-          : {
-              x: endPoint.x,
-              z: endPoint.z
-            };
+      if (node) {
+        startPoint = {
+          x: node.x,
+          y:
+            Number(
+              node.y || 0
+            ),
+          z: node.z
+        };
+      }
+
+      clearPreview();
 
       updateMessage(
-        `${R().ROAD_TYPES[roadType]?.label || "Road"} built • continue from endpoint or press Esc.`,
+        `${R().ROAD_TYPES[roadType]?.label || "Road"} built • endpoint remains active so you can continue.`,
         "good"
       );
     } else {
@@ -1011,7 +2484,8 @@
   }
 
   function pickedRoadSegment() {
-    const rt = runtime();
+    const rt =
+      runtime();
 
     const pick =
       rt?.scene?.pick(
@@ -1019,7 +2493,8 @@
         rt.scene.pointerY,
         mesh =>
           Boolean(
-            mesh?.metadata?.roadPick
+            mesh?.metadata
+              ?.roadPick
           )
       );
 
@@ -1033,39 +2508,60 @@
   }
 
   function inspectSegment(id) {
-    const t = activeTerritory();
+    const t =
+      activeTerritory();
 
     const segment =
       t
-        ? R().graphFor(t.id)
+        ? R()
+            .graphFor(t.id)
             .segments.get(id)
         : null;
 
-    if (!segment) return;
+    if (!segment) {
+      return;
+    }
 
     const def =
-      R().ROAD_TYPES[segment.type];
+      R().ROAD_TYPES[
+        segment.type
+      ];
+
+    const heights =
+      segment.path.map(
+        p => p.y
+      );
+
+    const elevationRange =
+      Math.max(...heights) -
+      Math.min(...heights);
 
     updateMessage(
-      `${def?.label || segment.type} • ${Math.round(segment.length)}m • ${segment.lanes} lanes • speed ${segment.speed}`,
+      `${def?.label || segment.type} • ${Math.round(segment.length)}m • ${segment.lanes} lanes • ${Math.round((segment.maxGrade || 0) * 100)}% max grade • ${Math.round(elevationRange)}m elevation change`,
       "good"
     );
   }
 
   function upgradeRoad(id) {
-    const t = activeTerritory();
+    const t =
+      activeTerritory();
 
     if (!t) return;
 
     const current =
-      R().graphFor(t.id)
+      R()
+        .graphFor(t.id)
         .segments.get(id);
 
     if (!current) return;
 
     if (
-      roadRank[roadType] <=
-      roadRank[current.type]
+      roadRank[
+        roadType
+      ] <=
+      roadRank[
+        current.type
+      ]
     ) {
       updateMessage(
         "Select a higher road class before upgrading.",
@@ -1076,13 +2572,18 @@
     }
 
     const target =
-      R().ROAD_TYPES[roadType];
+      R().ROAD_TYPES[
+        roadType
+      ];
 
     const newCost =
       Math.ceil(
-        current.length / 100 *
+        current.length /
+          100 *
         Number(
-          target.costPer100m || 0
+          target
+            .costPer100m ||
+          0
         )
       );
 
@@ -1090,13 +2591,17 @@
       Math.max(
         0,
         newCost -
-        Number(current.cost || 0)
+        Number(
+          current.cost ||
+          0
+        )
       );
 
     if (
       !window.mapGameEconomy
         ?.spend?.({
-          money: upgradeCost
+          money:
+            upgradeCost
         })
     ) {
       updateMessage(
@@ -1114,11 +2619,9 @@
         roadType
       );
     } catch (error) {
-      window.mapGameEconomy
-        ?.credit?.(
-          "money",
-          upgradeCost
-        );
+      refundMoney(
+        upgradeCost
+      );
 
       updateMessage(
         error.message,
@@ -1129,7 +2632,10 @@
     }
 
     save();
-    rebuildSegmentVisual(id);
+
+    clearRendered();
+    ensureRoadRoot();
+    refreshVisible(true);
 
     updateMessage(
       `Upgraded to ${target.label} • $${upgradeCost.toLocaleString()}.`,
@@ -1138,7 +2644,8 @@
   }
 
   function deleteRoad(id) {
-    const t = activeTerritory();
+    const t =
+      activeTerritory();
 
     if (!t) return;
 
@@ -1150,13 +2657,8 @@
     ) {
       save();
 
-      if (rendered.has(id)) {
-        disposeNode(
-          rendered.get(id)
-        );
-        rendered.delete(id);
-      }
-
+      clearRendered();
+      ensureRoadRoot();
       refreshVisible(true);
 
       updateMessage(
@@ -1166,11 +2668,85 @@
     }
   }
 
+  function beginAtPoint(
+    point
+  ) {
+    const t =
+      activeTerritory();
+
+    if (!t) return;
+
+    const intendedY =
+      Number(
+        point.y ||
+        terrainY(
+          point.x,
+          point.z
+        )
+      );
+
+    const check =
+      R()
+        .validateConnectedStart(
+          t.id,
+          {
+            x: point.x,
+            y: intendedY,
+            z: point.z
+          },
+          activeCapital(),
+          {
+            snapDistance: 36,
+            capitalStartDistance: 150
+          }
+        );
+
+    if (
+      !check.allowed
+    ) {
+      updateMessage(
+        check.reason,
+        "bad"
+      );
+
+      return;
+    }
+
+    const snapped =
+      R().snapPoint(
+        t.id,
+        point.x,
+        point.z,
+        36,
+        {
+          allowSplit: false,
+          y: intendedY,
+          verticalTolerance: 5
+        }
+      );
+
+    startPoint = {
+      x: snapped.x,
+      y:
+        Number(
+          snapped.y ??
+          intendedY
+        ),
+      z: snapped.z
+    };
+
+    updateMessage(
+      "Start selected • move the cursor to see the full ghost road.",
+      "good"
+    );
+  }
+
   function onPointer(info) {
     if (!open) return;
 
     if (
-      runtime()?.getMode?.() !== "TERRITORY"
+      runtime()?.getMode?.() !==
+      "TERRITORY"
     ) {
       return;
     }
@@ -1184,7 +2760,9 @@
       return;
     }
 
-    if (mode === "build") {
+    if (
+      mode === "build"
+    ) {
       const point =
         groundPoint();
 
@@ -1195,61 +2773,25 @@
         BABYLON.PointerEventTypes.POINTERMOVE
       ) {
         if (startPoint) {
-          updatePreview(point);
+          updatePreview(
+            point
+          );
         }
 
         return;
       }
 
       if (!startPoint) {
-        const t = activeTerritory();
-
-        const check =
-          R().validateConnectedStart(
-            t.id,
-            point,
-            activeCapital(),
-            {
-              snapDistance: 34,
-              capitalStartDistance: 145
-            }
-          );
-
-        if (!check.allowed) {
-          updateMessage(
-            check.reason,
-            "bad"
-          );
-
-          return;
-        }
-
-        const snapped =
-          R().snapPoint(
-            t.id,
-            point.x,
-            point.z,
-            34,
-            {
-              // Do not mutate the graph until the road is actually built.
-              allowSplit: false
-            }
-          );
-
-        startPoint = {
-          x: snapped.x,
-          z: snapped.z
-        };
-
-        updateMessage(
-          "Start selected • click the endpoint.",
-          "good"
+        beginAtPoint(
+          point
         );
-
         return;
       }
 
-      buildRoad(point);
+      buildRoad(
+        point
+      );
+
       return;
     }
 
@@ -1271,25 +2813,43 @@
       return;
     }
 
-    if (mode === "inspect") {
+    if (
+      mode === "inspect"
+    ) {
       inspectSegment(id);
-    } else if (mode === "upgrade") {
+    } else if (
+      mode === "upgrade"
+    ) {
       upgradeRoad(id);
-    } else if (mode === "delete") {
+    } else if (
+      mode === "delete"
+    ) {
       deleteRoad(id);
     }
   }
 
-  function enterTerritory(territoryId) {
-    if (!territoryId || !R()) return;
+  function enterTerritory(
+    territoryId
+  ) {
+    if (
+      !territoryId ||
+      !R()
+    ) {
+      return;
+    }
 
-    if (activeTerritoryId === territoryId) {
+    if (
+      activeTerritoryId ===
+      territoryId
+    ) {
       refreshVisible(true);
       return;
     }
 
     clearRendered();
-    activeTerritoryId = territoryId;
+
+    activeTerritoryId =
+      territoryId;
 
     R().loadLocal(
       worldType(),
@@ -1307,20 +2867,30 @@
   }
 
   function frameTick() {
-    if (!runtime()?.scene) return;
+    if (
+      !runtime()?.scene
+    ) {
+      return;
+    }
 
-    const now = performance.now();
+    const now =
+      performance.now();
 
     if (
-      now - lastStreamRefresh > 700
+      now -
+        lastStreamRefresh >
+      700
     ) {
-      lastStreamRefresh = now;
+      lastStreamRefresh =
+        now;
+
       refreshVisible();
     }
   }
 
   function bindRuntime() {
-    const rt = runtime();
+    const rt =
+      runtime();
 
     if (!rt?.scene) return;
 
@@ -1336,27 +2906,82 @@
   window.addEventListener(
     "keydown",
     event => {
+      if (!open) return;
+
       if (
-        event.key === "Escape" &&
-        open
+        event.key ===
+        "Escape"
       ) {
         if (startPoint) {
           clearStart();
+
           updateMessage(
             "Road placement cancelled."
           );
         } else {
           closeTool();
         }
+
+        return;
+      }
+
+      if (
+        event.key ===
+        "PageUp"
+      ) {
+        elevationOffset =
+          Math.min(
+            40,
+            elevationOffset + 4
+          );
+
+        paintElevation();
+        event.preventDefault();
+      }
+
+      if (
+        event.key ===
+        "PageDown"
+      ) {
+        elevationOffset =
+          Math.max(
+            -12,
+            elevationOffset - 4
+          );
+
+        paintElevation();
+        event.preventDefault();
+      }
+
+      if (
+        event.key.toLowerCase() ===
+        "r"
+      ) {
+        curveAmount = 0;
+
+        const input =
+          panel?.querySelector(
+            "#mgRoadCurve"
+          );
+
+        if (input) {
+          input.value = "0";
+        }
+
+        paintCurveValue();
       }
     }
   );
 
   window.mapGameRoadTool = {
-    VERSION: "0.2.2C1",
-    open: openTool,
-    close: closeTool,
-    isOpen: () => open,
+    VERSION:
+      "0.2.2C1.5",
+    open:
+      openTool,
+    close:
+      closeTool,
+    isOpen:
+      () => open,
     enterTerritory,
     leaveTerritory,
     refreshVisible
@@ -1365,10 +2990,12 @@
   window.addEventListener(
     "mapgame:runtime-ready",
     bindRuntime,
-    { once: true }
+    {
+      once: true
+    }
   );
 
   console.log(
-    "Map Game road tool 0.2.2C1 ready."
+    "Map Game Road Tool 0.2.2C1.5 ready — curves, sidewalks, yellow crossings, elevation and overpasses."
   );
 })();

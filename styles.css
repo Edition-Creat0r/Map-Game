@@ -2969,3 +2969,100 @@ body[data-world="singleplayer"] [data-action="hub"]{display:none!important}
     grid-template-columns: 1fr 1fr;
   }
 }
+
+
+/* ============================================================
+   0.2.2C1.5 — ROAD TOOL OVERHAUL
+   ============================================================ */
+
+.mg-road-tool-c15 {
+  width: 350px;
+}
+
+.mg-road-shape-panel {
+  margin-top: 13px;
+  padding: 12px 0 3px;
+  border-top: 1px solid rgba(111,214,243,.08);
+}
+
+.mg-road-range {
+  display: grid;
+  gap: 8px;
+}
+
+.mg-road-range > span,
+.mg-road-elevation > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mg-road-range b,
+.mg-road-elevation b {
+  color: rgba(224,241,247,.72);
+  font-size: 8px;
+  letter-spacing: .11em;
+}
+
+.mg-road-range output,
+.mg-road-elevation small {
+  color: rgba(109,220,249,.74);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.mg-road-range input[type="range"] {
+  width: 100%;
+  accent-color: #6fdcf7;
+}
+
+.mg-road-elevation {
+  margin-top: 13px;
+  display: grid;
+  gap: 8px;
+}
+
+.mg-road-stepper {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 1fr;
+  gap: 5px;
+}
+
+.mg-road-stepper button {
+  min-height: 34px;
+  padding: 0 7px;
+  border: 1px solid rgba(111,214,243,.10);
+  border-radius: 7px;
+  background: rgba(255,255,255,.025);
+  color: rgba(216,237,244,.60);
+  font: inherit;
+  font-size: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.mg-road-stepper button:hover {
+  border-color: rgba(111,214,243,.26);
+  color: rgba(232,248,252,.88);
+}
+
+.mg-road-help {
+  margin: 10px 0 0;
+  color: rgba(185,215,224,.35);
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.mg-road-message[data-kind="warn"] {
+  color: rgba(246,202,98,.90);
+  border-color: rgba(230,179,53,.18);
+  background: rgba(90,65,11,.10);
+}
+
+@media (max-width: 760px) {
+  .mg-road-tool-c15 {
+    width: min(336px, calc(100vw - 82px));
+  }
+}
