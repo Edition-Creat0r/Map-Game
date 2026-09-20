@@ -30,6 +30,26 @@
       diffuse: "assets/textures/roads/asphalt_01/asphalt-diffuse.jpg",
       normal: "assets/textures/roads/asphalt_01/asphalt-normal.jpg",
       roughness: "assets/textures/roads/asphalt_01/asphalt-roughness.jpg"
+    },
+    brick: {
+      diffuse: "assets/textures/buildings/brick_01/brick-diffuse.jpg",
+      normal: "assets/textures/buildings/brick_01/brick-normal.jpg",
+      roughness: "assets/textures/buildings/brick_01/brick-roughness.jpg"
+    },
+    stucco: {
+      diffuse: "assets/textures/buildings/stucco_01/stucco-diffuse.jpg",
+      normal: "assets/textures/buildings/stucco_01/stucco-normal.jpg",
+      roughness: "assets/textures/buildings/stucco_01/stucco-roughness.jpg"
+    },
+    corrugatedMetal: {
+      diffuse: "assets/textures/buildings/corrugated_metal_01/metal-diffuse.jpg",
+      normal: "assets/textures/buildings/corrugated_metal_01/metal-normal.jpg",
+      roughness: "assets/textures/buildings/corrugated_metal_01/metal-roughness.jpg"
+    },
+    roof: {
+      diffuse: "assets/textures/buildings/roof_01/roof-diffuse.jpg",
+      normal: "assets/textures/buildings/roof_01/roof-normal.jpg",
+      roughness: "assets/textures/buildings/roof_01/roof-roughness.jpg"
     }
   };
 
@@ -300,18 +320,168 @@
     };
   }
 
+  const BUILDING_STYLES = Object.freeze([
+    "Modern",
+    "Traditional",
+    "Brick",
+    "Steampunk",
+    "Cyberpunk"
+  ]);
+
+  function createStylePalette(
+    scene,
+    preset = "BASIC",
+    style = "Modern",
+    category = "Residential"
+  ) {
+    const B = window.BABYLON;
+    const graphics = String(preset || "BASIC").toUpperCase();
+    const regular = graphics === "REGULAR" || graphics === "DEEP";
+    const deep = graphics === "DEEP";
+    const styleName =
+      BUILDING_STYLES.includes(style)
+        ? style
+        : "Modern";
+
+    const base =
+      createBuildingPalette(
+        scene,
+        graphics,
+        category
+      );
+
+    if (!regular) {
+      const basic = {
+        ...base,
+        style: styleName,
+        brick:
+          simpleMaterial(
+            B, scene,
+            "mgBrickBasic",
+            "#925e4f",
+            0.05
+          ),
+        stucco:
+          simpleMaterial(
+            B, scene,
+            "mgStuccoBasic",
+            "#d9d3c4",
+            0.05
+          ),
+        metal:
+          simpleMaterial(
+            B, scene,
+            "mgMetalBasic",
+            "#68747a",
+            0.16
+          ),
+        roofSurface:
+          simpleMaterial(
+            B, scene,
+            "mgRoofSurfaceBasic",
+            "#343b41",
+            0.06
+          ),
+        glass:
+          glassMaterial(
+            B,
+            scene,
+            false,
+            false
+          )
+      };
+
+      return basic;
+    }
+
+    return {
+      ...base,
+      style: styleName,
+
+      brick:
+        pbrSurface(
+          B,
+          scene,
+          "mgBrickRegular",
+          ASSETS.brick,
+          {
+            baseColor: "#b48775",
+            roughness: 0.88,
+            uScale: deep ? 3.6 : 2.7,
+            vScale: deep ? 3.6 : 2.7,
+            bumpLevel: deep ? 0.82 : 0.64
+          }
+        ),
+
+      stucco:
+        pbrSurface(
+          B,
+          scene,
+          "mgStuccoRegular",
+          ASSETS.stucco,
+          {
+            baseColor: "#e2ddd0",
+            roughness: 0.91,
+            uScale: deep ? 3.0 : 2.2,
+            vScale: deep ? 3.0 : 2.2,
+            bumpLevel: deep ? 0.60 : 0.42
+          }
+        ),
+
+      metal:
+        pbrSurface(
+          B,
+          scene,
+          "mgCorrugatedMetalRegular",
+          ASSETS.corrugatedMetal,
+          {
+            baseColor: "#9da6a8",
+            roughness: 0.62,
+            uScale: deep ? 2.8 : 2.0,
+            vScale: deep ? 2.8 : 2.0,
+            bumpLevel: deep ? 0.88 : 0.68
+          }
+        ),
+
+      roofSurface:
+        pbrSurface(
+          B,
+          scene,
+          "mgRoofSurfaceRegular",
+          ASSETS.roof,
+          {
+            baseColor: "#4b5053",
+            roughness: 0.90,
+            uScale: deep ? 3.5 : 2.5,
+            vScale: deep ? 3.5 : 2.5,
+            bumpLevel: deep ? 0.72 : 0.54
+          }
+        ),
+
+      glass:
+        glassMaterial(
+          B,
+          scene,
+          true,
+          deep
+        )
+    };
+  }
+
   function assetReport() {
     return JSON.parse(JSON.stringify(ASSETS));
   }
 
   window.mapGameMaterials = {
-    VERSION: "0.2.2A1.4",
+    VERSION: "0.2.2C2",
     ASSETS,
     getRoadSet,
     createBuildingPalette,
+    createStylePalette,
+    BUILDING_STYLES,
     glassMaterial,
     assetReport
   };
 
-  console.log("Map Game materials 0.2.2A1.4 category-style hotfix ready.");
+  console.log("Map Game materials 0.2.2C2 style texture foundation ready.");
 })();

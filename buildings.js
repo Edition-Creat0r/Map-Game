@@ -783,7 +783,7 @@
         scene,
         regular,
         runtime.graphicsPreset || "BASIC",
-        data.category || def.category || "General"
+        "Residential"
       );
 
     const root = new B.TransformNode("neutralNeighborhoodDemo", scene);
@@ -911,8 +911,20 @@
     const B = window.BABYLON;
     const scene = runtime.scene;
     const def = item(data.type);
-    const regular = runtime.graphicsPreset === "REGULAR";
-    const mats = createMaterials(B, scene, regular);
+    const regular =
+      runtime.graphicsPreset === "REGULAR" ||
+      runtime.graphicsPreset === "DEEP";
+
+    const mats =
+      createMaterials(
+        B,
+        scene,
+        regular,
+        runtime.graphicsPreset || "BASIC",
+        data.category ||
+          def.category ||
+          "General"
+      );
     const fp = def.footprint || [40, 40];
     const w = fp[0];
     const d = fp[1];
@@ -926,7 +938,9 @@
       placedBuildingId: data.id,
       buildingType: data.type,
       footprint: fp.slice(),
-      ownerId: data.ownerId || "local"
+      ownerId: data.ownerId || "local",
+      architecturalStyle:
+        data.style || null
     };
 
     const foundationDepth = data.foundationDepth || 3.2;
@@ -934,7 +948,59 @@
 
     let visual;
 
-    if (data.type === "smallHouse") {
+    const zoneStyles =
+      window.mapGameBuildingStyles
+        ?.STYLE_IDS || [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ];
+
+    const resolvedStyle =
+      data.style ||
+      (
+        typeof data.variant === "string" &&
+        zoneStyles.includes(data.variant)
+          ? data.variant
+          : zoneStyles[
+              Math.abs(
+                Number(data.variant || 0)
+              ) % zoneStyles.length
+            ]
+      ) ||
+      "Modern";
+
+    if (
+      def.category === "Residential" &&
+      data.type === "smallHouse" &&
+      window.mapGameBuildingStyles
+        ?.createResidential
+    ) {
+      visual =
+        window.mapGameBuildingStyles
+          .createResidential(
+            {
+              ...runtime,
+              graphicsPreset:
+                runtime.graphicsPreset ||
+                "BASIC"
+            },
+            root,
+            {
+              width: w * 0.88,
+              depth: d * 0.86,
+              seed:
+                Number(data.variant || 0),
+              density: "Low",
+              style: resolvedStyle,
+              graphicsPreset:
+                runtime.graphicsPreset ||
+                "BASIC"
+            }
+          );
+    } else if (data.type === "smallHouse") {
       visual = house(B, scene, root, 0, 0, 0, mats, data.variant || 0);
     } else if (data.type === "townhomes") {
       visual = new B.TransformNode("townhomesVisual", scene);
@@ -1065,7 +1131,7 @@
   }
 
   window.mapGameBuildings = {
-    VERSION: "0.2.2A1",
+    VERSION: "0.2.2C2",
     CATALOG,
     item,
     buildNeighborhoodDemo,
@@ -1073,5 +1139,5 @@
     addFoundation
   };
 
-  console.log("Map Game buildings 0.2.2A1 category-style foundation ready.");
+  console.log("Map Game buildings 0.2.2C2 procedural style foundation ready.");
 })();
