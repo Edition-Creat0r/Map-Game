@@ -46,6 +46,16 @@
       normal: "assets/textures/buildings/corrugated_metal_01/metal-normal.jpg",
       roughness: "assets/textures/buildings/corrugated_metal_01/metal-roughness.jpg"
     },
+    metal: {
+      diffuse: "assets/textures/buildings/metal_01/albedo.webp",
+      normal: "assets/textures/buildings/metal_01/normal.webp",
+      roughness: "assets/textures/buildings/metal_01/roughness.webp"
+    },
+    buildingConcrete: {
+      diffuse: "assets/textures/buildings/concrete_01/albedo.webp",
+      normal: "assets/textures/buildings/concrete_01/normal.webp",
+      roughness: "assets/textures/buildings/concrete_01/roughness.webp"
+    },
     roof: {
       diffuse: "assets/textures/buildings/roof_01/roof-diffuse.jpg",
       normal: "assets/textures/buildings/roof_01/roof-normal.jpg",
@@ -73,26 +83,57 @@
     return m;
   }
 
-  function texture(B, scene, path, uScale = 1, vScale = 1, gammaSpace = true) {
-    const key = `texture:${path}:${uScale}:${vScale}:${gammaSpace}`;
+  function texture(
+    B,
+    scene,
+    path,
+    uScale = 1,
+    vScale = 1,
+    gammaSpace = true,
+    onError = null
+  ) {
+    const key =
+      `texture:${path}:${uScale}:${vScale}:${gammaSpace}`;
+
     const c = sceneCache(scene);
-    if (c.has(key)) return c.get(key);
+
+    // Textures are normally cached. If a caller needs its own error fallback,
+    // it still receives the cached texture and can listen to onErrorObservable.
+    if (c.has(key)) {
+      const cached = c.get(key);
+
+      if (onError && cached?.onErrorObservable) {
+        cached.onErrorObservable.addOnce(onError);
+      }
+
+      return cached;
+    }
 
     const t = new B.Texture(
       path,
       scene,
       true,
       false,
-      B.Texture.TRILINEAR_SAMPLINGMODE
+      B.Texture.TRILINEAR_SAMPLINGMODE,
+      null,
+      (message, exception) => {
+        console.warn(
+          "Map Game texture failed to load:",
+          path,
+          message || "",
+          exception || ""
+        );
+
+        try {
+          onError?.(message, exception);
+        } catch (_) {}
+      }
     );
 
     t.uScale = uScale;
     t.vScale = vScale;
     t.gammaSpace = gammaSpace;
     t.anisotropicFilteringLevel = 8;
-    t.onError = (_message, exception) => {
-      console.warn("Map Game texture failed to load:", path, exception || "");
-    };
 
     c.set(key, t);
     return t;
@@ -125,21 +166,63 @@
     m.directIntensity = 0.90;
     m.specularIntensity = 0.48;
 
-    m.albedoTexture = texture(
-      B, scene, set.diffuse, uScale, vScale, true
+    // IMPORTANT:
+    // Babylon shows a red/black error texture when an image path fails.
+    // For MAP GAME we never want missing art assets to make the world look
+    // corrupted. Failed maps are removed and the material falls back to its
+    // neutral procedural color instead.
+
+    const albedoTex = texture(
+      B,
+      scene,
+      set.diffuse,
+      uScale,
+      vScale,
+      true,
+      () => {
+        if (m.albedoTexture === albedoTex) {
+          m.albedoTexture = null;
+        }
+      }
     );
 
-    m.bumpTexture = texture(
-      B, scene, set.normal, uScale, vScale, false
+    m.albedoTexture = albedoTex;
+
+    const bumpTex = texture(
+      B,
+      scene,
+      set.normal,
+      uScale,
+      vScale,
+      false,
+      () => {
+        if (m.bumpTexture === bumpTex) {
+          m.bumpTexture = null;
+        }
+      }
     );
-    m.bumpTexture.level = bumpLevel;
+
+    bumpTex.level = bumpLevel;
+    m.bumpTexture = bumpTex;
 
     // A standalone grayscale roughness image can be read from its green
     // channel by Babylon's PBR material. Because it is grayscale, RGB
     // channels carry the same roughness information.
-    m.metallicTexture = texture(
-      B, scene, set.roughness, uScale, vScale, false
+    const roughnessTex = texture(
+      B,
+      scene,
+      set.roughness,
+      uScale,
+      vScale,
+      false,
+      () => {
+        if (m.metallicTexture === roughnessTex) {
+          m.metallicTexture = null;
+        }
+      }
     );
+
+    m.metallicTexture = roughnessTex;
     m.useRoughnessFromMetallicTextureGreen = true;
     m.useRoughnessFromMetallicTextureAlpha = false;
     m.useMetallnessFromMetallicTextureBlue = false;
@@ -473,7 +556,7 @@
   }
 
   window.mapGameMaterials = {
-    VERSION: "0.2.2C2",
+    VERSION: "0.2.2C2.4",
     ASSETS,
     getRoadSet,
     createBuildingPalette,
@@ -483,5 +566,5 @@
     assetReport
   };
 
-  console.log("Map Game materials 0.2.2C2 style texture foundation ready.");
+  console.log("Map Game materials 0.2.2C2.4 final building texture map ready.");
 })();
