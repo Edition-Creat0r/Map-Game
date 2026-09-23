@@ -548,46 +548,41 @@
     const sX = d.x - c.x;
     const sZ = d.z - c.z;
 
-    const denom =
-      rX * sZ -
-      rZ * sX;
+    const rLen = Math.hypot(rX, rZ);
+    const sLen = Math.hypot(sX, sZ);
 
-    if (
-      Math.abs(denom) <
-      0.00001
-    ) {
-      return null;
-    }
+    if (rLen < 0.01 || sLen < 0.01) return null;
+
+    const denom = rX * sZ - rZ * sX;
+    if (Math.abs(denom) < 0.00001) return null;
 
     const cax = c.x - a.x;
     const caz = c.z - a.z;
 
-    const t =
-      (
-        cax * sZ -
-        caz * sX
-      ) / denom;
-
-    const u =
-      (
-        cax * rZ -
-        caz * rX
-      ) / denom;
+    const t = (cax * sZ - caz * sX) / denom;
+    const u = (cax * rZ - caz * rX) / denom;
 
     if (
-      t <= 0.002 ||
-      t >= 0.998 ||
-      u <= 0.002 ||
-      u >= 0.998
-    ) {
-      return null;
-    }
+      t <= 0.08 ||
+      t >= 0.92 ||
+      u <= 0.08 ||
+      u >= 0.92
+    ) return null;
+
+    const dot =
+      (rX * sX + rZ * sZ) /
+      (rLen * sLen);
+
+    const angle = Math.acos(
+      Math.max(-1, Math.min(1, Math.abs(dot)))
+    );
 
     return {
       x: a.x + t * rX,
       z: a.z + t * rZ,
       t,
-      u
+      u,
+      angle
     };
   }
 
@@ -1032,6 +1027,10 @@
 
           if (!cross) continue;
 
+          // Shallow contacts are usually parallel roads or curve tangencies,
+          // not real intersections. Ignore them to prevent spaghetti nodes.
+          if (cross.angle < (24 * Math.PI / 180)) continue;
+
           const newY =
             na.y +
             (nb.y - na.y) *
@@ -1307,7 +1306,8 @@
           return a.newT - b.newT;
         });
 
-    // De-duplicate near-identical intersection hits.
+    // De-duplicate crossings and do not create a cluster of tiny
+    // junctions around an existing node.
     const filtered = [];
 
     for (const hit of sameLevel) {
@@ -1317,10 +1317,20 @@
             Math.hypot(
               other.x - hit.x,
               other.z - hit.z
-            ) < 3
+            ) < 18
         );
 
-      if (!duplicate) {
+      const nearbyNode =
+        nearestNode(
+          territoryId,
+          hit.x,
+          hit.z,
+          14,
+          hit.newY,
+          4
+        );
+
+      if (!duplicate && !nearbyNode) {
         filtered.push(hit);
       }
     }
@@ -1802,7 +1812,7 @@
 
     return {
       version:
-        "0.2.2C1.5",
+        "0.2.2C1.5.2",
       territoryId,
       nextNode:
         g.nextNode,
@@ -2042,7 +2052,7 @@
 
   window.mapGameRoads = {
     VERSION:
-      "0.2.2C1.5",
+      "0.2.2C1.5.2",
     ROAD_TYPES,
     ROAD_ORDER,
     SAME_LEVEL_TOLERANCE,
@@ -2068,6 +2078,6 @@
   };
 
   console.log(
-    "Map Game roads 0.2.2C1.5 curved/elevated graph ready."
+    "Map Game roads 0.2.2C1.5.2 stable intersection graph ready."
   );
 })();

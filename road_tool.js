@@ -517,7 +517,7 @@
       );
 
     if (
-      horizontal < 14
+      horizontal < 22
     ) {
       return;
     }
@@ -794,6 +794,7 @@
             ghost
               ? 0.45
               : 0.42,
+          extraLength: 0.20,
           name:
             ghost
               ? "roadGhostSurface"
@@ -824,6 +825,7 @@
               lateral:
                 side *
                 sideOffset,
+              extraLength: 0.16,
               name:
                 "roadSidewalk"
             }
@@ -844,6 +846,7 @@
                   width / 2 +
                   0.35
                 ),
+              extraLength: 0.12,
               name:
                 "roadCurb"
             }
@@ -889,6 +892,7 @@
               lateral:
                 side *
                 sideOffset,
+              extraLength: 0.12,
               name:
                 "ghostSidewalk"
             }
@@ -1025,129 +1029,56 @@
     node,
     segment
   ) {
-    if (
-      !roadHasCrossings(
-        segment.type
-      )
-    ) {
-      return;
-    }
+    if (!roadHasCrossings(segment.type)) return;
 
-    const direction =
-      directionAwayFromNode(
-        segment,
-        node.id
-      );
-
+    const direction = directionAwayFromNode(segment, node.id);
     if (!direction) return;
 
-    const length =
-      Math.hypot(
-        direction.x,
-        direction.z
-      );
+    const length = Math.hypot(direction.x, direction.z);
+    if (length < 0.01) return;
 
-    if (
-      length < 0.01
-    ) {
-      return;
-    }
-
-    const tx =
-      direction.x / length;
-
-    const tz =
-      direction.z / length;
-
+    const tx = direction.x / length;
+    const tz = direction.z / length;
     const nx = -tz;
     const nz = tx;
 
-    const width =
-      Number(
-        segment.width ||
-        14
-      );
+    const width = Number(segment.width || 14);
+    const setback = width * 0.46 + 4.2;
 
-    const setback =
-      width / 2 + 3.7;
+    const centerX = node.x + tx * setback;
+    const centerZ = node.z + tz * setback;
 
-    const centerX =
-      node.x +
-      tx * setback;
+    const stripeCount = Math.max(
+      5,
+      Math.min(8, Math.round(width / 2.5))
+    );
 
-    const centerZ =
-      node.z +
-      tz * setback;
-
-    const stripeCount =
-      Math.max(
-        5,
-        Math.min(
-          9,
-          Math.round(
-            width / 3
-          )
-        )
-      );
-
-    for (
-      let i = 0;
-      i < stripeCount;
-      i++
-    ) {
-      const sideT =
-        stripeCount === 1
-          ? 0
-          : (
-              i /
-                (stripeCount - 1) -
-              0.5
-            );
-
+    for (let i = 0; i < stripeCount; i++) {
       const lateral =
-        sideT *
-        (
-          width -
-          1.5
-        );
+        (i - (stripeCount - 1) / 2) * 2.15;
 
       const stripe =
-        BABYLON.MeshBuilder
-          .CreateBox(
-            "yellowPedCrossing",
-            {
-              width: 1.25,
-              height: 0.06,
-              depth: 3.2
-            },
-            runtime().scene
-          );
-
-      stripe.position.set(
-        centerX +
-          nx * lateral,
-        Number(
-          node.y || 0
-        ) + 0.63,
-        centerZ +
-          nz * lateral
-      );
-
-      stripe.rotation.y =
-        Math.atan2(
-          nx,
-          nz
+        BABYLON.MeshBuilder.CreateBox(
+          "yellowPedCrossing",
+          {
+            width: 1.15,
+            height: 0.055,
+            depth: 2.35
+          },
+          runtime().scene
         );
 
-      stripe.material =
-        ensureMaterials()
-          .crossing;
+      stripe.position.set(
+        centerX + nx * lateral,
+        Number(node.y || 0) + 0.61,
+        centerZ + nz * lateral
+      );
 
-      stripe.parent =
-        parent;
-
-      stripe.isPickable =
-        false;
+      // Local depth follows the road, so the repeated bars span across it.
+      stripe.rotation.y = Math.atan2(tx, tz);
+      stripe.material = ensureMaterials().crossing;
+      stripe.parent = parent;
+      stripe.isPickable = false;
     }
   }
 
@@ -1165,18 +1096,9 @@
       return null;
     }
 
-    // Freeway-only junctions will eventually get interchange geometry.
-    const urbanConnections =
-      connections.filter(
-        seg =>
-          roadHasSidewalk(
-            seg.type
-          )
-      );
-
     const maxWidth =
       Math.max(
-        14,
+        10,
         ...connections.map(
           seg =>
             Number(
@@ -1197,49 +1119,20 @@
     const materials =
       ensureMaterials();
 
-    if (
-      urbanConnections.length
-    ) {
-      const sidewalkPad =
-        BABYLON.MeshBuilder
-          .CreateCylinder(
-            "intersectionSidewalkPad",
-            {
-              diameter:
-                maxWidth + 15,
-              height: 0.30,
-              tessellation: 20
-            },
-            runtime().scene
-          );
-
-      sidewalkPad.position.set(
-        node.x,
-        Number(
-          node.y || 0
-        ) + 0.32,
-        node.z
-      );
-
-      sidewalkPad.material =
-        materials.sidewalk;
-
-      sidewalkPad.parent =
-        root;
-
-      sidewalkPad.isPickable =
-        false;
-    }
-
+    // IMPORTANT:
+    // Do not place a huge circular sidewalk disc under the whole junction.
+    // It was making intersections look like white roundabouts and causing
+    // ugly overlapping geometry. Each road already brings its sidewalks
+    // up to the junction; this compact asphalt patch only closes the center.
     const roadPad =
       BABYLON.MeshBuilder
         .CreateCylinder(
           "intersectionRoadPad",
           {
             diameter:
-              maxWidth + 4,
-            height: 0.30,
-            tessellation: 22
+              maxWidth + 2.5,
+            height: 0.22,
+            tessellation: 24
           },
           runtime().scene
         );
@@ -1248,7 +1141,7 @@
       node.x,
       Number(
         node.y || 0
-      ) + 0.48,
+      ) + 0.46,
       node.z
     );
 
@@ -1260,6 +1153,120 @@
 
     roadPad.isPickable =
       false;
+
+    // Add small sidewalk corner islands rather than one giant disc.
+    // This keeps pedestrian space visible without covering the road center.
+    const urban =
+      connections.filter(
+        seg =>
+          roadHasSidewalk(
+            seg.type
+          )
+      );
+
+    if (urban.length >= 2) {
+      const cornerRadius =
+        maxWidth / 2 + 4.2;
+
+      const dirs =
+        urban
+          .map(seg => {
+            const d =
+              directionAwayFromNode(
+                seg,
+                node.id
+              );
+
+            if (!d) return null;
+
+            const len =
+              Math.hypot(
+                d.x,
+                d.z
+              );
+
+            if (len < 0.01) {
+              return null;
+            }
+
+            return {
+              x: d.x / len,
+              z: d.z / len
+            };
+          })
+          .filter(Boolean);
+
+      dirs.sort(
+        (a, b) =>
+          Math.atan2(
+            a.z,
+            a.x
+          ) -
+          Math.atan2(
+            b.z,
+            b.x
+          )
+      );
+
+      for (
+        let i = 0;
+        i < dirs.length;
+        i++
+      ) {
+        const a = dirs[i];
+        const b =
+          dirs[
+            (i + 1) %
+            dirs.length
+          ];
+
+        // Mid-direction between adjoining road approaches.
+        let mx = a.x + b.x;
+        let mz = a.z + b.z;
+        const ml =
+          Math.hypot(
+            mx,
+            mz
+          );
+
+        // Opposing roads have no well-defined corner between them.
+        if (ml < 0.35) continue;
+
+        mx /= ml;
+        mz /= ml;
+
+        const corner =
+          BABYLON.MeshBuilder
+            .CreateCylinder(
+              "intersectionSidewalkCorner",
+              {
+                diameter: 5.2,
+                height: 0.28,
+                tessellation: 16
+              },
+              runtime().scene
+            );
+
+        corner.position.set(
+          node.x +
+            mx * cornerRadius,
+          Number(
+            node.y || 0
+          ) + 0.34,
+          node.z +
+            mz * cornerRadius
+        );
+
+        corner.material =
+          materials.sidewalk;
+
+        corner.parent =
+          root;
+
+        corner.isPickable =
+          false;
+      }
+    }
 
     // Requested yellow pedestrian crossings.
     for (
@@ -1294,6 +1301,7 @@
 
       if (
         count >= 3 &&
+        count <= 5 &&
         Math.hypot(
           node.x -
             runtime().camera.target.x,
@@ -2975,7 +2983,7 @@
 
   window.mapGameRoadTool = {
     VERSION:
-      "0.2.2C1.5",
+      "0.2.2C1.5.2",
     open:
       openTool,
     close:
@@ -2984,7 +2992,59 @@
       () => open,
     enterTerritory,
     leaveTerritory,
-    refreshVisible
+    refreshVisible,
+    resetRoadsForCurrentTerritory() {
+      const t =
+        activeTerritory();
+
+      if (!t) return false;
+
+      const g =
+        R().graphFor(t.id);
+
+      g.nodes.clear();
+      g.segments.clear();
+      g.nextNode = 1;
+      g.nextSegment = 1;
+
+      try {
+        const prefix =
+          "mapgame_roads_";
+
+        for (
+          let i =
+            localStorage.length - 1;
+          i >= 0;
+          i--
+        ) {
+          const key =
+            localStorage.key(i);
+
+          if (
+            key &&
+            key.startsWith(prefix) &&
+            key.endsWith(
+              "_" + t.id
+            )
+          ) {
+            localStorage.removeItem(
+              key
+            );
+          }
+        }
+      } catch (_) {}
+
+      clearStart();
+      clearRendered();
+      ensureRoadRoot();
+      refreshVisible(true);
+      updateMessage(
+        "Road network reset for this territory.",
+        "good"
+      );
+
+      return true;
+    }
   };
 
   window.addEventListener(
@@ -2996,6 +3056,6 @@
   );
 
   console.log(
-    "Map Game Road Tool 0.2.2C1.5 ready — curves, sidewalks, yellow crossings, elevation and overpasses."
+    "Map Game Road Tool 0.2.2C1.5.2 intersection cleanup ready."
   );
 })();
