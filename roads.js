@@ -1,3 +1,4 @@
+
 // ============================================================
 // MAP GAME — roads.js
 // Alpha 0.2.2C1.5 — curved / elevated road graph
@@ -27,6 +28,67 @@
 
   const SAME_LEVEL_TOLERANCE = 2.75;
   const DEFAULT_SAMPLES = 22;
+
+  // MAP GAME road geometry rules.
+  // These are game design limits inspired by real roadway-design principles:
+  // higher-speed roads get gentler curves, lower grades and stricter access.
+  // They are intentionally conservative rather than claiming to reproduce
+  // one jurisdiction's engineering standard exactly.
+  const ROAD_GUIDELINES = Object.freeze({
+    dirt: {
+      minRadius: 18,
+      maxTurnDeg: 110,
+      maxGrade: 0.20,
+      minIntersectionAngleDeg: 50,
+      idealIntersectionMinDeg: 75,
+      idealIntersectionMaxDeg: 105,
+      minIntersectionSpacing: 18,
+      allowAtGradeCrossing: true
+    },
+    road2: {
+      minRadius: 42,
+      maxTurnDeg: 85,
+      maxGrade: 0.15,
+      minIntersectionAngleDeg: 55,
+      idealIntersectionMinDeg: 75,
+      idealIntersectionMaxDeg: 105,
+      minIntersectionSpacing: 26,
+      allowAtGradeCrossing: true
+    },
+    avenue4: {
+      minRadius: 85,
+      maxTurnDeg: 65,
+      maxGrade: 0.10,
+      minIntersectionAngleDeg: 60,
+      idealIntersectionMinDeg: 75,
+      idealIntersectionMaxDeg: 105,
+      minIntersectionSpacing: 42,
+      allowAtGradeCrossing: true
+    },
+    highway: {
+      minRadius: 180,
+      maxTurnDeg: 48,
+      maxGrade: 0.07,
+      minIntersectionAngleDeg: 70,
+      idealIntersectionMinDeg: 80,
+      idealIntersectionMaxDeg: 100,
+      minIntersectionSpacing: 90,
+      allowAtGradeCrossing: true
+    },
+    freeway: {
+      minRadius: 320,
+      maxTurnDeg: 34,
+      maxGrade: 0.06,
+      minIntersectionAngleDeg: 75,
+      idealIntersectionMinDeg: 85,
+      idealIntersectionMaxDeg: 95,
+      minIntersectionSpacing: 150,
+      allowAtGradeCrossing: false
+    }
+  });
+
+  const MIN_GRADE_SEPARATION_CLEARANCE = 5.5;
+  const ROAD_EDGE_BUFFER = 2.5;
 
   function graphFor(territoryId) {
     if (!graphs.has(territoryId)) {
@@ -203,6 +265,470 @@
     }
 
     return worst;
+  }
+
+  function angleBetween2D(ax, az, bx, bz) {
+    const al = Math.hypot(ax, az);
+    const bl = Math.hypot(bx, bz);
+
+    if (al < 0.0001 || bl < 0.0001) return 0;
+
+    const dot =
+      (ax * bx + az * bz) /
+      (al * bl);
+
+    return Math.acos(
+      Math.max(-1, Math.min(1, dot))
+    );
+  }
+
+  function radiusThrough3Points(a, b, c) {
+    const ab = Math.hypot(b.x - a.x, b.z - a.z);
+    const bc = Math.hypot(c.x - b.x, c.z - b.z);
+    const ca = Math.hypot(a.x - c.x, a.z - c.z);
+
+    const twiceArea = Math.abs(
+      (b.x - a.x) * (c.z - a.z) -
+      (b.z - a.z) * (c.x - a.x)
+    );
+
+    if (
+      ab < 0.01 ||
+      bc < 0.01 ||
+      ca < 0.01 ||
+      twiceArea < 0.001
+    ) {
+      return Infinity;
+    }
+
+    // R = abc / 4A ; twiceArea = 2A.
+    return (ab * bc * ca) / (2 * twiceArea);
+  }
+
+  function pathGeometryStats(path) {
+    if (!Array.isArray(path) || path.length < 2) {
+      return {
+        totalTurnDeg: 0,
+        maxLocalTurnDeg: 0,
+        minRadius: Infinity,
+        maxGrade: 0
+      };
+    }
+
+    let totalTurn = 0;
+    let maxLocalTurn = 0;
+    let minRadius = Infinity;
+
+    for (let i = 1; i < path.length - 1; i++) {
+      const a = path[i - 1];
+      const b = path[i];
+      const c = path[i + 1];
+
+      const v1x = b.x - a.x;
+      const v1z = b.z - a.z;
+      const v2x = c.x - b.x;
+      const v2z = c.z - b.z;
+
+      const turn = angleBetween2D(v1x, v1z, v2x, v2z);
+      totalTurn += Math.abs(turn);
+      maxLocalTurn = Math.max(maxLocalTurn, Math.abs(turn));
+
+      const radius = radiusThrough3Points(a, b, c);
+      if (Number.isFinite(radius)) {
+        minRadius = Math.min(minRadius, radius);
+      }
+    }
+
+    return {
+      totalTurnDeg: totalTurn * 180 / Math.PI,
+      maxLocalTurnDeg: maxLocalTurn * 180 / Math.PI,
+      minRadius,
+      maxGrade: pathGrade(path)
+    };
+  }
+
+  function segmentClosest2D(a, b, c, d) {
+    // Compact closest-distance helper. For overlap rejection we do not need
+    // an expensive exact solver; endpoint projections are stable and enough.
+    const candidates = [];
+
+    const p1 = pointToLine2D(a.x, a.z, c.x, c.z, d.x, d.z);
+    candidates.push({
+      distance: p1.distance,
+      x1: a.x,
+      z1: a.z,
+      y1: a.y,
+      x2: p1.x,
+      z2: p1.z,
+      y2: c.y + (d.y - c.y) * p1.t,
+      tNew: 0,
+      tOld: p1.t
+    });
+
+    const p2 = pointToLine2D(b.x, b.z, c.x, c.z, d.x, d.z);
+    candidates.push({
+      distance: p2.distance,
+      x1: b.x,
+      z1: b.z,
+      y1: b.y,
+      x2: p2.x,
+      z2: p2.z,
+      y2: c.y + (d.y - c.y) * p2.t,
+      tNew: 1,
+      tOld: p2.t
+    });
+
+    const p3 = pointToLine2D(c.x, c.z, a.x, a.z, b.x, b.z);
+    candidates.push({
+      distance: p3.distance,
+      x1: p3.x,
+      z1: p3.z,
+      y1: a.y + (b.y - a.y) * p3.t,
+      x2: c.x,
+      z2: c.z,
+      y2: c.y,
+      tNew: p3.t,
+      tOld: 0
+    });
+
+    const p4 = pointToLine2D(d.x, d.z, a.x, a.z, b.x, b.z);
+    candidates.push({
+      distance: p4.distance,
+      x1: p4.x,
+      z1: p4.z,
+      y1: a.y + (b.y - a.y) * p4.t,
+      x2: d.x,
+      z2: d.z,
+      y2: d.y,
+      tNew: p4.t,
+      tOld: 1
+    });
+
+    candidates.sort((x, y) => x.distance - y.distance);
+    return candidates[0];
+  }
+
+  function pathDistanceFromStart(path, segmentIndex, t = 0) {
+    let length = 0;
+
+    for (let i = 1; i <= segmentIndex; i++) {
+      length += dist2D(path[i - 1], path[i]);
+    }
+
+    if (
+      segmentIndex + 1 < path.length &&
+      t > 0
+    ) {
+      length +=
+        dist2D(
+          path[segmentIndex],
+          path[segmentIndex + 1]
+        ) * t;
+    }
+
+    return length;
+  }
+
+  function validateAlignment(
+    territoryId,
+    {
+      path,
+      type = "road2",
+      width = null,
+      terrainSampler = null,
+      elevationMode = "surface"
+    } = {}
+  ) {
+    const g = graphFor(territoryId);
+    const rule =
+      ROAD_GUIDELINES[type] ||
+      ROAD_GUIDELINES.road2;
+
+    const spec =
+      ROAD_TYPES[type] || {};
+
+    const roadWidth =
+      Number(width || spec.width || 14);
+
+    if (!Array.isArray(path) || path.length < 2) {
+      return {
+        allowed: false,
+        state: "bad",
+        reason: "Road alignment is missing."
+      };
+    }
+
+    const stats = pathGeometryStats(path);
+
+    if (
+      Number.isFinite(stats.minRadius) &&
+      stats.minRadius < rule.minRadius
+    ) {
+      return {
+        allowed: false,
+        state: "bad",
+        reason:
+          `${spec.label || "Road"} curve is too sharp. ` +
+          `Minimum radius is about ${Math.round(rule.minRadius)}m.`,
+        stats
+      };
+    }
+
+    if (stats.totalTurnDeg > rule.maxTurnDeg) {
+      return {
+        allowed: false,
+        state: "bad",
+        reason:
+          `${spec.label || "Road"} turns too far in one placement. ` +
+          `Maximum bend is ${rule.maxTurnDeg}°.`,
+        stats
+      };
+    }
+
+    if (stats.maxGrade > rule.maxGrade) {
+      return {
+        allowed: false,
+        state: "bad",
+        reason:
+          `${spec.label || "Road"} is too steep ` +
+          `(${Math.round(stats.maxGrade * 100)}%; max ${Math.round(rule.maxGrade * 100)}%).`,
+        stats
+      };
+    }
+
+    if (typeof terrainSampler === "function") {
+      for (let i = 0; i < path.length; i++) {
+        const p = path[i];
+        const ground = Number(terrainSampler(p.x, p.z) || 0);
+        const clearance = p.y - ground;
+
+        if (clearance < -0.65) {
+          return {
+            allowed: false,
+            state: "bad",
+            reason:
+              "Road would be buried under the terrain. Raise it or use a shorter alignment.",
+            stats
+          };
+        }
+
+        if (
+          elevationMode === "surface" &&
+          clearance > 2.75
+        ) {
+          return {
+            allowed: false,
+            state: "bad",
+            reason:
+              "Surface road would float above the terrain. Use elevation/bridge mode.",
+            stats
+          };
+        }
+      }
+    }
+
+    let warning = "";
+
+    // Compare the new alignment with existing road geometry.
+    for (const old of g.segments.values()) {
+      const oldPath = normalizeSegmentPath(g, old);
+      const oldWidth = Number(old.width || ROAD_TYPES[old.type]?.width || 14);
+      const minCenterSeparation =
+        roadWidth / 2 +
+        oldWidth / 2 +
+        ROAD_EDGE_BUFFER;
+
+      for (let ni = 1; ni < path.length; ni++) {
+        const na = path[ni - 1];
+        const nb = path[ni];
+
+        for (let oi = 1; oi < oldPath.length; oi++) {
+          const oa = oldPath[oi - 1];
+          const ob = oldPath[oi];
+
+          const cross = lineIntersection(na, nb, oa, ob);
+
+          if (cross) {
+            const newY = na.y + (nb.y - na.y) * cross.t;
+            const oldY = oa.y + (ob.y - oa.y) * cross.u;
+            const vertical = Math.abs(newY - oldY);
+
+            const newDirX = nb.x - na.x;
+            const newDirZ = nb.z - na.z;
+            const oldDirX = ob.x - oa.x;
+            const oldDirZ = ob.z - oa.z;
+
+            let angleDeg =
+              angleBetween2D(
+                newDirX,
+                newDirZ,
+                oldDirX,
+                oldDirZ
+              ) * 180 / Math.PI;
+
+            if (angleDeg > 90) angleDeg = 180 - angleDeg;
+
+            const distanceAlongNew =
+              pathDistanceFromStart(path, ni - 1, cross.t);
+
+            // Start-node joining is allowed; it is not treated as a crossing.
+            const startJoinZone =
+              Math.max(18, roadWidth + oldWidth);
+
+            if (distanceAlongNew <= startJoinZone) {
+              continue;
+            }
+
+            if (vertical <= SAME_LEVEL_TOLERANCE) {
+              if (
+                type === "freeway" ||
+                old.type === "freeway" ||
+                !rule.allowAtGradeCrossing
+              ) {
+                return {
+                  allowed: false,
+                  state: "bad",
+                  reason:
+                    "Freeways cannot make ordinary at-grade crossings. Use an overpass and ramps.",
+                  stats
+                };
+              }
+
+              if (angleDeg < rule.minIntersectionAngleDeg) {
+                return {
+                  allowed: false,
+                  state: "bad",
+                  reason:
+                    `Intersection angle is too shallow (${Math.round(angleDeg)}°). ` +
+                    `Approach closer to 90°.`,
+                  stats
+                };
+              }
+
+              if (
+                angleDeg < rule.idealIntersectionMinDeg ||
+                angleDeg > rule.idealIntersectionMaxDeg
+              ) {
+                warning =
+                  `Intersection works, but ${Math.round(angleDeg)}° is outside the preferred ` +
+                  `${rule.idealIntersectionMinDeg}–${rule.idealIntersectionMaxDeg}° range.`;
+              }
+
+              // Keep intersections from clustering together.
+              const nearNode =
+                nearestNode(
+                  territoryId,
+                  cross.x,
+                  cross.z,
+                  rule.minIntersectionSpacing,
+                  newY,
+                  4
+                );
+
+              if (nearNode) {
+                const dStart =
+                  Math.hypot(
+                    nearNode.x - path[0].x,
+                    nearNode.z - path[0].z
+                  );
+
+                if (dStart > startJoinZone) {
+                  return {
+                    allowed: false,
+                    state: "bad",
+                    reason:
+                      `Intersection is too close to another junction. Keep about ` +
+                      `${rule.minIntersectionSpacing}m between junctions.`,
+                    stats
+                  };
+                }
+              }
+            } else if (
+              vertical <
+              MIN_GRADE_SEPARATION_CLEARANCE
+            ) {
+              return {
+                allowed: false,
+                state: "bad",
+                reason:
+                  `Not enough vertical clearance to cross this road. ` +
+                  `Use at least ${MIN_GRADE_SEPARATION_CLEARANCE}m separation.`,
+                stats
+              };
+            } else {
+              warning =
+                `Grade-separated crossing • ${vertical.toFixed(1)}m clearance.`;
+            }
+
+            continue;
+          }
+
+          // Reject roads that run on top of, underneath, or immediately beside
+          // another alignment. True overpasses are allowed only where roads
+          // actually CROSS with adequate vertical clearance.
+          const closest =
+            segmentClosest2D(
+              na,
+              nb,
+              oa,
+              ob
+            );
+
+          const newY = closest.y1;
+          const oldY = closest.y2;
+          const vertical = Math.abs(newY - oldY);
+
+          const distanceAlongNew =
+            pathDistanceFromStart(
+              path,
+              ni - 1,
+              closest.tNew
+            );
+
+          const startJoinZone =
+            Math.max(
+              18,
+              roadWidth + oldWidth
+            );
+
+          if (
+            closest.distance < minCenterSeparation &&
+            distanceAlongNew > startJoinZone
+          ) {
+            if (
+              vertical <
+              MIN_GRADE_SEPARATION_CLEARANCE
+            ) {
+              return {
+                allowed: false,
+                state: "bad",
+                reason:
+                  "Roads cannot overlap or be placed through each other. Move farther away or create a real intersection.",
+                stats
+              };
+            }
+
+            return {
+              allowed: false,
+              state: "bad",
+              reason:
+                "Roads cannot be stacked directly above or below one another. " +
+                "Elevated roads may cross other roads, but cannot run on top of them.",
+              stats
+            };
+          }
+        }
+      }
+    }
+
+    return {
+      allowed: true,
+      state: warning ? "warn" : "valid",
+      reason:
+        warning ||
+        "Road alignment meets the current geometry rules.",
+      stats
+    };
   }
 
   function pointToLine2D(
@@ -1812,7 +2338,7 @@
 
     return {
       version:
-        "0.2.2C1.5.2",
+        "0.2.2C1.6",
       territoryId,
       nextNode:
         g.nextNode,
@@ -2052,10 +2578,12 @@
 
   window.mapGameRoads = {
     VERSION:
-      "0.2.2C1.5.2",
+      "0.2.2C1.6",
     ROAD_TYPES,
     ROAD_ORDER,
     SAME_LEVEL_TOLERANCE,
+    MIN_GRADE_SEPARATION_CLEARANCE,
+    ROAD_GUIDELINES,
     graphFor,
     buildPath,
     pathLength,
@@ -2064,6 +2592,8 @@
     nearestSegment,
     snapPoint,
     estimateSegment,
+    pathGeometryStats,
+    validateAlignment,
     validateConnectedStart,
     addConnectedSegment,
     removeSegment,
@@ -2078,6 +2608,6 @@
   };
 
   console.log(
-    "Map Game roads 0.2.2C1.5.2 stable intersection graph ready."
+    "Map Game roads 0.2.2C1.6 stable intersection graph ready."
   );
 })();

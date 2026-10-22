@@ -1,3 +1,4 @@
+
 /* ============================================================
    MAP GAME — ALPHA 0.2.0 UI ADDITION
    Add this as phase2.css after your existing styles.css.
@@ -3065,4 +3066,19 @@ body[data-world="singleplayer"] [data-action="hub"]{display:none!important}
   .mg-road-tool-c15 {
     width: min(336px, calc(100vw - 82px));
   }
+}
+
+
+/* 0.2.2C1.6 — geometry-guideline readouts */
+.mg-road-type-copy small {
+  white-space: normal;
+  line-height: 1.35;
+}
+
+.mg-road-message[data-kind="bad"] {
+  color: rgba(255, 127, 119, .96);
+}
+
+.mg-road-message[data-kind="good"] {
+  color: rgba(135, 235, 202, .92);
 }

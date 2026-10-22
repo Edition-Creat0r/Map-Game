@@ -1,3 +1,4 @@
+
 // ============================================================
 // MAP GAME — road_tool.js
 // Alpha 0.2.2C1.5 — Road Tool overhaul
@@ -1506,7 +1507,7 @@
         </div>
 
         <p class="mg-road-help">
-          Raise a road before crossing another road to make an overpass. Start a new road from the elevated road to create a ramp back down.
+          Curves, grades, intersection angles, spacing and clearances are validated live. Roads cannot overlap, stack directly above/below another road, or clip through terrain. Raise a road only to make a real overpass.
         </p>
       </section>
 
@@ -1712,7 +1713,7 @@
         <span class="mg-road-type-line" style="--road-width:${Math.max(2, Math.min(7, def.lanes || 2))}px"></span>
         <span class="mg-road-type-copy">
           <strong>${def.label}</strong>
-          <small>${def.lanes} lanes • ${def.speed}${sidewalk}</small>
+          <small>${def.lanes} lanes • ${def.speed}${sidewalk} • R≥${roadRule(id).minRadius}m • ≤${roadRule(id).maxTurnDeg}°</small>
         </span>
       `;
 
@@ -1964,53 +1965,18 @@
     );
   }
 
-  function maxAllowedGrade(
-    type
-  ) {
-    if (
-      type === "freeway"
-    ) {
-      return 0.075;
-    }
-
-    if (
-      type === "highway"
-    ) {
-      return 0.09;
-    }
-
-    if (
-      type === "avenue4"
-    ) {
-      return 0.13;
-    }
-
-    if (
-      type === "road2"
-    ) {
-      return 0.17;
-    }
-
-    return 0.22;
+  function roadRule(type) {
+    return (
+      R()?.ROAD_GUIDELINES?.[type] ||
+      R()?.ROAD_GUIDELINES?.road2 ||
+      {
+        minRadius: 42,
+        maxTurnDeg: 85,
+        maxGrade: 0.15
+      }
+    );
   }
 
-  function minimumCurveRadiusHint(
-    type
-  ) {
-    if (
-      type === "freeway"
-    ) {
-      return 0.58;
-    }
-
-    if (
-      type === "highway"
-    ) {
-      return 0.70;
-    }
-
-    return 1;
-  }
 
   function validateRoadPath(
     a,
@@ -2097,48 +2063,6 @@
         }
       );
 
-    const gradeLimit =
-      maxAllowedGrade(
-        roadType
-      );
-
-    if (
-      estimate.maxGrade >
-      gradeLimit
-    ) {
-      return {
-        allowed: false,
-        reason:
-          `Road grade is too steep (${Math.round(estimate.maxGrade * 100)}%).`,
-        state: "bad",
-        estimate
-      };
-    }
-
-    const curveLimit =
-      minimumCurveRadiusHint(
-        roadType
-      );
-
-    if (
-      Math.abs(
-        curveAmount
-      ) >
-      curveLimit
-    ) {
-      return {
-        allowed: false,
-        reason:
-          `${R().ROAD_TYPES[roadType]?.label || "This road"} needs a gentler curve.`,
-        state: "bad",
-        estimate
-      };
-    }
-
-    let state = "valid";
-    let reason =
-      startCheck.reason;
-
     const elevated =
       estimate.path.some(
         p =>
@@ -2147,20 +2071,57 @@
               p.x,
               p.z
             ) >
-          4
+          3
       );
 
-    if (elevated) {
+    const geometry =
+      R().validateAlignment(
+        t.id,
+        {
+          path: estimate.path,
+          type: roadType,
+          width: estimate.width,
+          terrainSampler: terrainY,
+          elevationMode:
+            elevated
+              ? "elevated"
+              : "surface"
+        }
+      );
+
+    if (!geometry.allowed) {
+      return {
+        allowed: false,
+        reason: geometry.reason,
+        state: "bad",
+        estimate,
+        geometry
+      };
+    }
+
+    let state =
+      geometry.state ||
+      "valid";
+
+    let reason =
+      geometry.reason ||
+      startCheck.reason;
+
+    if (
+      elevated &&
+      state === "valid"
+    ) {
       state = "warn";
       reason =
-        "Elevated road / bridge • crossings below will remain separate.";
+        "Elevated road / bridge • only true crossings are allowed above other roads.";
     }
 
     return {
       allowed: true,
       reason,
       state,
-      estimate
+      estimate,
+      geometry
     };
   }
 
@@ -2287,12 +2248,35 @@
         }
       );
 
+    const stats =
+      check.geometry?.stats ||
+      R().pathGeometryStats?.(
+        estimate.path
+      ) ||
+      {};
+
     const grade =
       Math.round(
         Number(
-          estimate.maxGrade || 0
+          stats.maxGrade ??
+          estimate.maxGrade ??
+          0
         ) * 100
       );
+
+    const bend =
+      Math.round(
+        Number(
+          stats.totalTurnDeg || 0
+        )
+      );
+
+    const radius =
+      Number.isFinite(
+        stats.minRadius
+      )
+        ? Math.round(stats.minRadius)
+        : "∞";
 
     const elevationText =
       Math.abs(
@@ -2303,7 +2287,7 @@
 
     updateMessage(
       check.allowed
-        ? `${Math.round(estimate.length)}m • ${grade}% max grade${elevationText} • $${estimate.cost.toLocaleString()} • click to build`
+        ? `${Math.round(estimate.length)}m • ${bend}° bend • R${radius}m • ${grade}% grade${elevationText} • $${estimate.cost.toLocaleString()} • click to build`
         : check.reason,
       check.allowed
         ? (
@@ -2983,7 +2967,7 @@
 
   window.mapGameRoadTool = {
     VERSION:
-      "0.2.2C1.5.2",
+      "0.2.2C1.6",
     open:
       openTool,
     close:
@@ -3056,6 +3040,6 @@
   );
 
   console.log(
-    "Map Game Road Tool 0.2.2C1.5.2 intersection cleanup ready."
+    "Map Game Road Tool 0.2.2C1.6 intersection cleanup ready."
   );
 })();
