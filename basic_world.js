@@ -52,9 +52,12 @@
 
   // Far zoom MUST NOT build all 4,096 detailed chunks. At territory scale we
   // draw one lightweight overview raster, then switch to chunks as you zoom.
-  const OVERVIEW_PIXELS = 320;
-  const DETAIL_ZOOM_THRESHOLD = 0.115;
-  const MAX_DETAIL_CHUNKS_PER_FRAME = 110;
+  const OVERVIEW_PIXELS = 384;
+  const DETAIL_ZOOM_THRESHOLD = 0.105;
+  const TREE_CLUSTER_ZOOM = 0.105;
+  const TREE_DETAIL_ZOOM = 0.205;
+  const MOUNTAIN_DETAIL_ZOOM = 0.090;
+  const MAX_DETAIL_CHUNKS_PER_FRAME = 120;
 
   const state = {
     active: false,
@@ -194,18 +197,33 @@
     // Mountain ridges are gated by a large regional field so they form
     // coherent chains rather than appearing evenly everywhere.
     const mountainRegion =
-      smooth(clamp((fbm(x, z, 18000, 3, 3301) - 0.48) / 0.28, 0, 1));
+      smooth(
+        clamp(
+          (fbm(x, z, 21000, 3, 3301) - 0.43) / 0.24,
+          0,
+          1
+        )
+      );
 
+    const ridgeRaw =
+      ridged(x, z, 7200, 5, 4401);
+
+    // Push the ridges harder so mountain chains are visually distinct instead
+    // of reading as slightly darker grass.
     const ridge =
-      ridged(x, z, 6200, 5, 4401) * mountainRegion;
+      Math.pow(
+        clamp(ridgeRaw, 0, 1),
+        1.55
+      ) *
+      mountainRegion;
 
     // Basin / valley modifier.
-    const valley = fbm(x, z, 7200, 4, 5501);
+    const valley = fbm(x, z, 7600, 4, 5501);
 
     let elevation =
-      0.31 * broad +
-      0.35 * rolling +
-      0.48 * ridge -
+      0.25 * broad +
+      0.31 * rolling +
+      0.72 * ridge -
       0.10 * (1 - valley);
 
     elevation = clamp(elevation, 0, 1);
@@ -235,8 +253,8 @@
 
     const steepness =
       clamp(
-        ridge * 0.78 +
-        Math.max(0, elevation - 0.63) * 1.1,
+        ridge * 0.98 +
+        Math.max(0, elevation - 0.56) * 1.35,
         0,
         1
       );
@@ -256,11 +274,11 @@
 
     if (water) {
       terrain = "water";
-    } else if (elevation > 0.82) {
-      terrain = temperature < 0.58 ? "snow_peak" : "high_rock";
-    } else if (elevation > 0.69 || steepness > 0.70) {
+    } else if (elevation > 0.80) {
+      terrain = temperature < 0.62 ? "snow_peak" : "high_rock";
+    } else if (elevation > 0.64 || steepness > 0.62) {
       terrain = "mountain";
-    } else if (elevation > 0.57 || steepness > 0.47) {
+    } else if (elevation > 0.50 || steepness > 0.40) {
       terrain = "hills";
     } else if (moisture < 0.31) {
       terrain = "dry_plains";
@@ -351,7 +369,7 @@
         base = mixColor(
           COLORS.deepGrass,
           COLORS.forest,
-          sample.forest * 0.72
+          clamp(0.34 + sample.forest * 0.62, 0, 1)
         );
         break;
 
@@ -365,9 +383,9 @@
 
       case "mountain":
         base = mixColor(
-          COLORS.hill,
-          COLORS.rock,
-          clamp(sample.steepness, 0, 1)
+          [104, 111, 73],
+          [91, 88, 79],
+          clamp(0.35 + sample.steepness * 0.72, 0, 1)
         );
         break;
 
@@ -528,31 +546,9 @@
 
     c.putImageData(image, 0, 0);
 
-    // Far-zoom forest masses. No individual trees here.
-    c.save();
-    c.globalAlpha = 0.18;
-
-    const forestStep = 8;
-
-    for (let py = 0; py < OVERVIEW_PIXELS; py += forestStep) {
-      for (let px = 0; px < OVERVIEW_PIXELS; px += forestStep) {
-        const index = py * OVERVIEW_PIXELS + px;
-        const s = samples[index];
-
-        if (!s?.water && s?.forest > 0.58) {
-          const radius =
-            3 +
-            (s.forest - 0.58) * 10;
-
-          c.fillStyle = "#163f24";
-          c.beginPath();
-          c.arc(px, py, radius, 0, Math.PI * 2);
-          c.fill();
-        }
-      }
-    }
-
-    c.restore();
+    // Forest color is already encoded continuously in the terrain raster.
+    // Do not overlay a grid of circles at far zoom; it reveals the sampling
+    // lattice and looks like dots instead of a forest.
 
     state.overviewCanvas = off;
     state.overviewReady = true;
@@ -602,11 +598,15 @@
       for (let px = 0; px < TILE_PIXELS; px++) {
         const localX =
           worldX0 +
-          (px + 0.5) / TILE_PIXELS * CHUNK_SIZE;
+          px /
+          Math.max(1, TILE_PIXELS - 1) *
+          CHUNK_SIZE;
 
         const localZ =
           worldZ0 +
-          (py + 0.5) / TILE_PIXELS * CHUNK_SIZE;
+          py /
+          Math.max(1, TILE_PIXELS - 1) *
+          CHUNK_SIZE;
 
         const sample = terrainSample(localX, localZ);
         const color = terrainColor(sample, localX, localZ);
@@ -629,108 +629,12 @@
   }
 
   function drawChunkArt(c, cx, cz) {
-    const x0 = cx * CHUNK_SIZE;
-    const z0 = cz * CHUNK_SIZE;
-
-    // Tree crowns are generated deterministically at a much lower density
-    // than the underlying forest field. At far zoom they merge into canopy.
-    const treeSlots = 58;
-
-    for (let i = 0; i < treeSlots; i++) {
-      const rx = hash32(cx * 719 + i * 13, cz * 911, state.seed + 17001);
-      const rz = hash32(cx * 811, cz * 613 + i * 17, state.seed + 18001);
-
-      const wx = x0 + rx * CHUNK_SIZE;
-      const wz = z0 + rz * CHUNK_SIZE;
-      const s = terrainSample(wx, wz);
-
-      if (
-        s.water ||
-        s.forest < 0.48 ||
-        hash32(i, cx + cz * 31, state.seed + 19001) > s.forest
-      ) {
-        continue;
-      }
-
-      const px = rx * TILE_PIXELS;
-      const py = rz * TILE_PIXELS;
-      const size =
-        2.2 +
-        hash32(i, cx, state.seed + 20001) * 3.4;
-
-      const tint =
-        hash32(i, cz, state.seed + 21001);
-
-      c.beginPath();
-      c.arc(
-        px + size * 0.35,
-        py + size * 0.50,
-        size * 0.92,
-        0,
-        Math.PI * 2
-      );
-      c.fillStyle = "rgba(19,55,28,.20)";
-      c.fill();
-
-      c.beginPath();
-      c.arc(px, py, size, 0, Math.PI * 2);
-      c.fillStyle =
-        tint > 0.52
-          ? "rgba(35,91,42,.94)"
-          : "rgba(46,105,48,.94)";
-      c.fill();
-
-      c.beginPath();
-      c.arc(
-        px - size * 0.28,
-        py - size * 0.30,
-        size * 0.46,
-        0,
-        Math.PI * 2
-      );
-      c.fillStyle = "rgba(93,142,72,.66)";
-      c.fill();
-    }
-
-    // Sparse top-down rock accents in mountainous regions.
-    const rockSlots = 18;
-
-    for (let i = 0; i < rockSlots; i++) {
-      const rx = hash32(cx * 101 + i * 29, cz * 71, state.seed + 22001);
-      const rz = hash32(cx * 59, cz * 97 + i * 23, state.seed + 23001);
-
-      const wx = x0 + rx * CHUNK_SIZE;
-      const wz = z0 + rz * CHUNK_SIZE;
-      const s = terrainSample(wx, wz);
-
-      if (
-        s.water ||
-        s.steepness < 0.58
-      ) {
-        continue;
-      }
-
-      const px = rx * TILE_PIXELS;
-      const py = rz * TILE_PIXELS;
-      const size = 1.5 + s.steepness * 3.3;
-
-      c.save();
-      c.translate(px, py);
-      c.rotate(
-        hash32(i, cx - cz, state.seed + 24001) * Math.PI
-      );
-
-      c.fillStyle = "rgba(67,67,63,.66)";
-      c.beginPath();
-      c.moveTo(-size, size * 0.5);
-      c.lineTo(-size * 0.35, -size);
-      c.lineTo(size * 0.9, -size * 0.4);
-      c.lineTo(size, size * 0.62);
-      c.closePath();
-      c.fill();
-
-      c.restore();
-    }
+    // Intentionally empty in 0.3A2.
+    //
+    // Trees/rocks used to be baked into each 512m chunk. That made crowns
+    // clip at chunk borders and exposed the chunk grid while zooming.
+    // Natural objects are now drawn in world space after the terrain pass,
+    // so they remain continuous across chunk boundaries.
   }
 
   function getChunk(cx, cz) {
@@ -839,6 +743,344 @@
   }
 
   // ----------------------------------------------------------
+  // World-space natural detail LOD
+  // ----------------------------------------------------------
+
+  function visibleWorldBounds() {
+    return {
+      left: state.cameraX - canvas.width / (2 * state.zoom),
+      right: state.cameraX + canvas.width / (2 * state.zoom),
+      top: state.cameraZ - canvas.height / (2 * state.zoom),
+      bottom: state.cameraZ + canvas.height / (2 * state.zoom)
+    };
+  }
+
+  function drawTreeSymbol(screenX, screenY, radius, seed) {
+    const shadowX = radius * 0.34;
+    const shadowY = radius * 0.42;
+
+    ctx.beginPath();
+    ctx.arc(
+      screenX + shadowX,
+      screenY + shadowY,
+      radius * 0.96,
+      0,
+      Math.PI * 2
+    );
+    ctx.fillStyle = "rgba(13,35,19,.24)";
+    ctx.fill();
+
+    // Irregular layered crown rather than one perfect circle.
+    const lobes = 5;
+    for (let i = 0; i < lobes; i++) {
+      const angle =
+        (i / lobes) * Math.PI * 2 +
+        hash32(seed, i, state.seed + 41001) * 0.55;
+
+      const rr =
+        radius *
+        (0.38 + hash32(seed, i + 11, state.seed + 42001) * 0.23);
+
+      const ox = Math.cos(angle) * radius * 0.36;
+      const oy = Math.sin(angle) * radius * 0.32;
+
+      ctx.beginPath();
+      ctx.arc(
+        screenX + ox,
+        screenY + oy,
+        rr,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.fillStyle =
+        i % 2 === 0
+          ? "rgba(34,91,43,.96)"
+          : "rgba(44,108,49,.96)";
+
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(
+      screenX - radius * 0.22,
+      screenY - radius * 0.24,
+      radius * 0.28,
+      0,
+      Math.PI * 2
+    );
+    ctx.fillStyle = "rgba(111,154,80,.72)";
+    ctx.fill();
+  }
+
+  function drawForestLOD() {
+    if (state.zoom < TREE_CLUSTER_ZOOM) return;
+
+    const bounds = visibleWorldBounds();
+
+    // At medium zoom, each deterministic 220m cell may show one canopy
+    // cluster. At close zoom, 96m cells reveal individual trees.
+    const cell =
+      state.zoom >= TREE_DETAIL_ZOOM
+        ? 96
+        : 220;
+
+    const startX =
+      Math.max(0, Math.floor(bounds.left / cell) - 1);
+
+    const endX =
+      Math.min(
+        Math.ceil(TERRITORY_SIZE / cell),
+        Math.floor(bounds.right / cell) + 1
+      );
+
+    const startZ =
+      Math.max(0, Math.floor(bounds.top / cell) - 1);
+
+    const endZ =
+      Math.min(
+        Math.ceil(TERRITORY_SIZE / cell),
+        Math.floor(bounds.bottom / cell) + 1
+      );
+
+    const close =
+      state.zoom >= TREE_DETAIL_ZOOM;
+
+    for (let gz = startZ; gz <= endZ; gz++) {
+      for (let gx = startX; gx <= endX; gx++) {
+        const r1 = hash32(gx, gz, state.seed + 31001);
+        const r2 = hash32(gx, gz, state.seed + 32001);
+
+        const wx =
+          gx * cell +
+          r1 * cell;
+
+        const wz =
+          gz * cell +
+          r2 * cell;
+
+        if (
+          wx < 0 ||
+          wz < 0 ||
+          wx > TERRITORY_SIZE ||
+          wz > TERRITORY_SIZE
+        ) {
+          continue;
+        }
+
+        const s = terrainSample(wx, wz);
+
+        if (
+          s.water ||
+          s.forest < 0.48
+        ) {
+          continue;
+        }
+
+        const spawn =
+          hash32(gx, gz, state.seed + 33001);
+
+        if (
+          spawn >
+          clamp(
+            (s.forest - 0.38) * 1.28,
+            0,
+            0.92
+          )
+        ) {
+          continue;
+        }
+
+        const p = worldToScreen(wx, wz);
+
+        if (close) {
+          const radius =
+            clamp(
+              3.1 + state.zoom * 9,
+              3.2,
+              8.5
+            );
+
+          drawTreeSymbol(
+            p.x,
+            p.y,
+            radius,
+            gx * 100000 + gz
+          );
+        } else {
+          const radius =
+            clamp(
+              cell * state.zoom * 0.28,
+              5,
+              14
+            );
+
+          const grad =
+            ctx.createRadialGradient(
+              p.x - radius * 0.2,
+              p.y - radius * 0.25,
+              radius * 0.1,
+              p.x,
+              p.y,
+              radius
+            );
+
+          grad.addColorStop(0, "rgba(78,128,65,.48)");
+          grad.addColorStop(0.55, "rgba(38,92,44,.42)");
+          grad.addColorStop(1, "rgba(24,68,34,.04)");
+
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(
+            p.x,
+            p.y,
+            radius,
+            0,
+            Math.PI * 2
+          );
+          ctx.fill();
+        }
+      }
+    }
+  }
+
+  function drawMountainRidges() {
+    if (state.zoom < MOUNTAIN_DETAIL_ZOOM) return;
+
+    const bounds = visibleWorldBounds();
+    const cell =
+      state.zoom >= 0.20
+        ? 180
+        : 340;
+
+    const sx =
+      Math.max(0, Math.floor(bounds.left / cell) - 1);
+
+    const ex =
+      Math.min(
+        Math.ceil(TERRITORY_SIZE / cell),
+        Math.floor(bounds.right / cell) + 1
+      );
+
+    const sz =
+      Math.max(0, Math.floor(bounds.top / cell) - 1);
+
+    const ez =
+      Math.min(
+        Math.ceil(TERRITORY_SIZE / cell),
+        Math.floor(bounds.bottom / cell) + 1
+      );
+
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    for (let gz = sz; gz <= ez; gz++) {
+      for (let gx = sx; gx <= ex; gx++) {
+        const wx =
+          gx * cell +
+          hash32(gx, gz, state.seed + 35001) * cell;
+
+        const wz =
+          gz * cell +
+          hash32(gx, gz, state.seed + 36001) * cell;
+
+        const s = terrainSample(wx, wz);
+
+        if (
+          s.water ||
+          (
+            s.terrain !== "mountain" &&
+            s.terrain !== "high_rock" &&
+            s.terrain !== "snow_peak"
+          )
+        ) {
+          continue;
+        }
+
+        const p = worldToScreen(wx, wz);
+
+        const size =
+          clamp(
+            (12 + s.steepness * 23) *
+            Math.sqrt(state.zoom / 0.1),
+            10,
+            34
+          );
+
+        // Dark downslope mass.
+        ctx.fillStyle = "rgba(48,47,43,.30)";
+        ctx.beginPath();
+        ctx.moveTo(
+          p.x - size,
+          p.y + size * 0.65
+        );
+        ctx.lineTo(
+          p.x,
+          p.y - size * 0.92
+        );
+        ctx.lineTo(
+          p.x + size * 1.05,
+          p.y + size * 0.72
+        );
+        ctx.closePath();
+        ctx.fill();
+
+        // Lit ridge face.
+        ctx.fillStyle =
+          s.terrain === "snow_peak"
+            ? "rgba(224,229,221,.65)"
+            : "rgba(155,151,133,.28)";
+
+        ctx.beginPath();
+        ctx.moveTo(
+          p.x,
+          p.y - size * 0.92
+        );
+        ctx.lineTo(
+          p.x - size,
+          p.y + size * 0.65
+        );
+        ctx.lineTo(
+          p.x - size * 0.12,
+          p.y + size * 0.22
+        );
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle =
+          s.terrain === "snow_peak"
+            ? "rgba(241,244,238,.72)"
+            : "rgba(76,74,68,.42)";
+
+        ctx.lineWidth =
+          clamp(
+            1 + state.zoom * 3,
+            1,
+            2.5
+          );
+
+        ctx.beginPath();
+        ctx.moveTo(
+          p.x - size * 0.72,
+          p.y + size * 0.46
+        );
+        ctx.lineTo(
+          p.x,
+          p.y - size * 0.92
+        );
+        ctx.lineTo(
+          p.x + size * 0.74,
+          p.y + size * 0.48
+        );
+        ctx.stroke();
+      }
+    }
+
+    ctx.restore();
+  }
+
+  // ----------------------------------------------------------
   // Drawing
   // ----------------------------------------------------------
 
@@ -912,6 +1154,10 @@
         }
       }
     }
+
+    // Natural art is drawn in world space, never baked into chunk edges.
+    drawMountainRidges();
+    drawForestLOD();
 
     drawTerritoryBorder();
     drawScale();
@@ -1316,7 +1562,7 @@
   }
 
   window.mapGameBasicWorld = {
-    VERSION: "0.3A1.2",
+    VERSION: "0.3A2",
     TERRITORY_SIZE,
     CHUNK_SIZE,
     CHUNKS_PER_SIDE,
@@ -1331,11 +1577,17 @@
       cameraX: state.cameraX,
       cameraZ: state.cameraZ,
       zoom: state.zoom,
-      cachedChunks: state.cache.size
+      cachedChunks: state.cache.size,
+      lod:
+        state.zoom < DETAIL_ZOOM_THRESHOLD
+          ? "overview"
+          : state.zoom < TREE_DETAIL_ZOOM
+            ? "regional"
+            : "close"
     })
   };
 
   console.log(
-    "Map Game Basic 0.3A1.2 LOD terrain renderer ready — 32K 2D world foundation."
+    "Map Game Basic 0.3A2 seamless terrain LOD renderer ready — 32K 2D world foundation."
   );
 })();
