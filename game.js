@@ -97,7 +97,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.3A1";
+  const VERSION = "0.3A1.1";
   const CHUNK_WORLD_SIZE = window.mapGameWorldConfig?.TERRITORY_SIZE || 32768;
   const TERRITORY_RENDER_SIZE = window.mapGameWorldConfig?.SECTOR_SIZE || 512;
   const WORLD_COLS = window.mapGameWorldConfig?.WORLD_COLS || 316;
@@ -1609,9 +1609,18 @@
     mapCtx = mapCanvas.getContext("2d");
 
     mapOverlay.querySelector("#mgMapClose").onclick = () => {
-      hideWorldMap();
-      if (state.activeTerritory) setMode("TERRITORY");
-      else if (state.worldType === "central") setMode("HUB");
+      if (state.activeTerritory) {
+        hideWorldMap();
+        setMode("TERRITORY");
+        return;
+      }
+
+      // Basic Central has no neutral 3D hub. Until a territory is owned,
+      // the strategic map is the correct gameplay screen.
+      showToast(
+        "Choose a starting territory to enter the Basic world.",
+        "info"
+      );
     };
     mapOverlay.querySelector("#mgMapRecenter").onclick = () => {
       state.mapCamera.x = CENTRAL_X;
@@ -1942,6 +1951,40 @@
     if (mapOverlay) mapOverlay.hidden = true;
   }
 
+  async function openMyBasicTerritory() {
+    const owned =
+      getMyStartingTerritory();
+
+    if (!owned) {
+      return false;
+    }
+
+    const id =
+      owned.territory_id ||
+      owned.id;
+
+    const parsed =
+      parseTerritoryId(id);
+
+    if (!parsed) {
+      showToast(
+        "Your saved territory ID could not be read.",
+        "error"
+      );
+
+      return false;
+    }
+
+    hideWorldMap();
+
+    await enterTerritory({
+      ...parsed,
+      id
+    });
+
+    return true;
+  }
+
   function getMyStartingTerritory() {
     if (state.worldType === "central") {
       const direct =
@@ -2015,30 +2058,12 @@
         existing.territory_id ||
         existing.id;
 
-      const parsed =
-        parseTerritoryId(existingId);
-
-      if (parsed) {
-        hideWorldMap();
-
-        showToast(
-          `Opening your territory ${existingId}. Expansion is still locked.`,
-          "info"
-        );
-
-        enterTerritory({
-          ...parsed,
-          id: existingId
-        });
-
-        return;
-      }
-
       showToast(
-        "Your territory exists on the server, but its saved ID could not be read.",
-        "error"
+        `Opening your territory ${existingId}.`,
+        "info"
       );
 
+      await openMyBasicTerritory();
       return;
     }
 
@@ -2406,13 +2431,6 @@
 
     const biome = getBiome(cell.x, cell.y);
 
-    const root =
-      new BABYLON.TransformNode(
-        `Territory_${cell.x}_${cell.y}`,
-        scene
-      );
-
-    state.terrainRoot = root;
     state.activeTerritory = {
       ...cell,
       id: cell.id || territoryId(cell.x, cell.y),
@@ -2472,6 +2490,15 @@
 
       return;
     }
+
+    // Legacy Regular/3D fallback only.
+    const root =
+      new BABYLON.TransformNode(
+        `Territory_${cell.x}_${cell.y}`,
+        scene
+      );
+
+    state.terrainRoot = root;
 
     showWorldLoading("OPENING TERRITORY");
     setLoadingState("STARTING SECTOR STREAM", 28);
@@ -3954,12 +3981,13 @@
     document.body.appendChild(hudRoot);
 
     hudRoot.querySelector("[data-action='hub']").onclick = () => {
-      hideWorldMap();
-      if (state.worldType === "singleplayer") {
-        showToast("Singleplayer has no neutral spawn. The entire world belongs to this save.", "info");
-        return;
+      if (state.worldType === "central") {
+        if (getMyStartingTerritory()) {
+          openMyBasicTerritory();
+        } else {
+          showWorldMap();
+        }
       }
-      buildNeutralHub();
     };
     hudRoot.querySelector("[data-action='map']").onclick = showWorldMap;
     hudRoot.querySelector("[data-action='territory-map']").onclick = () => {
@@ -4387,13 +4415,57 @@
     updateOnlineUI();
 
     const hubButton = hudRoot?.querySelector("[data-action='hub']");
-    if (worldType === "singleplayer") {
-      if (hubButton) hubButton.hidden = true;
-      enterSingleplayerHome();
-    } else {
-      if (hubButton) hubButton.hidden = false;
-      buildNeutralHub();
+
+    // BASIC 0.3A1.1:
+    // There is no 3D neutral spawn while Basic is the active renderer.
+    // Existing owners go straight to their territory.
+    // New Central players go straight to the strategic territory map.
+    if (hubButton) {
+      hubButton.hidden = true;
     }
+
+    if (worldType === "singleplayer") {
+      enterSingleplayerHome();
+      return;
+    }
+
+    const owned =
+      getMyStartingTerritory();
+
+    if (owned) {
+      openMyBasicTerritory()
+        .catch(error => {
+          console.error(
+            "Could not open owned Basic territory:",
+            error
+          );
+
+          showToast(
+            error?.message ||
+            "Could not open your territory.",
+            "error"
+          );
+
+          showWorldMap();
+        });
+
+      return;
+    }
+
+    // No territory yet: choose the first one immediately.
+    // This replaces the old 3D neutral spawn entirely.
+    state.activeTerritory = null;
+    state.selectedTerritory = null;
+    showWorldMap();
+
+    setStatus(
+      "<b>BASIC 2D</b> • choose your free starting territory"
+    );
+
+    showToast(
+      "Choose your starting territory. Basic mode no longer uses the old 3D spawn.",
+      "info"
+    );
   }
 
   // ==========================================================
