@@ -97,7 +97,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.3A1.1";
+  const VERSION = "0.3A1.2";
   const CHUNK_WORLD_SIZE = window.mapGameWorldConfig?.TERRITORY_SIZE || 32768;
   const TERRITORY_RENDER_SIZE = window.mapGameWorldConfig?.SECTOR_SIZE || 512;
   const WORLD_COLS = window.mapGameWorldConfig?.WORLD_COLS || 316;
@@ -2453,9 +2453,29 @@
       setMode("TERRITORY");
 
       try {
-        await window.mapGameBasicWorld.enterTerritory(
-          state.activeTerritory
-        );
+        setLoadingState("BUILDING TERRITORY OVERVIEW", 52);
+
+        const basicLoad =
+          window.mapGameBasicWorld.enterTerritory(
+            state.activeTerritory
+          );
+
+        const timeout =
+          new Promise((_, reject) => {
+            setTimeout(
+              () => reject(
+                new Error(
+                  "2D terrain startup took too long."
+                )
+              ),
+              12000
+            );
+          });
+
+        await Promise.race([
+          basicLoad,
+          timeout
+        ]);
       } catch (error) {
         console.error("Basic 2D terrain failed:", error);
         hideWorldLoading();
@@ -2463,6 +2483,10 @@
         showToast(
           `Could not render 2D territory: ${error?.message || error}`,
           "error"
+        );
+
+        setStatus(
+          "<b>BASIC 2D ERROR</b> • terrain renderer did not finish"
         );
 
         return;
@@ -4592,6 +4616,20 @@
     });
 
   window.dispatchEvent(new CustomEvent("mapgame:runtime-ready", { detail: window.mapGameRuntime }));
+
+  // Basic boot failsafe: never leave the user behind an eternal loading page.
+  // If an unexpected error occurs, reveal the shell and leave a visible status.
+  setTimeout(() => {
+    const screen = document.getElementById("loadingScreen");
+
+    if (
+      screen &&
+      !screen.hidden &&
+      screen.dataset.worldLoading !== "true"
+    ) {
+      screen.hidden = true;
+    }
+  }, 6500);
 
   // ==========================================================
   // HELPERS

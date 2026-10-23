@@ -44,8 +44,17 @@
   const CHUNKS_PER_SIDE =
     Math.ceil(TERRITORY_SIZE / CHUNK_SIZE);
 
-  const CACHE_LIMIT = 140;
-  const TILE_PIXELS = 192;
+  const CACHE_LIMIT = 120;
+
+  // Detailed chunk raster. 96px is enough because a 512m chunk is normally
+  // smaller than this on screen until the player is already zoomed well in.
+  const TILE_PIXELS = 96;
+
+  // Far zoom MUST NOT build all 4,096 detailed chunks. At territory scale we
+  // draw one lightweight overview raster, then switch to chunks as you zoom.
+  const OVERVIEW_PIXELS = 320;
+  const DETAIL_ZOOM_THRESHOLD = 0.115;
+  const MAX_DETAIL_CHUNKS_PER_FRAME = 110;
 
   const state = {
     active: false,
@@ -53,8 +62,8 @@
     seed: 0,
     cameraX: TERRITORY_SIZE / 2,
     cameraZ: TERRITORY_SIZE / 2,
-    zoom: 0.048,
-    minZoom: 0.022,
+    zoom: 0.040,
+    minZoom: 0.020,
     maxZoom: 0.72,
     dragging: false,
     lastX: 0,
@@ -62,6 +71,8 @@
     hoverWorld: null,
     cache: new Map(),
     cacheClock: 0,
+    overviewCanvas: null,
+    overviewReady: false,
     needsDraw: true,
     inspector: null,
     lastFrame: 0,
@@ -396,7 +407,9 @@
     return Math.round(sample.elevation * 940);
   }
 
-  function hillShade(localX, localZ, step = 36) {
+  function hillShade(localX, localZ, step = 56) {
+    // Detail-only hillshade. Far-zoom overview computes shading from its
+    // already-sampled elevation grid instead of resampling terrain 4x/pixel.
     const west = terrainSample(localX - step, localZ).elevation;
     const east = terrainSample(localX + step, localZ).elevation;
     const north = terrainSample(localX, localZ - step).elevation;
@@ -405,12 +418,164 @@
     const dx = east - west;
     const dz = south - north;
 
-    // Virtual light from upper-left / northwest.
     const light =
       (-dx * 0.68) +
       (-dz * 0.52);
 
-    return clamp(light * 2.8, -0.24, 0.24);
+    return clamp(light * 2.7, -0.22, 0.22);
+  }
+
+  // ----------------------------------------------------------
+  // Territory overview LOD
+  // ----------------------------------------------------------
+
+  function buildOverview() {
+    if (state.overviewReady && state.overviewCanvas) {
+      return state.overviewCanvas;
+    }
+
+    const off = document.createElement("canvas");
+    off.width = OVERVIEW_PIXELS;
+    off.height = OVERVIEW_PIXELS;
+
+    const c = off.getContext("2d", { alpha: false });
+    const image = c.createImageData(OVERVIEW_PIXELS, OVERVIEW_PIXELS);
+    const data = image.data;
+
+    // Sample terrain ONCE per overview pixel.
+    const elevation = new Float32Array(OVERVIEW_PIXELS * OVERVIEW_PIXELS);
+    const samples = new Array(OVERVIEW_PIXELS * OVERVIEW_PIXELS);
+
+    for (let py = 0; py < OVERVIEW_PIXELS; py++) {
+      const wz =
+        (py + 0.5) /
+        OVERVIEW_PIXELS *
+        TERRITORY_SIZE;
+
+      for (let px = 0; px < OVERVIEW_PIXELS; px++) {
+        const wx =
+          (px + 0.5) /
+          OVERVIEW_PIXELS *
+          TERRITORY_SIZE;
+
+        const index = py * OVERVIEW_PIXELS + px;
+        const s = terrainSample(wx, wz);
+
+        samples[index] = s;
+        elevation[index] = s.elevation;
+      }
+    }
+
+    // Shade from neighboring cached elevation values. This is dramatically
+    // cheaper than calling terrainSample four extra times per pixel.
+    for (let py = 0; py < OVERVIEW_PIXELS; py++) {
+      for (let px = 0; px < OVERVIEW_PIXELS; px++) {
+        const index = py * OVERVIEW_PIXELS + px;
+        const s = samples[index];
+
+        const wx =
+          (px + 0.5) /
+          OVERVIEW_PIXELS *
+          TERRITORY_SIZE;
+
+        const wz =
+          (py + 0.5) /
+          OVERVIEW_PIXELS *
+          TERRITORY_SIZE;
+
+        const west =
+          elevation[
+            py * OVERVIEW_PIXELS +
+            Math.max(0, px - 1)
+          ];
+
+        const east =
+          elevation[
+            py * OVERVIEW_PIXELS +
+            Math.min(OVERVIEW_PIXELS - 1, px + 1)
+          ];
+
+        const north =
+          elevation[
+            Math.max(0, py - 1) * OVERVIEW_PIXELS +
+            px
+          ];
+
+        const south =
+          elevation[
+            Math.min(OVERVIEW_PIXELS - 1, py + 1) * OVERVIEW_PIXELS +
+            px
+          ];
+
+        const shade =
+          s.water
+            ? 0
+            : clamp(
+                ((west - east) * 0.78 + (north - south) * 0.58) * 1.8,
+                -0.20,
+                0.20
+              );
+
+        const color = terrainColor(s, wx, wz);
+        const i = index * 4;
+
+        data[i] = clamp(color[0] + shade * 255, 0, 255);
+        data[i + 1] = clamp(color[1] + shade * 255, 0, 255);
+        data[i + 2] = clamp(color[2] + shade * 255, 0, 255);
+        data[i + 3] = 255;
+      }
+    }
+
+    c.putImageData(image, 0, 0);
+
+    // Far-zoom forest masses. No individual trees here.
+    c.save();
+    c.globalAlpha = 0.18;
+
+    const forestStep = 8;
+
+    for (let py = 0; py < OVERVIEW_PIXELS; py += forestStep) {
+      for (let px = 0; px < OVERVIEW_PIXELS; px += forestStep) {
+        const index = py * OVERVIEW_PIXELS + px;
+        const s = samples[index];
+
+        if (!s?.water && s?.forest > 0.58) {
+          const radius =
+            3 +
+            (s.forest - 0.58) * 10;
+
+          c.fillStyle = "#163f24";
+          c.beginPath();
+          c.arc(px, py, radius, 0, Math.PI * 2);
+          c.fill();
+        }
+      }
+    }
+
+    c.restore();
+
+    state.overviewCanvas = off;
+    state.overviewReady = true;
+
+    return off;
+  }
+
+  function drawOverview() {
+    const overview = buildOverview();
+
+    const a = worldToScreen(0, 0);
+    const b = worldToScreen(TERRITORY_SIZE, TERRITORY_SIZE);
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+    ctx.drawImage(
+      overview,
+      a.x,
+      a.y,
+      b.x - a.x,
+      b.y - a.y
+    );
   }
 
   // ----------------------------------------------------------
@@ -710,24 +875,41 @@
     const maxCZ =
       clamp(Math.floor(worldBottom / CHUNK_SIZE) + 1, 0, CHUNKS_PER_SIDE - 1);
 
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
+    const visibleChunkCount =
+      (maxCX - minCX + 1) *
+      (maxCZ - minCZ + 1);
 
-    for (let cz = minCZ; cz <= maxCZ; cz++) {
-      for (let cx = minCX; cx <= maxCX; cx++) {
-        const chunk = getChunk(cx, cz);
-        if (!chunk) continue;
+    const useOverview =
+      state.zoom < DETAIL_ZOOM_THRESHOLD ||
+      visibleChunkCount > MAX_DETAIL_CHUNKS_PER_FRAME;
 
-        const p = worldToScreen(cx * CHUNK_SIZE, cz * CHUNK_SIZE);
-        const size = CHUNK_SIZE * state.zoom + 1.5;
+    if (useOverview) {
+      drawOverview();
+    } else {
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
 
-        ctx.drawImage(
-          chunk,
-          p.x,
-          p.y,
-          size,
-          size
-        );
+      for (let cz = minCZ; cz <= maxCZ; cz++) {
+        for (let cx = minCX; cx <= maxCX; cx++) {
+          const chunk = getChunk(cx, cz);
+          if (!chunk) continue;
+
+          const p = worldToScreen(
+            cx * CHUNK_SIZE,
+            cz * CHUNK_SIZE
+          );
+
+          const size =
+            CHUNK_SIZE * state.zoom + 1.5;
+
+          ctx.drawImage(
+            chunk,
+            p.x,
+            p.y,
+            size,
+            size
+          );
+        }
       }
     }
 
@@ -1038,7 +1220,7 @@
     if (event.key === "Home") {
       state.cameraX = TERRITORY_SIZE / 2;
       state.cameraZ = TERRITORY_SIZE / 2;
-      state.zoom = 0.048;
+      state.zoom = 0.040;
       moved = true;
     }
 
@@ -1070,10 +1252,12 @@
 
     state.cache.clear();
     state.cacheClock = 0;
+    state.overviewCanvas = null;
+    state.overviewReady = false;
 
     state.cameraX = TERRITORY_SIZE / 2;
     state.cameraZ = TERRITORY_SIZE / 2;
-    state.zoom = 0.048;
+    state.zoom = 0.040;
     state.hoverWorld = null;
 
     canvas.hidden = false;
@@ -1090,9 +1274,14 @@
 
     ensureInspector().hidden = false;
 
-    // Yield once so the loading screen can paint before chunk generation.
+    // Yield so the loading overlay visibly updates first.
     await new Promise(resolve => requestAnimationFrame(resolve));
 
+    // Build one lightweight territory overview. Detailed chunks are generated
+    // only after the player zooms in enough to need them.
+    buildOverview();
+
+    state.needsDraw = true;
     draw();
 
     return {
@@ -1121,11 +1310,13 @@
 
   function invalidate() {
     state.cache.clear();
+    state.overviewCanvas = null;
+    state.overviewReady = false;
     state.needsDraw = true;
   }
 
   window.mapGameBasicWorld = {
-    VERSION: "0.3A1",
+    VERSION: "0.3A1.2",
     TERRITORY_SIZE,
     CHUNK_SIZE,
     CHUNKS_PER_SIDE,
@@ -1145,6 +1336,6 @@
   };
 
   console.log(
-    "Map Game Basic 0.3A1 terrain renderer ready — 32K 2D world foundation."
+    "Map Game Basic 0.3A1.2 LOD terrain renderer ready — 32K 2D world foundation."
   );
 })();
