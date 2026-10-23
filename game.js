@@ -1,3 +1,4 @@
+
 // ============================================================
 // MAP GAME — ALPHA 0.2.0 RESTRUCTURE
 // FIRST PLAYABLE WORLD FLOW FOUNDATION
@@ -96,7 +97,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.2.2C1";
+  const VERSION = "0.3A1";
   const CHUNK_WORLD_SIZE = window.mapGameWorldConfig?.TERRITORY_SIZE || 32768;
   const TERRITORY_RENDER_SIZE = window.mapGameWorldConfig?.SECTOR_SIZE || 512;
   const WORLD_COLS = window.mapGameWorldConfig?.WORLD_COLS || 316;
@@ -108,7 +109,7 @@
   const state = {
     mode: "HOME", // HOME | HUB | MAP | TERRITORY | CAPITAL_PLACEMENT
     worldType: "singleplayer", // singleplayer | central
-    graphics: localStorage.getItem("mapgame_graphics") || "BASIC",
+    graphics: "BASIC",
     selectedTerritory: null,
     activeTerritory: null,
     claimedTerritories: new Map(),
@@ -1461,7 +1462,7 @@
       window.mapGameBuildings.buildNeighborhoodDemo(
         window.mapGameRuntime || {
           scene,
-          graphicsPreset: state.graphics,
+          graphicsPreset: "BASIC",
           createRoad,
           createStreetLamp,
           populateRoadLamps
@@ -2079,6 +2080,7 @@
   let territoryPlannerVisible = false;
 
   function clearWorldRoots() {
+    window.mapGameBasicWorld?.leave?.();
     disposeNode(state.hubRoot);
     disposeNode(state.terrainRoot);
     state.hubRoot = null;
@@ -2416,6 +2418,60 @@
       id: cell.id || territoryId(cell.x, cell.y),
       biome
     };
+
+    // --------------------------------------------------------
+    // BASIC 0.3A1
+    // 2D is now the active renderer. Regular/3D remains in the
+    // codebase, but is deliberately paused while Basic is built.
+    // --------------------------------------------------------
+    state.graphics = "BASIC";
+    localStorage.setItem("mapgame_graphics", "BASIC");
+    document.body.dataset.graphics = "basic";
+
+    if (window.mapGameBasicWorld) {
+      showWorldLoading("GENERATING 2D TERRAIN");
+      setLoadingState("BUILDING TERRAIN CHUNKS", 34);
+
+      setMode("TERRITORY");
+
+      try {
+        await window.mapGameBasicWorld.enterTerritory(
+          state.activeTerritory
+        );
+      } catch (error) {
+        console.error("Basic 2D terrain failed:", error);
+        hideWorldLoading();
+
+        showToast(
+          `Could not render 2D territory: ${error?.message || error}`,
+          "error"
+        );
+
+        return;
+      }
+
+      setLoadingState("2D TERRITORY READY", 100);
+      hideWorldLoading();
+
+      const existingCapital =
+        getCapitalForActiveTerritory();
+
+      if (existingCapital) {
+        state.capital = existingCapital;
+      }
+
+      setStatus(
+        `<b>BASIC 2D</b> • ${BIOMES[biome].label} • ` +
+        `32,768 × 32,768 territory • terrain foundation`
+      );
+
+      showToast(
+        "Basic 2D terrain loaded. Drag to pan, scroll to zoom.",
+        "success"
+      );
+
+      return;
+    }
 
     showWorldLoading("OPENING TERRITORY");
     setLoadingState("STARTING SECTOR STREAM", 28);
@@ -4000,38 +4056,19 @@
   }
 
   function toggleGraphics() {
-    state.graphics = state.graphics === "BASIC" ? "REGULAR" : "BASIC";
-    localStorage.setItem("mapgame_graphics", state.graphics);
-    document.body.dataset.graphics = state.graphics.toLowerCase();
-    const btn = document.getElementById("mgGraphicsToggle");
-    if (btn) btn.textContent = `GRAPHICS • ${state.graphics}`;
+    state.graphics = "BASIC";
+    localStorage.setItem("mapgame_graphics", "BASIC");
+    document.body.dataset.graphics = "basic";
 
-    if (state.graphics === "REGULAR") {
-      engine.setHardwareScalingLevel(window.devicePixelRatio >= 2 ? 1.15 : 1.0);
-      shadowGenerator.mapSize = 2048;
-      scene.imageProcessingConfiguration.contrast = 1.12;
-      scene.imageProcessingConfiguration.exposure = 1.06;
-      glowLayer.intensity = 0.37;
-    } else {
-      engine.setHardwareScalingLevel(window.devicePixelRatio >= 2 ? 1.38 : 1.16);
-      scene.imageProcessingConfiguration.contrast = 1.06;
-      scene.imageProcessingConfiguration.exposure = 1.02;
-      glowLayer.intensity = 0.28;
+    const btn = document.getElementById("mgGraphicsToggle");
+    if (btn) {
+      btn.textContent = "GRAPHICS • BASIC 2D";
     }
 
-    window.mapGameRuntime.graphicsPreset = state.graphics;
-    window.dispatchEvent(
-      new CustomEvent(
-        "mapgame:graphics",
-        { detail: { preset: state.graphics } }
-      )
+    showToast(
+      "Regular 3D is paused while the Basic 2D update is being built.",
+      "info"
     );
-    window.mapGameShopPreview?.refresh?.();
-
-    // Rebuild active view so architecture actually changes, not just the label.
-    if (state.mode === "HUB") buildNeutralHub();
-    else if (state.activeTerritory) enterTerritory(state.activeTerritory);
-    showToast(`${state.graphics} graphics active.`, "success");
   }
 
   window.addEventListener("mapgame:session-conflict", event => {
@@ -4315,8 +4352,8 @@
   function startGame(worldType) {
     state.worldType = worldType;
 
-    state.graphics =
-      localStorage.getItem("mapgame_graphics") || "BASIC";
+    state.graphics = "BASIC";
+    localStorage.setItem("mapgame_graphics", "BASIC");
 
     document.body.dataset.graphics =
       String(state.graphics).toLowerCase();
@@ -4424,7 +4461,7 @@
     shallowOceanMaterial: waterMat,
     deepOceanMaterial: waterMat,
     glassMaterial: glassBasic,
-    graphicsPreset: state.graphics,
+    graphicsPreset: "BASIC",
     mapSize: CHUNK_WORLD_SIZE,
     renderWindowSize:
       (window.mapGameWorldConfig?.SECTOR_SIZE || 512) *

@@ -1,3 +1,4 @@
+
 // ============================================================
 // MAP GAME — world_config.js
 // Alpha 0.2.2A1 — THE BIG WORLD UPDATE
@@ -8,13 +9,18 @@
   const WORLD_ROWS = 316;
   const TERRITORY_SIZE = 32768;
   const SECTOR_SIZE = 512;
+  const BASIC_TERRAIN_SAMPLE_SIZE = 64;
+  const BASIC_TERRAIN_GRID = TERRITORY_SIZE / BASIC_TERRAIN_SAMPLE_SIZE;
+
 
   window.mapGameWorldConfig = Object.freeze({
-    VERSION: "0.2.2B1",
+    VERSION: "0.3A1",
     WORLD_COLS,
     WORLD_ROWS,
     TERRITORY_SIZE,
     SECTOR_SIZE,
+    BASIC_TERRAIN_SAMPLE_SIZE,
+    BASIC_TERRAIN_GRID,
     SECTORS_PER_SIDE: TERRITORY_SIZE / SECTOR_SIZE,
     TERRITORY_COUNT: WORLD_COLS * WORLD_ROWS,
     SINGLEPLAYER_OWNS_WORLD: true,
