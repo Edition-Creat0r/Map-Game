@@ -51,7 +51,7 @@
 
   // Far zoom MUST NOT build all 4,096 detailed chunks. At territory scale we
   // draw one lightweight overview raster, then switch to chunks as you zoom.
-  const OVERVIEW_PIXELS = 384;
+  const OVERVIEW_PIXELS = 112; // startup-safe overview; detail streams later
   const DETAIL_ZOOM_THRESHOLD = 0.145;
   const TREE_CLUSTER_ZOOM = 0.155;
   const TREE_DETAIL_ZOOM = 0.245;
@@ -1601,6 +1601,7 @@
 
   async function enterTerritory(territory) {
     state.territory = territory;
+    if (!window.mapGameSharedTerrain) throw new Error("Shared terrain module not loaded. Check world_terrain.js path.");
     state.seed = window.mapGameSharedTerrain.seed;
 
     state.cache.clear();

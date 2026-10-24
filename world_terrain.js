@@ -20,6 +20,7 @@
     return v0*(1-b)+v1*b;
   }
   function octave(x,y,scale,seed,count=3){
+    count=Math.min(count,2); // temporary startup budget for 0.3.2A3.1
     let v=0,weight=1,total=0;
     for(let k=0;k<count;k++){
       v+=weight*noise(x,y,scale,seed+k*733);
