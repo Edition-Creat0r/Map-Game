@@ -1,7 +1,4 @@
-
-
-
-//============================================================
+// ============================================================
 // MAP GAME — basic_world.js
 // Basic 0.3A1 — 2D TERRAIN FOUNDATION
 //
@@ -50,7 +47,7 @@
 
   // Detailed chunk raster. 96px is enough because a 512m chunk is normally
   // smaller than this on screen until the player is already zoomed well in.
-  const TILE_PIXELS = 96;
+  const TILE_PIXELS = 64;
 
   // Far zoom MUST NOT build all 4,096 detailed chunks. At territory scale we
   // draw one lightweight overview raster, then switch to chunks as you zoom.
@@ -59,9 +56,9 @@
   const TREE_CLUSTER_ZOOM = 0.155;
   const TREE_DETAIL_ZOOM = 0.245;
   const MOUNTAIN_DETAIL_ZOOM = 0.145;
-  const MAX_DETAIL_CHUNKS_PER_FRAME = 72;
-  const MAX_TREE_SYMBOLS = 900;
-  const MAX_MOUNTAIN_SYMBOLS = 260;
+  const MAX_DETAIL_CHUNKS_PER_FRAME = 32;
+  const MAX_TREE_SYMBOLS = 180;
+  const MAX_MOUNTAIN_SYMBOLS = 100;
 
   const state = {
     active: false,
@@ -70,9 +67,9 @@
     cameraX: TERRITORY_SIZE / 2,
     cameraZ: TERRITORY_SIZE / 2,
     // Camera is intentionally constrained so a 32K territory feels huge.
-    zoom: 0.115,
-    minZoom: 0.075,
-    maxZoom: 0.42,
+    zoom: 0.32,
+    minZoom: 0.24,
+    maxZoom: 2.0,
     dragging: false,
     lastX: 0,
     lastY: 0,
@@ -84,7 +81,12 @@
     needsDraw: true,
     inspector: null,
     lastFrame: 0,
-    showLabels: true
+    showLabels: true,
+    queuedChunks: new Set(),
+    generationQueue: [],
+    lastInteraction: 0,
+    treeImages: [],
+    treesLoading: false
   };
 
   // ----------------------------------------------------------
@@ -706,7 +708,7 @@
             by,
             Math.min(block + 2, TILE_PIXELS - bx),
             Math.min(block + 2, TILE_PIXELS - by),
-            0.36
+            0.18
           );
         }
       }
@@ -744,16 +746,8 @@
       return item.canvas;
     }
 
-    const rendered = renderChunk(cx, cz);
-
-    state.cache.set(key, {
-      canvas: rendered,
-      lastUsed: ++state.cacheClock
-    });
-
-    pruneCache();
-
-    return rendered;
+    queueChunk(cx, cz);
+    return null;
   }
 
   function pruneCache() {
@@ -1182,6 +1176,119 @@
     ctx.restore();
   }
 
+
+  // 0.3.2A2: Deterministic regional waterways; a provisional visual layer.
+  // Full hydrological flow/accumulation will replace this art layer later.
+  function drawWaterways() {
+    const left = state.cameraX - canvas.width / (2 * state.zoom);
+    const right = state.cameraX + canvas.width / (2 * state.zoom);
+    const top = state.cameraZ - canvas.height / (2 * state.zoom);
+    const bottom = state.cameraZ + canvas.height / (2 * state.zoom);
+    const worldOffsetX = (Number(state.territory?.x) || 0) * TERRITORY_SIZE;
+    const worldOffsetZ = (Number(state.territory?.y) || 0) * TERRITORY_SIZE;
+    const globalLeft = left + worldOffsetX;
+    const globalRight = right + worldOffsetX;
+    // Drainage-like connected ribbons. They are anchored in GLOBAL world space,
+    // so water continues between neighboring territories without resetting.
+    const spacing = 10500;
+    const first = Math.floor((globalLeft - 4500) / spacing);
+    const last = Math.ceil((globalRight + 4500) / spacing);
+    ctx.save();
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    for (let channel = first; channel <= last; channel++) {
+      const phase = channel * 1.73;
+      const riverX = gz => channel * spacing + 3200 +
+        Math.sin(gz / 2800 + phase) * 1050 + Math.sin(gz / 800 + phase * 2) * 175;
+      const step = Math.max(100, Math.min(350, 5 / state.zoom * 100));
+      const start = Math.floor((top + worldOffsetZ - 500) / step) * step;
+      const end = bottom + worldOffsetZ + 500;
+      ctx.beginPath();
+      let begun = false;
+      for (let gz = start; gz <= end; gz += step) {
+        const x = riverX(gz) - worldOffsetX;
+        const z = gz - worldOffsetZ;
+        const p = worldToScreen(x, z);
+        if (!begun) { ctx.moveTo(p.x, p.y); begun = true; }
+        else ctx.lineTo(p.x, p.y);
+      }
+      if (begun) {
+        const width = Math.max(1.7, 36 * state.zoom);
+        ctx.strokeStyle = 'rgba(46,65,57,.43)';
+        ctx.lineWidth = width + Math.max(2, 12 * state.zoom);
+        ctx.stroke();
+        ctx.strokeStyle = '#347f9b';
+        ctx.lineWidth = width;
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(125,204,217,.38)';
+        ctx.lineWidth = Math.max(0.8, width * .18);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
+  function loadTreeSprites() {
+    if (state.treesLoading) return;
+    state.treesLoading = true;
+    const names = [
+      'tree_small_green.png', 'tree_round_olive.png',
+      'tree_round_dark_teal.png', 'tree_small_teal.png',
+      'tree_deciduous_mint_large.png', 'tree_round_white_blossom.png'
+    ];
+    for (const name of names) {
+      const img = new Image();
+      img.onload = () => { state.needsDraw = true; };
+      img.src = 'assets/environment/trees/' + name;
+      state.treeImages.push(img);
+    }
+  }
+
+  function drawTreeSprites() {
+    if (state.zoom < .60 || state.dragging) return;
+    const cell = 145;
+    const left = Math.max(0, state.cameraX - canvas.width / (2 * state.zoom));
+    const right = Math.min(TERRITORY_SIZE, state.cameraX + canvas.width / (2 * state.zoom));
+    const top = Math.max(0, state.cameraZ - canvas.height / (2 * state.zoom));
+    const bottom = Math.min(TERRITORY_SIZE, state.cameraZ + canvas.height / (2 * state.zoom));
+    let drawn = 0;
+    for (let iz = Math.floor(top / cell); iz <= Math.ceil(bottom / cell) && drawn < 155; iz++) {
+      for (let ix = Math.floor(left / cell); ix <= Math.ceil(right / cell) && drawn < 155; ix++) {
+        const wx = (ix + hash32(ix, iz, state.seed + 144)) * cell;
+        const wz = (iz + hash32(ix, iz, state.seed + 194)) * cell;
+        const s = terrainSample(wx, wz);
+        if (s.water || s.steepness > .62 || s.forest < .56) continue;
+        if (hash32(ix, iz, state.seed + 293) > s.forest * .72) continue;
+        const img = state.treeImages[Math.floor(hash32(ix, iz, state.seed + 294) * state.treeImages.length)];
+        if (!img?.complete || !img.naturalWidth) continue;
+        const p = worldToScreen(wx, wz);
+        const h = Math.max(10, Math.min(76, state.zoom * 80));
+        const w = h * img.naturalWidth / img.naturalHeight;
+        ctx.drawImage(img, p.x - w / 2, p.y - h * .80, w, h);
+        drawn++;
+      }
+    }
+  }
+
+  // Missing chunks are queued rather than constructed during camera drawing.
+  function queueChunk(cx, cz) {
+    const key = chunkKey(cx, cz);
+    if (state.cache.has(key) || state.queuedChunks.has(key)) return;
+    state.queuedChunks.add(key);
+    state.generationQueue.push({cx, cz, key});
+  }
+
+  function produceOneChunk() {
+    if (!state.active || state.dragging || !state.generationQueue.length) return;
+    const job = state.generationQueue.shift();
+    state.queuedChunks.delete(job.key);
+    if (state.cache.has(job.key)) return;
+    const built = renderChunk(job.cx, job.cz);
+    state.cache.set(job.key, {canvas: built, lastUsed: ++state.cacheClock});
+    pruneCache();
+    state.needsDraw = true;
+  }
+
   // ----------------------------------------------------------
   // Drawing
   // ----------------------------------------------------------
@@ -1227,9 +1334,8 @@
       state.zoom < DETAIL_ZOOM_THRESHOLD ||
       visibleChunkCount > MAX_DETAIL_CHUNKS_PER_FRAME;
 
-    if (useOverview) {
-      drawOverview();
-    } else {
+    drawOverview();
+    if (!useOverview) {
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
 
@@ -1258,8 +1364,12 @@
     }
 
     // Natural art is drawn in world space, never baked into chunk edges.
-    drawMountainRidges();
-    drawForestLOD();
+    drawWaterways();
+    if (!state.dragging) {
+      drawMountainRidges();
+      if (state.zoom < .60) drawForestLOD();
+      drawTreeSprites();
+    }
 
     drawTerritoryBorder();
     drawScale();
@@ -1341,7 +1451,12 @@
     ctx.restore();
   }
 
+  let lastChunkBuild = 0;
   function loop(now) {
+    if (state.active && !state.dragging && state.generationQueue.length && now - lastChunkBuild > 80) {
+      lastChunkBuild = now;
+      produceOneChunk();
+    }
     if (
       state.active &&
       (state.needsDraw || now - state.lastFrame > 950)
@@ -1568,7 +1683,7 @@
     if (event.key === "Home") {
       state.cameraX = TERRITORY_SIZE / 2;
       state.cameraZ = TERRITORY_SIZE / 2;
-      state.zoom = 0.115;
+      state.zoom = 0.32;
       moved = true;
     }
 
@@ -1599,13 +1714,15 @@
     state.seed = seedForTerritory(territory);
 
     state.cache.clear();
+    state.queuedChunks.clear();
+    state.generationQueue.length = 0;
     state.cacheClock = 0;
     state.overviewCanvas = null;
     state.overviewReady = false;
 
     state.cameraX = TERRITORY_SIZE / 2;
     state.cameraZ = TERRITORY_SIZE / 2;
-    state.zoom = 0.115;
+    state.zoom = 0.32;
     state.hoverWorld = null;
 
     canvas.hidden = false;
@@ -1626,6 +1743,7 @@
     await new Promise(resolve => requestAnimationFrame(resolve));
 
     await loadTerrainTextures();
+    loadTreeSprites();
 
     // Build one lightweight territory overview. Detailed chunks are generated
     // only after the player zooms in enough to need them.
@@ -1666,7 +1784,7 @@
   }
 
   window.mapGameBasicWorld = {
-    VERSION: "0.3A3",
+    VERSION: "0.3.2A2",
     TERRITORY_SIZE,
     CHUNK_SIZE,
     CHUNKS_PER_SIDE,

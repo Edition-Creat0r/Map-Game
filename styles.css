@@ -3446,3 +3446,14 @@ body[data-graphics="basic"] [data-action="hub"] {
     display: none;
   }
 }
+
+/* 0.3.2A2 — compact atlas controls and inspector */
+.mg-sw-header{padding:8px 14px;min-height:51px}
+.mg-sw-heading h2{font-size:15px;margin:0}
+.mg-sw-body{grid-template-columns:minmax(0,1fr) 235px}
+.mg-sw-inspector{padding:12px}
+.mg-sw-inspector h3{font-size:14px}
+.mg-sw-livability{padding:9px;margin:8px 0}
+.mg-sw-livability strong{font-size:21px}
+.mg-sw-stats{gap:5px}
+@media(max-width:740px){.mg-sw-body{grid-template-columns:minmax(0,1fr) 190px}.mg-sw-stream-status{display:none}}

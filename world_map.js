@@ -421,8 +421,8 @@
         <header class="mg-sw-header">
           <div class="mg-sw-heading">
             <div class="mg-kicker">WORLD MAP • 0.3.2A</div>
-            <h2>Strategic World</h2>
-            <p>${TERRITORY_COUNT.toLocaleString()} territories • fixed scale • drag or scroll to explore</p>
+            <h2>World Atlas</h2>
+            <p>${TERRITORY_COUNT.toLocaleString()} territories • seamless geography • fixed scale</p>
           </div>
 
           <div class="mg-sw-actions">
@@ -1074,9 +1074,7 @@
     const canvas =
       document.createElement("canvas");
 
-    const size =
-      REGION_PX +
-      REGION_OVERDRAW * 2;
+    const size = Math.ceil((REGION_PX + REGION_OVERDRAW * 2) / 2);
 
     canvas.width = size;
     canvas.height = size;
@@ -1111,7 +1109,7 @@
     ) {
       const gy =
         worldY0 +
-        (py - REGION_OVERDRAW) /
+        (py * 2 - REGION_OVERDRAW) /
         CELL_PX;
 
       for (
@@ -1121,7 +1119,7 @@
       ) {
         const gx =
           worldX0 +
-          (px - REGION_OVERDRAW) /
+          (px * 2 - REGION_OVERDRAW) /
           CELL_PX;
 
         const t =
@@ -1129,55 +1127,6 @@
 
         let rgb =
           colorForTerrain(t);
-
-        // Cheap local hillshade.
-        if (!t.water) {
-          const e1 =
-            terrainAt(
-              gx - 0.22,
-              gy - 0.15
-            ).elevation;
-
-          const e2 =
-            terrainAt(
-              gx + 0.22,
-              gy + 0.15
-            ).elevation;
-
-          const shade =
-            clamp(
-              (e1 - e2) * 0.46,
-              -0.11,
-              0.11
-            );
-
-          rgb = [
-            clamp(
-              Math.round(
-                rgb[0] +
-                shade * 255
-              ),
-              0,
-              255
-            ),
-            clamp(
-              Math.round(
-                rgb[1] +
-                shade * 255
-              ),
-              0,
-              255
-            ),
-            clamp(
-              Math.round(
-                rgb[2] +
-                shade * 255
-              ),
-              0,
-              255
-            )
-          ];
-        }
 
         const i =
           (py * size + px) * 4;
@@ -1195,13 +1144,8 @@
       0
     );
 
-    drawRegionDetail(
-      ctx,
-      rx,
-      ry,
-      worldX0,
-      worldY0
-    );
+    // Decorative terrain features are drawn globally in the main view;
+    // keeping region images free of clipped objects removes edge seams.
 
     return canvas;
   }
@@ -1398,6 +1342,7 @@
       }
     }
 
+    drawStrategicRivers(ctx, width, height);
     drawCivilization(
       ctx,
       width,
@@ -1496,11 +1441,41 @@
         height
       );
 
+    ctx.imageSmoothingEnabled = true;
     ctx.drawImage(
       canvas,
       p.x - REGION_OVERDRAW,
-      p.y - REGION_OVERDRAW
+      p.y - REGION_OVERDRAW,
+      canvas.width * 2,
+      canvas.height * 2
     );
+  }
+
+
+  function drawStrategicRivers(ctx, width, height) {
+    // This provisional hydrology art is global and never stops at region edges.
+    const halfX = width / CELL_PX / 2;
+    const halfY = height / CELL_PX / 2;
+    const first = Math.floor((state.cameraX - halfX - 6) / 31);
+    const last = Math.ceil((state.cameraX + halfX + 6) / 31);
+    ctx.save();
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    for (let j = first; j <= last; j++) {
+      const center = j * 31 + 12;
+      ctx.beginPath();
+      let started = false;
+      for (let gy = state.cameraY - halfY - 2; gy <= state.cameraY + halfY + 3; gy += .35) {
+        const gx = center + Math.sin(gy / 5.8 + j * 2.1) * 3.0 + Math.sin(gy / 2.2 + j) * .5;
+        const p = worldToScreen(gx,gy,width,height);
+        if (!started) {ctx.moveTo(p.x,p.y);started=true;}
+        else ctx.lineTo(p.x,p.y);
+      }
+      if (!started) continue;
+      ctx.strokeStyle = 'rgba(16,48,59,.45)';ctx.lineWidth=5;ctx.stroke();
+      ctx.strokeStyle = '#3b9bb9';ctx.lineWidth=2.7;ctx.stroke();
+    }
+    ctx.restore();
   }
 
   function drawCivilization(
@@ -2057,6 +2032,7 @@
 
     state.open = true;
     state.root.hidden = false;
+    state.root.querySelector('#mgSwReturn').hidden = !state.callbacks.canReturn?.();
 
     // The map is intentionally a stable fixed scale.
     // Reopening it preserves the previous camera position unless a center
@@ -2163,7 +2139,7 @@
   }
 
   window.mapGameStrategicWorld = {
-    VERSION: "0.3.2A",
+    VERSION: "0.3.2A2",
     WORLD_COLS,
     WORLD_ROWS,
     TERRITORY_COUNT,
