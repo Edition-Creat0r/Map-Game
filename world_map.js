@@ -1104,7 +1104,7 @@
           REGION_OVERDRAW +
           (ty + 0.5) * CELL_PX;
 
-        if (t.mountain) {
+        if (false && t.mountain) {
           const size =
             4 +
             t.ridge * 5;

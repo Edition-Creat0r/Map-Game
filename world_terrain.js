@@ -41,17 +41,17 @@
     const spine=noise(x,y,138000,seed+311);
     const mountainMask=smooth((spine-.43)/.20);
     const r=noise(x,y,48000,seed+411);
-    const ridge=Math.pow(1-Math.abs(r*2-1),2.5)*mountainMask;
+    const ridge=Math.pow(1-Math.abs(r*2-1),1.75)*mountainMask;
     const hills=octave(x,y,18000,seed+521,3);
     const micro=noise(x,y,3400,seed+631);
-    const elevation=clamp(.18+(.38*continent)+(.21*base)+(.36*ridge)+(.10*(hills-.5))+.025*(micro-.5));
+    const elevation=clamp(.18+(.38*continent)+(.21*base)+(.59*ridge)+(.15*(hills-.5))+.025*(micro-.5));
     const moisture=clamp(.60*octave(x,y,140000,seed+711,3)+.40*octave(x,y,24000,seed+811,3));
     const temperature=clamp(.73*octave(x,y,320000,seed+911,3)+.27*(1-elevation));
-    const steepness=clamp(ridge*.95+Math.max(0,elevation-.56)*1.5);
+    const steepness=clamp(ridge*1.10+Math.max(0,elevation-.53)*1.65);
     const water=elevation<.32;
     const forest=water?0:clamp((moisture-.35)*1.55+.30*noise(x,y,11000,seed+1021)-steepness*.52);
-    const rock=clamp(smooth((elevation-.50)/.25)*.75+steepness*.65);
-    const snow=clamp(smooth((elevation-.75)/.15)*smooth((.69-temperature)/.19));
+    const rock=clamp(smooth((elevation-.51)/.23)*.77+steepness*.60);
+    const snow=clamp(smooth((elevation-.77)/.12)*smooth((.75-temperature)/.23));
     const dry=clamp(smooth((.48-moisture)/.24)*(1-rock));
     const wet=clamp(smooth((moisture-.59)/.24)*smooth((.49-elevation)/.20));
     const soil=clamp(.06+(hills-.5)*.12);
@@ -79,5 +79,5 @@
        forest:s.terrain==='forest'};
   }
   function local(tx,ty,x,y){return sample(tx*SIZE+x,ty*SIZE+y);}
-  window.mapGameSharedTerrain={VERSION:'0.3.2A3',SIZE,seed,sample,strategic,local};
+  window.mapGameSharedTerrain={VERSION:'0.3.2A3.2',SIZE,seed,sample,strategic,local};
 })();

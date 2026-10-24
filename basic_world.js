@@ -51,14 +51,14 @@
 
   // Far zoom MUST NOT build all 4,096 detailed chunks. At territory scale we
   // draw one lightweight overview raster, then switch to chunks as you zoom.
-  const OVERVIEW_PIXELS = 112; // startup-safe overview; detail streams later
+  const OVERVIEW_PIXELS = 160; // startup-safe overview; detail streams later
   const DETAIL_ZOOM_THRESHOLD = 0.145;
   const TREE_CLUSTER_ZOOM = 0.155;
   const TREE_DETAIL_ZOOM = 0.245;
   const MOUNTAIN_DETAIL_ZOOM = 0.145;
   const MAX_DETAIL_CHUNKS_PER_FRAME = 32;
-  const MAX_TREE_SYMBOLS = 180;
-  const MAX_MOUNTAIN_SYMBOLS = 100;
+  const MAX_TREE_SYMBOLS = 80;
+  const MAX_MOUNTAIN_SYMBOLS = 65;
 
   const state = {
     active: false,
@@ -487,9 +487,9 @@
           s.water
             ? 0
             : clamp(
-                ((west - east) * 0.78 + (north - south) * 0.58) * 1.8,
-                -0.20,
-                0.20
+                ((west - east) * 0.90 + (north - south) * 0.72) * 3.0,
+                -0.31,
+                0.27
               );
 
         const color = terrainColor(s, wx, wz);
@@ -581,29 +581,10 @@
 
     c.putImageData(image, 0, 0);
 
-    if (texturesReady) {
-      const block = 24;
-      for (let by = 0; by < TILE_PIXELS; by += block) {
-        for (let bx = 0; bx < TILE_PIXELS; bx += block) {
-          const localX = worldX0 + bx / Math.max(1, TILE_PIXELS - 1) * CHUNK_SIZE;
-          const localZ = worldZ0 + by / Math.max(1, TILE_PIXELS - 1) * CHUNK_SIZE;
-          const sample = terrainSample(localX, localZ);
-          const key = textureKeyForSample(sample);
-          const img = key ? textureImages[key] : null;
-          if (!img) continue;
-          drawTexturePatch(
-            c,
-            img,
-            bx,
-            by,
-            Math.min(block + 2, TILE_PIXELS - bx),
-            Math.min(block + 2, TILE_PIXELS - by),
-            0.18
-          );
-        }
-      }
-    }
-
+    // 0.3.2A3.2: Do not paint square image patches onto chunks. They
+    // expose a rectangular grid and don't agree across chunk edges.
+    // Shared biome weights already provide smooth material colors; a
+    // world-anchored seamless weighted texture compositor comes next.
     drawChunkArt(c, cx, cz);
 
     return off;
@@ -1135,24 +1116,24 @@
   }
 
   function drawTreeSprites() {
-    if (state.zoom < .60 || state.dragging) return;
-    const cell = 145;
+    if (state.zoom < .28 || state.dragging || !state.treeImages.length) return;
+    const cell = state.zoom < .65 ? 105 : 72;
     const left = Math.max(0, state.cameraX - canvas.width / (2 * state.zoom));
     const right = Math.min(TERRITORY_SIZE, state.cameraX + canvas.width / (2 * state.zoom));
     const top = Math.max(0, state.cameraZ - canvas.height / (2 * state.zoom));
     const bottom = Math.min(TERRITORY_SIZE, state.cameraZ + canvas.height / (2 * state.zoom));
     let drawn = 0;
-    for (let iz = Math.floor(top / cell); iz <= Math.ceil(bottom / cell) && drawn < 155; iz++) {
-      for (let ix = Math.floor(left / cell); ix <= Math.ceil(right / cell) && drawn < 155; ix++) {
+    for (let iz = Math.floor(top / cell); iz <= Math.ceil(bottom / cell) && drawn < 95; iz++) {
+      for (let ix = Math.floor(left / cell); ix <= Math.ceil(right / cell) && drawn < 95; ix++) {
         const wx = (ix + hash32(ix, iz, state.seed + 144)) * cell;
         const wz = (iz + hash32(ix, iz, state.seed + 194)) * cell;
         const s = terrainSample(wx, wz);
-        if (s.water || s.steepness > .62 || s.forest < .56) continue;
-        if (hash32(ix, iz, state.seed + 293) > s.forest * .72) continue;
+        if (s.water || s.steepness > .69 || s.forest < .43) continue;
+        if (hash32(ix, iz, state.seed + 293) > Math.min(.94, Math.pow(s.forest, 1.3) * 1.1)) continue;
         const img = state.treeImages[Math.floor(hash32(ix, iz, state.seed + 294) * state.treeImages.length)];
         if (!img?.complete || !img.naturalWidth) continue;
         const p = worldToScreen(wx, wz);
-        const h = Math.max(10, Math.min(76, state.zoom * 80));
+        const h = Math.max(17, Math.min(70, state.zoom * (52 + hash32(ix, iz, state.seed + 411) * 45)));
         const w = h * img.naturalWidth / img.naturalHeight;
         ctx.drawImage(img, p.x - w / 2, p.y - h * .80, w, h);
         drawn++;
@@ -1256,8 +1237,7 @@
     // Natural art is drawn in world space, never baked into chunk edges.
     drawWaterways();
     if (!state.dragging) {
-      drawMountainRidges();
-      if (state.zoom < .60) drawForestLOD();
+      if (state.zoom < .28) drawForestLOD();
       drawTreeSprites();
     }
 
@@ -1633,7 +1613,7 @@
     // Yield so the loading overlay visibly updates first.
     await new Promise(resolve => requestAnimationFrame(resolve));
 
-    await loadTerrainTextures();
+    loadTerrainTextures().then(() => { state.needsDraw = true; });
     loadTreeSprites();
 
     // Build one lightweight territory overview. Detailed chunks are generated
