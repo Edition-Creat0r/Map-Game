@@ -191,132 +191,8 @@
   }
 
   function terrainSample(localX, localZ) {
-    const gp = globalPoint(localX, localZ);
-    const x = gp.x;
-    const z = gp.z;
-
-    // Broad continental / regional form.
-    const broad = fbm(x, z, 14500, 4, 1101);
-
-    // Mid-frequency elevation.
-    const rolling = fbm(x, z, 4600, 5, 2201);
-
-    // Mountain ridges are gated by a large regional field so they form
-    // coherent chains rather than appearing evenly everywhere.
-    const mountainRegion =
-      smooth(
-        clamp(
-          (fbm(x, z, 21000, 3, 3301) - 0.43) / 0.24,
-          0,
-          1
-        )
-      );
-
-    const ridgeRaw =
-      ridged(x, z, 7200, 5, 4401);
-
-    // Push the ridges harder so mountain chains are visually distinct instead
-    // of reading as slightly darker grass.
-    const ridge =
-      Math.pow(
-        clamp(ridgeRaw, 0, 1),
-        1.55
-      ) *
-      mountainRegion;
-
-    // Basin / valley modifier.
-    const valley = fbm(x, z, 7600, 4, 5501);
-
-    let elevation =
-      0.25 * broad +
-      0.31 * rolling +
-      0.72 * ridge -
-      0.10 * (1 - valley);
-
-    elevation = clamp(elevation, 0, 1);
-
-    const moisture = clamp(
-      0.58 * fbm(x, z, 6900, 5, 6601) +
-      0.42 * fbm(x, z, 19000, 3, 7701),
-      0,
-      1
-    );
-
-    const temperature = clamp(
-      0.70 * fbm(x, z, 22000, 3, 8801) +
-      0.30 * (1 - elevation),
-      0,
-      1
-    );
-
-    // Low basins become lakes/wetlands. This is deliberately conservative
-    // in A1; drainage-fed rivers arrive in A2.
-    const lakeField =
-      fbm(x, z, 5200, 4, 9901);
-
-    const water =
-      elevation < 0.235 &&
-      lakeField > 0.47;
-
-    const steepness =
-      clamp(
-        ridge * 0.98 +
-        Math.max(0, elevation - 0.56) * 1.35,
-        0,
-        1
-      );
-
-    let forest = clamp(
-      (moisture - 0.39) * 1.75 +
-      fbm(x, z, 2100, 4, 12101) * 0.72 -
-      steepness * 0.52 -
-      Math.max(0, 0.30 - elevation) * 1.5,
-      0,
-      1
-    );
-
-    if (water) forest = 0;
-
-    let terrain = "grassland";
-
-    if (water) {
-      terrain = "water";
-    } else if (elevation > 0.80) {
-      terrain = temperature < 0.62 ? "snow_peak" : "high_rock";
-    } else if (elevation > 0.64 || steepness > 0.62) {
-      terrain = "mountain";
-    } else if (elevation > 0.50 || steepness > 0.40) {
-      terrain = "hills";
-    } else if (moisture < 0.31) {
-      terrain = "dry_plains";
-    } else if (moisture > 0.68 && forest > 0.56) {
-      terrain = "forest";
-    } else if (moisture > 0.72 && elevation < 0.39) {
-      terrain = "wet_grassland";
-    }
-
-    const buildability =
-      water
-        ? "BLOCKED"
-        : steepness > 0.78
-          ? "VERY DIFFICULT"
-          : steepness > 0.54
-            ? "DIFFICULT"
-            : elevation > 0.52
-              ? "GOOD"
-              : "EXCELLENT";
-
-    return {
-      elevation,
-      moisture,
-      temperature,
-      ridge,
-      steepness,
-      forest,
-      water,
-      terrain,
-      buildability
-    };
+    const t=state.territory || {x:0,y:0};
+    return window.mapGameSharedTerrain.local(Number(t.x)||0,Number(t.y)||0,localX,localZ);
   }
 
   // ----------------------------------------------------------
@@ -456,6 +332,20 @@
         break;
     }
 
+    // Continuous material weights, not square biome labels. Color follows
+    // the same masks that will drive the later texture blending pass.
+    const wt=sample.weights || {};
+    const materials=[
+      [COLORS.grass,wt.grass||0],
+      [COLORS.hill,wt.rockyGrass||0],
+      [COLORS.rock,wt.rock||0],
+      [COLORS.snow,wt.snow||0],
+      [COLORS.dry,wt.dry||0],
+      [COLORS.wet,wt.wet||0]
+    ];
+    let sum=0,r=0,g=0,bb=0;
+    for(const [color,amount] of materials){sum+=amount;r+=color[0]*amount;g+=color[1]*amount;bb+=color[2]*amount;}
+    if(sum>0.01 && !sample.water){base=mixColor(base,[r/sum,g/sum,bb/sum],.65);}
     const micro =
       (fbm(x, z, 610, 3, 15101) - 0.5) * 18;
 
@@ -1711,7 +1601,7 @@
 
   async function enterTerritory(territory) {
     state.territory = territory;
-    state.seed = seedForTerritory(territory);
+    state.seed = window.mapGameSharedTerrain.seed;
 
     state.cache.clear();
     state.queuedChunks.clear();
@@ -1784,7 +1674,7 @@
   }
 
   window.mapGameBasicWorld = {
-    VERSION: "0.3.2A2",
+    VERSION: "0.3.2A3",
     TERRITORY_SIZE,
     CHUNK_SIZE,
     CHUNKS_PER_SIDE,

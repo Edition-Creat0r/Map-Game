@@ -29,6 +29,7 @@
 
   // Each cached region gets a little overdraw so seams never expose.
   const REGION_OVERDRAW = 2;
+  const REGION_RASTER_SCALE = 0.5;
 
   // Progressive streamer intentionally performs only a small amount of work
   // per step. This avoids long main-thread stalls on Chromebooks.
@@ -151,107 +152,21 @@
     return r * r;
   }
 
-  function terrainAt(gx, gy) {
-    // These are GLOBAL strategic coordinates, not per-territory seeds.
-    // Neighboring territories therefore share terrain naturally.
-    const continent = fbm(gx, gy, 92, 5, 1011);
-    const broad = fbm(gx, gy, 42, 4, 2011);
-    const ridgeRegion = smooth(
-      clamp(
-        (fbm(gx, gy, 112, 3, 3011) - 0.43) / 0.26,
-        0,
-        1
-      )
-    );
-    const ridge = ridged(gx, gy, 34, 4011) * ridgeRegion;
-    const moisture = clamp(
-      fbm(gx, gy, 56, 4, 5011) * 0.66 +
-      fbm(gx, gy, 132, 3, 6011) * 0.34,
-      0,
-      1
-    );
-    const temperature = clamp(
-      fbm(gx, gy, 140, 3, 7011) * 0.62 +
-      (1 - Math.abs((gy / WORLD_ROWS) * 2 - 1)) * 0.38,
-      0,
-      1
-    );
-
-    let elevation =
-      continent * 0.34 +
-      broad * 0.28 +
-      ridge * 0.54;
-
-    elevation = clamp(elevation, 0, 1);
-
-    const waterMask =
-      fbm(gx, gy, 72, 4, 8011);
-
-    const water =
-      elevation < 0.28 &&
-      waterMask > 0.48;
-
-    const mountain =
-      !water &&
-      (
-        elevation > 0.66 ||
-        ridge > 0.55
-      );
-
-    const hills =
-      !water &&
-      !mountain &&
-      (
-        elevation > 0.52 ||
-        ridge > 0.35
-      );
-
-    const forest =
-      !water &&
-      moisture > 0.56 &&
-      elevation < 0.69;
-
-    const dry =
-      !water &&
-      moisture < 0.34;
-
-    const wetland =
-      !water &&
-      elevation < 0.39 &&
-      moisture > 0.72;
-
-    const snow =
-      mountain &&
-      elevation > 0.78 &&
-      temperature < 0.62;
-
-    let kind = "plains";
-
-    if (water) kind = "water";
-    else if (snow) kind = "snow";
-    else if (mountain) kind = "mountain";
-    else if (hills) kind = "hills";
-    else if (wetland) kind = "wetland";
-    else if (dry) kind = "dry";
-    else if (forest) kind = "forest";
-
-    return {
-      elevation,
-      moisture,
-      temperature,
-      ridge,
-      water,
-      mountain,
-      hills,
-      forest,
-      dry,
-      wetland,
-      snow,
-      kind
-    };
+  function terrainAt(gx,gy){
+    return window.mapGameSharedTerrain.strategic(gx,gy);
   }
 
   function colorForTerrain(t) {
+    if(!t.water && t.weights){
+      const palette={grass:[106,145,79],rockyGrass:[111,124,85],rock:[100,101,92],
+        snow:[208,215,207],dry:[157,146,93],wet:[62,115,83],soil:[125,105,77]};
+      let r=0,g=0,b=0,total=0;
+      for(const [key,value] of Object.entries(t.weights)){
+        const c=palette[key];if(!c)continue;
+        total+=value;r+=c[0]*value;g+=c[1]*value;b+=c[2]*value;
+      }
+      if(total>.01)return [Math.round(r/total),Math.round(g/total),Math.round(b/total)];
+    }
     switch (t.kind) {
       case "water":
         return [36, 96, 126];
@@ -2139,7 +2054,7 @@
   }
 
   window.mapGameStrategicWorld = {
-    VERSION: "0.3.2A2",
+    VERSION: "0.3.2A3",
     WORLD_COLS,
     WORLD_ROWS,
     TERRITORY_COUNT,
