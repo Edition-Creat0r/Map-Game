@@ -1,4 +1,3 @@
-
 // ============================================================
 // MAP GAME — ALPHA 0.2.0 RESTRUCTURE
 // FIRST PLAYABLE WORLD FLOW FOUNDATION
@@ -97,7 +96,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.3A1.2";
+  const VERSION = "0.3.2A";
   const CHUNK_WORLD_SIZE = window.mapGameWorldConfig?.TERRITORY_SIZE || 32768;
   const TERRITORY_RENDER_SIZE = window.mapGameWorldConfig?.SECTOR_SIZE || 512;
   const WORLD_COLS = window.mapGameWorldConfig?.WORLD_COLS || 316;
@@ -1562,6 +1561,7 @@
       state.claimedTerritories.set(row.territory_id, row);
     });
     if (mapOverlay && !mapOverlay.hidden) drawWorldMap();
+    window.mapGameStrategicWorld?.updateClaims?.();
     updateOnlineUI();
     window.dispatchEvent(new CustomEvent("mapgame:claims"));
   }
@@ -1667,7 +1667,29 @@
     });
     mapCanvas.addEventListener("wheel", e => {
       e.preventDefault();
-      state.mapCamera.zoom = clamp(state.mapCamera.zoom * (e.deltaY > 0 ? 0.88 : 1.14), 0.58, 2.35);
+
+      const cell = 42;
+      state.mapCamera.zoom = 1;
+
+      if (e.shiftKey) {
+        state.mapCamera.x += e.deltaY / cell;
+      } else {
+        state.mapCamera.x += e.deltaX / cell;
+        state.mapCamera.y += e.deltaY / cell;
+      }
+
+      state.mapCamera.x = clamp(
+        state.mapCamera.x,
+        0,
+        WORLD_COLS - 1
+      );
+
+      state.mapCamera.y = clamp(
+        state.mapCamera.y,
+        0,
+        WORLD_ROWS - 1
+      );
+
       drawWorldMap();
     }, { passive: false });
 
@@ -1938,17 +1960,197 @@
   }
 
   function showWorldMap() {
+    // --------------------------------------------------------
+    // UPDATE 0.3.2A — NEW STRATEGIC WORLD
+    //
+    // The map is fixed-scale and pan-only. Internal streaming regions
+    // are invisible and exist only to keep world loading smooth.
+    // --------------------------------------------------------
+    if (window.mapGameStrategicWorld) {
+      window.mapGameBasicWorld?.leave?.();
+
+      setMode("MAP");
+
+      const preferred =
+        state.activeTerritory ||
+        (() => {
+          const owned =
+            getMyStartingTerritory();
+
+          const id =
+            owned?.territory_id ||
+            owned?.id;
+
+          return id
+            ? parseTerritoryId(id)
+            : null;
+        })();
+
+      window.mapGameStrategicWorld.open({
+        worldType: state.worldType,
+
+        center:
+          preferred
+            ? {
+                x: preferred.x,
+                y: preferred.y
+              }
+            : null,
+
+        callbacks: {
+          getOwner:
+            id =>
+              ownerForTerritory(id),
+
+          getCurrentUserId:
+            () =>
+              state.multiplayerState
+                ?.user
+                ?.id ||
+              null,
+
+          isReserved:
+            (x, y) =>
+              isCentralReserved(x, y),
+
+          hasOwnedTerritory:
+            () =>
+              Boolean(
+                getMyStartingTerritory()
+              ),
+
+          getPreferredTerritory:
+            () => {
+              if (state.activeTerritory) {
+                return {
+                  x: state.activeTerritory.x,
+                  y: state.activeTerritory.y
+                };
+              }
+
+              const owned =
+                getMyStartingTerritory();
+
+              const id =
+                owned?.territory_id ||
+                owned?.id;
+
+              return id
+                ? parseTerritoryId(id)
+                : null;
+            },
+
+          getSummary:
+            id => {
+              // 0.3.2A supports progressive civilization summaries.
+              // Existing systems can publish richer territory summaries later.
+              const capital =
+                state.capitals?.get?.(id) ||
+                null;
+
+              if (!capital) {
+                return null;
+              }
+
+              return {
+                population:
+                  Number(capital.population || 0),
+                cities: 1,
+                buildings:
+                  Number(capital.buildings || 0),
+                shields:
+                  Number(capital.shields || 0),
+                majorRoads:
+                  Number(capital.majorRoads || 0),
+                airports:
+                  Number(capital.airports || 0),
+                ports:
+                  Number(capital.ports || 0),
+                development:
+                  Number(capital.development || 0.15)
+              };
+            },
+
+          onSelection:
+            cell => {
+              state.selectedTerritory = {
+                ...cell
+              };
+            },
+
+          onPrimary:
+            async cell => {
+              state.selectedTerritory = {
+                ...cell
+              };
+
+              await claimSelectedTerritory();
+
+              window.mapGameStrategicWorld
+                ?.updateClaims?.();
+
+              window.mapGameStrategicWorld
+                ?.refreshInspector?.();
+            },
+
+          onEnter:
+            cell => {
+              state.selectedTerritory = {
+                ...cell
+              };
+
+              hideWorldMap();
+
+              enterTerritory({
+                ...cell
+              });
+            },
+
+          canReturn:
+            () =>
+              Boolean(
+                state.activeTerritory
+              ),
+
+          onReturn:
+            () => {
+              if (state.activeTerritory) {
+                setMode("TERRITORY");
+
+                window.mapGameBasicWorld
+                  ?.enterTerritory?.(
+                    state.activeTerritory
+                  );
+              }
+            }
+        }
+      });
+
+      setStatus(
+        `<b>WORLD MAP</b> • ${WORLD_COLS * WORLD_ROWS} territories • fixed scale • pan only`
+      );
+
+      return;
+    }
+
+    // Legacy fallback only.
     if (!mapOverlay) createMapOverlay();
     mapOverlay.hidden = false;
     setMode("MAP");
     setTimeout(() => {
       resizeWorldMapCanvas();
-      updateTerritoryInspector(state.selectedTerritory);
+      updateTerritoryInspector(
+        state.selectedTerritory
+      );
     }, 0);
   }
 
   function hideWorldMap() {
-    if (mapOverlay) mapOverlay.hidden = true;
+    window.mapGameStrategicWorld?.close?.();
+
+    if (mapOverlay) {
+      mapOverlay.hidden = true;
+    }
   }
 
   async function openMyBasicTerritory() {
@@ -4385,20 +4587,17 @@
   }
 
   function enterSingleplayerHome() {
-    const saved = loadLocalState();
-    const savedId =
-      saved?.capital?.territoryId ||
-      saved?.activeTerritoryId ||
-      territoryId(CENTRAL_X, CENTRAL_Y);
+    // 0.3.2A:
+    // Singleplayer has NO spawn and NO forced starting territory.
+    // The entire 316x316 world belongs to the local save.
+    state.activeTerritory = null;
+    state.selectedTerritory = null;
 
-    const parsed =
-      parseTerritoryId(savedId) ||
-      { x: CENTRAL_X, y: CENTRAL_Y };
+    showWorldMap();
 
-    enterTerritory({
-      ...parsed,
-      id: territoryId(parsed.x, parsed.y)
-    });
+    setStatus(
+      `<b>SINGLEPLAYER WORLD</b> • ${WORLD_COLS * WORLD_ROWS} territories • select anywhere to enter`
+    );
   }
 
   function startGame(worldType) {
@@ -4453,41 +4652,20 @@
       return;
     }
 
-    const owned =
-      getMyStartingTerritory();
-
-    if (owned) {
-      openMyBasicTerritory()
-        .catch(error => {
-          console.error(
-            "Could not open owned Basic territory:",
-            error
-          );
-
-          showToast(
-            error?.message ||
-            "Could not open your territory.",
-            "error"
-          );
-
-          showWorldMap();
-        });
-
-      return;
-    }
-
-    // No territory yet: choose the first one immediately.
-    // This replaces the old 3D neutral spawn entirely.
+    // 0.3.2A:
+    // Multiplayer also enters through the huge strategic world map.
+    // Existing owners are centered near their land, but never skip the map.
     state.activeTerritory = null;
     state.selectedTerritory = null;
+
     showWorldMap();
 
     setStatus(
-      "<b>BASIC 2D</b> • choose your free starting territory"
+      `<b>CENTRAL WORLD</b> • ${WORLD_COLS * WORLD_ROWS} territories • inspect, claim, or enter land`
     );
 
     showToast(
-      "Choose your starting territory. Basic mode no longer uses the old 3D spawn.",
+      "World Map loaded. Drag or scroll to explore; the map scale is fixed.",
       "info"
     );
   }
