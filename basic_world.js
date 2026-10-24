@@ -1,5 +1,7 @@
 
-// ============================================================
+
+
+//============================================================
 // MAP GAME — basic_world.js
 // Basic 0.3A1 — 2D TERRAIN FOUNDATION
 //
@@ -53,11 +55,13 @@
   // Far zoom MUST NOT build all 4,096 detailed chunks. At territory scale we
   // draw one lightweight overview raster, then switch to chunks as you zoom.
   const OVERVIEW_PIXELS = 384;
-  const DETAIL_ZOOM_THRESHOLD = 0.105;
-  const TREE_CLUSTER_ZOOM = 0.105;
-  const TREE_DETAIL_ZOOM = 0.205;
-  const MOUNTAIN_DETAIL_ZOOM = 0.090;
-  const MAX_DETAIL_CHUNKS_PER_FRAME = 120;
+  const DETAIL_ZOOM_THRESHOLD = 0.145;
+  const TREE_CLUSTER_ZOOM = 0.155;
+  const TREE_DETAIL_ZOOM = 0.245;
+  const MOUNTAIN_DETAIL_ZOOM = 0.145;
+  const MAX_DETAIL_CHUNKS_PER_FRAME = 72;
+  const MAX_TREE_SYMBOLS = 900;
+  const MAX_MOUNTAIN_SYMBOLS = 260;
 
   const state = {
     active: false,
@@ -65,9 +69,10 @@
     seed: 0,
     cameraX: TERRITORY_SIZE / 2,
     cameraZ: TERRITORY_SIZE / 2,
-    zoom: 0.040,
-    minZoom: 0.020,
-    maxZoom: 0.72,
+    // Camera is intentionally constrained so a 32K territory feels huge.
+    zoom: 0.115,
+    minZoom: 0.075,
+    maxZoom: 0.42,
     dragging: false,
     lastX: 0,
     lastY: 0,
@@ -324,6 +329,45 @@
     ];
   }
 
+  const TEXTURE_PATHS = {
+    grass: "assets/textures/grass/grass_diffuse.jpg",
+    dirt: "assets/textures/dirt/dirt.jpg",
+    rock: "assets/textures/rock/rock_diffuse.jpg",
+    sand: "assets/textures/sand/sand_diffuse.jpg",
+    dryPlains: "assets/textures/terrain/dry_plains_01/plains.jpg",
+    rockyGrass: "assets/textures/terrain/rocky_grass_01/thick_grass.jpg",
+    snow: "assets/textures/terrain/snow_01/snow.jpg",
+    wetGround: "assets/textures/terrain/wet_ground_01/wet_grass.jpg"
+  };
+
+  const textureImages = {};
+  let texturesReady = false;
+
+  function loadTextureImage(key, path) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => {
+        textureImages[key] = img;
+        resolve(true);
+      };
+      img.onerror = () => {
+        console.warn(`Basic texture missing: ${path}`);
+        resolve(false);
+      };
+      img.src = path;
+    });
+  }
+
+  async function loadTerrainTextures() {
+    if (texturesReady) return;
+    await Promise.all(
+      Object.entries(TEXTURE_PATHS).map(
+        ([key, path]) => loadTextureImage(key, path)
+      )
+    );
+    texturesReady = true;
+  }
+
   const COLORS = {
     deepGrass: [76, 119, 66],
     grass: [104, 143, 75],
@@ -418,6 +462,28 @@
       clamp(Math.round(base[1] + micro), 0, 255),
       clamp(Math.round(base[2] + micro), 0, 255)
     ];
+  }
+
+  function textureKeyForSample(sample) {
+    if (sample.water) return null;
+    switch (sample.terrain) {
+      case "dry_plains": return "dryPlains";
+      case "wet_grassland": return "wetGround";
+      case "forest": return "grass";
+      case "hills": return sample.steepness > 0.52 ? "rockyGrass" : "grass";
+      case "mountain":
+      case "high_rock": return "rock";
+      case "snow_peak": return "snow";
+      default: return "grass";
+    }
+  }
+
+  function drawTexturePatch(context, image, x, y, w, h, alpha) {
+    if (!image) return;
+    context.save();
+    context.globalAlpha = alpha;
+    context.drawImage(image, x, y, w, h);
+    context.restore();
   }
 
   function elevationMeters(sample) {
@@ -622,6 +688,29 @@
     }
 
     c.putImageData(image, 0, 0);
+
+    if (texturesReady) {
+      const block = 24;
+      for (let by = 0; by < TILE_PIXELS; by += block) {
+        for (let bx = 0; bx < TILE_PIXELS; bx += block) {
+          const localX = worldX0 + bx / Math.max(1, TILE_PIXELS - 1) * CHUNK_SIZE;
+          const localZ = worldZ0 + by / Math.max(1, TILE_PIXELS - 1) * CHUNK_SIZE;
+          const sample = terrainSample(localX, localZ);
+          const key = textureKeyForSample(sample);
+          const img = key ? textureImages[key] : null;
+          if (!img) continue;
+          drawTexturePatch(
+            c,
+            img,
+            bx,
+            by,
+            Math.min(block + 2, TILE_PIXELS - bx),
+            Math.min(block + 2, TILE_PIXELS - by),
+            0.36
+          );
+        }
+      }
+    }
 
     drawChunkArt(c, cx, cz);
 
@@ -846,6 +935,8 @@
     const close =
       state.zoom >= TREE_DETAIL_ZOOM;
 
+    let drawn = 0;
+
     for (let gz = startZ; gz <= endZ; gz++) {
       for (let gx = startX; gx <= endX; gx++) {
         const r1 = hash32(gx, gz, state.seed + 31001);
@@ -891,7 +982,10 @@
           continue;
         }
 
+        if (drawn >= MAX_TREE_SYMBOLS) return;
+
         const p = worldToScreen(wx, wz);
+        drawn++;
 
         if (close) {
           const radius =
@@ -975,6 +1069,8 @@
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
 
+    let drawn = 0;
+
     for (let gz = sz; gz <= ez; gz++) {
       for (let gx = sx; gx <= ex; gx++) {
         const wx =
@@ -998,6 +1094,12 @@
           continue;
         }
 
+        if (drawn >= MAX_MOUNTAIN_SYMBOLS) {
+          ctx.restore();
+          return;
+        }
+
+        drawn++;
         const p = worldToScreen(wx, wz);
 
         const size =
@@ -1410,7 +1512,7 @@
       const before = screenToWorld(event.clientX, event.clientY);
 
       const factor =
-        event.deltaY < 0 ? 1.14 : 1 / 1.14;
+        event.deltaY < 0 ? 1.10 : 1 / 1.10;
 
       state.zoom = clamp(
         state.zoom * factor,
@@ -1466,7 +1568,7 @@
     if (event.key === "Home") {
       state.cameraX = TERRITORY_SIZE / 2;
       state.cameraZ = TERRITORY_SIZE / 2;
-      state.zoom = 0.040;
+      state.zoom = 0.115;
       moved = true;
     }
 
@@ -1503,7 +1605,7 @@
 
     state.cameraX = TERRITORY_SIZE / 2;
     state.cameraZ = TERRITORY_SIZE / 2;
-    state.zoom = 0.040;
+    state.zoom = 0.115;
     state.hoverWorld = null;
 
     canvas.hidden = false;
@@ -1522,6 +1624,8 @@
 
     // Yield so the loading overlay visibly updates first.
     await new Promise(resolve => requestAnimationFrame(resolve));
+
+    await loadTerrainTextures();
 
     // Build one lightweight territory overview. Detailed chunks are generated
     // only after the player zooms in enough to need them.
@@ -1562,7 +1666,7 @@
   }
 
   window.mapGameBasicWorld = {
-    VERSION: "0.3A2",
+    VERSION: "0.3A3",
     TERRITORY_SIZE,
     CHUNK_SIZE,
     CHUNKS_PER_SIDE,
@@ -1588,6 +1692,6 @@
   };
 
   console.log(
-    "Map Game Basic 0.3A2 seamless terrain LOD renderer ready — 32K 2D world foundation."
+    "Map Game Basic 0.3A3 textured performance renderer ready — 32K 2D world foundation."
   );
 })();
