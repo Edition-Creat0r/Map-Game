@@ -166,7 +166,11 @@
         const value=t.weights[key], c=terrainPalette[key];if(!c)continue;
         total+=value;r+=c[0]*value;g+=c[1]*value;b+=c[2]*value;
       }
-      if(total>.01)return [Math.round(r/total),Math.round(g/total),Math.round(b/total)];
+      if(total>.01){
+        const amount=.72*(1-Math.min(1,t.weights.rock+t.weights.snow)*.8);
+        const biome=t.biome.color;
+        return [Math.round(r/total*(1-amount)+biome[0]*amount),Math.round(g/total*(1-amount)+biome[1]*amount),Math.round(b/total*(1-amount)+biome[2]*amount)];
+      }
     }
     switch (t.kind) {
       case "water":
@@ -336,7 +340,7 @@
       <div class="mg-sw-shell">
         <header class="mg-sw-header">
           <div class="mg-sw-heading">
-            <div class="mg-kicker">WORLD MAP • 0.3.2A</div>
+            <div class="mg-kicker">WORLD MAP • 0.3.3A</div>
             <h2>World Atlas</h2>
             <p>${TERRITORY_COUNT.toLocaleString()} territories • seamless geography • fixed scale</p>
           </div>
@@ -1790,7 +1794,7 @@
       `Territory ${cell.x}-${cell.y}`;
 
     sub.textContent =
-      `${terrainLabel(metrics.center.kind)} • ${metrics.rating}`;
+      `${metrics.center.biome?.label || terrainLabel(metrics.center.kind)} • ${metrics.rating}`;
 
     live.textContent =
       `${metrics.score}%`;
@@ -2055,7 +2059,7 @@
   }
 
   window.mapGameStrategicWorld = {
-    VERSION: "0.3.2A3",
+    VERSION: "0.3.3A",
     WORLD_COLS,
     WORLD_ROWS,
     TERRITORY_COUNT,

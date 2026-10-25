@@ -2636,7 +2636,8 @@
     state.activeTerritory = {
       ...cell,
       id: cell.id || territoryId(cell.x, cell.y),
-      biome
+      biome,
+      biomeInfo: window.mapGameSharedTerrain?.strategic(cell.x, cell.y).biome
     };
 
     // --------------------------------------------------------
@@ -2705,7 +2706,7 @@
       }
 
       setStatus(
-        `<b>BASIC 2D</b> • ${BIOMES[biome].label} • ` +
+        `<b>BASIC 2D</b> • ${state.activeTerritory.biomeInfo?.label || BIOMES[biome].label} • ` +
         `32,768 × 32,768 territory • terrain foundation`
       );
 
@@ -4286,7 +4287,7 @@
     } else if (state.activeTerritory) {
       pill.textContent =
         `TERRITORY ${state.activeTerritory.x}-${state.activeTerritory.y} • ` +
-        `${BIOMES[state.activeTerritory.biome].label.toUpperCase()}`;
+        `${(state.activeTerritory.biomeInfo?.label || BIOMES[state.activeTerritory.biome].label).toUpperCase()}`;
     }
 
     const dock = document.getElementById("mgDock");

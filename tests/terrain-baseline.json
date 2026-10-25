@@ -1,0 +1,1502 @@
+[
+  {
+    "seed": 734221,
+    "x": 0,
+    "y": 0,
+    "sample": {
+      "elevation": 0.3949179354357192,
+      "moisture": 0.5904437248262366,
+      "temperature": 0.5344887625961676,
+      "ridge": 0.050510551386216886,
+      "steepness": 0.05556160652483858,
+      "forest": 0.45802201531019465,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.9666607433551563,
+        "rockyGrass": 0.03333696391490315,
+        "rock": 0.03333696391490315,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0.000004743597003154454,
+        "soil": 0.06822016696171374
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 193919,
+    "y": 791919,
+    "sample": {
+      "elevation": 0.5627415584228264,
+      "moisture": 0.6288042522881945,
+      "temperature": 0.5594356833323242,
+      "ridge": 0.126031099889249,
+      "steepness": 0.19265778127583735,
+      "forest": 0.5836446264194236,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.7815065588431237,
+        "rockyGrass": 0.1464643004829146,
+        "rock": 0.2184934411568763,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.07725905008201259
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 387838,
+    "y": 1583838,
+    "sample": {
+      "elevation": 0.4095810014281691,
+      "moisture": 0.4922005972823161,
+      "temperature": 0.43627033002467297,
+      "ridge": 0,
+      "steepness": 0,
+      "forest": 0.28577185469629357,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 1,
+        "rockyGrass": 0,
+        "rock": 0,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.06220709172593467
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 581757,
+    "y": 2375757,
+    "sample": {
+      "elevation": 0.9945721570712673,
+      "moisture": 0.546946321214768,
+      "temperature": 0.5149244817042525,
+      "ridge": 0.883507635723131,
+      "steepness": 1,
+      "forest": 0,
+      "water": false,
+      "terrain": "snow_peak",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 1,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.05310314762095895
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 775676,
+    "y": 3167676,
+    "sample": {
+      "elevation": 0.5793992896005628,
+      "moisture": 0.3398804102492913,
+      "temperature": 0.32321231772077946,
+      "ridge": 0.021856117983415035,
+      "steepness": 0.10555055762268503,
+      "forest": 0.11137973052566882,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.5103473328368984,
+        "rockyGrass": 0.11373245990236484,
+        "rock": 0.23133741900279048,
+        "snow": 0,
+        "dry": 0.48008292872461084,
+        "wet": 0,
+        "soil": 0.08052253541139084
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 969595,
+    "y": 3959595,
+    "sample": {
+      "elevation": 0.4411082715244532,
+      "moisture": 0.3492341035112692,
+      "temperature": 0.5337518034438546,
+      "ridge": 0.0010721290398099349,
+      "steepness": 0.0011793419437909284,
+      "forest": 0.03054671425911452,
+      "water": false,
+      "terrain": "dry_plains",
+      "weights": {
+        "grass": 0.6028795715081413,
+        "rockyGrass": 0.000707605166274557,
+        "rock": 0.000707605166274557,
+        "snow": 0,
+        "dry": 0.56670503673401,
+        "wet": 0,
+        "soil": 0.03750764903511623
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 1163514,
+    "y": 4751514,
+    "sample": {
+      "elevation": 0.4461165939012899,
+      "moisture": 0.6111151787007023,
+      "temperature": 0.6465736112491174,
+      "ridge": 0.06610832893852286,
+      "steepness": 0.07271916183237516,
+      "forest": 0.617140363715433,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.955079625635672,
+        "rockyGrass": 0.04363149709942509,
+        "rock": 0.04363149709942509,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0.0026953569905196944,
+        "soil": 0.03514006755382444
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 1357433,
+    "y": 5543433,
+    "sample": {
+      "elevation": 0.8149378864883722,
+      "moisture": 0.6185819201888703,
+      "temperature": 0.6388485456189639,
+      "ridge": 0.5411620123361671,
+      "steepness": 1,
+      "forest": 0.0789293117472154,
+      "water": false,
+      "terrain": "high_rock",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 0.1499189545302153,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.05803786222789688
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 1551352,
+    "y": 6335352,
+    "sample": {
+      "elevation": 0.709094206246958,
+      "moisture": 0.5534749401573325,
+      "temperature": 0.37462729942932727,
+      "ridge": 0.4521687558372303,
+      "steepness": 0.7928910717284339,
+      "forest": 0,
+      "water": false,
+      "terrain": "high_rock",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.6330142501259421,
+        "rock": 1,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.05601954137151795
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 1745271,
+    "y": 7127271,
+    "sample": {
+      "elevation": 0.8808100333713126,
+      "moisture": 0.5042556804475187,
+      "temperature": 0.3172981410846624,
+      "ridge": 0.5018696291821351,
+      "steepness": 1,
+      "forest": 0,
+      "water": false,
+      "terrain": "snow_peak",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 0.9833034207282964,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.0754886452730601
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 1939190,
+    "y": 7919190,
+    "sample": {
+      "elevation": 0.9870436659155138,
+      "moisture": 0.5938004989852045,
+      "temperature": 0.3378273295940866,
+      "ridge": 0.8316460528268504,
+      "steepness": 1,
+      "forest": 0,
+      "water": false,
+      "terrain": "snow_peak",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 1,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.04545372268604266
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 2133109,
+    "y": 8711109,
+    "sample": {
+      "elevation": 1,
+      "moisture": 0.40764095506814335,
+      "temperature": 0.49417343881357445,
+      "ridge": 0.839393342166389,
+      "steepness": 1,
+      "forest": 0,
+      "water": false,
+      "terrain": "snow_peak",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 1,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.059039207721783116
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 2327028,
+    "y": 9503028,
+    "sample": {
+      "elevation": 0.42554575014615936,
+      "moisture": 0.41126351228981856,
+      "temperature": 0.5652681281751883,
+      "ridge": 0,
+      "steepness": 0,
+      "forest": 0.29321637971656556,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.8606345676316082,
+        "rockyGrass": 0,
+        "rock": 0,
+        "snow": 0,
+        "dry": 0.19909347481198833,
+        "wet": 0,
+        "soil": 0.049552302598956585
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 2520947,
+    "y": 10294947,
+    "sample": {
+      "elevation": 0.7279559375384443,
+      "moisture": 0.32883557074928405,
+      "temperature": 0.36246896073587,
+      "ridge": 0.5092145699461105,
+      "steepness": 0.8867633238791548,
+      "forest": 0,
+      "water": false,
+      "terrain": "high_rock",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.672440596029245,
+        "rock": 1,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.06367330032163283
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 2714866,
+    "y": 732178,
+    "sample": {
+      "elevation": 0.520254054177474,
+      "moisture": 0.5964731611047125,
+      "temperature": 0.5398070834017991,
+      "ridge": 0,
+      "steepness": 0,
+      "forest": 0.5532891099914059,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.9955450405628637,
+        "rockyGrass": 0.001336487831140877,
+        "rock": 0.0044549594371362565,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.025959904877225333
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 2908785,
+    "y": 1524097,
+    "sample": {
+      "elevation": 0.4209146680463049,
+      "moisture": 0.46337802575408277,
+      "temperature": 0.7975219572266261,
+      "ridge": 0,
+      "steepness": 0,
+      "forest": 0.33754743995714465,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.9903920215560288,
+        "rockyGrass": 0,
+        "rock": 0,
+        "snow": 0,
+        "dry": 0.013725683491387513,
+        "wet": 0,
+        "soil": 0.04949281186672483
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 3102704,
+    "y": 2316016,
+    "sample": {
+      "elevation": 0.9762593955290517,
+      "moisture": 0.5373473402568203,
+      "temperature": 0.500206352375648,
+      "ridge": 0.8600923365135272,
+      "steepness": 1,
+      "forest": 0,
+      "water": false,
+      "terrain": "snow_peak",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 1,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.08441859443606736
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 3296623,
+    "y": 3107935,
+    "sample": {
+      "elevation": 0.5942569512976197,
+      "moisture": 0.4600787056868302,
+      "temperature": 0.4489141113967797,
+      "ridge": 0.36460986725993105,
+      "steepness": 0.5070948236269966,
+      "forest": 0.023177097745522846,
+      "water": false,
+      "terrain": "mountain",
+      "weights": {
+        "grass": 0.45853853840555797,
+        "rockyGrass": 0.37454513732879735,
+        "rock": 0.538551038018196,
+        "snow": 0,
+        "dry": 0.009010201145992904,
+        "wet": 0,
+        "soil": 0.047274889028556984
+      },
+      "buildability": "GOOD"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 3490542,
+    "y": 3899854,
+    "sample": {
+      "elevation": 0.5729408981405739,
+      "moisture": 0.6085136028575487,
+      "temperature": 0.6616227994931458,
+      "ridge": 0.0012181950897593495,
+      "steepness": 0.0721924965306822,
+      "forest": 0.5858488602339448,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.81525396092763,
+        "rockyGrass": 0.08574466026459752,
+        "rock": 0.18474603907237,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.06433454920808707
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 734221,
+    "x": 3684461,
+    "y": 4691773,
+    "sample": {
+      "elevation": 1,
+      "moisture": 0.4695046538351955,
+      "temperature": 0.44585876609803365,
+      "ridge": 0.9450903813706947,
+      "steepness": 1,
+      "forest": 0,
+      "water": false,
+      "terrain": "snow_peak",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 1,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.07747646989008021
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 0,
+    "y": 0,
+    "sample": {
+      "elevation": 0.4627771624629913,
+      "moisture": 0.7099870972591423,
+      "temperature": 0.6181433439391941,
+      "ridge": 0.0023665691360270718,
+      "steepness": 0.002603226049629779,
+      "forest": 0.7324592715682791,
+      "water": false,
+      "terrain": "forest",
+      "weights": {
+        "grass": 0.9858254276630004,
+        "rockyGrass": 0.0015619356297778674,
+        "rock": 0.0015619356297778674,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0.02526473530469275,
+        "soil": 0.06592822396800113
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 193919,
+    "y": 791919,
+    "sample": {
+      "elevation": 0.6604041533670583,
+      "moisture": 0.5121404195410051,
+      "temperature": 0.5203115689452992,
+      "ridge": 0.11264721000891273,
+      "steepness": 0.3390787840654501,
+      "forest": 0.2365100416847666,
+      "water": false,
+      "terrain": "mountain",
+      "weights": {
+        "grass": 0.23937924809951616,
+        "rockyGrass": 0.3705993148776342,
+        "rock": 0.7606207519004838,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.08053785199575833
+      },
+      "buildability": "GOOD"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 387838,
+    "y": 1583838,
+    "sample": {
+      "elevation": 0.41688307598267427,
+      "moisture": 0.3060996732787109,
+      "temperature": 0.6231732445449585,
+      "ridge": 0,
+      "steepness": 0,
+      "forest": 0.16764576085318877,
+      "water": false,
+      "terrain": "dry_plains",
+      "weights": {
+        "grass": 0.4300448041909156,
+        "rockyGrass": 0,
+        "rock": 0,
+        "snow": 0,
+        "dry": 0.814221708298692,
+        "wet": 0,
+        "soil": 0.04685155955962924
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 581757,
+    "y": 2375757,
+    "sample": {
+      "elevation": 1,
+      "moisture": 0.37984958549135595,
+      "temperature": 0.3438801144719634,
+      "ridge": 0.9909232623524635,
+      "steepness": 1,
+      "forest": 0,
+      "water": false,
+      "terrain": "snow_peak",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 1,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.0935511194051395
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 775676,
+    "y": 3167676,
+    "sample": {
+      "elevation": 0.6024334590677313,
+      "moisture": 0.5032857862004205,
+      "temperature": 0.3561055669813058,
+      "ridge": 0.3633440313027819,
+      "steepness": 0.5191936418948168,
+      "forest": 0.03696295882182438,
+      "water": false,
+      "terrain": "mountain",
+      "weights": {
+        "grass": 0.415352534642473,
+        "rockyGrass": 0.3934555692030811,
+        "rock": 0.584647465357527,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.043224332012660335
+      },
+      "buildability": "GOOD"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 969595,
+    "y": 3959595,
+    "sample": {
+      "elevation": 0.49003572656090266,
+      "moisture": 0.5360280489765288,
+      "temperature": 0.5378357028177271,
+      "ridge": 0.12846564439392572,
+      "steepness": 0.1413122088333183,
+      "forest": 0.2862596991529836,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.915212674700009,
+        "rockyGrass": 0.08478732529999097,
+        "rock": 0.08478732529999097,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.02599364517592989
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 1163514,
+    "y": 4751514,
+    "sample": {
+      "elevation": 0.5517327188420311,
+      "moisture": 0.39990420577519437,
+      "temperature": 0.5475877843913631,
+      "ridge": 0.029237558216286926,
+      "steepness": 0.06802030012726692,
+      "forest": 0.31280790979420975,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.7475318894429213,
+        "rockyGrass": 0.060867859733991996,
+        "rock": 0.10766444560179964,
+        "snow": 0,
+        "dry": 0.2318212890744352,
+        "wet": 0,
+        "soil": 0.08842511762624278
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 1357433,
+    "y": 5543433,
+    "sample": {
+      "elevation": 0.4590831084288546,
+      "moisture": 0.28019926360016434,
+      "temperature": 0.4182636012294123,
+      "ridge": 0,
+      "steepness": 0,
+      "forest": 0,
+      "water": false,
+      "terrain": "dry_plains",
+      "weights": {
+        "grass": 0.3523371373769425,
+        "rockyGrass": 0,
+        "rock": 0,
+        "snow": 0,
+        "dry": 0.9252326608900823,
+        "wet": 0,
+        "soil": 0.06074124350140452
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 1551352,
+    "y": 6335352,
+    "sample": {
+      "elevation": 0.5013986731538862,
+      "moisture": 0.4068812732305233,
+      "temperature": 0.6339544415099283,
+      "ridge": 0.15094294301867517,
+      "steepness": 0.1660372373205427,
+      "forest": 0.2068258973365767,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.7744552060544051,
+        "rockyGrass": 0.09962234239232562,
+        "rock": 0.09962234239232562,
+        "snow": 0,
+        "dry": 0.19979307014640996,
+        "wet": 0,
+        "soil": 0.05694384273094935
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 1745271,
+    "y": 7127271,
+    "sample": {
+      "elevation": 0.8382924875225122,
+      "moisture": 0.3629718967921638,
+      "temperature": 0.32095604614636125,
+      "ridge": 0.7734318794216745,
+      "steepness": 1,
+      "forest": 0,
+      "water": false,
+      "terrain": "snow_peak",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 0.6029960988911905,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.031094914178199692
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 1939190,
+    "y": 7919190,
+    "sample": {
+      "elevation": 0.4393790684566245,
+      "moisture": 0.5257060750856508,
+      "temperature": 0.3800490424551464,
+      "ridge": 0,
+      "steepness": 0,
+      "forest": 0.4593889933629899,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 1,
+        "rockyGrass": 0,
+        "rock": 0,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.06621346378653067
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 2133109,
+    "y": 8711109,
+    "sample": {
+      "elevation": 0.5487723261507236,
+      "moisture": 0.3497867611460991,
+      "temperature": 0.5472935629352781,
+      "ridge": 0,
+      "steepness": 0.030974338148693856,
+      "forest": 0.12222285554741717,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.5868902896319711,
+        "rockyGrass": 0.03606481175537589,
+        "rock": 0.07685196577641489,
+        "snow": 0,
+        "dry": 0.5203588035189426,
+        "wet": 0,
+        "soil": 0.0372929141868461
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 2327028,
+    "y": 9503028,
+    "sample": {
+      "elevation": 0.5341805415647759,
+      "moisture": 0.3288974976094594,
+      "temperature": 0.7250463739999288,
+      "ridge": 0,
+      "steepness": 0.006897893581880193,
+      "forest": 0.12003141410334744,
+      "water": false,
+      "terrain": "dry_plains",
+      "weights": {
+        "grass": 0.5156516181369617,
+        "rockyGrass": 0.01126154378620905,
+        "rock": 0.02788142827273123,
+        "snow": 0,
+        "dry": 0.6707984673387155,
+        "wet": 0,
+        "soil": 0.05155583723192345
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 2520947,
+    "y": 10294947,
+    "sample": {
+      "elevation": 0.516620165226085,
+      "moisture": 0.6292219363979914,
+      "temperature": 0.26433562058332216,
+      "ridge": 0,
+      "steepness": 0,
+      "forest": 0.5879923504212157,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.998122934860213,
+        "rockyGrass": 0.0005631195419361165,
+        "rock": 0.001877065139787055,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.06308966852603437
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 2714866,
+    "y": 732178,
+    "sample": {
+      "elevation": 0.5002349348563029,
+      "moisture": 0.48191441168598953,
+      "temperature": 0.681328181687151,
+      "ridge": 0.06681638482660403,
+      "steepness": 0.07349802330926444,
+      "forest": 0.3340132149150504,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.9559011860144413,
+        "rockyGrass": 0.04409881398555866,
+        "rock": 0.04409881398555866,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.07776663922074656
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 2908785,
+    "y": 1524097,
+    "sample": {
+      "elevation": 0.5215036511083586,
+      "moisture": 0.28645900971709337,
+      "temperature": 0.4079276906625182,
+      "ridge": 0,
+      "steepness": 0,
+      "forest": 0.049749141894785145,
+      "water": false,
+      "terrain": "dry_plains",
+      "weights": {
+        "grass": 0.36998653402953824,
+        "rockyGrass": 0.001675795247249792,
+        "rock": 0.005585984157499307,
+        "snow": 0,
+        "dry": 0.8970501677583839,
+        "wet": 0,
+        "soil": 0.06466623208925347
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 3102704,
+    "y": 2316016,
+    "sample": {
+      "elevation": 0.5398244515574641,
+      "moisture": 0.24397270577929847,
+      "temperature": 0.5196564702229761,
+      "ridge": 0,
+      "steepness": 0.01621034506981565,
+      "forest": 0,
+      "water": false,
+      "terrain": "dry_plains",
+      "weights": {
+        "grass": 0.3171721255598362,
+        "rockyGrass": 0.020371458314359672,
+        "rock": 0.04521037795012366,
+        "snow": 0,
+        "dry": 0.9540134463205675,
+        "wet": 0,
+        "soil": 0.04882126058821758
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 3296623,
+    "y": 3107935,
+    "sample": {
+      "elevation": 0.6595684828557518,
+      "moisture": 0.4812749954524075,
+      "temperature": 0.24385220803349217,
+      "ridge": 0.3272920026309377,
+      "steepness": 0.5738091996060218,
+      "forest": 0.13586991705294965,
+      "water": false,
+      "terrain": "high_rock",
+      "weights": {
+        "grass": 0.10234908995242753,
+        "rockyGrass": 0.5102951368488009,
+        "rock": 0.8976509100475725,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.03404916887911561
+      },
+      "buildability": "DIFFICULT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 3490542,
+    "y": 3899854,
+    "sample": {
+      "elevation": 0.4693656370283968,
+      "moisture": 0.48382692238738284,
+      "temperature": 0.6062857191471431,
+      "ridge": 0.012701900206316792,
+      "steepness": 0.013972090226948472,
+      "forest": 0.3304876437240951,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.991616745863831,
+        "rockyGrass": 0.008383254136169083,
+        "rock": 0.008383254136169083,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.03825609517340787
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": 42,
+    "x": 3684461,
+    "y": 4691773,
+    "sample": {
+      "elevation": 0.5336208828664256,
+      "moisture": 0.5305430189556305,
+      "temperature": 0.6038373868154613,
+      "ridge": 0.09773543781388588,
+      "steepness": 0.11348343832487671,
+      "forest": 0.33752201816494903,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.9092140522185682,
+        "rockyGrass": 0.07489882843087776,
+        "rock": 0.09078594778143181,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.06288338612064842
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 0,
+    "y": 0,
+    "sample": {
+      "elevation": 0.8328573871935513,
+      "moisture": 0.5749736154238476,
+      "temperature": 0.30850808451303013,
+      "ridge": 0.4497949964265569,
+      "steepness": 0.9944891849385722,
+      "forest": 0.04738230002916277,
+      "water": false,
+      "terrain": "snow_peak",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.7176854576742002,
+        "rock": 1,
+        "snow": 0.5356903380682093,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.09055017868302533
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 193919,
+    "y": 791919,
+    "sample": {
+      "elevation": 0.8633761006205172,
+      "moisture": 0.5253624776918255,
+      "temperature": 0.48211298884931064,
+      "ridge": 0.6261459318398388,
+      "steepness": 1,
+      "forest": 0,
+      "water": false,
+      "terrain": "snow_peak",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 0.8741691077063586,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.06367574796232288
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 387838,
+    "y": 1583838,
+    "sample": {
+      "elevation": 0.3369666917269503,
+      "moisture": 0.20062676178806294,
+      "temperature": 0.6076977030751256,
+      "ridge": 0,
+      "steepness": 0,
+      "forest": 0.03453488174918473,
+      "water": false,
+      "terrain": "dry_plains",
+      "weights": {
+        "grass": 0.30000000000000004,
+        "rockyGrass": 0,
+        "rock": 0,
+        "snow": 0,
+        "dry": 1,
+        "wet": 0,
+        "soil": 0.05166680537599949
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 581757,
+    "y": 2375757,
+    "sample": {
+      "elevation": 0.6518893107989107,
+      "moisture": 0.28193997147510436,
+      "temperature": 0.48230203162713037,
+      "ridge": 0.1835894197464013,
+      "steepness": 0.40306572453924394,
+      "forest": 0,
+      "water": false,
+      "terrain": "mountain",
+      "weights": {
+        "grass": 0.20335125038329036,
+        "rockyGrass": 0.39711052614958015,
+        "rock": 0.7594097394769923,
+        "snow": 0,
+        "dry": 0.22111695543384022,
+        "wet": 0,
+        "soil": 0.07740709089582255
+      },
+      "buildability": "GOOD"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 775676,
+    "y": 3167676,
+    "sample": {
+      "elevation": 0.4971888291192408,
+      "moisture": 0.4978115592231389,
+      "temperature": 0.558523340782142,
+      "ridge": 0.16319669909887455,
+      "steepness": 0.17951636900876203,
+      "forest": 0.23441763849610833,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.8922901785947428,
+        "rockyGrass": 0.1077098214052572,
+        "rock": 0.10770982140525721,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.09066469814328315
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 969595,
+    "y": 3959595,
+    "sample": {
+      "elevation": 0.5597988404838854,
+      "moisture": 0.5129972904448474,
+      "temperature": 0.42574541022925044,
+      "ridge": 0.3182578691039752,
+      "steepness": 0.3992517428127836,
+      "forest": 0.11052153770581183,
+      "water": false,
+      "terrain": "hills",
+      "weights": {
+        "grass": 0.66778864761879,
+        "rockyGrass": 0.2673491376957321,
+        "rock": 0.33221135238121,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.04016910052219634
+      },
+      "buildability": "GOOD"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 1163514,
+    "y": 4751514,
+    "sample": {
+      "elevation": 0.47596360160134615,
+      "moisture": 0.6259104021329189,
+      "temperature": 0.5967360301702346,
+      "ridge": 0.17404840676543662,
+      "steepness": 0.1914532474419803,
+      "forest": 0.49163154334022985,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.8847511393755438,
+        "rockyGrass": 0.11487194846518817,
+        "rock": 0.11487194846518818,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0.0008516556640913846,
+        "soil": 0.06465565014569853
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 1357433,
+    "y": 5543433,
+    "sample": {
+      "elevation": 0.8766740172172871,
+      "moisture": 0.5673494172430507,
+      "temperature": 0.2995972497900603,
+      "ridge": 0.7935741193363364,
+      "steepness": 1,
+      "forest": 0.046565718952607194,
+      "water": false,
+      "terrain": "snow_peak",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 0.965742737447921,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.037733557166417006
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 1551352,
+    "y": 6335352,
+    "sample": {
+      "elevation": 0.4003819567451011,
+      "moisture": 0.6550710182309394,
+      "temperature": 0.5009994798503931,
+      "ridge": 0,
+      "steepness": 0,
+      "forest": 0.7263686738996196,
+      "water": false,
+      "terrain": "forest",
+      "weights": {
+        "grass": 0.9618408805302023,
+        "rockyGrass": 0,
+        "rock": 0,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0.07631823893959529,
+        "soil": 0.04732686822857524
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 1745271,
+    "y": 7127271,
+    "sample": {
+      "elevation": 0.4542797197474209,
+      "moisture": 0.3262640616257855,
+      "temperature": 0.6068206971826697,
+      "ridge": 0.03459242856954235,
+      "steepness": 0.03805167142649659,
+      "forest": 0.16305598277519984,
+      "water": false,
+      "terrain": "dry_plains",
+      "weights": {
+        "grass": 0.5057489563417535,
+        "rockyGrass": 0.022831002855897953,
+        "rock": 0.022831002855897953,
+        "snow": 0,
+        "dry": 0.6891921490698892,
+        "wet": 0,
+        "soil": 0.09095341218259939
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 1939190,
+    "y": 7919190,
+    "sample": {
+      "elevation": 0.6825242353949457,
+      "moisture": 0.6178823831789764,
+      "temperature": 0.5592956753878587,
+      "ridge": 0.4630575963696029,
+      "steepness": 0.7610283444082235,
+      "forest": 0.13820754469266477,
+      "water": false,
+      "terrain": "high_rock",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.6196319046514538,
+        "rock": 1,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.04826840502855551
+      },
+      "buildability": "DIFFICULT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 2133109,
+    "y": 8711109,
+    "sample": {
+      "elevation": 0.8974563843595036,
+      "moisture": 0.6537290670209295,
+      "temperature": 0.42443585796228145,
+      "ridge": 0.8264320596009093,
+      "steepness": 1,
+      "forest": 0.23011609855205128,
+      "water": false,
+      "terrain": "snow_peak",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 1,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.07582753728278974
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 2327028,
+    "y": 9503028,
+    "sample": {
+      "elevation": 0.8600013424051558,
+      "moisture": 0.535570042988523,
+      "temperature": 0.33987694694699766,
+      "ridge": 0.727207346019706,
+      "steepness": 1,
+      "forest": 0,
+      "water": false,
+      "terrain": "snow_peak",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 0.843762584860619,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.06202749127388782
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 2520947,
+    "y": 10294947,
+    "sample": {
+      "elevation": 0.34955638092156366,
+      "moisture": 0.4215685907653326,
+      "temperature": 0.5074024901679812,
+      "ridge": 0,
+      "steepness": 0,
+      "forest": 0.3623276633824432,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.895726695141794,
+        "rockyGrass": 0,
+        "rock": 0,
+        "snow": 0,
+        "dry": 0.14896186408315137,
+        "wet": 0,
+        "soil": 0.05250393717952749
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 2714866,
+    "y": 732178,
+    "sample": {
+      "elevation": 0.5267538832085406,
+      "moisture": 0.6454653266577397,
+      "temperature": 0.384795237049922,
+      "ridge": 0,
+      "steepness": 0,
+      "forest": 0.5899177296480111,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.988338141244477,
+        "rockyGrass": 0.003498557626656872,
+        "rock": 0.011661858755522907,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.0691737790943974
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 2908785,
+    "y": 1524097,
+    "sample": {
+      "elevation": 0.5365867533162931,
+      "moisture": 0.5732747436981988,
+      "temperature": 0.7026709337073143,
+      "ridge": 0,
+      "steepness": 0.01086814297188362,
+      "forest": 0.5624628390550893,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.9649913115835949,
+        "rockyGrass": 0.01506722657311267,
+        "rock": 0.03500868841640517,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.04547543542913925
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 3102704,
+    "y": 2316016,
+    "sample": {
+      "elevation": 0.7469455022097375,
+      "moisture": 0.5394523876450779,
+      "temperature": 0.501532877412455,
+      "ridge": 0.6021377694598868,
+      "steepness": 1,
+      "forest": 0,
+      "water": false,
+      "terrain": "high_rock",
+      "weights": {
+        "grass": 0,
+        "rockyGrass": 0.72,
+        "rock": 1,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.04513126524858931
+      },
+      "buildability": "VERY DIFFICULT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 3296623,
+    "y": 3107935,
+    "sample": {
+      "elevation": 0.5520125041758062,
+      "moisture": 0.5879979625801388,
+      "temperature": 0.3441401699259006,
+      "ridge": 0.10144745369382965,
+      "steepness": 0.14791283095329275,
+      "forest": 0.4654137535195735,
+      "water": false,
+      "terrain": "grassland",
+      "weights": {
+        "grass": 0.8435631521668685,
+        "rockyGrass": 0.10905444335032238,
+        "rock": 0.15643684783313144,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.03593325762232225
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 3490542,
+    "y": 3899854,
+    "sample": {
+      "elevation": 0.5821402487513768,
+      "moisture": 0.7013463429900458,
+      "temperature": 0.6279234897921518,
+      "ridge": 0,
+      "steepness": 0.08603141043977171,
+      "forest": 0.6880330549643021,
+      "water": false,
+      "terrain": "forest",
+      "weights": {
+        "grass": 0.768646440676823,
+        "rockyGrass": 0.10553926018165724,
+        "rock": 0.23135355932317708,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.04872988436116483
+      },
+      "buildability": "EXCELLENT"
+    }
+  },
+  {
+    "seed": -123,
+    "x": 3684461,
+    "y": 4691773,
+    "sample": {
+      "elevation": 0.6007859593174059,
+      "moisture": 0.6333037378677424,
+      "temperature": 0.5357858616869394,
+      "ridge": 0.21069908039471918,
+      "steepness": 0.3485658213079107,
+      "forest": 0.49303415393642097,
+      "water": false,
+      "terrain": "hills",
+      "weights": {
+        "grass": 0.5256601403090675,
+        "rockyGrass": 0.28869960285660223,
+        "rock": 0.47433985969093245,
+        "snow": 0,
+        "dry": 0,
+        "wet": 0,
+        "soil": 0.05069911782915188
+      },
+      "buildability": "GOOD"
+    }
+  }
+]

@@ -219,6 +219,7 @@
   };
 
   const textureImages = {};
+  const texturePixels = {};
   let texturesReady = false;
 
   function loadTextureImage(key, path) {
@@ -226,6 +227,9 @@
       const img = new Image();
       img.onload = () => {
         textureImages[key] = img;
+        const tile=document.createElement('canvas');tile.width=tile.height=16;
+        const context=tile.getContext('2d');context.drawImage(img,0,0,16,16);
+        texturePixels[key]=context.getImageData(0,0,16,16).data;
         resolve(true);
       };
       img.onerror = () => {
@@ -244,6 +248,7 @@
       )
     );
     texturesReady = true;
+    invalidate();
   }
 
   const COLORS = {
@@ -346,7 +351,21 @@
     let sum=0,r=0,g=0,bb=0;
     for(const [color,amount] of materials){sum+=amount;r+=color[0]*amount;g+=color[1]*amount;bb+=color[2]*amount;}
     if(sum>0.01 && !sample.water){base=mixColor(base,[r/sum,g/sum,bb/sum],.65);}
-    const micro =
+    if (sample.biome) {
+      const amount=.72*(1-Math.min(1,(wt.rock||0)+(wt.snow||0))*.8);
+      base=mixColor(base,sample.biome.color,amount);
+    }
+    // Tiny cached texture tiles, blended by continuous biome weights. No patterns
+    // or image decoding in raster loops. Global coordinates keep edges aligned.
+    const point=globalPoint(x,z);
+    const ix=((Math.floor(point.x/24)%16)+16)%16;
+    const iz=((Math.floor(point.z/24)%16)+16)%16;
+    let grain=0;
+    for(const id in sample.biome?.weights){
+      const pixels=texturePixels[window.mapGameSharedTerrain.BIOMES[id].texture];
+      if(pixels){const i=(iz*16+ix)*4;grain+=((pixels[i]+pixels[i+1]+pixels[i+2])/3-128)*sample.biome.weights[id]*.07;}
+    }
+    const micro = grain +
       (fbm(x, z, 610, 3, 15101) - 0.5) * 18;
 
     return [
@@ -1421,7 +1440,7 @@
 
     body.innerHTML = `
       <div class="mg-basic-terrain-name">
-        ${escapeHtml(titleForTerrain(s.terrain))}
+        ${escapeHtml(s.biome?.label || titleForTerrain(s.terrain))}
       </div>
 
       <dl>
@@ -1692,7 +1711,7 @@
   }
 
   window.mapGameBasicWorld = {
-    VERSION: "0.3.2A3",
+    VERSION: "0.3.3A",
     TERRITORY_SIZE,
     CHUNK_SIZE,
     CHUNKS_PER_SIDE,
