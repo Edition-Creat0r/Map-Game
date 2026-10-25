@@ -17,9 +17,9 @@
 
   const ASSETS = {
     concrete: {
-      diffuse: "assets/textures/buildings/concrete_01/concrete-diffuse.jpg",
-      normal: "assets/textures/buildings/concrete_01/concrete-normal.jpg",
-      roughness: "assets/textures/buildings/concrete_01/concrete-roughness.jpg"
+      diffuse: "assets/textures/buildings/concrete_01/albedo.webp",
+      normal: "assets/textures/buildings/concrete_01/normal.webp",
+      roughness: "assets/textures/buildings/concrete_01/roughness.webp"
     },
     pavement: {
       diffuse: "assets/textures/roads/pavement_01/pavement-diffuse.jpg",

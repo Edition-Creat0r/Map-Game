@@ -156,13 +156,14 @@
     return window.mapGameSharedTerrain.strategic(gx,gy);
   }
 
+  const terrainPalette = {grass:[106,145,79],rockyGrass:[111,124,85],rock:[100,101,92],
+    snow:[208,215,207],dry:[157,146,93],wet:[62,115,83],soil:[125,105,77]};
+
   function colorForTerrain(t) {
     if(!t.water && t.weights){
-      const palette={grass:[106,145,79],rockyGrass:[111,124,85],rock:[100,101,92],
-        snow:[208,215,207],dry:[157,146,93],wet:[62,115,83],soil:[125,105,77]};
       let r=0,g=0,b=0,total=0;
-      for(const [key,value] of Object.entries(t.weights)){
-        const c=palette[key];if(!c)continue;
+      for(const key in t.weights){
+        const value=t.weights[key], c=terrainPalette[key];if(!c)continue;
         total+=value;r+=c[0]*value;g+=c[1]*value;b+=c[2]*value;
       }
       if(total>.01)return [Math.round(r/total),Math.round(g/total),Math.round(b/total)];

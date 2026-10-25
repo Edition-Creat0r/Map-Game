@@ -320,7 +320,7 @@
   rockMat.bumpTexture = rockNormal;
 
   const sandDiffuse = terrainTexture("assets/textures/sand/sand_diffuse.jpg", 14);
-  const sandNormal = terrainTexture("assets/textures/sand/sand_normal.jpg", 14);
+  const sandNormal = terrainTexture("assets/textures/sand/sand.normal.jpg", 14);
   sandNormal.level = 0.42;
   sandMat.diffuseTexture = sandDiffuse;
   sandMat.bumpTexture = sandNormal;
@@ -4857,7 +4857,8 @@
     const dt = now - lastFrame;
     lastFrame = now;
     updateDayNight(dt);
-    scene.render();
+    // Basic uses its own 2D canvas; avoid rendering the hidden 3D scene.
+    if (document.body.dataset.graphics !== "basic") scene.render();
   });
 
   window.addEventListener("resize", () => engine.resize());

@@ -540,7 +540,12 @@
     return `${cx},${cz}`;
   }
 
-  function renderChunk(cx, cz) {
+  let terrainRevision = 0;
+  let chunkBuildPending = false;
+
+  async function renderChunk(cx, cz) {
+    const revision = terrainRevision;
+    let budgetStart = performance.now();
     const off = document.createElement("canvas");
     off.width = TILE_PIXELS;
     off.height = TILE_PIXELS;
@@ -553,6 +558,11 @@
     const worldZ0 = cz * CHUNK_SIZE;
 
     for (let py = 0; py < TILE_PIXELS; py++) {
+      if (revision !== terrainRevision || !state.active) return null;
+      if (performance.now() - budgetStart >= 4) {
+        await new Promise(resolve => setTimeout(resolve, 0));
+        budgetStart = performance.now();
+      }
       for (let px = 0; px < TILE_PIXELS; px++) {
         const localX =
           worldX0 +
@@ -1115,6 +1125,8 @@
     }
   }
 
+  // Exact world-space samples survive camera motion; bounded per territory.
+  const treeSamples = new Map();
   function drawTreeSprites() {
     if (state.zoom < .28 || state.dragging || !state.treeImages.length) return;
     const cell = state.zoom < .65 ? 105 : 72;
@@ -1127,7 +1139,13 @@
       for (let ix = Math.floor(left / cell); ix <= Math.ceil(right / cell) && drawn < 95; ix++) {
         const wx = (ix + hash32(ix, iz, state.seed + 144)) * cell;
         const wz = (iz + hash32(ix, iz, state.seed + 194)) * cell;
-        const s = terrainSample(wx, wz);
+        const key = `${cell}:${ix}:${iz}`;
+        let s = treeSamples.get(key);
+        if (!s) {
+          s = terrainSample(wx, wz);
+          if (treeSamples.size >= 8192) treeSamples.delete(treeSamples.keys().next().value);
+          treeSamples.set(key, s);
+        }
         if (s.water || s.steepness > .69 || s.forest < .43) continue;
         if (hash32(ix, iz, state.seed + 293) > Math.min(.94, Math.pow(s.forest, 1.3) * 1.1)) continue;
         const img = state.treeImages[Math.floor(hash32(ix, iz, state.seed + 294) * state.treeImages.length)];
@@ -1149,12 +1167,20 @@
     state.generationQueue.push({cx, cz, key});
   }
 
-  function produceOneChunk() {
-    if (!state.active || state.dragging || !state.generationQueue.length) return;
+  async function produceOneChunk() {
+    if (chunkBuildPending || !state.active || state.dragging || !state.generationQueue.length) return;
     const job = state.generationQueue.shift();
     state.queuedChunks.delete(job.key);
     if (state.cache.has(job.key)) return;
-    const built = renderChunk(job.cx, job.cz);
+    const revision = terrainRevision;
+    chunkBuildPending = true;
+    let built;
+    try {
+      built = await renderChunk(job.cx, job.cz);
+    } finally {
+      chunkBuildPending = false;
+    }
+    if (!built || revision !== terrainRevision || !state.active) return;
     state.cache.set(job.key, {canvas: built, lastUsed: ++state.cacheClock});
     pruneCache();
     state.needsDraw = true;
@@ -1205,6 +1231,12 @@
       state.zoom < DETAIL_ZOOM_THRESHOLD ||
       visibleChunkCount > MAX_DETAIL_CHUNKS_PER_FRAME;
 
+    // Discard queued work outside the current view before spending CPU on it.
+    state.generationQueue = state.generationQueue.filter(job => {
+      const visible = !useOverview && job.cx >= minCX && job.cx <= maxCX && job.cz >= minCZ && job.cz <= maxCZ;
+      if (!visible) state.queuedChunks.delete(job.key);
+      return visible;
+    });
     drawOverview();
     if (!useOverview) {
       ctx.imageSmoothingEnabled = true;
@@ -1584,6 +1616,8 @@
     if (!window.mapGameSharedTerrain) throw new Error("Shared terrain module not loaded. Check world_terrain.js path.");
     state.seed = window.mapGameSharedTerrain.seed;
 
+    terrainRevision++;
+    treeSamples.clear();
     state.cache.clear();
     state.queuedChunks.clear();
     state.generationQueue.length = 0;
@@ -1632,6 +1666,7 @@
   }
 
   function leave() {
+    terrainRevision++;
     state.active = false;
     canvas.hidden = true;
     canvas.classList.remove("active");
@@ -1648,6 +1683,8 @@
   }
 
   function invalidate() {
+    terrainRevision++;
+    treeSamples.clear();
     state.cache.clear();
     state.overviewCanvas = null;
     state.overviewReady = false;
