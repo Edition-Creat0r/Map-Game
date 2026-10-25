@@ -53,11 +53,9 @@
   // draw one lightweight overview raster, then switch to chunks as you zoom.
   const OVERVIEW_PIXELS = 160; // startup-safe overview; detail streams later
   const DETAIL_ZOOM_THRESHOLD = 0.145;
-  const TREE_CLUSTER_ZOOM = 0.155;
   const TREE_DETAIL_ZOOM = 0.245;
   const MOUNTAIN_DETAIL_ZOOM = 0.145;
   const MAX_DETAIL_CHUNKS_PER_FRAME = 32;
-  const MAX_TREE_SYMBOLS = 80;
   const MAX_MOUNTAIN_SYMBOLS = 65;
 
   const state = {
@@ -85,8 +83,6 @@
     queuedChunks: new Set(),
     generationQueue: [],
     lastInteraction: 0,
-    treeImages: [],
-    treesLoading: false
   };
 
   // ----------------------------------------------------------
@@ -193,6 +189,11 @@
   function terrainSample(localX, localZ) {
     const t=state.territory || {x:0,y:0};
     return window.mapGameSharedTerrain.local(Number(t.x)||0,Number(t.y)||0,localX,localZ);
+  }
+
+  function terrainElevation(localX,localZ) {
+    const t=state.territory || {x:0,y:0};
+    return window.mapGameSharedTerrain.elevationAt((Number(t.x)||0)*TERRITORY_SIZE+localX,(Number(t.y)||0)*TERRITORY_SIZE+localZ);
   }
 
   // ----------------------------------------------------------
@@ -368,10 +369,11 @@
     const micro = grain +
       (fbm(x, z, 610, 3, 15101) - 0.5) * 18;
 
+    const canopy=window.mapGameForest.densityAt(sample,point.x,point.z);
     return [
-      clamp(Math.round(base[0] + micro), 0, 255),
-      clamp(Math.round(base[1] + micro), 0, 255),
-      clamp(Math.round(base[2] + micro), 0, 255)
+      clamp(Math.round((base[0] + micro)*(1-canopy*.16)), 0, 255),
+      clamp(Math.round((base[1] + micro)*(1-canopy*.08)), 0, 255),
+      clamp(Math.round((base[2] + micro)*(1-canopy*.10)), 0, 255)
     ];
   }
 
@@ -405,10 +407,10 @@
   function hillShade(localX, localZ, step = 56) {
     // Detail-only hillshade. Far-zoom overview computes shading from its
     // already-sampled elevation grid instead of resampling terrain 4x/pixel.
-    const west = terrainSample(localX - step, localZ).elevation;
-    const east = terrainSample(localX + step, localZ).elevation;
-    const north = terrainSample(localX, localZ - step).elevation;
-    const south = terrainSample(localX, localZ + step).elevation;
+    const west = terrainElevation(localX - step, localZ);
+    const east = terrainElevation(localX + step, localZ);
+    const north = terrainElevation(localX, localZ - step);
+    const south = terrainElevation(localX, localZ + step);
 
     const dx = east - west;
     const dz = south - north;
@@ -738,200 +740,6 @@
     };
   }
 
-  function drawTreeSymbol(screenX, screenY, radius, seed) {
-    const shadowX = radius * 0.34;
-    const shadowY = radius * 0.42;
-
-    ctx.beginPath();
-    ctx.arc(
-      screenX + shadowX,
-      screenY + shadowY,
-      radius * 0.96,
-      0,
-      Math.PI * 2
-    );
-    ctx.fillStyle = "rgba(13,35,19,.24)";
-    ctx.fill();
-
-    // Irregular layered crown rather than one perfect circle.
-    const lobes = 5;
-    for (let i = 0; i < lobes; i++) {
-      const angle =
-        (i / lobes) * Math.PI * 2 +
-        hash32(seed, i, state.seed + 41001) * 0.55;
-
-      const rr =
-        radius *
-        (0.38 + hash32(seed, i + 11, state.seed + 42001) * 0.23);
-
-      const ox = Math.cos(angle) * radius * 0.36;
-      const oy = Math.sin(angle) * radius * 0.32;
-
-      ctx.beginPath();
-      ctx.arc(
-        screenX + ox,
-        screenY + oy,
-        rr,
-        0,
-        Math.PI * 2
-      );
-
-      ctx.fillStyle =
-        i % 2 === 0
-          ? "rgba(34,91,43,.96)"
-          : "rgba(44,108,49,.96)";
-
-      ctx.fill();
-    }
-
-    ctx.beginPath();
-    ctx.arc(
-      screenX - radius * 0.22,
-      screenY - radius * 0.24,
-      radius * 0.28,
-      0,
-      Math.PI * 2
-    );
-    ctx.fillStyle = "rgba(111,154,80,.72)";
-    ctx.fill();
-  }
-
-  function drawForestLOD() {
-    if (state.zoom < TREE_CLUSTER_ZOOM) return;
-
-    const bounds = visibleWorldBounds();
-
-    // At medium zoom, each deterministic 220m cell may show one canopy
-    // cluster. At close zoom, 96m cells reveal individual trees.
-    const cell =
-      state.zoom >= TREE_DETAIL_ZOOM
-        ? 96
-        : 220;
-
-    const startX =
-      Math.max(0, Math.floor(bounds.left / cell) - 1);
-
-    const endX =
-      Math.min(
-        Math.ceil(TERRITORY_SIZE / cell),
-        Math.floor(bounds.right / cell) + 1
-      );
-
-    const startZ =
-      Math.max(0, Math.floor(bounds.top / cell) - 1);
-
-    const endZ =
-      Math.min(
-        Math.ceil(TERRITORY_SIZE / cell),
-        Math.floor(bounds.bottom / cell) + 1
-      );
-
-    const close =
-      state.zoom >= TREE_DETAIL_ZOOM;
-
-    let drawn = 0;
-
-    for (let gz = startZ; gz <= endZ; gz++) {
-      for (let gx = startX; gx <= endX; gx++) {
-        const r1 = hash32(gx, gz, state.seed + 31001);
-        const r2 = hash32(gx, gz, state.seed + 32001);
-
-        const wx =
-          gx * cell +
-          r1 * cell;
-
-        const wz =
-          gz * cell +
-          r2 * cell;
-
-        if (
-          wx < 0 ||
-          wz < 0 ||
-          wx > TERRITORY_SIZE ||
-          wz > TERRITORY_SIZE
-        ) {
-          continue;
-        }
-
-        const s = terrainSample(wx, wz);
-
-        if (
-          s.water ||
-          s.forest < 0.48
-        ) {
-          continue;
-        }
-
-        const spawn =
-          hash32(gx, gz, state.seed + 33001);
-
-        if (
-          spawn >
-          clamp(
-            (s.forest - 0.38) * 1.28,
-            0,
-            0.92
-          )
-        ) {
-          continue;
-        }
-
-        if (drawn >= MAX_TREE_SYMBOLS) return;
-
-        const p = worldToScreen(wx, wz);
-        drawn++;
-
-        if (close) {
-          const radius =
-            clamp(
-              3.1 + state.zoom * 9,
-              3.2,
-              8.5
-            );
-
-          drawTreeSymbol(
-            p.x,
-            p.y,
-            radius,
-            gx * 100000 + gz
-          );
-        } else {
-          const radius =
-            clamp(
-              cell * state.zoom * 0.28,
-              5,
-              14
-            );
-
-          const grad =
-            ctx.createRadialGradient(
-              p.x - radius * 0.2,
-              p.y - radius * 0.25,
-              radius * 0.1,
-              p.x,
-              p.y,
-              radius
-            );
-
-          grad.addColorStop(0, "rgba(78,128,65,.48)");
-          grad.addColorStop(0.55, "rgba(38,92,44,.42)");
-          grad.addColorStop(1, "rgba(24,68,34,.04)");
-
-          ctx.fillStyle = grad;
-          ctx.beginPath();
-          ctx.arc(
-            p.x,
-            p.y,
-            radius,
-            0,
-            Math.PI * 2
-          );
-          ctx.fill();
-        }
-      }
-    }
-  }
-
   function drawMountainRidges() {
     if (state.zoom < MOUNTAIN_DETAIL_ZOOM) return;
 
@@ -1128,55 +936,7 @@
     ctx.restore();
   }
 
-  function loadTreeSprites() {
-    if (state.treesLoading) return;
-    state.treesLoading = true;
-    const names = [
-      'tree_small_green.png', 'tree_round_olive.png',
-      'tree_round_dark_teal.png', 'tree_small_teal.png',
-      'tree_deciduous_mint_large.png', 'tree_round_white_blossom.png'
-    ];
-    for (const name of names) {
-      const img = new Image();
-      img.onload = () => { state.needsDraw = true; };
-      img.src = 'assets/environment/trees/' + name;
-      state.treeImages.push(img);
-    }
-  }
-
-  // Exact world-space samples survive camera motion; bounded per territory.
-  const treeSamples = new Map();
-  function drawTreeSprites() {
-    if (state.zoom < .28 || state.dragging || !state.treeImages.length) return;
-    const cell = state.zoom < .65 ? 105 : 72;
-    const left = Math.max(0, state.cameraX - canvas.width / (2 * state.zoom));
-    const right = Math.min(TERRITORY_SIZE, state.cameraX + canvas.width / (2 * state.zoom));
-    const top = Math.max(0, state.cameraZ - canvas.height / (2 * state.zoom));
-    const bottom = Math.min(TERRITORY_SIZE, state.cameraZ + canvas.height / (2 * state.zoom));
-    let drawn = 0;
-    for (let iz = Math.floor(top / cell); iz <= Math.ceil(bottom / cell) && drawn < 95; iz++) {
-      for (let ix = Math.floor(left / cell); ix <= Math.ceil(right / cell) && drawn < 95; ix++) {
-        const wx = (ix + hash32(ix, iz, state.seed + 144)) * cell;
-        const wz = (iz + hash32(ix, iz, state.seed + 194)) * cell;
-        const key = `${cell}:${ix}:${iz}`;
-        let s = treeSamples.get(key);
-        if (!s) {
-          s = terrainSample(wx, wz);
-          if (treeSamples.size >= 8192) treeSamples.delete(treeSamples.keys().next().value);
-          treeSamples.set(key, s);
-        }
-        if (s.water || s.steepness > .69 || s.forest < .43) continue;
-        if (hash32(ix, iz, state.seed + 293) > Math.min(.94, Math.pow(s.forest, 1.3) * 1.1)) continue;
-        const img = state.treeImages[Math.floor(hash32(ix, iz, state.seed + 294) * state.treeImages.length)];
-        if (!img?.complete || !img.naturalWidth) continue;
-        const p = worldToScreen(wx, wz);
-        const h = Math.max(17, Math.min(70, state.zoom * (52 + hash32(ix, iz, state.seed + 411) * 45)));
-        const w = h * img.naturalWidth / img.naturalHeight;
-        ctx.drawImage(img, p.x - w / 2, p.y - h * .80, w, h);
-        drawn++;
-      }
-    }
-  }
+  const forestRenderer=window.createMapGameForestRenderer(ctx,()=>{state.needsDraw=true});
 
   // Missing chunks are queued rather than constructed during camera drawing.
   function queueChunk(cx, cz) {
@@ -1287,10 +1047,10 @@
 
     // Natural art is drawn in world space, never baked into chunk edges.
     drawWaterways();
-    if (!state.dragging) {
-      if (state.zoom < .28) drawForestLOD();
-      drawTreeSprites();
-    }
+    forestRenderer.draw({x:state.cameraX+Number(state.territory.x)*TERRITORY_SIZE,
+      z:state.cameraZ+Number(state.territory.y)*TERRITORY_SIZE,zoom:state.zoom,
+      width:canvas.width,height:canvas.height,originX:Number(state.territory.x)*TERRITORY_SIZE,
+      originZ:Number(state.territory.y)*TERRITORY_SIZE});
 
     drawTerritoryBorder();
     drawScale();
@@ -1430,10 +1190,10 @@
     const s = terrainSample(x, z);
 
     const step = 40;
-    const ex = terrainSample(x + step, z).elevation;
-    const wx = terrainSample(x - step, z).elevation;
-    const nz = terrainSample(x, z - step).elevation;
-    const sz = terrainSample(x, z + step).elevation;
+    const ex = terrainElevation(x + step, z);
+    const wx = terrainElevation(x - step, z);
+    const nz = terrainElevation(x, z - step);
+    const sz = terrainElevation(x, z + step);
 
     const slope =
       Math.hypot(ex - wx, sz - nz) * 11;
@@ -1636,7 +1396,7 @@
     state.seed = window.mapGameSharedTerrain.seed;
 
     terrainRevision++;
-    treeSamples.clear();
+    forestRenderer.reset();
     state.cache.clear();
     state.queuedChunks.clear();
     state.generationQueue.length = 0;
@@ -1662,12 +1422,13 @@
     state.needsDraw = true;
 
     ensureInspector().hidden = false;
+    state.inspector.querySelector('[data-terrain-body]').textContent='Move over the world to inspect terrain.';
 
     // Yield so the loading overlay visibly updates first.
     await new Promise(resolve => requestAnimationFrame(resolve));
 
     loadTerrainTextures().then(() => { state.needsDraw = true; });
-    loadTreeSprites();
+
 
     // Build one lightweight territory overview. Detailed chunks are generated
     // only after the player zooms in enough to need them.
@@ -1685,6 +1446,7 @@
   }
 
   function leave() {
+    forestRenderer.pause();
     terrainRevision++;
     state.active = false;
     canvas.hidden = true;
@@ -1703,7 +1465,7 @@
 
   function invalidate() {
     terrainRevision++;
-    treeSamples.clear();
+    forestRenderer.reset();
     state.cache.clear();
     state.overviewCanvas = null;
     state.overviewReady = false;
@@ -1711,7 +1473,8 @@
   }
 
   window.mapGameBasicWorld = {
-    VERSION: "0.3.3A",
+    VERSION: "0.3.3B",
+    forestStats: forestRenderer.getState,
     TERRITORY_SIZE,
     CHUNK_SIZE,
     CHUNKS_PER_SIDE,

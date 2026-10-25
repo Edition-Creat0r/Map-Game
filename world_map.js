@@ -65,6 +65,7 @@
     regionQueue: [],
     queuedKeys: new Set(),
     streamTimer: 0,
+    regionBuilding: false,
     useCounter: 0,
 
     civilization: new Map(),
@@ -169,7 +170,8 @@
       if(total>.01){
         const amount=.72*(1-Math.min(1,t.weights.rock+t.weights.snow)*.8);
         const biome=t.biome.color;
-        return [Math.round(r/total*(1-amount)+biome[0]*amount),Math.round(g/total*(1-amount)+biome[1]*amount),Math.round(b/total*(1-amount)+biome[2]*amount)];
+        const cover=window.mapGameForest.coverage(t);
+        return [Math.round(r/total*(1-amount)+biome[0]*amount)*(1-cover*.10),Math.round(g/total*(1-amount)+biome[1]*amount)*(1-cover*.06),Math.round(b/total*(1-amount)+biome[2]*amount)*(1-cover*.05)];
       }
     }
     switch (t.kind) {
@@ -267,7 +269,7 @@
 
       if (t.water) water++;
       if (!t.water && !t.mountain && t.ridge < 0.38) flat++;
-      if (t.forest) forest++;
+      forest += window.mapGameForest.coverage(t);
       if (t.mountain) mountain++;
     }
 
@@ -340,7 +342,7 @@
       <div class="mg-sw-shell">
         <header class="mg-sw-header">
           <div class="mg-sw-heading">
-            <div class="mg-kicker">WORLD MAP • 0.3.3A</div>
+            <div class="mg-kicker">WORLD MAP • 0.3.3B</div>
             <h2>World Atlas</h2>
             <p>${TERRITORY_COUNT.toLocaleString()} territories • seamless geography • fixed scale</p>
           </div>
@@ -885,65 +887,31 @@
   }
 
   function startStreamer() {
-    if (
-      state.streamTimer ||
-      !state.open
-    ) {
-      return;
-    }
-
-    const step = () => {
+    if (state.streamTimer || state.regionBuilding || !state.open) return;
+    const step = async () => {
       state.streamTimer = 0;
-
       if (!state.open) return;
-
-      const next =
-        state.regionQueue.shift();
-
-      if (!next) {
-        updateStreamStatus();
-        return;
-      }
-
-      const key =
-        regionKey(
-          next.rx,
-          next.ry
-        );
-
-      state.queuedKeys.delete(key);
-
-      const rendered =
-        renderRegion(
-          next.rx,
-          next.ry
-        );
-
-      state.regionCache.set(
-        key,
-        {
-          canvas: rendered,
-          used: ++state.useCounter
+      const next = state.regionQueue.shift();
+      if (!next) {updateStreamStatus();return;}
+      const key = regionKey(next.rx, next.ry);
+      // Keep the key reserved across yields so panning cannot enqueue duplicates.
+      state.regionBuilding = true;
+      try {
+        const rendered = await renderRegion(next.rx, next.ry);
+        if (rendered) {
+          state.regionCache.set(key,{canvas:rendered,used:++state.useCounter});
+          pruneRegionCache();state.needsDraw=true;
         }
-      );
-
-      pruneRegionCache();
-
-      state.needsDraw = true;
+      } catch (error) {
+        console.error('World region generation failed:',error);
+      } finally {
+        state.regionBuilding = false;
+        state.queuedKeys.delete(key);
+      }
       updateStreamStatus();
-
-      state.streamTimer =
-        window.setTimeout(
-          step,
-          STREAM_DELAY_MS
-        );
+      if(state.open) state.streamTimer=window.setTimeout(step,STREAM_DELAY_MS);
     };
-
-    state.streamTimer =
-      window.setTimeout(
-        step,
-        10
-      );
+    state.streamTimer=window.setTimeout(step,10);
   }
 
   function updateStreamStatus() {
@@ -990,7 +958,8 @@
   // Seamless region art
   // ----------------------------------------------------------
 
-  function renderRegion(rx, ry) {
+  async function renderRegion(rx, ry) {
+    let budgetStart=performance.now();
     const canvas =
       document.createElement("canvas");
 
@@ -1027,6 +996,11 @@
       py < size;
       py++
     ) {
+      if(!state.open) return null;
+      if(performance.now()-budgetStart>=4){
+        await new Promise(resolve=>setTimeout(resolve,0));
+        budgetStart=performance.now();
+      }
       const gy =
         worldY0 +
         (py * 2 - REGION_OVERDRAW) /
@@ -1138,7 +1112,7 @@
         }
 
         if (
-          t.forest &&
+          window.mapGameForest.coverage(t) > .35 &&
           hash32(
             Math.floor(gx * 7),
             Math.floor(gy * 7),
@@ -2059,7 +2033,7 @@
   }
 
   window.mapGameStrategicWorld = {
-    VERSION: "0.3.3A",
+    VERSION: "0.3.3B",
     WORLD_COLS,
     WORLD_ROWS,
     TERRITORY_COUNT,

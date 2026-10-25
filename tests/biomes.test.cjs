@@ -12,3 +12,5 @@ test('representative climate regions classify as the expected biome families',()
  const sites={taiga:[256,64],tundra_snow:[4,0],grassland:[48,160],dry_plains:[20,64],coastal:[300,72],wetlands:[260,108],alpine:[312,20],temperate_forest:[140,180]};
  for(const [id,[x,y]] of Object.entries(sites))assert.equal(t.strategic(x,y).biome.id,id);
 });
+
+test('height-only hillshade queries exactly match full terrain elevations',()=>{for(const seed of [734221,42,-123]){const terrain=load(seed);for(let i=0;i<500;i++){const x=(i*193919)%10354688-42,y=(i*791919)%10354688-42;assert.equal(terrain.elevationAt(x,y),terrain.sample(x,y).elevation)}}});

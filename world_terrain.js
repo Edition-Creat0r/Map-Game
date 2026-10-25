@@ -80,6 +80,22 @@
     }
     return {id,label:BIOMES[id].label,weights,color:[r,g,b],latitude,temperature:climateTemperature,waterProximity};
   }
+  // Height-only queries avoid allocating biome/climate data for hillshade.
+  // Keep landform arithmetic identical to sample(); parity tests guard it.
+  function elevationAt(x,y){
+    // 350km-scale landform, 90km mountain belts, 8km local detail.
+    // Global meter coordinates guarantee continuity between territories.
+    const continent=octave(x,y,350000,seed+101,3);
+    const base=octave(x,y,105000,seed+211,3);
+    const spine=noise(x,y,138000,seed+311);
+    const mountainMask=smooth((spine-.43)/.20);
+    const r=noise(x,y,48000,seed+411);
+    const ridge=Math.pow(1-Math.abs(r*2-1),1.75)*mountainMask;
+    const hills=octave(x,y,18000,seed+521,3);
+    const micro=noise(x,y,3400,seed+631);
+    const elevation=clamp(.18+(.38*continent)+(.21*base)+(.59*ridge)+(.15*(hills-.5))+.025*(micro-.5));
+    return elevation;
+  }
   function sample(x,y){
     // 350km-scale landform, 90km mountain belts, 8km local detail.
     // Global meter coordinates guarantee continuity between territories.
@@ -127,5 +143,5 @@
        forest:s.terrain==='forest'};
   }
   function local(tx,ty,x,y){return sample(tx*SIZE+x,ty*SIZE+y);}
-  window.mapGameSharedTerrain={VERSION:'0.3.3A',SIZE,seed,BIOMES,sample,strategic,local};
+  window.mapGameSharedTerrain={VERSION:'0.3.3A',SIZE,seed,BIOMES,sample,elevationAt,strategic,local};
 })();
