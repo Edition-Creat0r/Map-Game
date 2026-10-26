@@ -25,7 +25,7 @@
     shop.setAttribute("aria-modal", "true");
     shop.setAttribute("aria-label", "Construction shop");
     shop.innerHTML =
-      '<div class="mg-econ-shell"><header><div><small>SINGLEPLAYER · CONSTRUCTION</small><h2>Starter buildings</h2></div><button data-close aria-label="Close shop">Close ×</button></header><p>Choose a building, then click a suitable site. R rotates; Escape cancels. Payment happens only when placed.</p><p>Production: 1.2× while visible online; 1× offline, capped at 12 hours. Energy and workforce are shared across your local world.</p><div data-message role="status"></div><div data-list></div></div>';
+      '<div class="mg-econ-shell"><header><div><small>SINGLEPLAYER · CONSTRUCTION</small><h2>Starter buildings</h2></div><button data-close aria-label="Close shop">Close ×</button></header><p>Choose a building, then click a suitable site. R rotates; Escape cancels. Payment happens only when placed.</p><p>Production: 1.2× while visible online; 1× offline, with no elapsed-time cap. Energy and workforce are shared across your local world.</p><div data-message role="status"></div><div data-list></div></div>';
     document.body.appendChild(shop);
     shop.querySelector("[data-close]").onclick = hideShop;
     shop.querySelector("[data-list]").onclick = (e) => {
@@ -52,6 +52,9 @@
     if (shop && !shop.hidden) {
       shop.querySelector("[data-message]").textContent =
         snap.error ||
+        (snap.catchingUp
+          ? "Settling offline production… construction resumes when complete."
+          : "") ||
         message ||
         (!snap.enabled
           ? "Economy construction is available in Singleplayer only."
@@ -95,7 +98,7 @@
     }
     if (stats && !stats.hidden) {
       const s = snap.summary;
-      stats.innerHTML = `<header><h3>World statistics</h3><button data-collapse aria-label="Collapse statistics">−</button></header><p>Singleplayer economy ${snap.enabled ? "· active" : "· paused"}</p><dl><dt>Money</dt><dd>$${fmt(snap.money)}</dd><dt>Steel</dt><dd>${fmt(snap.steel)}</dd><dt>Carbon</dt><dd>${fmt(snap.carbon)}</dd><dt>Energy</dt><dd>${fmt(s.energyUsed)} used / ${fmt(s.energySupply)} capacity</dd><dt>Requested power</dt><dd>${fmt(s.requestedEnergy)} · deficit ${fmt(s.energyDeficit)}</dd><dt>Population</dt><dd>${fmt(s.population)} / ${fmt(s.housing)} housed</dd><dt>Workforce</dt><dd>${s.workforceUsed} used / ${s.workforce} available</dd><dt>Requested workers</dt><dd>${s.requestedWorkforce} · deficit ${s.workforceDeficit}</dd><dt>Money production</dt><dd>$${fmt(snap.incomePerMin)}/min</dd><dt>Upkeep</dt><dd>$${fmt(s.upkeep)}/min</dd></dl><p>${snap.error || "10-second simulation steps · offline cap 12h at 1×"}</p><div data-operations></div>`;
+      stats.innerHTML = `<header><h3>World statistics</h3><button data-collapse aria-label="Collapse statistics">−</button></header><p>Singleplayer economy ${snap.enabled ? "· active" : "· paused"}</p><dl><dt>Money</dt><dd>$${fmt(snap.money)}</dd><dt>Steel</dt><dd>${fmt(snap.steel)}</dd><dt>Carbon</dt><dd>${fmt(snap.carbon)}</dd><dt>Energy</dt><dd>${fmt(s.energyUsed)} used / ${fmt(s.energySupply)} capacity</dd><dt>Requested power</dt><dd>${fmt(s.requestedEnergy)} · deficit ${fmt(s.energyDeficit)}</dd><dt>Population</dt><dd>${fmt(s.population)} / ${fmt(s.housing)} housed</dd><dt>Workforce</dt><dd>${s.workforceUsed} used / ${s.workforce} available</dd><dt>Requested workers</dt><dd>${s.requestedWorkforce} · deficit ${s.workforceDeficit}</dd><dt>Money production</dt><dd>$${fmt(snap.incomePerMin)}/min</dd><dt>Upkeep</dt><dd>$${fmt(s.upkeep)}/min</dd></dl><p>${snap.error || (snap.catchingUp ? "Settling offline production…" : snap.clockNotice || "1× offline · no time cap · exact saved checkpoints")}</p><div data-operations></div>`;
       const operations = stats.querySelector("[data-operations]");
       for (const b of s.buildings) {
         const line = document.createElement("p");

@@ -23,9 +23,6 @@ fs.mkdirSync(output, { recursive: true });
     if (r.status() >= 400) report.http.push([r.url(), r.status()]);
   });
   await context.addInitScript(() => {
-    const clock = Date.now.bind(Date);
-    Date.now = () =>
-      clock() + Number(sessionStorage.getItem("testEconomyClock") || 0);
     if (!localStorage.getItem("testEconomyFixture")) {
       localStorage.setItem(
         "mapGame_alpha021_firstPlayable",
@@ -153,22 +150,39 @@ fs.mkdirSync(output, { recursive: true });
   await page.locator('[data-action="economy"]').click();
   await page.waitForTimeout(250);
   await page.screenshot({ path: path.join(output, "economy-deficits.png") });
-  // Advance the browser test clock: gap >60s deliberately uses offline 1x.
+  async function resumeOffline(minutes) {
+    await page.evaluate((minutes) => {
+      mapGameEconomy.stop();
+      const raw = JSON.parse(localStorage.getItem(mapGameEconomy.SAVE_KEY));
+      raw.economy.lastTick -= minutes * 60000;
+      raw.lastEconomyTick = raw.economy.lastTick;
+      localStorage.setItem(mapGameEconomy.SAVE_KEY, JSON.stringify(raw));
+    }, minutes);
+    await page.reload();
+    await page.waitForFunction(
+      () => document.querySelector("#mgStartSingle")?.disabled === false,
+    );
+    await page.locator("#mgStartSingle").click();
+    await page.waitForFunction(() => mapGameEconomy.snapshot().enabled);
+    await page.evaluate(async () => {
+      mapGameStrategicWorld.close();
+      await mapGameRuntime.enterTerritory({ x: 190, y: 27, id: "T_190_27" });
+    });
+    await page.waitForFunction(
+      () => document.querySelector("#loadingScreen").hidden,
+    );
+    await page.locator('[data-action="economy"]').click();
+  }
+  // A fixture of an older saved checkpoint models a real closed-game interval.
   const before = await page.evaluate(() => mapGameEconomy.snapshot());
-  await page.evaluate(() => {
-    sessionStorage.setItem("testEconomyClock", "600000");
-    mapGameEconomy.save();
-  });
+  await resumeOffline(10);
   const grown = await page.evaluate(() => mapGameEconomy.snapshot());
   assert.ok(grown.summary.population > 19.9);
   assert.ok(grown.steel > before.steel);
   assert.ok(grown.carbon > before.carbon);
   assert.ok(grown.summary.workforceDeficit > 0);
   await place("smallHouse");
-  await page.evaluate(() => {
-    sessionStorage.setItem("testEconomyClock", "1200000");
-    mapGameEconomy.save();
-  });
+  await resumeOffline(10);
   const snapshot = await page.evaluate(() => mapGameEconomy.snapshot());
   assert.equal(
     snapshot.summary.buildings.filter((b) => !b.operating).length,

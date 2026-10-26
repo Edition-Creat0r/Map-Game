@@ -50,10 +50,10 @@ test("partitioned ticks and partial visibility boundaries match a continuous det
   M.advance(mixed, now + 10000, false, defs);
   assert.ok(Math.abs(mixed.money - start - (180 * 1.1 - 15) / 6) < 1e-6);
 });
-test("offline catchup capped at 12 hours, reload cannot award it twice; backwards clocks do not pay", () => {
+test("offline catchup has no time cap, reload cannot award it twice; backwards clocks do not pay", () => {
   const a = state(["smallHouse", "powerPlant", "cornerStore"]);
   const result = M.advance(a, now + 48 * 3600000, false, defs);
-  assert.equal(result.steps, 4320);
+  assert.equal(result.steps, 17280);
   const balance = a.money;
   const reload = M.normalize(a, now + 48 * 3600000);
   M.advance(reload, now + 48 * 3600000, false, defs);
@@ -175,7 +175,39 @@ async function adapter(saved, options = {}) {
     events = {},
     lock = options.lock !== false;
   let failIn = Infinity;
+  const clock = { wall: now, mono: 0 };
+  const workers = [];
+  class FakeWorker {
+    constructor() {
+      workers.push(this);
+    }
+    terminate() {
+      this.terminated = true;
+    }
+    postMessage(data) {
+      this.data = data;
+      if (options.workerFailure)
+        setImmediate(() => this.onerror({ preventDefault() {} }));
+    }
+    respond() {
+      const d = this.data;
+      let result,
+        steps = 0;
+      do {
+        result = M.advance(d.state, d.target, d.online, d.defs);
+        steps += result.steps;
+      } while (!result.complete);
+      this.onmessage({
+        data: {
+          state: d.state,
+          result: { steps, complete: true },
+          summaryOnline: M.summary(d.state, d.defs, true),
+        },
+      });
+    }
+  }
   const context = {
+    ...(options.useWorker ? { Worker: FakeWorker } : {}),
     window: {
       mapGameBuildings: { CATALOG: defs },
       mapGameEconomyModel: M,
@@ -192,9 +224,12 @@ async function adapter(saved, options = {}) {
       },
     },
     navigator: { locks: { request: async (n, o, fn) => fn(lock ? {} : null) } },
-    Date: { now: () => now },
+    Date: { now: () => clock.wall },
+    performance: { now: () => clock.mono },
     setInterval: () => 1,
     clearInterval() {},
+    setTimeout,
+    clearTimeout,
     CustomEvent: function () {},
     console,
     localStorage: {
@@ -213,7 +248,14 @@ async function adapter(saved, options = {}) {
   const api = context.window.mapGameEconomy;
   api.setEnabled(true);
   await new Promise(setImmediate);
-  return { api, records, events, setFail: (writes = 1) => (failIn = writes) };
+  return {
+    api,
+    records,
+    events,
+    clock,
+    workers,
+    setFail: (writes = 1) => (failIn = writes),
+  };
 }
 test("atomic purchase is idempotent, cancellation is free and reload restores complete records", async () => {
   const { api, records } = await adapter();
@@ -386,4 +428,176 @@ test("late matching storage events and Home refresh cannot poison the next write
   a.events.storage({ key: "mapgame_economy_021e" });
   assert.equal(a.api.snapshot().enabled, false);
   assert.match(a.api.snapshot().error, /storage changed/);
+});
+
+test("observable clock gaps receive no online bonus and retain elapsed offline time", async () => {
+  const a = await adapter();
+  const before = a.api.snapshot().money;
+  a.clock.wall += 86400000;
+  a.clock.mono += 1000;
+  a.api.save();
+  assert.equal(a.api.snapshot().money, before);
+  assert.equal(a.api.snapshot().economy.clockAnomalies, 1);
+  assert.match(a.api.snapshot().clockNotice, /Clock or suspension/);
+  assert.equal(a.api.snapshot().economy.lastTick, a.clock.wall);
+});
+
+test("worker results commit atomically; cancelled or late worker results cannot pay twice", async () => {
+  const rows = Array.from({ length: 300 }, (_, i) => ({
+    id: "w" + i,
+    type: [
+      "smallHouse",
+      "powerPlant",
+      "steelMill",
+      "carbonPlant",
+      "cornerStore",
+      "smallHouse",
+    ][i % 6],
+  }));
+  const raw = {
+    money: 400000,
+    placedIncomeItems: rows,
+    economy: { version: 1, lastTick: now - 86400000, population: 0 },
+    custom: "keep",
+  };
+  const a = await adapter(
+    { mapgame_economy_021e: JSON.stringify(raw) },
+    { useWorker: true },
+  );
+  assert.equal(a.api.snapshot().catchingUp, true);
+  assert.equal(a.api.spend({ money: 1 }), false);
+  assert.equal(a.records.get("mapgame_economy_021e"), JSON.stringify(raw));
+  const late = a.workers[0];
+  a.api.stop();
+  late.respond();
+  assert.equal(a.records.get("mapgame_economy_021e"), JSON.stringify(raw));
+  a.api.start();
+  await new Promise(setImmediate);
+  a.workers.at(-1).respond();
+  assert.equal(a.api.snapshot().enabled, true);
+  assert.equal(a.api.snapshot().custom, "keep");
+  const exact = M.normalize(raw, now);
+  let r;
+  do {
+    r = M.advance(exact, now, false, defs);
+  } while (!r.complete);
+  assert.equal(a.api.snapshot().steel, exact.steel);
+  assert.equal(a.api.snapshot().money, exact.money);
+  const saved = a.records.get("mapgame_economy_021e");
+  late.respond();
+  assert.equal(a.records.get("mapgame_economy_021e"), saved);
+});
+test("worker startup failure falls back without dropping offline time", async () => {
+  const rows = Array.from({ length: 300 }, (_, i) => ({
+    id: "f" + i,
+    type: "smallHouse",
+  }));
+  const a = await adapter(
+    {
+      mapgame_economy_021e: JSON.stringify({
+        placedIncomeItems: rows,
+        economy: { version: 1, lastTick: now - 86400000, population: 0 },
+      }),
+    },
+    { useWorker: true, workerFailure: true },
+  );
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(a.api.snapshot().enabled, true);
+  assert.equal(a.api.snapshot().catchupEngine, "cooperative");
+  assert.equal(a.api.snapshot().economy.lastTick, now);
+});
+
+test("purchase cannot race a catch-up started by its own settlement", async () => {
+  const rows = Array.from({ length: 1100 }, (_, i) => ({
+    id: "r" + i,
+    type: [
+      "smallHouse",
+      "powerPlant",
+      "steelMill",
+      "carbonPlant",
+      "cornerStore",
+      "smallHouse",
+    ][i % 6],
+  }));
+  const a = await adapter(
+    {
+      mapgame_economy_021e: JSON.stringify({
+        placedIncomeItems: rows,
+        economy: { version: 1, lastTick: now, population: 0 },
+      }),
+    },
+    { useWorker: true },
+  );
+  a.workers[0].respond();
+  a.clock.wall += 60000;
+  a.clock.mono += 60000;
+  const def = defs.find((d) => d.id === "smallHouse");
+  assert.equal(
+    a.api.purchaseAndRegisterBuilding(def, {
+      id: "race",
+      type: def.id,
+      territoryId: "T_158_158",
+      x: 5000,
+      z: 5000,
+      rotation: 0,
+    }),
+    false,
+  );
+  assert.equal(a.api.snapshot().catchingUp, true);
+  a.workers.at(-1).respond();
+  assert.equal(a.api.listPlacedBuildings().length, 1100);
+});
+test("clock jumps during worker computation remain detectable after worker completion", async () => {
+  const rows = Array.from({ length: 300 }, (_, i) => ({
+    id: "j" + i,
+    type: "smallHouse",
+  }));
+  const a = await adapter(
+    {
+      mapgame_economy_021e: JSON.stringify({
+        placedIncomeItems: rows,
+        economy: { version: 1, lastTick: now - 86400000, population: 0 },
+      }),
+    },
+    { useWorker: true },
+  );
+  a.clock.wall += 86400000;
+  a.clock.mono += 1000;
+  a.workers[0].respond();
+  const before = a.api.snapshot().money;
+  a.api.save();
+  assert.equal(a.api.snapshot().money, before);
+  assert.equal(a.api.snapshot().economy.clockAnomalies, 1);
+});
+
+test("a suspicious active clock interval pays offline production rather than dropping genuine suspension time", async () => {
+  const rows = ["smallHouse", "powerPlant", "cornerStore"].map((type, i) => ({
+    id: "s" + i,
+    type,
+  }));
+  const a = await adapter({
+    mapgame_economy_021e: JSON.stringify({
+      placedIncomeItems: rows,
+      economy: { version: 1, lastTick: now, population: 20 },
+    }),
+  });
+  const before = a.api.snapshot().money;
+  a.clock.wall += 10000;
+  a.clock.mono += 1000;
+  a.api.save();
+  assert.equal(a.api.snapshot().money - before, 27.5);
+  assert.equal(a.api.snapshot().economy.clockAnomalies, 1);
+});
+
+test("external checkpoint refresh cannot erase the competing-tab read-only warning", async () => {
+  const a = await adapter({}, { lock: false });
+  assert.match(a.api.snapshot().error, /another tab/);
+  a.records.set(
+    "mapgame_economy_021e",
+    JSON.stringify({ money: 12345, economy: { version: 2, lastTick: now } }),
+  );
+  a.events.storage({ key: "mapgame_economy_021e" });
+  assert.match(a.api.snapshot().error, /another tab/);
+  assert.equal(a.api.getStatus().enabled, false);
+  assert.equal(a.api.snapshot().money, 12345);
 });

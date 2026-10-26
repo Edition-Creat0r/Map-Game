@@ -4,6 +4,17 @@
   const Model = window.mapGameEconomyModel,
     SAVE_KEY = "mapgame_economy_021e",
     WORLD_KEY = "mapGame_alpha021_firstPlayable";
+  let catchup = null,
+    catchupTimer = null,
+    sessionClock = null;
+  let summaryCache = null,
+    catchupWorker = null,
+    catchupEngine = "cooperative";
+  function currentSummary() {
+    if (!summaryCache || summaryCache.online !== online)
+      summaryCache = { online, value: Model.summary(state, catalog(), online) };
+    return summaryCache.value;
+  }
   let requested = false,
     releaseWriter = null;
   let state,
@@ -16,12 +27,13 @@
   const listeners = new Set(),
     catalog = () => window.mapGameBuildings?.CATALOG || [];
   function readState() {
+    summaryCache = null;
     try {
       stored = localStorage.getItem(SAVE_KEY);
       const raw = JSON.parse(stored || "{}");
       if (!raw || typeof raw !== "object" || Array.isArray(raw))
         throw Error("Invalid economy save");
-      if (raw.economy?.version > 1)
+      if (raw.economy?.version > Model.SCHEMA_VERSION)
         throw Error("Economy save is from a newer version");
       let legacy = [];
       try {
@@ -56,10 +68,13 @@
   readState();
   function snapshot() {
     const snap = Model.clone(state),
-      s = Model.summary(state, catalog());
+      s = currentSummary();
     return {
       ...snap,
-      enabled: enabled && !error,
+      enabled: enabled && !error && !catchup,
+      catchingUp: Boolean(catchup),
+      catchupEngine,
+      clockNotice: state.economy.clockNotice || "",
       error,
       incomePerMin:
         enabled && !error ? s.production.money * (online ? 1.2 : 1) : 0,
@@ -95,6 +110,7 @@
           "Another tab changed this economy. Reload before continuing",
         );
       const result = change(state);
+      if (!result || result.steps !== 0) summaryCache = null;
       if (result === false) {
         state = previous;
         return false;
@@ -113,18 +129,138 @@
   function activeOnline() {
     return enabled && !document.hidden;
   }
-  function settle() {
-    if (!enabled || error) return false;
-    const now = Date.now();
-    const result = transaction((s) =>
-      Model.advance(
-        s,
-        now,
-        online && now - s.economy.lastTick <= 60000,
-        catalog(),
-      ),
+  const monotonic = () =>
+    typeof performance !== "undefined" ? performance.now() : null;
+  function resetClock() {
+    sessionClock = { wall: Date.now(), mono: monotonic() };
+  }
+  function advancePass(target, boost) {
+    return transaction((s) =>
+      Model.advance(s, target, boost, catalog(), {
+        maxEvaluations: s.placedIncomeItems.length > 1000 ? 2 : 32,
+      }),
     );
+  }
+  function finishCatchup() {
+    const job = catchup;
+    catchup = null;
     online = activeOnline();
+    if (!sessionClock) resetClock();
+    offlineResult = {
+      steps: job.steps,
+      earned: job.earned,
+      elapsedMinutes: job.elapsedMinutes,
+      rate: currentSummary().production.money,
+    };
+    emit();
+  }
+  function continueCatchup() {
+    if (!enabled || error || !catchup) return;
+    const result = advancePass(catchup.target, catchup.online);
+    if (!result) {
+      catchup = null;
+      emit();
+      return;
+    }
+    catchup.steps += result.steps;
+    catchup.earned += result.earned;
+    if (result.complete) return finishCatchup();
+    catchupTimer = setTimeout(continueCatchup, 0);
+  }
+  function launchCatchup() {
+    if (
+      typeof Worker === "undefined" ||
+      state.placedIncomeItems.length <= 256
+    ) {
+      catchupEngine = "cooperative";
+      continueCatchup();
+      return;
+    }
+    const job = catchup,
+      before = state.money;
+    function fallback() {
+      catchupWorker?.terminate();
+      catchupWorker = null;
+      if (catchup !== job || !enabled) return;
+      catchupEngine = "cooperative";
+      continueCatchup();
+    }
+    try {
+      const worker = new Worker("economy_worker.js?v=3401");
+      catchupWorker = worker;
+      catchupEngine = "worker";
+      catchupWorker.onerror = (event) => {
+        event.preventDefault();
+        fallback();
+      };
+      catchupWorker.onmessage = ({ data }) => {
+        if (catchupWorker !== worker || catchup !== job || !enabled) return;
+        if (data.error || data.state?.economy?.lastTick !== job.target) {
+          fallback();
+          return;
+        }
+        catchupWorker.terminate();
+        catchupWorker = null;
+        const result = transaction((s) => {
+          Object.assign(s, data.state);
+          return data.result;
+        });
+        if (!result) {
+          catchup = null;
+          emit();
+          return;
+        }
+        summaryCache = { online: true, value: data.summaryOnline };
+        job.steps += result.steps;
+        job.earned += state.money - before;
+        finishCatchup();
+      };
+      catchupWorker.postMessage({
+        state: Model.clone(state),
+        defs: catalog(),
+        target: job.target,
+        online: job.online,
+      });
+    } catch (_) {
+      fallback();
+    }
+  }
+  function settle() {
+    if (!enabled || error || catchup) return false;
+    const now = Date.now(),
+      mono = monotonic();
+    let suspiciousClock = false;
+    if (
+      sessionClock &&
+      mono !== null &&
+      now - sessionClock.wall - (mono - sessionClock.mono) > 5000
+    ) {
+      suspiciousClock = true;
+      const recorded = transaction((s) => {
+        s.economy.clockAnomalies = (s.economy.clockAnomalies || 0) + 1;
+        s.economy.clockNotice =
+          "Clock or suspension gap detected: offline 1× applied, with no time cap. Local dates cannot be verified.";
+        return { steps: 0 };
+      });
+      if (!recorded) return false;
+    }
+    const elapsedMinutes = Math.max(0, (now - state.economy.lastTick) / 60000),
+      boost =
+        !suspiciousClock && online && now - state.economy.lastTick <= 60000;
+    const result = advancePass(now, boost);
+    if (result && !result.complete) {
+      catchup = {
+        target: now,
+        online: boost,
+        steps: result.steps,
+        earned: result.earned,
+        elapsedMinutes,
+      };
+      launchCatchup();
+    }
+    if (online !== activeOnline()) summaryCache = null;
+    online = activeOnline();
+    resetClock();
     return result;
   }
   function setEnabled(value) {
@@ -133,6 +269,11 @@
     if (!requested) {
       if (enabled) settle();
       enabled = false;
+      clearTimeout(catchupTimer);
+      catchupWorker?.terminate();
+      catchupWorker = null;
+      catchup = null;
+      sessionClock = null;
       online = false;
       clearInterval(timer);
       timer = null;
@@ -173,15 +314,20 @@
             return;
           }
           enabled = true;
-          const result = transaction((s) =>
-            Model.advance(s, Date.now(), false, catalog()),
-          );
-          offlineResult = {
-            ...(result || {}),
-            rate: Model.summary(state, catalog()).production.money,
+          catchup = {
+            target: Date.now(),
+            online: false,
+            steps: 0,
+            earned: 0,
+            elapsedMinutes: Math.max(
+              0,
+              (Date.now() - state.economy.lastTick) / 60000,
+            ),
           };
-          online = activeOnline();
+          resetClock();
+          launchCatchup();
           timer = setInterval(() => {
+            if (catchup) return;
             settle();
             emit();
           }, 1000);
@@ -198,7 +344,14 @@
       });
   }
   function purchaseAndRegisterBuilding(def, data) {
-    if (!enabled || error || !def || typeof data?.id !== "string" || !data.id)
+    if (
+      !enabled ||
+      error ||
+      catchup ||
+      !def ||
+      typeof data?.id !== "string" ||
+      !data.id
+    )
       return false;
     // IDs are transaction identities: replays never charge or create twice.
     const prior = state.placedIncomeItems.find((v) => v.id === data.id);
@@ -213,6 +366,7 @@
     const actual = catalog().find((v) => v.id === def.id && v.economy);
     if (!actual) return false;
     settle();
+    if (catchup || error) return false;
     const result = transaction((s) => {
       Model.flushPending(s, catalog());
       if (
@@ -267,10 +421,15 @@
     return exclusions;
   }
   function checkPlacement(def, data) {
-    if (!enabled || error)
+    if (!enabled || error || catchup)
       return {
         allowed: false,
-        reasons: [error || "Economy construction is Singleplayer only"],
+        reasons: [
+          error ||
+            (catchup
+              ? "Offline economy catch-up is still running"
+              : "Economy construction is Singleplayer only"),
+        ],
       };
     return Model.placement(
       state,
@@ -281,7 +440,9 @@
     );
   }
   function spend(cost) {
+    if (catchup) return false;
     settle();
+    if (catchup) return false;
     const result = transaction((s) => {
       Model.flushPending(s, catalog());
       return Model.spend(s, cost);
@@ -292,28 +453,35 @@
   function credit(amount, legacyAmount) {
     // The road tool historically calls credit("money", amount).
     if (amount === "money") amount = legacyAmount;
-    if (!Number.isFinite(amount) || amount < 0) return false;
+    if (!Number.isFinite(amount) || amount < 0 || catchup) return false;
     settle();
+    if (catchup) return false;
     const result = transaction((s) => {
       Model.flushPending(s, catalog());
-      s.money = Math.min(Model.LIMIT, s.money + amount);
-      s.totalEarned = Math.min(Model.LIMIT, s.totalEarned + amount);
+      return Model.credit(s, amount);
     });
     emit();
     return !!result;
   }
   window.mapGameEconomy = {
-    VERSION: "0.3.3D",
+    VERSION: "0.3.4A",
     SAVE_KEY,
-    OFFLINE_CAP_MINUTES: 720,
+    OFFLINE_CAP_MINUTES: null,
     snapshot,
+    getStatus: () => ({
+      enabled: enabled && !error && !catchup,
+      catchingUp: Boolean(catchup),
+      engine: catchupEngine,
+      error,
+    }),
     setEnabled,
     incomePerMinute: () => snapshot().incomePerMin,
     utilitySummary: () => snapshot().utilities,
     applyOfflineIncome: () => ({ ...offlineResult }),
     start: () => setEnabled(true),
     stop: () => setEnabled(false),
-    canAfford: (cost) => enabled && !error && Model.canAfford(state, cost),
+    canAfford: (cost) =>
+      enabled && !error && !catchup && Model.canAfford(state, cost),
     spend,
     credit,
     debit: (amount) =>
@@ -359,7 +527,11 @@
     if (enabled)
       error =
         "Economy paused: storage changed in another tab. Reload before continuing.";
-    else readState();
+    else {
+      const denied = requested ? error : "";
+      readState();
+      if (denied && !error) error = denied;
+    }
     emit();
   });
 })();

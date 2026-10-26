@@ -1,29 +1,63 @@
-// Pure singleplayer simulation. No renderer, DOM, wall clock or storage access.
+// Pure deterministic economy. Exact ledgers; guarded affine-cycle catch-up.
 (function (root) {
   "use strict";
   const STEP_MS = 10000,
-    CAP_MS = 12 * 60 * 60 * 1000,
-    LIMIT = 1e12;
+    LIMIT = 1e12,
+    SCHEMA_VERSION = 2;
   const RESOURCES = ["money", "steel", "carbon", "iron", "concrete", "glass"];
+  const KEYS = [...RESOURCES, "population"];
+  const SCALE = 300000000000n,
+    MAX = BigInt(LIMIT) * SCALE;
   const finite = (v, fallback = 0) =>
     typeof v === "number" && Number.isFinite(v)
       ? Math.min(LIMIT, Math.max(0, v))
       : fallback;
-  const clone = (value) => JSON.parse(JSON.stringify(value));
+  const clone = (v) => JSON.parse(JSON.stringify(v));
+  const min = (a, b) => (a < b ? a : b),
+    max = (a, b) => (a > b ? a : b);
+  function units(value) {
+    if (!value) return 0n;
+    const [mantissa, exp = "0"] = String(value).toLowerCase().split("e");
+    const parts = mantissa.split("."),
+      digits = BigInt(parts.join("")),
+      shift = Number(exp) - (parts[1]?.length || 0);
+    return shift >= 0
+      ? digits * SCALE * 10n ** BigInt(shift)
+      : (digits * SCALE) / 10n ** BigInt(-shift);
+  }
+  const number = (v) => Number(v / SCALE) + Number(v % SCALE) / Number(SCALE);
+  const micro = (v) => (units(finite(v)) + 150000n) / 300000n;
+  function balance(state, key) {
+    const value = key === "population" ? state.economy.population : state[key];
+    const saved = state.economy.precision?.[key];
+    if (
+      typeof saved === "string" &&
+      saved.length <= 32 &&
+      /^\d+$/.test(saved)
+    ) {
+      const exact = BigInt(saved);
+      if (exact <= MAX && number(exact) === value) return exact;
+    }
+    return units(finite(value));
+  }
+  function write(state, key, value) {
+    value = min(MAX, max(0n, value));
+    state.economy.precision[key] = String(value);
+    if (key === "population") state.economy.population = number(value);
+    else state[key] = number(value);
+  }
   function normalize(raw = {}, now = 0, legacyBuildings = []) {
-    const state = clone(raw);
+    const state = clone(raw),
+      defaults = {
+        money: 400000,
+        steel: 100,
+        carbon: 40,
+        iron: 200,
+        concrete: 500,
+        glass: 180,
+      };
     for (const key of RESOURCES)
-      state[key] =
-        raw[key] === undefined
-          ? {
-              money: 400000,
-              steel: 100,
-              carbon: 40,
-              iron: 200,
-              concrete: 500,
-              glass: 180,
-            }[key]
-          : finite(raw[key]);
+      state[key] = raw[key] === undefined ? defaults[key] : finite(raw[key]);
     state.totalEarned = finite(raw.totalEarned);
     const seen = new Set();
     state.placedIncomeItems = [
@@ -45,27 +79,31 @@
     const old = raw.economy || {};
     state.economy = {
       ...old,
-      version: 1,
+      version: SCHEMA_VERSION,
       population: finite(old.population),
       lastTick:
-        Number.isFinite(old.lastTick) && old.lastTick >= 0
+        Number.isSafeInteger(old.lastTick) && old.lastTick >= 0
           ? old.lastTick
-          : Number.isFinite(raw.lastEconomyTick) && raw.lastEconomyTick >= 0
+          : Number.isSafeInteger(raw.lastEconomyTick) &&
+              raw.lastEconomyTick >= 0
             ? raw.lastEconomyTick
             : now,
-      pendingMs: Math.min(STEP_MS - 1, finite(old.pendingMs)),
-      pendingBoostMs: finite(old.pendingBoostMs),
+      pendingMs: Math.min(STEP_MS - 1, Math.trunc(finite(old.pendingMs))),
+      pendingBoostMs: Math.trunc(finite(old.pendingBoostMs)),
       revision: finite(old.revision),
+      precision: { ...(old.precision || {}) },
     };
     state.economy.pendingBoostMs = Math.min(
       state.economy.pendingMs,
       state.economy.pendingBoostMs,
     );
+    for (const key of [...KEYS, "totalEarned"])
+      write(state, key, balance(state, key));
     state.lastEconomyTick = state.economy.lastTick;
     return state;
   }
   function definition(row, defs) {
-    const d = defs.find((d) => d.id === row.type);
+    const d = defs.get(row.type);
     if (!d) return null;
     return (
       (row.legacyEconomy ? d.legacyEconomy : d.economy) || {
@@ -79,71 +117,147 @@
       }
     );
   }
-  function compiled(state, defs) {
+  function compiled(state, catalog) {
+    const defs = new Map(catalog.map((d) => [d.id, d])),
+      templates = new Map();
     return state.placedIncomeItems
-      .map((row, order) => ({ row, order, def: definition(row, defs) }))
-      .filter((v) => v.def)
+      .map((row, order) => {
+        const def = definition(row, defs);
+        if (!def) return null;
+        const level = row.level;
+        const key = JSON.stringify([row.type, !!row.legacyEconomy, level]);
+        if (templates.has(key)) return { row, order, ...templates.get(key) };
+        const entry = {
+          row,
+          order,
+          def,
+          power: finite(def.energyUse) * level,
+          workers: finite(def.workforce) * level,
+          supply: finite(def.energySupply) * level,
+          housing: units(finite(def.housing) * level),
+          growth: micro(finite(def.growth) * level),
+          upkeep: micro(finite(def.upkeep) * level),
+          inputs: RESOURCES.map((k) => micro(finite(def.inputs?.[k]) * level)),
+          outputs: RESOURCES.map((k) =>
+            micro(finite(def.production?.[k]) * level),
+          ),
+          invalidInput: Object.keys(def.inputs || {}).some(
+            (k) => !RESOURCES.includes(k),
+          ),
+        };
+        const { row: ignoredRow, order: ignoredOrder, ...template } = entry;
+        templates.set(key, template);
+        return entry;
+      })
+      .filter(Boolean)
       .sort(
-        (a, b) =>
-          Number(!!b.def.energySupply) - Number(!!a.def.energySupply) ||
-          a.order - b.order,
+        (a, b) => Number(!!b.supply) - Number(!!a.supply) || a.order - b.order,
       );
   }
-  function evaluate(state, entries, minutes = 1 / 6, details = true) {
-    const housing = entries.reduce(
-      (s, v) => s + finite(v.def.housing) * v.row.level,
-      0,
-    );
-    const population = Math.min(housing, state.economy.population);
-    const workforce = Math.floor(population * 0.6 + 1e-9);
-    let energySupply = 0,
+  function evaluate(
+    state,
+    entries,
+    duration = STEP_MS,
+    boostMs = 0,
+    details = true,
+    trace = false,
+  ) {
+    const values = KEYS.map((k) => balance(state, k)),
+      lower = KEYS.map(() => null),
+      upper = KEYS.map(() => null);
+    const use = RESOURCES.map(() => 0n),
+      output = RESOURCES.map(() => 0n),
+      rate = { money: 0, steel: 0, carbon: 0 },
+      buildings = [],
+      signature = [];
+    const housing = entries.reduce((s, v) => s + v.housing, 0n),
+      population = min(housing, values[6]);
+    let energySupply = state.economy.legacyUtilities ? 18 : 0,
       energyUsed = 0,
       workforceUsed = 0,
-      upkeep = 0,
-      growth = 0;
-    const production = { money: 0, steel: 0, carbon: 0 },
-      buildings = [];
-    // Legacy saves retain their old starter utility allowance; new worlds build power.
-    if (state.economy.legacyUtilities) energySupply = 18;
-    const requestedEnergy = entries.reduce(
-      (s, v) => s + finite(v.def.energyUse) * v.row.level,
-      0,
-    );
-    const requestedWorkforce = entries.reduce(
-      (s, v) => s + finite(v.def.workforce) * v.row.level,
-      0,
-    );
-    for (const { row, def: d } of entries) {
-      const level = row.level,
-        power = finite(d.energyUse) * level,
-        workers = finite(d.workforce) * level,
-        expense = finite(d.upkeep) * level;
+      growth = 0n;
+    const workforce = Number((population * 3n) / (5n * SCALE)),
+      elapsed = BigInt(duration) * 5n,
+      throughput = elapsed + BigInt(boostMs);
+    function guard(index, threshold) {
+      const pass = values[index] >= threshold;
+      if (trace) {
+        if (pass)
+          lower[index] =
+            lower[index] === null ? threshold : max(lower[index], threshold);
+        else
+          upper[index] =
+            upper[index] === null ? threshold : min(upper[index], threshold);
+      }
+      return pass;
+    }
+    for (const v of entries) {
+      const costs = v.inputs.map((n) => n * throughput);
+      costs[0] += v.upkeep * elapsed;
+      let finance = true,
+        material = true;
+      for (let i = 0; i < 6; i++)
+        if (costs[i] > 0n) {
+          const ok = guard(i, use[i] + costs[i]);
+          if (!ok) {
+            if (i === 0) finance = false;
+            else material = false;
+          }
+        }
+      if (v.workers > 0)
+        guard(
+          6,
+          (BigInt(Math.ceil(workforceUsed + v.workers)) * 5n * SCALE + 2n) / 3n,
+        );
       let reason = "Operating";
-      if ((upkeep + expense) * minutes > state.money + 1e-9)
-        reason = "Insufficient money for upkeep";
-      else if (workforceUsed + workers > workforce)
+      if (!finance) reason = "Insufficient money for upkeep";
+      else if (v.invalidInput || !material)
+        reason = "Insufficient input materials";
+      else if (workforceUsed + v.workers > workforce)
         reason = "Insufficient workforce";
-      else if (
-        energyUsed + power >
-        energySupply + finite(d.energySupply) * level
-      )
+      else if (energyUsed + v.power > energySupply + v.supply)
         reason = "Insufficient energy";
       const operating = reason === "Operating";
+      signature.push(operating ? "1" : "0");
       if (operating) {
-        energySupply += finite(d.energySupply) * level;
-        energyUsed += power;
-        workforceUsed += workers;
-        upkeep += expense;
-        growth += finite(d.growth) * level;
-        for (const key of Object.keys(production))
-          production[key] += finite(d.production?.[key]) * level;
+        energySupply += v.supply;
+        energyUsed += v.power;
+        workforceUsed += v.workers;
+        growth += v.growth * elapsed;
+        for (let i = 0; i < 6; i++) {
+          use[i] += costs[i];
+          output[i] += v.outputs[i] * throughput;
+        }
+        for (const k of Object.keys(rate))
+          rate[k] += finite(v.def.production?.[k]) * v.row.level;
       }
       if (details)
-        buildings.push({ id: row.id, type: row.type, operating, reason });
+        buildings.push({ id: v.row.id, type: v.row.type, operating, reason });
     }
+    const flow = output.map((v, i) => v - use[i]);
+    flow.push(growth);
+    const caps = [...RESOURCES.map(() => MAX), min(MAX, housing)],
+      clamped = [];
+    for (let i = 0; i < 7; i++) {
+      const after = values[i] + flow[i];
+      if (after >= caps[i]) {
+        clamped.push(i);
+        if (trace)
+          lower[i] =
+            lower[i] === null
+              ? caps[i] - flow[i]
+              : max(lower[i], caps[i] - flow[i]);
+      } else if (trace)
+        upper[i] =
+          upper[i] === null
+            ? caps[i] - flow[i]
+            : min(upper[i], caps[i] - flow[i]);
+    }
+    const requestedEnergy = entries.reduce((s, v) => s + v.power, 0),
+      requestedWorkforce = entries.reduce((s, v) => s + v.workers, 0);
     return {
-      housing,
-      population,
+      housing: number(housing),
+      population: number(population),
       workforce,
       workforceUsed,
       requestedWorkforce,
@@ -152,70 +266,192 @@
       requestedEnergy,
       energyDeficit: Math.max(0, requestedEnergy - energySupply),
       workforceDeficit: Math.max(0, requestedWorkforce - workforce),
-      upkeep,
-      growth,
-      production,
+      upkeep: (number(use[0]) * 60000) / duration,
+      growth: (number(growth) * 60000) / duration,
+      production: rate,
       buildings,
+      values,
+      flow,
+      caps,
+      lower,
+      upper,
+      clamped,
+      signature: signature.join(""),
+      gross: output[0],
     };
   }
-  function summary(state, defs) {
-    return evaluate(state, compiled(state, defs));
+  function summary(state, defs, online = false) {
+    const s = evaluate(
+      state,
+      compiled(state, defs),
+      STEP_MS,
+      online ? STEP_MS : 0,
+    );
+    const {
+      values,
+      flow,
+      caps,
+      lower,
+      upper,
+      clamped,
+      signature,
+      gross,
+      ...visible
+    } = s;
+    return visible;
   }
-  function advance(state, now, online, defs) {
-    const e = state.economy,
-      elapsed = Math.max(0, Math.min(CAP_MS, now - e.lastTick));
-    if (!Number.isFinite(now) || now < e.lastTick)
-      return { steps: 0, earned: 0, elapsedMinutes: 0 };
+  function apply(state, s, count = 1) {
+    const n = BigInt(count);
+    for (let i = 0; i < 7; i++)
+      write(state, KEYS[i], min(s.caps[i], s.values[i] + s.flow[i] * n));
+    write(state, "totalEarned", balance(state, "totalEarned") + s.gross * n);
+  }
+  function repetitions(history, start, current, limit) {
+    const delta = current.map((v, i) => v - history[start].values[i]);
+    let count = BigInt(limit);
+    for (let j = start; j < history.length; j++) {
+      const step = history[j];
+      if (step.clamped.some((i) => delta[i] !== 0n)) return { count: 0, delta };
+      for (let i = 0; i < 7; i++) {
+        const base = step.values[i],
+          d = delta[i],
+          first = base + d,
+          lo = step.lower[i],
+          hi = step.upper[i];
+        if ((lo !== null && first < lo) || (hi !== null && first >= hi))
+          return { count: 0, delta };
+        // Leave one boundary cycle to the exact evaluator, avoiding off-by-one jumps.
+        if (d > 0n && hi !== null)
+          count = min(count, max(0n, (hi - base) / d - 1n));
+        if (d < 0n && lo !== null)
+          count = min(count, max(0n, (base - lo) / -d - 1n));
+      }
+    }
+    return { count: Number(count), delta };
+  }
+  function advance(state, now, online, defs, options = {}) {
+    const e = state.economy;
+    if (!Number.isSafeInteger(now) || now < 0)
+      throw RangeError("Economy clock must be a nonnegative safe integer");
+    if (now < e.lastTick)
+      return {
+        steps: 0,
+        evaluations: 0,
+        cyclesSkipped: 0,
+        earned: 0,
+        elapsedMinutes: 0,
+        complete: true,
+      };
+    const elapsed = now - e.lastTick;
+    if (e.pendingMs + elapsed < STEP_MS) {
+      e.pendingMs += elapsed;
+      e.pendingBoostMs += online ? elapsed : 0;
+      e.lastTick = now;
+      state.lastEconomyTick = now;
+      return {
+        steps: 0,
+        evaluations: 0,
+        cyclesSkipped: 0,
+        earned: 0,
+        elapsedMinutes: elapsed / 60000,
+        complete: true,
+      };
+    }
     const entries = compiled(state, defs),
-      before = state.money;
+      before = state.money,
+      origin = e.lastTick;
     let pending = e.pendingMs,
       boosted = e.pendingBoostMs,
       remaining = elapsed,
-      steps = 0;
-    while (pending + remaining >= STEP_MS) {
-      const needed = STEP_MS - pending;
-      const boost = (boosted + (online ? needed : 0)) / STEP_MS;
+      steps = 0,
+      evaluations = 0,
+      cyclesSkipped = 0;
+    const budget = Math.max(1, Math.trunc(options.maxEvaluations || 64)),
+      history = [],
+      seen = new Map();
+    while (pending + remaining >= STEP_MS && evaluations < budget) {
+      const needed = STEP_MS - pending,
+        boostMs = boosted + (online ? needed : 0);
+      const s = evaluate(state, entries, STEP_MS, boostMs, false, true);
+      evaluations++;
+      const ticks = Math.floor((pending + remaining) / STEP_MS),
+        previous = seen.get(s.signature);
+      if (options.accelerate !== false && !pending && previous !== undefined) {
+        const period = history.length - previous,
+          jump = repetitions(
+            history,
+            previous,
+            s.values,
+            Math.floor(ticks / period),
+          );
+        if (jump.count > 0) {
+          const n = BigInt(jump.count);
+          for (let i = 0; i < 7; i++)
+            write(state, KEYS[i], s.values[i] + jump.delta[i] * n);
+          const gross = history
+            .slice(previous)
+            .reduce((sum, t) => sum + t.gross, 0n);
+          write(
+            state,
+            "totalEarned",
+            balance(state, "totalEarned") + gross * n,
+          );
+          const skipped = jump.count * period;
+          remaining -= skipped * STEP_MS;
+          steps += skipped;
+          cyclesSkipped += skipped;
+          history.length = 0;
+          seen.clear();
+          continue;
+        }
+      }
+      apply(state, s);
       remaining -= needed;
-      simulateStep(state, entries, STEP_MS, boost);
       pending = 0;
       boosted = 0;
       steps++;
+      // The first mixed online/offline tick cannot define the following steady rate.
+      if (boostMs === (online ? STEP_MS : 0)) {
+        if (history.length >= 64) {
+          history.length = 0;
+          seen.clear();
+        }
+        seen.set(s.signature, history.length);
+        history.push(s);
+      }
     }
-    e.pendingMs = pending + remaining;
-    e.pendingBoostMs = boosted + (online ? remaining : 0);
-    e.lastTick = now;
-    state.lastEconomyTick = now;
+    const complete = pending + remaining < STEP_MS;
+    if (complete) {
+      e.pendingMs = pending + remaining;
+      e.pendingBoostMs = boosted + (online ? remaining : 0);
+      e.lastTick = now;
+    } else {
+      e.pendingMs = pending;
+      e.pendingBoostMs = boosted;
+      e.lastTick = origin + (elapsed - remaining);
+    }
+    state.lastEconomyTick = e.lastTick;
     return {
       steps,
+      evaluations,
+      cyclesSkipped,
       earned: state.money - before,
-      elapsedMinutes: elapsed / 60000,
+      elapsedMinutes: (e.lastTick - origin) / 60000,
+      complete,
     };
   }
-  function simulateStep(state, entries, duration, boost) {
-    const minutes = duration / 60000,
-      s = evaluate(state, entries, minutes, false);
-    state.money = Math.max(0, state.money - s.upkeep * minutes);
-    for (const key of Object.keys(s.production))
-      state[key] = finite(
-        state[key] + s.production[key] * minutes * (1 + 0.2 * boost),
-      );
-    state.totalEarned = finite(
-      state.totalEarned + s.production.money * minutes * (1 + 0.2 * boost),
-    );
-    const nextPopulation = finite(s.population + s.growth * minutes);
-    state.economy.population =
-      nextPopulation >= s.housing - 1e-9 ? s.housing : nextPopulation;
-  }
-  // Settle pre-event partial time using the old buildings/balances. New purchases
-  // must never produce for time accrued before construction.
   function flushPending(state, defs) {
     const e = state.economy;
     if (e.pendingMs > 0)
-      simulateStep(
+      apply(
         state,
-        compiled(state, defs),
-        e.pendingMs,
-        e.pendingBoostMs / e.pendingMs,
+        evaluate(
+          state,
+          compiled(state, defs),
+          e.pendingMs,
+          e.pendingBoostMs,
+          false,
+        ),
       );
     e.pendingMs = 0;
     e.pendingBoostMs = 0;
@@ -236,12 +472,20 @@
   }
   function canAfford(state, cost) {
     return (
-      !!validCost(cost) && Object.entries(cost).every(([k, v]) => state[k] >= v)
+      !!validCost(cost) &&
+      Object.entries(cost).every(([k, v]) => balance(state, k) >= units(v))
     );
   }
   function spend(state, cost) {
     if (!canAfford(state, cost)) return false;
-    for (const [k, v] of Object.entries(cost)) state[k] -= v;
+    for (const [k, v] of Object.entries(cost))
+      write(state, k, balance(state, k) - units(v));
+    return true;
+  }
+  function credit(state, amount) {
+    if (!Number.isFinite(amount) || amount < 0) return false;
+    write(state, "money", balance(state, "money") + units(amount));
+    write(state, "totalEarned", balance(state, "totalEarned") + units(amount));
     return true;
   }
   function placement(state, def, data, terrain, exclusions = []) {
@@ -319,7 +563,7 @@
   }
   const api = {
     STEP_MS,
-    CAP_MS,
+    SCHEMA_VERSION,
     RESOURCES,
     LIMIT,
     normalize,
@@ -328,6 +572,7 @@
     summary,
     canAfford,
     spend,
+    credit,
     placement,
     clone,
   };

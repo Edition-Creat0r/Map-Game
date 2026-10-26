@@ -1,4 +1,4 @@
-// Matched real-browser gestures against the exact 0.3.3C source, no TLS bypasses.
+// Matched real-browser gestures against the a selectable baseline source, no TLS bypasses.
 const { chromium } = require("playwright-core");
 const { execFileSync } = require("node:child_process"),
   fs = require("node:fs"),
@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, ".."),
   output = process.argv[2] || "/tmp/map-game-economy";
 fs.mkdirSync(output, { recursive: true });
 const origin = process.env.MAP_GAME_TEST_URL || "http://127.0.0.1:8001",
-  base = "feature/0.3.3c-terrain-polish";
+  base = process.env.MAP_GAME_BASELINE_REF || "feature/0.3.3d-economy";
 const baseline = new Map();
 for (const file of execFileSync("git", ["ls-tree", "-r", "--name-only", base], {
   cwd: root,
