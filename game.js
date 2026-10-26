@@ -96,7 +96,7 @@
   // CONSTANTS / GAME STATE
   // ==========================================================
 
-  const VERSION = "0.3.2A";
+  const VERSION = "0.3.3D";
   const CHUNK_WORLD_SIZE = window.mapGameWorldConfig?.TERRITORY_SIZE || 32768;
   const TERRITORY_RENDER_SIZE = window.mapGameWorldConfig?.SECTOR_SIZE || 512;
   const WORLD_COLS = window.mapGameWorldConfig?.WORLD_COLS || 316;
@@ -3112,6 +3112,14 @@
   }
 
   function beginBuildingPlacement(item, variant = 0) {
+    if (state.worldType !== "singleplayer") {
+      showToast("Economy construction is Singleplayer only.", "info");
+      return;
+    }
+    if (window.mapGameBasicWorld?.getState().active) {
+      window.mapGameBasicWorld.beginConstruction(item);
+      return;
+    }
     if (!state.activeTerritory) {
       showToast("Enter your territory before building.", "info");
       return;
@@ -3674,6 +3682,7 @@
   }
 
   function saveLocalState() {
+    if (state.worldType !== "singleplayer" || state.mode === "HOME") return;
     const old = loadLocalState();
     old.claims =
       Array.from(state.claimedTerritories.values())
@@ -4091,15 +4100,12 @@
   }
 
   function showShop() {
-    if (!shopOverlay) buildShopOverlay();
-    shopOverlay.hidden = false;
-    document.body.dataset.shopOpen = "true";
-    window.mapGameShopPreview?.setVisible?.(true);
-    renderShopList();
-    renderShopSelection();
+    // The legacy 3D preview stays available; starter purchases use text-first UI.
+    window.mapGameEconomyUI.showShop();
   }
 
   function hideShop() {
+    window.mapGameEconomyUI.hideShop();
     if (shopOverlay) shopOverlay.hidden = true;
     window.mapGameShopPreview?.setVisible?.(false);
     delete document.body.dataset.shopOpen;
@@ -4237,18 +4243,7 @@
     };
     hudRoot.querySelector("[data-action='shop']").onclick = showShop;
     hudRoot.querySelector("[data-action='development']").onclick = toggleTerritoryPlanner;
-    hudRoot.querySelector("[data-action='economy']").onclick = () => {
-      const snap = window.mapGameEconomy?.snapshot?.();
-      if (!snap) {
-        showToast("Economy module is still loading.", "info");
-        return;
-      }
-      showToast(
-        `Economy • $${Math.floor(snap.money).toLocaleString()} • ` +
-        `+$${Math.floor(snap.incomePerMin).toLocaleString()}/min`,
-        "success"
-      );
-    };
+    hudRoot.querySelector("[data-action='economy']").onclick = () => window.mapGameEconomyUI.toggleStats();
     hudRoot.querySelector("[data-action='infrastructure']").onclick = () => {
       if (!state.activeTerritory) {
         showToast(
@@ -4385,24 +4380,8 @@
   function startLocalEconomy() {
     if (!window.mapGameEconomy) return;
 
-    const offline = window.mapGameEconomy.applyOfflineIncome();
-
     if (economyUnsubscribe) economyUnsubscribe();
-    economyUnsubscribe =
-      window.mapGameEconomy.subscribe(updateEconomyHUD);
-
-    window.mapGameEconomy.start();
-
-    if (offline.earned >= 1) {
-      setTimeout(() => {
-        showToast(
-          `Offline income +$${Math.floor(offline.earned).toLocaleString()} ` +
-          `(${Math.floor(offline.elapsedMinutes)} min at ` +
-          `$${Math.floor(offline.rate).toLocaleString()}/min)`,
-          "success"
-        );
-      }, 700);
-    }
+    economyUnsubscribe = window.mapGameEconomy.subscribe(updateEconomyHUD);
   }
 
   startLocalEconomy();
@@ -4603,6 +4582,7 @@
 
   function startGame(worldType) {
     state.worldType = worldType;
+    window.mapGameEconomy.setEnabled(worldType === "singleplayer");
 
     state.graphics = "BASIC";
     localStorage.setItem("mapgame_graphics", "BASIC");

@@ -700,6 +700,7 @@
       width:canvas.width,height:canvas.height,originX:Number(state.territory.x)*TERRITORY_SIZE,
       originZ:Number(state.territory.y)*TERRITORY_SIZE});
 
+    drawEconomyBuildings();
     drawTerritoryBorder();
     drawScale();
     drawHoverMarker();
@@ -778,6 +779,135 @@
     ctx.stroke();
 
     ctx.restore();
+  }
+
+  // Economy objects are separate from cached terrain/forest imagery.
+  let construction = null,
+    constructionPanel = null,
+    placedBuildings = [],
+    operationStatus = new Map(),
+    constructionDown = null;
+  function refreshBuildings(snap) {
+    placedBuildings = (
+      document.body.dataset.world === "singleplayer"
+        ? snap.placedIncomeItems || []
+        : []
+    ).filter((b) => b.territoryId === state.territory?.id);
+    operationStatus = new Map(
+      snap.summary.buildings.map((b) => [b.id, b.operating]),
+    );
+    if (state.active && placedBuildings.length) state.needsDraw = true;
+  }
+  window.mapGameEconomy.subscribe(refreshBuildings);
+  function constructionData(point) {
+    return {
+      territoryId: state.territory.id,
+      x: point.x,
+      z: point.z,
+      rotation: construction.rotation,
+    };
+  }
+  function updateConstruction(point) {
+    if (!construction || !point) return;
+    construction.point = point;
+    construction.analysis = window.mapGameEconomy.checkPlacement(
+      construction.def,
+      constructionData(point),
+    );
+    constructionPanel.querySelector("[data-reason]").textContent = construction
+      .analysis.allowed
+      ? "Suitable site · click to build"
+      : construction.analysis.reasons.join(" · ");
+    state.needsDraw = true;
+  }
+  function cancelConstruction() {
+    construction = null;
+    constructionDown = null;
+    if (constructionPanel) constructionPanel.hidden = true;
+    state.needsDraw = true;
+  }
+  function beginConstruction(def) {
+    if (!state.active || !window.mapGameEconomy.snapshot().enabled) return;
+    if (!constructionPanel) {
+      constructionPanel = document.createElement("aside");
+      constructionPanel.id = "mgConstructionControls";
+      constructionPanel.innerHTML =
+        '<b data-name></b><div>Click to build · R rotates · Escape cancels · right-drag to pan</div><div data-reason role="status"></div><button data-rotate>Rotate</button> <button data-cancel>Cancel</button>';
+      document.body.appendChild(constructionPanel);
+      constructionPanel.querySelector("[data-cancel]").onclick =
+        cancelConstruction;
+      constructionPanel.querySelector("[data-rotate]").onclick = () => {
+        if (construction) {
+          construction.rotation =
+            (construction.rotation + Math.PI / 2) % (Math.PI * 2);
+          updateConstruction(construction.point);
+        }
+      };
+    }
+    construction = { def, rotation: 0, point: null, analysis: null };
+    constructionPanel.hidden = false;
+    constructionPanel.querySelector("[data-name]").textContent = def.name;
+    updateConstruction({ x: state.cameraX, z: state.cameraZ });
+  }
+  function drawStructure(row, def, ghost = false) {
+    const p = worldToScreen(row.x, row.z),
+      fp = def.footprint || [40, 40];
+    const w = fp[0] * state.zoom,
+      d = fp[1] * state.zoom;
+    if (
+      p.x + w < 0 ||
+      p.x - w > canvas.width ||
+      p.y + d < 0 ||
+      p.y - d > canvas.height
+    )
+      return;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(row.rotation || 0);
+    if (!ghost) {
+      ctx.fillStyle = "rgba(0,0,0,.38)";
+      ctx.fillRect(-w / 2 + 3, -d / 2 + 4, w, d);
+    }
+    ctx.fillStyle = ghost
+      ? construction.analysis?.allowed
+        ? "#57df9a99"
+        : "#ed727899"
+      : {
+          Residential: "#c3b69a",
+          Infrastructure: "#839cab",
+          Industrial: "#8497a0",
+          Commercial: "#8dbbc6",
+        }[def.category] || "#acb6ae";
+    ctx.fillRect(-w / 2, -d / 2, w, d);
+    ctx.strokeStyle = ghost
+      ? "#f2ffff"
+      : operationStatus.get(row.id) === false
+        ? "#ffc474"
+        : "#d9e6e8";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(-w / 2, -d / 2, w, d);
+    ctx.beginPath();
+    ctx.moveTo(-w / 2, 0);
+    ctx.lineTo(w / 2, 0);
+    ctx.stroke();
+    ctx.restore();
+    if (!ghost && state.zoom > 0.55) {
+      ctx.fillStyle = "#f2ffff";
+      ctx.font = "11px system-ui";
+      ctx.fillText(def.name, p.x - w / 2, p.y - d / 2 - 5);
+    }
+  }
+  function drawEconomyBuildings() {
+    for (const row of placedBuildings) {
+      const def = window.mapGameBuildings.CATALOG.find((d) => d.id === row.type);
+      if (def) drawStructure(row, def);
+    }
+    if (construction?.point)
+      drawStructure(
+        { ...construction.point, rotation: construction.rotation },
+        construction.def,
+        true,
+      );
   }
 
   let lastChunkBuild = 0;
@@ -889,26 +1019,38 @@
   // Input
   // ----------------------------------------------------------
 
-  canvas.addEventListener("pointerdown", event => {
+  canvas.addEventListener("pointerdown", (event) => {
     if (!state.active) return;
 
+    if (construction && event.button === 0) {
+      constructionDown = { x: event.clientX, y: event.clientY };
+      updateConstruction(screenToWorld(event.clientX, event.clientY));
+      return;
+    }
     state.dragging = true;
     state.lastX = event.clientX;
     state.lastY = event.clientY;
     canvas.setPointerCapture?.(event.pointerId);
   });
 
-  canvas.addEventListener("pointermove", event => {
+  canvas.addEventListener("pointermove", (event) => {
     if (!state.active) return;
 
     const world = screenToWorld(event.clientX, event.clientY);
 
     state.hoverWorld = {
       x: clamp(world.x, 0, TERRITORY_SIZE),
-      z: clamp(world.z, 0, TERRITORY_SIZE)
+      z: clamp(world.z, 0, TERRITORY_SIZE),
     };
 
     updateInspector(state.hoverWorld);
+    if (
+      construction &&
+      (!construction.updatedAt || performance.now() - construction.updatedAt > 80)
+    ) {
+      construction.updatedAt = performance.now();
+      updateConstruction(world);
+    }
 
     if (state.dragging) {
       const dx = event.clientX - state.lastX;
@@ -918,8 +1060,8 @@
       const scaleX = canvas.width / Math.max(1, rect.width);
       const scaleY = canvas.height / Math.max(1, rect.height);
 
-      state.cameraX -= dx * scaleX / state.zoom;
-      state.cameraZ -= dy * scaleY / state.zoom;
+      state.cameraX -= (dx * scaleX) / state.zoom;
+      state.cameraZ -= (dy * scaleY) / state.zoom;
 
       state.lastX = event.clientX;
       state.lastY = event.clientY;
@@ -938,9 +1080,42 @@
     } catch (_) {}
   }
 
-  canvas.addEventListener("pointerup", stopDrag);
-  canvas.addEventListener("pointercancel", stopDrag);
-  canvas.addEventListener("pointerleave", event => {
+  canvas.addEventListener("contextmenu", (e) => {
+    if (construction) e.preventDefault();
+  });
+  canvas.addEventListener("pointerup", (event) => {
+    if (construction && constructionDown && event.button === 0) {
+      const down = constructionDown;
+      constructionDown = null;
+      if (Math.hypot(event.clientX - down.x, event.clientY - down.y) < 5) {
+        updateConstruction(screenToWorld(event.clientX, event.clientY));
+        if (construction.analysis.allowed) {
+          const id = crypto.randomUUID();
+          const paid = window.mapGameEconomy.purchaseAndRegisterBuilding(
+            construction.def,
+            {
+              id,
+              type: construction.def.id,
+              ...constructionData(construction.point),
+              ownerId: "local",
+              variant: 0,
+            },
+          );
+          if (paid) cancelConstruction();
+          else
+            constructionPanel.querySelector("[data-reason]").textContent =
+              window.mapGameEconomy.snapshot().error ||
+              "Purchase failed; no construction was charged.";
+        }
+      }
+    }
+    stopDrag(event);
+  });
+  canvas.addEventListener("pointercancel", (event) => {
+    constructionDown = null;
+    stopDrag(event);
+  });
+  canvas.addEventListener("pointerleave", (event) => {
     if (event.buttons === 0) {
       state.dragging = false;
     }
@@ -948,21 +1123,16 @@
 
   canvas.addEventListener(
     "wheel",
-    event => {
+    (event) => {
       if (!state.active) return;
 
       event.preventDefault();
 
       const before = screenToWorld(event.clientX, event.clientY);
 
-      const factor =
-        event.deltaY < 0 ? 1.10 : 1 / 1.10;
+      const factor = event.deltaY < 0 ? 1.1 : 1 / 1.1;
 
-      state.zoom = clamp(
-        state.zoom * factor,
-        state.minZoom,
-        state.maxZoom
-      );
+      state.zoom = clamp(state.zoom * factor, state.minZoom, state.maxZoom);
 
       const after = screenToWorld(event.clientX, event.clientY);
 
@@ -973,19 +1143,29 @@
       clampCamera();
       state.needsDraw = true;
     },
-    { passive: false }
+    { passive: false },
   );
 
   window.addEventListener("resize", () => {
     state.needsDraw = true;
   });
 
-  window.addEventListener("keydown", event => {
+  window.addEventListener("keydown", (event) => {
     if (!state.active) return;
+    if (event.target.closest?.("input,textarea,select")) return;
+    if (construction && event.key === "Escape") {
+      cancelConstruction();
+      event.preventDefault();
+      return;
+    }
+    if (construction && event.key.toLowerCase() === "r") {
+      construction.rotation =
+        (construction.rotation + Math.PI / 2) % (Math.PI * 2);
+      updateConstruction(construction.point);
+      return;
+    }
 
-    const speed =
-      (event.shiftKey ? 1100 : 480) /
-      Math.max(0.035, state.zoom);
+    const speed = (event.shiftKey ? 1100 : 480) / Math.max(0.035, state.zoom);
 
     let moved = false;
 
@@ -1039,7 +1219,9 @@
   }
 
   async function enterTerritory(territory) {
+    cancelConstruction();
     state.territory = territory;
+    refreshBuildings(window.mapGameEconomy.snapshot());
     if (!window.mapGameSharedTerrain) throw new Error("Shared terrain module not loaded. Check world_terrain.js path.");
     state.seed = window.mapGameSharedTerrain.seed;
 
@@ -1094,6 +1276,8 @@
   }
 
   function leave() {
+    cancelConstruction();
+    placedBuildings=[];
     forestRenderer.pause();waterRenderer.pause();
     terrainRevision++;
     state.active = false;
@@ -1121,7 +1305,9 @@
   }
 
   window.mapGameBasicWorld = {
-    VERSION: "0.3.3C",
+    VERSION: "0.3.3D",
+    beginConstruction,
+    cancelConstruction,
     forestStats: forestRenderer.getState,
     waterStats: waterRenderer.stats,
     TERRITORY_SIZE,
@@ -1139,6 +1325,8 @@
       cameraZ: state.cameraZ,
       zoom: state.zoom,
       cachedChunks: state.cache.size,
+      buildingCount: placedBuildings.length,
+      construction: Boolean(construction),
       lod:
         state.zoom < DETAIL_ZOOM_THRESHOLD
           ? "overview"

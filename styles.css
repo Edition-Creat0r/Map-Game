@@ -3458,3 +3458,112 @@ body[data-graphics="basic"] [data-action="hub"] {
 .mg-sw-livability strong{font-size:21px}
 .mg-sw-stats{gap:5px}
 @media(max-width:740px){.mg-sw-body{grid-template-columns:minmax(0,1fr) 190px}.mg-sw-stream-status{display:none}}
+
+/* 0.3.3D text-first economy panels. No preview engine or offscreen UI rebuilds. */
+#mgEconomyShop[hidden],
+#mgEconomyStats[hidden],
+#mgConstructionControls[hidden] {
+  display: none;
+}
+#mgEconomyShop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(0, 7, 15, 0.8);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: #e5f3f7;
+  font: 14px/1.5 system-ui;
+}
+.mg-econ-shell {
+  width: min(1050px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  background: #0b1c28;
+  border: 1px solid #4a798a;
+  border-radius: 14px;
+  padding: 24px;
+}
+.mg-econ-shell header,
+#mgEconomyStats header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+.mg-econ-shell h2,
+.mg-econ-shell h4,
+#mgEconomyStats h3 {
+  margin: 0;
+}
+.mg-econ-shell article {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid #294653;
+  padding: 14px 0;
+}
+.mg-econ-shell p {
+  margin: 5px 0;
+  color: #bdd1da;
+}
+.mg-econ-shell button,
+#mgEconomyStats button,
+#mgConstructionControls button {
+  padding: 8px 16px;
+  border: 1px solid #6094a7;
+  border-radius: 7px;
+  background: #163f50;
+  color: #e8f8ff;
+  cursor: pointer;
+  font: inherit;
+}
+.mg-econ-shell button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.mg-econ-shell [data-message] {
+  color: #ffd49c;
+}
+#mgEconomyStats {
+  position: fixed;
+  right: 20px;
+  top: 88px;
+  z-index: 220;
+  width: min(360px, 85vw);
+  max-height: 75vh;
+  overflow: auto;
+  padding: 18px;
+  background: #0b1c28f5;
+  border: 1px solid #4a798a;
+  border-radius: 12px;
+  color: #e5f3f7;
+  font: 13px/1.5 system-ui;
+}
+#mgEconomyStats dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+}
+#mgEconomyStats dd {
+  margin: 0;
+  text-align: right;
+}
+#mgConstructionControls {
+  position: fixed;
+  left: 50%;
+  bottom: 78px;
+  transform: translateX(-50%);
+  z-index: 230;
+  max-width: 85vw;
+  padding: 12px;
+  background: #0b1c28f5;
+  border: 1px solid #4a798a;
+  border-radius: 10px;
+  color: #e5f3f7;
+  font: 14px/1.5 system-ui;
+}
+#mgConstructionControls [data-reason] {
+  color: #ffd49c;
+}
