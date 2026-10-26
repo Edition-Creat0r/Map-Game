@@ -160,7 +160,8 @@
   const terrainPalette = {grass:[106,145,79],rockyGrass:[111,124,85],rock:[100,101,92],
     snow:[208,215,207],dry:[157,146,93],wet:[62,115,83],soil:[125,105,77]};
 
-  function colorForTerrain(t) {
+  function colorForTerrain(t){const base=baseColorForTerrain(t);return window.mapGameEnvironment.color(t,base[0],base[1],base[2]);}
+  function baseColorForTerrain(t) {
     if(!t.water && t.weights){
       let r=0,g=0,b=0,total=0;
       for(const key in t.weights){
@@ -210,14 +211,14 @@
   }
 
   function terrainColorAt(gx, gy) {
-    const t = terrainAt(gx, gy);
+    const t = window.mapGameEnvironment.sampleWorld(gx,gy);
     let base = colorForTerrain(t);
 
     // Blend with nearby samples. This deliberately softens territory-scale
     // transitions so geography reads as one map rather than colored tiles.
     const neighbor =
       colorForTerrain(
-        terrainAt(gx + 0.45, gy + 0.30)
+        window.mapGameEnvironment.sampleWorld(gx + 0.45,gy + 0.30)
       );
 
     base = mixRgb(base, neighbor, 0.22);
@@ -342,7 +343,7 @@
       <div class="mg-sw-shell">
         <header class="mg-sw-header">
           <div class="mg-sw-heading">
-            <div class="mg-kicker">WORLD MAP • 0.3.3B</div>
+            <div class="mg-kicker">WORLD MAP • 0.3.3C</div>
             <h2>World Atlas</h2>
             <p>${TERRITORY_COUNT.toLocaleString()} territories • seamless geography • fixed scale</p>
           </div>
@@ -833,6 +834,12 @@
         REGION_CELLS
       );
 
+    // Keep only pending work needed by the current camera. The active job's
+    // reserved key is not in this array and remains valid across its yields.
+    state.regionQueue=state.regionQueue.filter(job=>{
+      const visible=job.rx>=b.minRX&&job.rx<=b.maxRX&&job.ry>=b.minRY&&job.ry<=b.maxRY;
+      if(!visible)state.queuedKeys.delete(regionKey(job.rx,job.ry));return visible;
+    });
     const wanted = [];
 
     for (
@@ -882,6 +889,7 @@
       state.queuedKeys.add(key);
     }
 
+    state.regionQueue.sort((a,b)=>Math.abs(a.rx-centerRX)+Math.abs(a.ry-centerRY)-Math.abs(b.rx-centerRX)-Math.abs(b.ry-centerRY)||a.ry-b.ry||a.rx-b.rx);
     updateStreamStatus();
     startStreamer();
   }
@@ -958,189 +966,13 @@
   // Seamless region art
   // ----------------------------------------------------------
 
-  async function renderRegion(rx, ry) {
-    let budgetStart=performance.now();
-    const canvas =
-      document.createElement("canvas");
-
-    const size = Math.ceil((REGION_PX + REGION_OVERDRAW * 2) / 2);
-
-    canvas.width = size;
-    canvas.height = size;
-
-    const ctx =
-      canvas.getContext(
-        "2d",
-        { alpha: false }
-      );
-
-    const worldX0 =
-      rx * REGION_CELLS;
-
-    const worldY0 =
-      ry * REGION_CELLS;
-
-    // Render at pixel resolution using global terrain coordinates.
-    // Because adjacent regions evaluate the same field, edges match.
-    const image =
-      ctx.createImageData(
-        size,
-        size
-      );
-
-    const data =
-      image.data;
-
-    for (
-      let py = 0;
-      py < size;
-      py++
-    ) {
-      if(!state.open) return null;
-      if(performance.now()-budgetStart>=4){
-        await new Promise(resolve=>setTimeout(resolve,0));
-        budgetStart=performance.now();
-      }
-      const gy =
-        worldY0 +
-        (py * 2 - REGION_OVERDRAW) /
-        CELL_PX;
-
-      for (
-        let px = 0;
-        px < size;
-        px++
-      ) {
-        const gx =
-          worldX0 +
-          (px * 2 - REGION_OVERDRAW) /
-          CELL_PX;
-
-        const t =
-          terrainAt(gx, gy);
-
-        let rgb =
-          colorForTerrain(t);
-
-        const i =
-          (py * size + px) * 4;
-
-        data[i] = rgb[0];
-        data[i + 1] = rgb[1];
-        data[i + 2] = rgb[2];
-        data[i + 3] = 255;
-      }
-    }
-
-    ctx.putImageData(
-      image,
-      0,
-      0
-    );
-
-    // Decorative terrain features are drawn globally in the main view;
-    // keeping region images free of clipped objects removes edge seams.
-
-    return canvas;
+  async function renderRegion(rx,ry){
+    const size=Math.ceil((REGION_PX+REGION_OVERDRAW*2)/2),env=window.mapGameEnvironment,SIZE=window.mapGameSharedTerrain.SIZE;
+    const alive=()=>state.open;
+    const grid=await env.grid(size,size,(rx*REGION_CELLS+(1-REGION_OVERDRAW)/CELL_PX)*SIZE,(ry*REGION_CELLS+(1-REGION_OVERDRAW)/CELL_PX)*SIZE,2/CELL_PX*SIZE,window.mapGameSharedTerrain.sample,alive,colorForTerrain);
+    if(!grid)return null;const data=await env.paint(grid,colorForTerrain,alive);if(!data)return null;
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=size;canvas.getContext('2d',{alpha:false}).putImageData(new ImageData(data,size,size),0,0);return canvas;
   }
-
-  function drawRegionDetail(
-    ctx,
-    rx,
-    ry,
-    worldX0,
-    worldY0
-  ) {
-    // Detail is deliberately subtle and does not stop at territory borders.
-    // This gives loaded regions more information without revealing the
-    // streaming grid.
-    ctx.save();
-
-    for (
-      let ty = 0;
-      ty < REGION_CELLS;
-      ty++
-    ) {
-      for (
-        let tx = 0;
-        tx < REGION_CELLS;
-        tx++
-      ) {
-        const gx =
-          worldX0 + tx + 0.5;
-
-        const gy =
-          worldY0 + ty + 0.5;
-
-        const t =
-          terrainAt(gx, gy);
-
-        const cx =
-          REGION_OVERDRAW +
-          (tx + 0.5) * CELL_PX;
-
-        const cy =
-          REGION_OVERDRAW +
-          (ty + 0.5) * CELL_PX;
-
-        if (false && t.mountain) {
-          const size =
-            4 +
-            t.ridge * 5;
-
-          ctx.strokeStyle =
-            t.snow
-              ? "rgba(242,246,241,.58)"
-              : "rgba(55,58,54,.38)";
-
-          ctx.lineWidth = 1;
-
-          ctx.beginPath();
-          ctx.moveTo(
-            cx - size,
-            cy + size * 0.48
-          );
-          ctx.lineTo(
-            cx,
-            cy - size
-          );
-          ctx.lineTo(
-            cx + size,
-            cy + size * 0.48
-          );
-          ctx.stroke();
-        }
-
-        if (
-          window.mapGameForest.coverage(t) > .35 &&
-          hash32(
-            Math.floor(gx * 7),
-            Math.floor(gy * 7),
-            9101
-          ) > 0.54
-        ) {
-          ctx.fillStyle =
-            "rgba(28,74,38,.26)";
-
-          ctx.beginPath();
-          ctx.arc(
-            cx,
-            cy,
-            3.1,
-            0,
-            Math.PI * 2
-          );
-          ctx.fill();
-        }
-      }
-    }
-
-    ctx.restore();
-  }
-
-  // ----------------------------------------------------------
-  // Drawing
-  // ----------------------------------------------------------
 
   function loop() {
     if (
@@ -1269,54 +1101,24 @@
     };
   }
 
-  function drawFallbackRegion(
-    ctx,
-    rx,
-    ry,
-    width,
-    height
-  ) {
-    const startX =
-      rx * REGION_CELLS;
-
-    const startY =
-      ry * REGION_CELLS;
-
-    // Four large fills per region. They come from the same global field and
-    // are deliberately blurred/overlapped so streaming regions don't read
-    // as tiles while higher detail is still loading.
-    const half =
-      REGION_CELLS / 2;
-
-    for (let sy = 0; sy < 2; sy++) {
-      for (let sx = 0; sx < 2; sx++) {
-        const gx =
-          startX +
-          (sx + 0.5) * half;
-
-        const gy =
-          startY +
-          (sy + 0.5) * half;
-
-        const p =
-          worldToScreen(
-            startX + sx * half,
-            startY + sy * half,
-            width,
-            height
-          );
-
-        ctx.fillStyle =
-          terrainColorAt(gx, gy);
-
-        ctx.fillRect(
-          p.x - 1,
-          p.y - 1,
-          half * CELL_PX + 2,
-          half * CELL_PX + 2
-        );
+  const fallbackColors=new Map();
+  function drawFallbackRegion(ctx,rx,ry,width,height){
+    const key=rx+':'+ry;
+    if(state.regionCache.has(key))return;
+    let image=fallbackColors.get(key);
+    if(!image){
+      image=document.createElement('canvas');image.width=image.height=4;
+      const data=new Uint8ClampedArray(64);
+      for(let y=0;y<4;y++)for(let x=0;x<4;x++){
+        const color=colorForTerrain(window.mapGameEnvironment.sampleWorld(rx*REGION_CELLS+(x-.5)*REGION_CELLS/2,ry*REGION_CELLS+(y-.5)*REGION_CELLS/2));
+        const i=(y*4+x)*4;data[i]=color[0];data[i+1]=color[1];data[i+2]=color[2];data[i+3]=255;
       }
+      image.getContext('2d',{alpha:false}).putImageData(new ImageData(data,4,4),0,0);
+      if(fallbackColors.size>=256)fallbackColors.delete(fallbackColors.keys().next().value);fallbackColors.set(key,image);
     }
+    const p=worldToScreen(rx*REGION_CELLS,ry*REGION_CELLS,width,height);
+    ctx.save();ctx.beginPath();ctx.rect(p.x,p.y,REGION_PX+1,REGION_PX+1);ctx.clip();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='low';
+    ctx.drawImage(image,p.x-REGION_PX/2,p.y-REGION_PX/2,REGION_PX*2,REGION_PX*2);ctx.restore();
   }
 
   function drawCachedRegion(
@@ -1346,30 +1148,12 @@
   }
 
 
-  function drawStrategicRivers(ctx, width, height) {
-    // This provisional hydrology art is global and never stops at region edges.
-    const halfX = width / CELL_PX / 2;
-    const halfY = height / CELL_PX / 2;
-    const first = Math.floor((state.cameraX - halfX - 6) / 31);
-    const last = Math.ceil((state.cameraX + halfX + 6) / 31);
-    ctx.save();
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    for (let j = first; j <= last; j++) {
-      const center = j * 31 + 12;
-      ctx.beginPath();
-      let started = false;
-      for (let gy = state.cameraY - halfY - 2; gy <= state.cameraY + halfY + 3; gy += .35) {
-        const gx = center + Math.sin(gy / 5.8 + j * 2.1) * 3.0 + Math.sin(gy / 2.2 + j) * .5;
-        const p = worldToScreen(gx,gy,width,height);
-        if (!started) {ctx.moveTo(p.x,p.y);started=true;}
-        else ctx.lineTo(p.x,p.y);
-      }
-      if (!started) continue;
-      ctx.strokeStyle = 'rgba(16,48,59,.45)';ctx.lineWidth=5;ctx.stroke();
-      ctx.strokeStyle = '#3b9bb9';ctx.lineWidth=2.7;ctx.stroke();
-    }
-    ctx.restore();
+  let waterRenderer=null;
+  function drawStrategicRivers(ctx,width,height){
+    if(!waterRenderer)waterRenderer=window.createMapGameWaterRenderer(ctx,()=>{state.needsDraw=true});
+    const SIZE=window.mapGameSharedTerrain.SIZE;
+    ctx.save();ctx.beginPath();ctx.rect(width/2-state.cameraX*CELL_PX,height/2-state.cameraY*CELL_PX,WORLD_COLS*CELL_PX,WORLD_ROWS*CELL_PX);ctx.clip();
+    waterRenderer.draw({x:state.cameraX*SIZE,z:state.cameraY*SIZE,scale:CELL_PX/SIZE,width,height});ctx.restore();
   }
 
   function drawCivilization(
@@ -1958,6 +1742,7 @@
   }
 
   function close() {
+    waterRenderer?.pause();
     state.open = false;
 
     if (state.root) {
@@ -2033,7 +1818,7 @@
   }
 
   window.mapGameStrategicWorld = {
-    VERSION: "0.3.3B",
+    VERSION: "0.3.3C",
     WORLD_COLS,
     WORLD_ROWS,
     TERRITORY_COUNT,
@@ -2047,6 +1832,7 @@
     setTerritorySummaries,
     refreshInspector,
 
+    waterStats:()=>waterRenderer?.stats(),
     terrainAt,
     territoryMetrics,
 
