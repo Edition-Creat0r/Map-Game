@@ -1,0 +1,4 @@
+project_id = "mapgame-naming-041-review"
+[functions.public-names]
+verify_jwt = true
+entrypoint = "./functions/public-names/index.ts"

@@ -53,6 +53,9 @@
   }
 
   function usernameFromUser(user) {
+    if (window.mapGamePublicNames?.enabled) {
+      return window.mapGamePublicNames.username(user?.id);
+    }
     const username =
       user &&
       user.user_metadata &&
@@ -192,9 +195,9 @@
       worldName: WORLD_NAME,
       user: currentUser,
       onlineCount: onlinePlayers.size,
-      onlinePlayers: Array.from(onlinePlayers.values()),
-      territoryClaims: Array.from(territoryClaims.values()),
-      capitals: Array.from(capitals.values())
+      onlinePlayers: Array.from(onlinePlayers.values(), row => window.mapGamePublicNames?.project(row, "presence") || row),
+      territoryClaims: Array.from(territoryClaims.values(), row => window.mapGamePublicNames?.project(row, "claim") || row),
+      capitals: Array.from(capitals.values(), row => window.mapGamePublicNames?.project(row, "capital") || row)
     };
   }
 
@@ -470,7 +473,7 @@
         );
 
     emitState();
-    return mine;
+    return mine.map(row => window.mapGamePublicNames?.project(row, "claim") || row);
   }
 
 
@@ -1153,16 +1156,18 @@
     }
   );
 
+  window.addEventListener("mapgame:public-names-updated", emitState);
+
   window.mapGameMultiplayer = {
     WORLD_ID,
     WORLD_NAME,
     joinCentralWorld,
     leaveWorld,
-    claimTerritory,
-    establishCapital,
-    getTerritory,
-    getMyTerritories,
-    getMyCapital,
+    claimTerritory: async (...args) => { const row = await claimTerritory(...args); return window.mapGamePublicNames?.project(row, "claim") || row; },
+    establishCapital: async (...args) => { const row = await establishCapital(...args); return window.mapGamePublicNames?.project(row, "capital") || row; },
+    getTerritory: id => window.mapGamePublicNames?.project(getTerritory(id), "claim") || getTerritory(id),
+    getMyTerritories: () => getMyTerritories().map(row => window.mapGamePublicNames?.project(row, "claim") || row),
+    getMyCapital: () => window.mapGamePublicNames?.project(getMyCapital(), "capital") || getMyCapital(),
     refreshMyOwnership,
     getState:
       stateSnapshot,

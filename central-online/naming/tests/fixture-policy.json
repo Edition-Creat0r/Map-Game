@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "testOnly": true,
+  "terms": [
+    {
+      "value": "shit",
+      "mode": "prefix"
+    },
+    {
+      "value": "fuck",
+      "mode": "prefix"
+    },
+    {
+      "value": "cunt",
+      "mode": "prefix"
+    },
+    {
+      "value": "ass",
+      "mode": "word"
+    },
+    {
+      "value": "heil hitler",
+      "mode": "word"
+    },
+    {
+      "value": "sex slave",
+      "mode": "word"
+    }
+  ],
+  "reserved": [
+    {
+      "value": "admin",
+      "mode": "prefix"
+    },
+    {
+      "value": "administrator",
+      "mode": "prefix"
+    },
+    {
+      "value": "moderator",
+      "mode": "prefix"
+    },
+    {
+      "value": "official",
+      "mode": "prefix"
+    },
+    {
+      "value": "developer",
+      "mode": "word"
+    },
+    {
+      "value": "support",
+      "mode": "word"
+    }
+  ],
+  "allowWhole": [
+    "Shitake Grove"
+  ]
+}

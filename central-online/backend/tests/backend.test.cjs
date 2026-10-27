@@ -625,20 +625,22 @@ test("partial settlement commits a durable target and resumes without lost time 
 });
 test("both economic and regional reads enforce the same authenticated request limit", async () => {
   await reset();
-  const h = handler();
-  await send(h, input());
-  await query(
-    "UPDATE cw041.rate_limits SET requests=120,bucket=floor(extract(epoch from clock_timestamp())/60)::bigint",
-  );
-  assert.equal((await send(h, input())).status, 429);
-  assert.equal(
-    (await send(h, {
-      action: "region",
-      territoryId: "T_190_27",
-      sessionId: session,
-    })).status,
-    429,
-  );
+  const h=handler();await send(h,input());
+  async function rejectInCurrentBucket(request){
+    for(let attempt=0;attempt<3;attempt++){
+      const seeded=Number(await query("UPDATE cw041.rate_limits SET requests=120,bucket=floor(extract(epoch from clock_timestamp())/60)::bigint RETURNING bucket"));
+      const result=await send(h,request);
+      if(result.status===429)return;
+      const current=Number(await query("SELECT floor(extract(epoch from clock_timestamp())/60)::bigint"));
+      // A fixed-window quota correctly resets at a minute boundary. Retry only
+      // when the database confirms that boundary, never for a same-window failure.
+      if(current!==seeded)continue;
+      assert.equal(result.status,429);
+    }
+    throw Error("Could not observe a stable database rate-limit window");
+  }
+  await rejectInCurrentBucket(input());
+  await rejectInCurrentBucket({action:"region",territoryId:"T_190_27",sessionId:session});
 });
 test("reconnect discovers only own pending intents and committed transaction receipts", async () => {
   await reset();

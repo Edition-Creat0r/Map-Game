@@ -1,0 +1,7 @@
+{
+  "source": "Installed ICU 76, uspoof_getSkeletonUTF8 and u_strFoldCase; standard Unicode data only",
+  "unicodeVersion": "16.0.0",
+  "confusableMappings": 22717,
+  "caseFoldMappings": 1557,
+  "sha256": "90f229f40628a61cbfd629cb2f771a25ed8fc8c784dc99fbc4d7ede582518b03"
+}

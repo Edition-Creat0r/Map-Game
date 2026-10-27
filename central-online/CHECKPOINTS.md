@@ -17,4 +17,4 @@ Target private-playtest window: October 30–November 2, 2026. This is a target,
 
 Every delivery records changed files, commit, automated/browser/backend results, limitations and whether its gate passed. Mocked/isolated SQL tests are not represented as real staging validation. No authenticated two-user or database-security claim without actual authorized backend testing.
 
-Status: checkpoint 1 review package is implemented and locally tested; real Supabase schema/policy/deployment gates remain blocked and multiplayer economy stays disabled. See [Checkpoint 1 report](CHECKPOINT_1.md). Checkpoints 2–6 have not started.
+Status: checkpoint 1 review package is implemented and locally tested; real Supabase schema/policy/deployment gates remain blocked and multiplayer economy stays disabled. See [Checkpoint 1 report](CHECKPOINT_1.md). Checkpoint 2 is now prepared and locally tested; see [Checkpoint 2 report](CHECKPOINT_2.md). Naming remains disabled pending production policy and actual staging verification. Checkpoints 3–6 have not started.
