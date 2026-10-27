@@ -4,9 +4,9 @@ Source contract: [SPECIFICATION.md](SPECIFICATION.md). Base: validated visual re
 
 ## Working agreement
 
-One bounded update → check it → blend it into the feature branch → report before the next update. Each checkpoint has its own commit and evidence. “Blend” means integration into this feature branch, never an automatic merge to main. Do not batch several major phases into a single unreviewable change. Stop on a failed gate; fix that checkpoint before moving forward. Keep working systems available throughout.
+User steering: complete the update in one turn, using bounded updates → checks → integration on the feature branch without pausing between milestones. Report the combined result at the end. Each checkpoint has its own commit and evidence. “Blend” means integration into this feature branch, never an automatic merge to main. Do not batch several major phases into a single unreviewable change. Stop on a failed gate; fix that checkpoint before moving forward. Keep working systems available throughout.
 
-This initial delivery completes **checkpoint 00 only**. Next is 01A, not the entire home hub or shop. No runtime features are changed in checkpoint 00.
+Checkpoint 00 was completed in the previous delivery. The current delivery integrates the frontend milestones together with explicit validation checkpoints; backend-dependent operations remain blocked pending real deployment/security evidence. Checkpoint 00 itself changed no runtime features.
 
 ## Current status
 
@@ -19,10 +19,10 @@ This initial delivery completes **checkpoint 00 only**. Next is 01A, not the ent
 | Five starter contracts | Existing costs, production and placement | Implemented; preserve |
 | Visual restoration | Compact resources, side shop, research links, themes/density | Validated feature branch; not main/deployed |
 | Central World | Authentication, membership/presence, territory/capital persistence | Existing; backend security not independently verified |
-| New home/shop/studio | Current UI is reusable foundation | Planned |
+| New home/shop/studio | Integrated in Modern Frontier; current release tests tracked in VALIDATION.md | Implemented on feature branch |
 | Social/username cooldown/deletion | No complete implementation or backend policy in repository | Backend-dependent |
 | Multiplayer economy | Deliberately Singleplayer-only today | Blocked until authoritative backend verification |
-| Advancements and backups | Not a shipped integrated system | Planned |
+| Advancements and backups | 13 cosmetic SP objectives, three pins, full slot export/import/recovery | Implemented on feature branch |
 | C2 warehouse simulation / D upgrades / combat | Not implemented | Remain future, no implicit activation |
 
 ## Small implementation checkpoints
@@ -103,6 +103,14 @@ flowchart TD
 | Checkpoint | Result | Evidence |
 |---|---|---|
 | 00 | Complete: documentation only, 91/91 fresh tests passed | [Audit](AUDIT.md), [checkpoint record](CHECKPOINT_00.md) |
-| 01A | Next; not started | Home structure only |
+| 01A–C | Implemented | Asset-backed home, existing launch/auth gating, truthful updates, continue/details; backed-up New World |
+| 02A–D | Implemented; gated by regression suite | Full-screen paged catalog, real inspector, favorites/sort, existing placement, opt-in UI tones; upgrades unavailable |
+| 03A–B | Implemented | Five presets, appearance/motion/volume, validated local-only backgrounds |
+| 04A | Implemented | Existing account status with unavailable social/rename/delete previews |
+| 04B / 05A | Design/audit delivered | [Backend contract and unrun adversarial release matrix](SECURITY.md) |
+| 04C / 05B–C / 06D | Blocked, unavailable | No admin interface/deployed schema/RLS/settlement verification; no client substitute |
+| 06A–C | Implemented | World-specific cosmetic SP objectives, progressive graph reveal, pan/zoom and three pins |
+| 07A–B | Implemented | Exact-string backup, import/restore/New World confirmation, writer lock and rollback journal |
+| 08 | Functional validation passed; release blocked | [101 tests, browser flows, measurements and open performance/backend gates](VALIDATION.md); main unchanged |
 
 Future checkpoint reports must list files, tested commit, automated/browser results, before/after screenshots where relevant, performance, compatibility, limitations and next bounded update.

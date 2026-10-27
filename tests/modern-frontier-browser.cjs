@@ -5,10 +5,11 @@ const url=process.env.MAP_GAME_TEST_URL||'http://127.0.0.1:8001';
 (async()=>{
  const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox','--enable-unsafe-swiftshader']});
  const c=await b.newContext({viewport:{width:1440,height:900},acceptDownloads:true}),p=await c.newPage(),r={errors:[],http:[],failed:[],checks:[],resolutions:[]};
+ await p.addInitScript(()=>{const Native=window.AudioContext;if(Native)window.AudioContext=class extends Native{constructor(...args){super(...args);window.frontierTestAudio=this;}};});
  function attach(p){p.on('pageerror',e=>r.errors.push(e.message));p.on('console',m=>{if(m.type()==='error')r.errors.push(m.text())});p.on('requestfailed',q=>r.failed.push(q.url()));p.on('response',q=>{if(q.status()>=400)r.http.push([q.url(),q.status()])});}attach(p);
  async function ready(){await p.waitForFunction(()=>document.querySelector('#mgStartSingle')?.disabled===false);}
  async function screenshot(name){await p.screenshot({path:path.join(out,name+'.png')});}
- await p.goto(url);await ready();await p.waitForSelector('[data-updates] details');
+ await p.goto(url);await ready();await p.waitForSelector('[data-updates] details');assert.equal(await p.evaluate(()=>!!window.frontierTestAudio),false);await p.emulateMedia({reducedMotion:'reduce'});await p.waitForFunction(()=>document.documentElement.dataset.frontierMotion==='off');assert.equal(await p.locator('.mf-scene-tree').first().evaluate(el=>getComputedStyle(el).animationName),'none');await p.emulateMedia({reducedMotion:'no-preference'});
  assert.match(await p.locator('.mf-home').innerText(),/Offline launch is not verified/);
  for(const [w,h]of [[1366,768],[1440,900],[1920,1080]]){await p.setViewportSize({width:w,height:h});await p.waitForTimeout(150);const bounds=await p.locator('#mgStartSingle').boundingBox();assert(bounds.y+bounds.height<h);assert.equal(await p.evaluate(()=>document.querySelector('#mgHome').scrollWidth<=innerWidth),true);await screenshot('home-'+w);r.resolutions.push({width:w,height:h,home:true});}
  await p.setViewportSize({width:1440,height:900});
@@ -49,6 +50,8 @@ const url=process.env.MAP_GAME_TEST_URL||'http://127.0.0.1:8001';
  const png=await p.evaluate(()=>{const c=document.createElement('canvas');c.width=c.height=128;c.getContext('2d').fillRect(0,0,128,128);return c.toDataURL().split(',')[1]});
  await p.locator('[data-image="home"]').setInputFiles({name:'private.png',mimeType:'image/png',buffer:Buffer.from(png,'base64')});await p.waitForFunction(()=>document.querySelector('[data-image-status]').textContent.includes('saved'));await screenshot('studio-private-image');
  await p.click('[data-remove-image="home"]');await p.waitForFunction(()=>document.querySelector('[data-image-status]').textContent.includes('removed'));
+ await p.selectOption('[data-pref="motion"]','subtle');await p.locator('#mf-audio summary').click();await p.locator('[data-pref="mute"]').uncheck();await p.click('[data-test-audio]');await p.waitForFunction(()=>window.frontierTestAudio?.state==='running');await p.locator('[data-pref="mute"]').check();await p.selectOption('[data-pref="motion"]','off');
+ r.checks.push('Silent boot, system reduced-motion static scene, and explicitly unmuted gesture-started Web Audio with independent interface/master levels');
  assert.deepEqual(await p.evaluate(()=>[localStorage.getItem(mapGameEconomy.SAVE_KEY),localStorage.getItem('mapGame_alpha021_firstPlayable')]),protectedBefore);
  r.checks.push('Appearance, reduced motion and validated private backgrounds persist independently of exact economy/world records; unsafe uploads rejected');
  await p.keyboard.press('Escape');await p.reload();await ready();assert.equal(await p.evaluate(()=>mapGameFrontier.preferences().theme),'forest');
@@ -64,6 +67,17 @@ const url=process.env.MAP_GAME_TEST_URL||'http://127.0.0.1:8001';
  assert.equal(await p.evaluate(()=>new Set(mapGameFrontier.progress().progress.completed).size),await p.evaluate(()=>mapGameFrontier.progress().progress.completed.length));
  r.checks.push('Export/import confirmation, future-version rejection, pre-import recovery copy, exact ledger persistence, building and pin reload');
  await p.evaluate(()=>mapGameRuntime.showWorldMap());await screenshot('world-map');
+ // A second Home tab cannot replace a world while the first tab owns the writer lock.
+ const other=await c.newPage();attach(other);await other.goto(url);await other.waitForFunction(()=>document.querySelector('#mgStartSingle')?.disabled===false);await other.click('[data-world-info]');
+ await other.locator('[data-import]').setInputFiles({name:'same-world.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});await other.waitForSelector('[data-confirm-word]');await other.fill('[data-confirm-word]','RESTORE');await other.click('[data-confirm-restore]');await other.waitForFunction(()=>document.querySelector('[data-backup-message]').textContent.includes('other Singleplayer tab'));assert.match(await other.locator('[data-backup-message]').innerText(),/other Singleplayer tab/);await other.close();
+ // Deliberate New World and restore of the complete pre-change slot.
+ await p.reload();await ready();await p.click('[data-new-world]');const dl=p.waitForEvent('download');await p.click('[data-export]');await dl;await p.click('[data-prepare-new]');await p.fill('[data-new-seed]','711999');await p.fill('[data-new-word]','NEW WORLD');await Promise.all([p.waitForNavigation(),p.click('[data-create-new]')]);await ready();
+ assert.equal(await p.evaluate(()=>localStorage.getItem('mapgame_world_seed')),'711999');assert.equal(await p.evaluate(()=>localStorage.getItem('mapgame_economy_021e')),null);
+ await p.click('[data-world-info]');await p.click('[data-restore]');await p.fill('[data-confirm-word]','RESTORE');await Promise.all([p.waitForNavigation(),p.click('[data-confirm-restore]')]);await ready();assert.equal(await p.evaluate(()=>mapGameSharedTerrain.seed),734221);assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('mapgame_economy_021e')).placedIncomeItems.length),initial.count+1);
+ // Simulate an interrupted multi-key restore; a locked recovery occurs before play.
+ const recovered=await p.evaluate(()=>{const before=mapGameFrontierModel.snapshot(localStorage);localStorage.setItem(mapGameFrontierModel.JOURNAL,JSON.stringify(before));localStorage.removeItem('mapgame_economy_021e');return before.records.mapgame_economy_021e;});
+ await p.reload();await p.waitForFunction(()=>!window.mapGameFrontierRecoveryError&&!localStorage.getItem('mapgame_frontier_restore_journal_v1')&&document.querySelector('#mgStartSingle')?.disabled===false);assert.equal(await p.evaluate(()=>localStorage.getItem('mapgame_economy_021e')),recovered);
+ r.checks.push('Other-tab writer blocks import; exported/confirmed New World retains a restorable snapshot; interrupted restore journal recovers before play');
  // Audio remains silent without a trusted opt-in, no autoplay on boot.
  assert.equal(await p.evaluate(()=>mapGameFrontier.preferences().mute),true);
  assert.deepEqual(r.errors,[]);assert.deepEqual(r.http,[]);assert.deepEqual(r.failed,[]);
