@@ -211,6 +211,7 @@ async function adapter(saved, options = {}) {
     window: {
       mapGameBuildings: { CATALOG: defs },
       mapGameEconomyModel: M,
+      mapGameProgression: require("../industrial/progression.js"),
       mapGameSharedTerrain: dry,
       dispatchEvent() {},
       addEventListener(type, fn) {

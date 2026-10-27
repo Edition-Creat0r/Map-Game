@@ -239,7 +239,7 @@ test("schema-2 migration pins prior economics and preserves unknown fields and e
   };
   const s = M.normalize(raw, epoch);
   M.bindContracts(s, defs, 2);
-  assert.equal(s.economy.version, 3);
+  assert.equal(s.economy.version, M.SCHEMA_VERSION);
   assert.equal(s.economy.materialRegistryVersion, 1);
   assert.equal(s.economy.precision.steel, raw.economy.precision.steel);
   assert.equal(s.inventory.futureStock, 91);
@@ -316,6 +316,7 @@ test("future registry/schema saves fail closed and unknown inventory/precision f
 test("registry display order cannot redirect upkeep or production to another stock", () => {
   const c = {
     window: {
+      mapGameProgression: require("../industrial/progression.js"),
       mapGameIndustrialRegistry: {
         ...R,
         materialIds: [...R.materialIds].reverse(),

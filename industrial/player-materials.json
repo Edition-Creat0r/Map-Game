@@ -1,0 +1,1172 @@
+{
+  "version": 1,
+  "registryVersion": 1,
+  "materials": [
+    {
+      "id": "money",
+      "unlockEra": 1,
+      "unlockRequirements": [],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "cornerStore"
+      }
+    },
+    {
+      "id": "steel",
+      "unlockEra": 1,
+      "unlockRequirements": [],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "steelFoundry"
+      }
+    },
+    {
+      "id": "carbon",
+      "unlockEra": 1,
+      "unlockRequirements": [],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "cokeWorks"
+      }
+    },
+    {
+      "id": "ironOre",
+      "unlockEra": 1,
+      "unlockRequirements": [],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "ironMine"
+      }
+    },
+    {
+      "id": "coal",
+      "unlockEra": 1,
+      "unlockRequirements": [],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "coalMine"
+      }
+    },
+    {
+      "id": "concrete",
+      "unlockEra": 1,
+      "unlockRequirements": [],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "concreteBatchPlant"
+      }
+    },
+    {
+      "id": "glass",
+      "unlockEra": 1,
+      "unlockRequirements": [],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "glassWorks"
+      }
+    },
+    {
+      "id": "silica",
+      "unlockEra": 1,
+      "unlockRequirements": [],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "silicaQuarry"
+      }
+    },
+    {
+      "id": "copperOre",
+      "unlockEra": 1,
+      "unlockRequirements": [],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "copperMine"
+      }
+    },
+    {
+      "id": "limestone",
+      "unlockEra": 1,
+      "unlockRequirements": [],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "limestoneQuarry"
+      }
+    },
+    {
+      "id": "salt",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "saltWorks"
+      }
+    },
+    {
+      "id": "copper",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "copperSmelter"
+      }
+    },
+    {
+      "id": "iron",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "ironSmelter"
+      }
+    },
+    {
+      "id": "bricks",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "constructionTechnology"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "brickKiln"
+      }
+    },
+    {
+      "id": "cement",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "constructionTechnology"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "cementKiln"
+      }
+    },
+    {
+      "id": "wire",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "constructionTechnology"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "wireMill"
+      }
+    },
+    {
+      "id": "bauxite",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "bauxiteMine"
+      }
+    },
+    {
+      "id": "naturalGas",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "gasWell"
+      }
+    },
+    {
+      "id": "crudeOil",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "oilWell"
+      }
+    },
+    {
+      "id": "phosphate",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "phosphateMine"
+      }
+    },
+    {
+      "id": "sulfur",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "sulfurMine"
+      }
+    },
+    {
+      "id": "aluminum",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "aluminumRefinery"
+      }
+    },
+    {
+      "id": "industrialGas",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "gasProcessor"
+      }
+    },
+    {
+      "id": "fuel",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "oilRefinery"
+      }
+    },
+    {
+      "id": "silicon",
+      "unlockEra": 2,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "siliconRefinery"
+      }
+    },
+    {
+      "id": "beams",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "constructionTechnology"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "beamMill"
+      }
+    },
+    {
+      "id": "ceramics",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "constructionTechnology"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "ceramicsWorks"
+      }
+    },
+    {
+      "id": "pipes",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "constructionTechnology"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "pipeMill"
+      }
+    },
+    {
+      "id": "steelPlate",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "constructionTechnology"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "plateMill"
+      }
+    },
+    {
+      "id": "industrialAcid",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "acidWorks"
+      }
+    },
+    {
+      "id": "coolant",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "coolantWorks"
+      }
+    },
+    {
+      "id": "fertilizer",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "fertilizerWorks"
+      }
+    },
+    {
+      "id": "lubricant",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "lubricantWorks"
+      }
+    },
+    {
+      "id": "paint",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "paintWorks"
+      }
+    },
+    {
+      "id": "plastic",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "polymerWorks"
+      }
+    },
+    {
+      "id": "cable",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "constructionTechnology"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "cableWorks"
+      }
+    },
+    {
+      "id": "insulation",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "constructionTechnology"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "insulationWorks"
+      }
+    },
+    {
+      "id": "polymerFilm",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "filmWorks"
+      }
+    },
+    {
+      "id": "industrialResin",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "resinWorks"
+      }
+    },
+    {
+      "id": "rubber",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "rubberWorks"
+      }
+    },
+    {
+      "id": "industrialSolvent",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "solventWorks"
+      }
+    },
+    {
+      "id": "adhesive",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "adhesiveWorks"
+      }
+    },
+    {
+      "id": "syntheticTextiles",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "textileWorks"
+      }
+    },
+    {
+      "id": "semiconductors",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "electronicsFoundations"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "semiconductorFab"
+      }
+    },
+    {
+      "id": "circuitBoards",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "electronicsFoundations"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "boardWorks"
+      }
+    },
+    {
+      "id": "bearings",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "bearingWorks"
+      }
+    },
+    {
+      "id": "gears",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "gearWorks"
+      }
+    },
+    {
+      "id": "motors",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "motorWorks"
+      }
+    },
+    {
+      "id": "pumps",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "pumpWorks"
+      }
+    },
+    {
+      "id": "tools",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "toolWorks"
+      }
+    },
+    {
+      "id": "chassis",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "chassisWorks"
+      }
+    },
+    {
+      "id": "tires",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "tireWorks"
+      }
+    },
+    {
+      "id": "industrialConsumables",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "urbanDevelopment"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "consumablesWorks"
+      }
+    },
+    {
+      "id": "furniture",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "urbanDevelopment"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "furnitureWorks"
+      }
+    },
+    {
+      "id": "householdGoods",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "urbanDevelopment"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "householdGoodsWorks"
+      }
+    },
+    {
+      "id": "packaging",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "urbanDevelopment"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "packagingWorks"
+      }
+    },
+    {
+      "id": "workwear",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "urbanDevelopment"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "workwearWorks"
+      }
+    },
+    {
+      "id": "lithiumOre",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "lithiumMine"
+      }
+    },
+    {
+      "id": "rareEarthOre",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "rareEarthMine"
+      }
+    },
+    {
+      "id": "titaniumOre",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "titaniumMine"
+      }
+    },
+    {
+      "id": "lithium",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "lithiumRefinery"
+      }
+    },
+    {
+      "id": "rareEarths",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "rareEarthRefinery"
+      }
+    },
+    {
+      "id": "titanium",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "titaniumRefinery"
+      }
+    },
+    {
+      "id": "alloySteel",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "miningRefining"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "alloyFoundry"
+      }
+    },
+    {
+      "id": "constructionModules",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "constructionTechnology"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "moduleWorks"
+      }
+    },
+    {
+      "id": "compositeFiber",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "fiberWorks"
+      }
+    },
+    {
+      "id": "composites",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "basicIndustry"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "compositeWorks"
+      }
+    },
+    {
+      "id": "batteries",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "electronicsFoundations"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "batteryWorks"
+      }
+    },
+    {
+      "id": "displays",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "electronicsFoundations"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "displayWorks"
+      }
+    },
+    {
+      "id": "memory",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "electronicsFoundations"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "memoryFab"
+      }
+    },
+    {
+      "id": "powerElectronics",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "electronicsFoundations"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "powerElectronicsWorks"
+      }
+    },
+    {
+      "id": "processors",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "electronicsFoundations"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "processorFab"
+      }
+    },
+    {
+      "id": "sensors",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "electronicsFoundations"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "sensorWorks"
+      }
+    },
+    {
+      "id": "industrialMachinery",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "machineWorks"
+      }
+    },
+    {
+      "id": "turbines",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "turbineWorks"
+      }
+    },
+    {
+      "id": "engines",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "engineWorks"
+      }
+    },
+    {
+      "id": "vehicleParts",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "vehiclePartsWorks"
+      }
+    },
+    {
+      "id": "freightTrucks",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "truckWorks"
+      }
+    },
+    {
+      "id": "utilityVehicles",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "utilityVehicleWorks"
+      }
+    },
+    {
+      "id": "appliances",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "urbanDevelopment"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "applianceWorks"
+      }
+    },
+    {
+      "id": "electricalGoods",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "urbanDevelopment"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "electricalGoodsWorks"
+      }
+    },
+    {
+      "id": "medicalSupplies",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "urbanDevelopment"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "medicalSupplyWorks"
+      }
+    },
+    {
+      "id": "communicationModules",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "electronicsFoundations"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "communicationsWorks"
+      }
+    },
+    {
+      "id": "controlSystems",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "electronicsFoundations"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "controlWorks"
+      }
+    },
+    {
+      "id": "automationModules",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "automationWorks"
+      }
+    },
+    {
+      "id": "heavyMachinery",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "heavyMachineWorks"
+      }
+    },
+    {
+      "id": "precisionTools",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "precisionToolWorks"
+      }
+    },
+    {
+      "id": "buses",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "busWorks"
+      }
+    },
+    {
+      "id": "passengerCars",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "carWorks"
+      }
+    },
+    {
+      "id": "electricVehicles",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "electricVehicleWorks"
+      }
+    },
+    {
+      "id": "railAssemblies",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "railWorks"
+      }
+    },
+    {
+      "id": "consumerDevices",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "urbanDevelopment"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "consumerDeviceWorks"
+      }
+    },
+    {
+      "id": "precisionElectronics",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "electronicsFoundations"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "precisionElectronicsWorks"
+      }
+    },
+    {
+      "id": "roboticArms",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "robotArmWorks"
+      }
+    },
+    {
+      "id": "ships",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "shipWorks"
+      }
+    },
+    {
+      "id": "advancedAppliances",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "urbanDevelopment"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "advancedApplianceWorks"
+      }
+    },
+    {
+      "id": "medicalDevices",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "urbanDevelopment"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "medicalDeviceWorks"
+      }
+    },
+    {
+      "id": "quantumModules",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "electronicsFoundations"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "quantumModuleWorks"
+      }
+    },
+    {
+      "id": "autonomousVehicles",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "industrialMachinery"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "autonomousVehicleWorks"
+      }
+    },
+    {
+      "id": "luxuryGoods",
+      "unlockEra": 6,
+      "unlockRequirements": [
+        "urbanDevelopment"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "luxuryGoodsWorks"
+      }
+    }
+  ],
+  "excluded": [
+    {
+      "id": "industrialRobots",
+      "reason": "Terminal specialized product deferred; not required by selected recipes"
+    },
+    {
+      "id": "airframes",
+      "reason": "Terminal specialized product deferred; not required by selected recipes"
+    },
+    {
+      "id": "jetEngines",
+      "reason": "Terminal specialized product deferred; not required by selected recipes"
+    },
+    {
+      "id": "avionics",
+      "reason": "Terminal specialized product deferred; not required by selected recipes"
+    },
+    {
+      "id": "aerospaceComposites",
+      "reason": "Terminal specialized product deferred; not required by selected recipes"
+    },
+    {
+      "id": "aircraftParts",
+      "reason": "Terminal specialized product deferred; not required by selected recipes"
+    },
+    {
+      "id": "civilAircraft",
+      "reason": "Terminal specialized product deferred; not required by selected recipes"
+    },
+    {
+      "id": "satelliteParts",
+      "reason": "Terminal specialized product deferred; not required by selected recipes"
+    },
+    {
+      "id": "satellites",
+      "reason": "Terminal specialized product deferred; not required by selected recipes"
+    },
+    {
+      "id": "launchAssemblies",
+      "reason": "Terminal specialized product deferred; not required by selected recipes"
+    },
+    {
+      "id": "orbitalPlatforms",
+      "reason": "Terminal specialized product deferred; not required by selected recipes"
+    },
+    {
+      "id": "protectiveEquipment",
+      "reason": "Defense-only future inventory"
+    },
+    {
+      "id": "fieldSupplies",
+      "reason": "Defense-only future inventory"
+    },
+    {
+      "id": "communicationsEquipment",
+      "reason": "Defense-only future inventory"
+    },
+    {
+      "id": "opticalEquipment",
+      "reason": "Defense-only future inventory"
+    },
+    {
+      "id": "equipmentParts",
+      "reason": "Defense-only future inventory"
+    },
+    {
+      "id": "transportEquipment",
+      "reason": "Defense-only future inventory"
+    },
+    {
+      "id": "aircraftEquipment",
+      "reason": "Defense-only future inventory"
+    },
+    {
+      "id": "navalEquipment",
+      "reason": "Defense-only future inventory"
+    },
+    {
+      "id": "precisionEquipment",
+      "reason": "Defense-only future inventory"
+    },
+    {
+      "id": "strategicEquipment",
+      "reason": "Defense-only future inventory"
+    }
+  ]
+}

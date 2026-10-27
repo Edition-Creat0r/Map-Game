@@ -70,6 +70,7 @@ fs.mkdirSync(output, { recursive: true });
     await page.locator('[data-action="shop"]').click();
     await page.locator("#mgEconomyShop [data-category]").selectOption(category);
     await page.locator("#mgEconomyShop [data-search]").fill("");
+    await page.locator("#mgEconomyShop [data-availability]").selectOption("all");
   }
   async function place(id, category) {
     await open(category);
@@ -120,6 +121,12 @@ fs.mkdirSync(output, { recursive: true });
   }
   for (const id of ["smallHouse", "smallHouse", "powerPlant", "cornerStore"])
     await place(id, "starter");
+  // C1 continuation: ordinary research plus powered-housing offline growth.
+  await page.evaluate(()=>{
+    if (!mapGameEconomy.completeResearch('basicIndustry') || !mapGameEconomy.completeResearch('miningRefining')) throw Error('Research failed');
+    mapGameEconomy.stop(); const key=mapGameEconomy.SAVE_KEY,s=JSON.parse(localStorage.getItem(key));s.economy.lastTick-=20*60000;s.lastEconomyTick=s.economy.lastTick;localStorage.setItem(key,JSON.stringify(s));
+  });
+  await page.reload();await page.waitForFunction(()=>document.querySelector('#mgStartSingle')?.disabled===false);await page.click('#mgStartSingle');await page.waitForFunction(()=>mapGameEconomy.getStatus().enabled);await enter();
   for (const id of ["ironMine", "coalMine"]) await place(id, "mining");
   for (const id of ["ironSmelter", "cokeWorks", "steelFoundry"])
     await place(id, "refining");
@@ -194,7 +201,7 @@ fs.mkdirSync(output, { recursive: true });
   await page.locator("#mgStartSingle").click();
   await page.waitForFunction(() => mapGameEconomy.getStatus().enabled);
   const after = await page.evaluate(() => mapGameEconomy.snapshot());
-  assert.equal(after.economy.version, 3);
+  assert.equal(after.economy.version, 4);
   assert.equal(after.economy.materialRegistryVersion, 1);
   assert.equal(after.custom, "retain");
   assert.equal(after.inventory.futureUnknown, 19);
@@ -258,6 +265,7 @@ fs.mkdirSync(output, { recursive: true });
   }
   await page.waitForTimeout(600);
   await page.screenshot({ path: path.join(output, "working-factories.png") });
+  await page.locator('[data-c1="more"]').click();
   await page.locator('[data-action="economy"]').click();
   await page
     .locator("#mgEconomyStats [data-inventory]")

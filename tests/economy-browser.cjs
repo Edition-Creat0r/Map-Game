@@ -147,6 +147,7 @@ fs.mkdirSync(output, { recursive: true });
   report.checks.push(
     "All five starter types placed through the shop and canvas",
   );
+  if(!await page.locator('[data-action="economy"]').isVisible()) await page.locator('[data-c1="more"]').click();
   await page.locator('[data-action="economy"]').click();
   await page.waitForTimeout(250);
   await page.screenshot({ path: path.join(output, "economy-deficits.png") });
@@ -171,7 +172,8 @@ fs.mkdirSync(output, { recursive: true });
     await page.waitForFunction(
       () => document.querySelector("#loadingScreen").hidden,
     );
-    await page.locator('[data-action="economy"]').click();
+    if(!await page.locator('[data-action="economy"]').isVisible()) await page.locator('[data-c1="more"]').click();
+  await page.locator('[data-action="economy"]').click();
   }
   // A fixture of an older saved checkpoint models a real closed-game interval.
   const before = await page.evaluate(() => mapGameEconomy.snapshot());

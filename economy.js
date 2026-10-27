@@ -1,6 +1,7 @@
 // Singleplayer economy adapter. One canonical, versioned localStorage transaction.
 (() => {
   "use strict";
+  const Progression = window.mapGameProgression;
   const Model = window.mapGameEconomyModel,
     SAVE_KEY = "mapgame_economy_021e",
     WORLD_KEY = "mapGame_alpha021_firstPlayable";
@@ -55,6 +56,10 @@
         );
       }
       Model.bindContracts(state, catalog(), raw.economy?.version || 0);
+      Progression.init(state, catalog(), {
+        legacy: Boolean(stored || legacy.length),
+      });
+      Progression.refresh(state);
       error = "";
       for (const row of state.placedIncomeItems)
         if (!row.footprint)
@@ -116,6 +121,7 @@
         state = previous;
         return false;
       }
+      Progression.refresh(state);
       state.economy.revision++;
       const serialized = JSON.stringify(state);
       localStorage.setItem(SAVE_KEY, serialized);
@@ -187,7 +193,7 @@
       continueCatchup();
     }
     try {
-      const worker = new Worker("economy_worker.js?v=3402");
+      const worker = new Worker("economy_worker.js?v=3403");
       catchupWorker = worker;
       catchupEngine = "worker";
       catchupWorker.onerror = (event) => {
@@ -365,8 +371,7 @@
         (prior.rotation || 0) === (data.rotation || 0)
       );
     const actual = catalog().find((v) => v.id === def.id && v.economy);
-    if (!actual || (actual.industrial && actual.availability !== "playable"))
-      return false;
+    if (!actual || Progression.reason(state, actual)) return false;
     settle();
     if (catchup || error) return false;
     const result = transaction((s) => {
@@ -385,6 +390,7 @@
       const row = {
         ...data,
         economyContract: null,
+        progressionAcquired: 1,
         type: actual.id,
         footprint: actual.footprint.slice(),
         level: 1,
@@ -428,15 +434,10 @@
     return exclusions;
   }
   function checkPlacement(def, data) {
-    if (def?.industrial && def.availability !== "playable")
-      return {
-        allowed: false,
-        reasons: [
-          def.availability === "definitionsOnly"
-            ? "Definition only — activation reserved for a later phase"
-            : `Era ${def.era} / ${def.technology} is future-locked until progression is implemented`,
-        ],
-      };
+    const actual = catalog().find((d) => d.id === def?.id && d.economy);
+    const locked = Progression.reason(state, actual);
+    if (locked) return { allowed: false, reasons: [locked] };
+    def = actual;
     if (!enabled || error || catchup)
       return {
         allowed: false,
@@ -480,7 +481,34 @@
     return !!result;
   }
   window.mapGameEconomy = {
-    VERSION: "0.3.4B",
+    VERSION: "0.3.4C1",
+    purchaseReason: (id) =>
+      Progression.reason(
+        state,
+        catalog().find((d) => d.id === id),
+      ),
+    completeResearch: (id) => {
+      if (!enabled || error || catchup) return false;
+      settle();
+      if (catchup || error) return false;
+      const result = transaction((s) => {
+        Model.flushPending(s, catalog());
+        return Progression.complete(s, id, Model);
+      });
+      emit();
+      return !!result;
+    },
+    setOperatingPriority: (mode) => {
+      if (!enabled || error || catchup) return false;
+      settle();
+      if (catchup || error) return false;
+      const result = transaction((s) => {
+        Model.flushPending(s, catalog());
+        return Progression.priorities(s, catalog(), mode, Model);
+      });
+      emit();
+      return !!result;
+    },
     SAVE_KEY,
     OFFLINE_CAP_MINUTES: null,
     snapshot,

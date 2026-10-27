@@ -133,7 +133,7 @@ fs.mkdirSync(output, { recursive: true });
         future: s.economy.future,
       };
     });
-    assert.equal(r.catchup.version, 3);
+    assert.equal(r.catchup.version, 4);
     if (industrial) {
       assert.ok(r.catchup.ironOre > 0);
       assert.ok(r.catchup.coal > 0);

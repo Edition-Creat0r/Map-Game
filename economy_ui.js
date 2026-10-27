@@ -1,6 +1,7 @@
 // Paged text-first catalog. Closed panels perform no DOM work.
 (() => {
   "use strict";
+  const P = window.mapGameProgression;
   const R = window.mapGameIndustrialRegistry,
     labels = {
       mining: "Mining",
@@ -45,6 +46,19 @@
         })[c],
     );
   const resource = (k) => R.material(k)?.name || k;
+  const searchText = new Map(
+    defs().map((d) => [
+      d.id,
+      JSON.stringify([
+        d.id,
+        d.name,
+        d.sector,
+        d.technology,
+        d.economy.inputs,
+        d.economy.production,
+      ]).toLowerCase(),
+    ]),
+  );
   const technology = new Map(R.data.technologies.map((t) => [t.id, t.name]));
   const amounts = (values, rate = false) =>
     Object.entries(values || {})
@@ -61,14 +75,15 @@
     shop.setAttribute("role", "dialog");
     shop.setAttribute("aria-modal", "true");
     shop.setAttribute("aria-label", "Construction shop");
-    shop.innerHTML = `<div class="mg-econ-shell"><header><div><small>SINGLEPLAYER · CONSTRUCTION</small><h2>Industrial construction</h2></div><button data-close aria-label="Close shop">Close ×</button></header><p>Choose a building, then click a suitable site. R rotates; Escape cancels. Payment happens only when placed.</p><p>Production and recipe inputs: 1.2× while visibly online; 1× offline, with no elapsed-time cap. Upkeep is unboosted.</p><p>${R.data.buildings.length} industries: ${counts.playable} playable · ${counts.futureLocked} future-locked · ${counts.definitionsOnly} definitions only. Five starter contracts remain available.</p><div class="mg-industrial-filters"><label>Category <select data-category><option value="starter">Starter buildings</option><option value="all">All buildings</option><option value="industries">All industries</option>${Object.entries(
+    shop.innerHTML = `<div class="mg-econ-shell"><header><div><small>SINGLEPLAYER · CONSTRUCTION</small><h2>Industrial construction</h2></div><button data-close aria-label="Close shop">Close ×</button></header><p>Choose a building, then click a suitable site. R rotates; Escape cancels. Payment happens only when placed.</p><p>Production and recipe inputs: 1.2× while visibly online; 1× offline, with no elapsed-time cap. Upkeep is unboosted.</p><p>120 industrial definitions · availability follows your materials and research. Five starter contracts remain available.</p><div class="mg-industrial-filters"><label>Category <select data-category><option value="starter">Starter buildings</option><option value="all">All buildings</option><option value="industries">All industries</option>${Object.entries(
       labels,
     )
       .map(([id, name]) => `<option value="${id}">${name}</option>`)
       .join(
         "",
-      )}</select></label><label>Availability <select data-availability><option value="all">All statuses</option><option value="playable">Playable</option><option value="futureLocked">Future-locked</option><option value="definitionsOnly">Definitions only</option></select></label><label>Search <input data-search placeholder="Name, material or technology" aria-label="Search industrial catalog"></label></div><div data-message role="status"></div><div data-list></div><footer><button data-prev>Previous</button> <span data-page></span> <button data-next>Next</button></footer></div>`;
+      )}</select></label><label>Availability <select data-availability><option value="available">Available now</option><option value="discover">Discover / Research</option><option value="all">All statuses (detailed)</option><option value="playable">Playable</option><option value="futureLocked">Future-locked</option><option value="definitionsOnly">Definitions only</option></select></label><label>Search <input data-search placeholder="Name, material or technology" aria-label="Search industrial catalog"></label></div><label><input type="checkbox" data-detail> Detailed catalog</label><div data-message role="status"></div><div data-list></div><footer><button data-prev>Previous</button> <span data-page></span> <button data-next>Next</button></footer></div>`;
     document.body.appendChild(shop);
+    shop.querySelector("[data-detail]").onchange = () => render();
     shop.querySelector("[data-close]").onclick = hideShop;
     for (const selector of [
       "[data-category]",
@@ -133,17 +148,13 @@
             (category === "starter" && !d.industrial) ||
             (category === "industries" && d.industrial) ||
             d.sector === category) &&
-          (status === "all" || (d.availability || "playable") === status) &&
-          JSON.stringify([
-            d.id,
-            d.name,
-            d.sector,
-            d.technology,
-            d.economy.inputs,
-            d.economy.production,
-          ])
-            .toLowerCase()
-            .includes(search),
+          (status === "all" ||
+            (status === "available" || status === "playable"
+              ? !P.reason(snap, d)
+              : status === "discover"
+                ? !!P.reason(snap, d)
+                : (d.availability || "playable") === status)) &&
+          searchText.get(d.id).includes(search),
       );
       const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
       page = Math.max(0, Math.min(page, pages - 1));
@@ -156,11 +167,9 @@
           .slice(page * PAGE, (page + 1) * PAGE)
           .map((d) => {
             const r = d.economy,
-              locked = d.industrial && d.availability !== "playable";
+              locked = P.reason(snap, d);
             const reason = locked
-              ? d.availability === "definitionsOnly"
-                ? "Definition only — future manufacturing activation"
-                : `Future-locked · Era ${d.era} · ${technology.get(d.technology) || d.technology}`
+              ? locked
               : !snap.enabled
                 ? "Singleplayer only"
                 : !active
@@ -173,20 +182,39 @@
               : r.housing
                 ? `Housing +${r.housing} · growth ${r.growth}/min when powered`
                 : `Energy capacity +${r.energySupply}`;
-            return `<article data-catalog-id="${d.id}"><div><small>${esc(d.sectorLabel || d.category)} · ${esc(d.availability || "Starter contract")}</small><h4>${esc(d.name)}</h4><p>${amounts(d.cost)} · footprint ${d.footprint.join(" × ")} m</p><p>Base output: ${production}</p><p>Base inputs: ${Object.keys(r.inputs || {}).length ? amounts(r.inputs, true) : d.industrial ? "Local extraction — no material input" : "No material inputs (starter contract)"}</p><p>Energy ${r.energyUse || 0} · workers ${r.workforce || 0} · upkeep $${r.upkeep || 0}/min</p>${d.industrial ? `<p>Era ${d.era} · ${esc(technology.get(d.technology) || d.technology)} · ${esc(d.logistics.storageClass)} goods</p>` : ""}<p>Requires dry terrain, slope ≤ 0.54, no overlap. Stocks are shared across your Singleplayer world.</p></div><div><button data-buy="${d.id}" ${reason ? "disabled" : ""}>Place</button><p>${esc(reason)}</p></div></article>`;
+            return `<article data-catalog-id="${d.id}"><div><small>${esc(d.sectorLabel || d.category)} · ${locked ? "Discover" : "Available"}</small><h4>${esc(d.name)}</h4><p>${amounts(d.cost)} · footprint ${d.footprint.join(" × ")} m</p><p>Base output: ${production}</p><p>Base inputs: ${Object.keys(r.inputs || {}).length ? amounts(r.inputs, true) : d.industrial ? "Local extraction — no material input" : "No material inputs (starter contract)"}</p><p>Energy ${r.energyUse || 0} · workers ${r.workforce || 0} · upkeep $${r.upkeep || 0}/min</p>${d.industrial ? `<p ${shop.querySelector("[data-detail]").checked ? "" : "hidden"}>${esc(d.logistics.storageClass)} goods · advanced upgrades planned</p>` : ""}<p>Requires dry terrain, slope ≤ 0.54, no overlap. Stocks are shared across your Singleplayer world.</p></div><div><button data-buy="${d.id}" ${reason ? "disabled" : ""}>Place</button><p>${esc(reason)}</p></div></article>`;
           })
           .join("") || "<p>No matching buildings.</p>";
     }
     if (stats && !stats.hidden) {
       const s = snap.summary,
-        inventoryOpen = stats.querySelector("[data-inventory]")?.open;
-      stats.innerHTML = `<header><h3>World statistics</h3><button data-collapse aria-label="Collapse statistics">−</button></header><p>Singleplayer economy ${snap.enabled ? "· active" : "· paused"}</p><dl><dt>Money</dt><dd>$${fmt(snap.money)}</dd><dt>Steel</dt><dd>${fmt(snap.steel)}</dd><dt>Carbon</dt><dd>${fmt(snap.carbon)}</dd><dt>Energy</dt><dd>${fmt(s.energyUsed)} used / ${fmt(s.energySupply)} capacity</dd><dt>Requested power</dt><dd>${fmt(s.requestedEnergy)} · deficit ${fmt(s.energyDeficit)}</dd><dt>Population</dt><dd>${fmt(s.population)} / ${fmt(s.housing)} housed</dd><dt>Workforce</dt><dd>${s.workforceUsed} used / ${s.workforce} available</dd><dt>Requested workers</dt><dd>${s.requestedWorkforce} · deficit ${s.workforceDeficit}</dd><dt>Money production</dt><dd>$${fmt(snap.incomePerMin)}/min</dd><dt>Upkeep</dt><dd>$${fmt(s.upkeep)}/min</dd></dl><details data-inventory ${inventoryOpen ? "open" : ""}><summary>Other material stocks</summary><dl>${
+        inventoryOpen = stats.querySelector("[data-inventory]")?.open,
+        legacyOpen = stats.querySelector("[data-legacy]")?.open;
+      stats.innerHTML = `<header><h3>World statistics</h3><button data-collapse aria-label="Collapse statistics">−</button></header><p>Singleplayer economy ${snap.enabled ? "· active" : "· paused"}</p><dl><dt>Money</dt><dd>$${fmt(snap.money)}</dd><dt>Steel</dt><dd>${fmt(snap.steel)}</dd><dt>Carbon</dt><dd>${fmt(snap.carbon)}</dd><dt>Energy</dt><dd>${fmt(s.energyUsed)} used / ${fmt(s.energySupply)} capacity</dd><dt>Requested power</dt><dd>${fmt(s.requestedEnergy)} · deficit ${fmt(s.energyDeficit)}</dd><dt>Population</dt><dd>${fmt(s.population)} / ${fmt(s.housing)} housed</dd><dt>Workforce</dt><dd>${s.workforceUsed} used / ${s.workforce} available</dd><dt>Requested workers</dt><dd>${s.requestedWorkforce} · deficit ${s.workforceDeficit}</dd><dt>Money production</dt><dd>$${fmt(snap.incomePerMin)}/min</dd><dt>Upkeep</dt><dd>$${fmt(s.upkeep)}/min</dd></dl><details data-inventory ${inventoryOpen ? "open" : ""}><summary>Unlocked materials</summary><dl>${
         [...R.data.materials]
-          .filter((m) => !["money", "steel", "carbon"].includes(m.id))
+          .filter(
+            (m) =>
+              !["money", "steel", "carbon"].includes(m.id) &&
+              P.manifest.materials.some((x) => x.id === m.id) &&
+              P.unlocked(snap, m.id),
+          )
           .map((m) => [m, snap[m.id] ?? snap.inventory?.[m.id] ?? 0])
-          .filter(([, n]) => n > 0)
+          .filter(() => true)
           .map(([m, n]) => `<dt>${esc(m.name)}</dt><dd>${fmt(n)}</dd>`)
           .join("") || "<dt>No extracted materials yet</dt>"
+      }</dl></details><details data-legacy ${legacyOpen ? "open" : ""}><summary>Legacy Inventory</summary><dl>${
+        R.data.materials
+          .filter(
+            (m) =>
+              (snap[m.id] ?? snap.inventory?.[m.id] ?? 0) > 0 &&
+              (!P.manifest.materials.some((x) => x.id === m.id) ||
+                !P.unlocked(snap, m.id)),
+          )
+          .map(
+            (m) =>
+              `<dt>${esc(m.name)}</dt><dd>${fmt(snap[m.id] ?? snap.inventory?.[m.id] ?? 0)}</dd>`,
+          )
+          .join("") || "<dt>No hidden balances</dt>"
       }</dl></details><p>${esc(snap.error || (snap.catchingUp ? "Settling offline production…" : snap.clockNotice || "1× offline · no time cap · exact saved checkpoints"))}</p><div data-operations></div><footer><button data-op-prev>Previous</button> <span data-op-page></span> <button data-op-next>Next</button></footer>`;
       const pages = Math.max(1, Math.ceil(s.buildings.length / OPERATIONS));
       operationsPage = Math.min(operationsPage, pages - 1);

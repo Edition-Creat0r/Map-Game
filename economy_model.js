@@ -3,13 +3,17 @@
   "use strict";
   const STEP_MS = 10000,
     LIMIT = 1e12,
-    SCHEMA_VERSION = 3;
+    SCHEMA_VERSION = 4;
   const RESOURCES = ["money", "steel", "carbon", "iron", "concrete", "glass"];
   const Registry =
     typeof module !== "undefined"
       ? require("./industrial/registry.js")
       : root.mapGameIndustrialRegistry;
   if (!Registry) throw Error("Material registry must load before the economy");
+  const Progression =
+    typeof module !== "undefined"
+      ? require("./industrial/progression.js")
+      : root.mapGameProgression;
   const MATERIALS = Registry.materialIds,
     materialSet = new Set(MATERIALS),
     legacySet = new Set(RESOURCES);
@@ -95,6 +99,7 @@
         level: Math.max(1, Math.min(100, finite(v.level, 1))),
       }));
     const old = raw.economy || {};
+    Progression.checkSaved(old.progression);
     if (
       old.version !== undefined &&
       (!Number.isInteger(old.version) ||
@@ -178,12 +183,23 @@
       pinContract(state, row, d);
     }
   }
+  function c1Eligible(row, def, state) {
+    return Boolean(
+      state.economy.progression &&
+        row.progressionAcquired === 1 &&
+        def.availability !== "definitionsOnly" &&
+        typeof row.economyContract === "string" &&
+        Object.hasOwn(state.economy.rules, row.economyContract),
+    );
+  }
   function definition(row, defs, state) {
     const d = defs.get(row.type);
     if (
       !d ||
       row.economyUnavailable ||
-      (d.industrial && d.availability !== "playable")
+      (d.industrial &&
+        d.availability !== "playable" &&
+        !c1Eligible(row, d, state))
     )
       return null;
     return typeof row.economyContract === "string" &&
@@ -194,6 +210,12 @@
   function compiled(state, catalog) {
     const defs = new Map(catalog.map((d) => [d.id, d])),
       templates = new Map();
+    const priorities = state.economy.progression?.priorities;
+    const ranks = new Map(
+      (priorities?.mode === "automatic" ? priorities.order : []).map(
+        (id, i) => [id, i],
+      ),
+    );
     const entries = state.placedIncomeItems
       .map((row, order) => {
         const def = definition(row, defs, state);
@@ -248,7 +270,13 @@
       })
       .filter(Boolean)
       .sort(
-        (a, b) => Number(!!b.supply) - Number(!!a.supply) || a.order - b.order,
+        ranks.size
+          ? (a, b) =>
+              Number(!!b.supply) - Number(!!a.supply) ||
+              (ranks.get(a.row.id) ?? ranks.size + a.order) -
+                (ranks.get(b.row.id) ?? ranks.size + b.order)
+          : (a, b) =>
+              Number(!!b.supply) - Number(!!a.supply) || a.order - b.order,
       );
     entries.frame = frame(entries);
     return entries;
