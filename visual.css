@@ -1,0 +1,961 @@
+/* Map Game visual restoration. No gameplay/terrain rules depend on these tokens. */
+:root {
+  color-scheme: dark;
+  --v-bg: #07131f;
+  --v-surface: #0c2030;
+  --v-raised: #142d3e;
+  --v-line: #315266;
+  --v-text: #e7f4f7;
+  --v-muted: #a6beca;
+  --v-accent: #6be2de;
+  --v-gold: #efcb8b;
+  --v-pad: 20px;
+  --v-gap: 14px;
+  --v-font: 13px;
+  --v-shadow: 0 20px 70px #010a1370;
+}
+:root[data-theme="midnight"] {
+  --v-bg: #080e19;
+  --v-surface: #101a2a;
+  --v-raised: #1a2940;
+  --v-line: #35465e;
+  --v-accent: #84d8f2;
+}
+:root[data-theme="slate"] {
+  --v-bg: #15212b;
+  --v-surface: #1b2d38;
+  --v-raised: #29424f;
+  --v-line: #526a79;
+  --v-accent: #8ce5dc;
+  --v-muted: #b7cbd3;
+}
+:root[data-density="compact"] {
+  --v-pad: 13px;
+  --v-gap: 8px;
+  --v-font: 12px;
+}
+body {
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+}
+button,
+input,
+select,
+summary {
+  font: inherit;
+}
+:is(button, a, input, select, summary):focus-visible {
+  outline: 2px solid var(--v-accent) !important;
+  outline-offset: 3px;
+}
+button {
+  touch-action: manipulation;
+}
+.mg-topbar {
+  height: 64px !important;
+  min-height: 64px !important;
+  padding: 8px 18px !important;
+  background: linear-gradient(90deg, #071725f5, #102c3af5) !important;
+  border-bottom: 1px solid var(--v-line) !important;
+  gap: 18px !important;
+  box-shadow: 0 8px 28px #0003;
+}
+.mg-brand-lockup {
+  gap: 10px !important;
+  min-width: 215px;
+}
+.mg-brand-lockup strong {
+  font-size: 14px !important;
+  letter-spacing: 0.14em;
+}
+.mg-brand-lockup span {
+  font-size: 8px !important;
+  letter-spacing: 0.13em !important;
+}
+.mg-brand-mark {
+  width: 34px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+}
+.mg-legacy-status {
+  display: none !important;
+}
+#mgVisualWorld {
+  display: block;
+  border: 1px solid #5e929e70;
+  border-radius: 20px;
+  padding: 4px 8px;
+  color: var(--v-accent);
+  white-space: nowrap;
+}
+#mgResourceStrip {
+  display: flex;
+  justify-content: flex-end;
+  gap: clamp(10px, 2vw, 32px);
+  flex: 1;
+  min-width: 0;
+}
+.mg-resource {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 70px;
+  color: var(--v-text);
+  font-variant-numeric: tabular-nums;
+}
+.mg-resource > div > span {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--v-muted);
+}
+.mg-resource strong {
+  display: block;
+  font-size: 16px;
+  line-height: 1.25;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.mg-material-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  vertical-align: middle;
+  width: 23px;
+  height: 23px;
+  margin-right: 4px;
+  border: 1px solid #6da4b157;
+  border-radius: 7px;
+  background: #204052;
+  color: #aad4df;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0;
+}
+.mg-material-icon[data-material="money"] {
+  color: #a9e9c3;
+  background: #1a4137;
+}
+.mg-material-icon[data-material="steel"] {
+  color: #dde6ed;
+  background: #334857;
+}
+.mg-material-icon[data-material="carbon"],
+.mg-material-icon[data-material="coal"] {
+  color: #d5cadc;
+  background: #3d3746;
+}
+.mg-material-icon[data-material="energy"] {
+  color: #f9d689;
+  background: #51402a;
+}
+.mg-material-icon[data-material="population"] {
+  color: #9ee4ec;
+}
+#mgDock,
+body.mg-c1-single #mgDock {
+  width: 132px !important;
+  top: 80px !important;
+  left: 12px !important;
+  border: 1px solid var(--v-line) !important;
+  border-radius: 14px !important;
+  background: var(--v-surface) !important;
+  padding: 7px !important;
+  gap: 4px !important;
+  box-shadow: var(--v-shadow);
+}
+body.mg-c1-single #mgDock button,
+#mgDock button {
+  min-height: 43px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  color: var(--v-muted);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  justify-content: flex-start;
+}
+#mgDock button:hover {
+  background: var(--v-raised) !important;
+  color: var(--v-text) !important;
+  border-color: var(--v-line);
+}
+#mgDock button span {
+  font-size: 11px !important;
+  letter-spacing: 0.04em !important;
+}
+body.mg-c1-single .mg-location-pill,
+.mg-location-pill {
+  left: 162px !important;
+  top: 79px !important;
+  background: #0a2030eb;
+  border: 1px solid var(--v-line);
+  font-size: 9px;
+  box-shadow: none;
+}
+#mgNextGoal {
+  left: 12px !important;
+  top: 342px !important;
+  width: 132px !important;
+  box-sizing: border-box;
+  padding: 12px !important;
+  background: var(--v-surface) !important;
+  border: 1px solid var(--v-line) !important;
+  border-radius: 12px !important;
+  font-size: 11px !important;
+  line-height: 1.55;
+}
+#mgNextGoal > b {
+  color: var(--v-accent);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+#mgNextGoal [data-core] {
+  display: none;
+}
+#mgNextGoal details {
+  margin-top: 10px;
+  border-top: 1px solid var(--v-line);
+  padding-top: 8px;
+}
+#mgNextGoal details summary {
+  font-size: 10px;
+  cursor: pointer;
+  color: var(--v-muted);
+}
+#mgNextGoal select {
+  width: 100%;
+  font-size: 10px;
+}
+#mgNextGoal [data-plan] {
+  margin-top: 7px;
+  width: 100%;
+  font-size: 10px;
+}
+body:has(#mgDock.mg-c1-more) #mgNextGoal {
+  display: none;
+}
+#mgTerrainInspector {
+  top: auto !important;
+  right: 18px !important;
+  bottom: 55px !important;
+  width: 230px !important;
+  max-height: 55vh;
+  overflow: auto;
+  background: var(--v-surface) !important;
+  border: 1px solid var(--v-line) !important;
+  border-radius: 13px !important;
+  padding: 15px !important;
+  box-shadow: var(--v-shadow);
+  color: var(--v-text) !important;
+  font-size: 12px !important;
+}
+#mgTerrainInspector header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+#mgTerrainInspector h3 {
+  font-size: 13px;
+  margin: 0;
+}
+#mgTerrainInspector .mg-kicker {
+  display: none;
+}
+#mgTerrainInspector [data-terrain-body] {
+  margin-top: 9px;
+}
+#mgTerrainInspector [data-terrain-body][hidden] {
+  display: none;
+}
+#mgTerrainInspector button {
+  border: 1px solid var(--v-line);
+  border-radius: 6px;
+  color: var(--v-accent);
+  background: var(--v-raised);
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+}
+#mgTerrainInspector dt {
+  color: var(--v-muted) !important;
+}
+#mgTerrainInspector dd {
+  color: var(--v-text) !important;
+}
+/* Construction is a focused side sheet; terrain stays visible underneath. */
+#mgEconomyShop {
+  top: 64px !important;
+  padding: 0 !important;
+  display: block;
+  background: linear-gradient(90deg, #03101b08, #03101b66) !important;
+  font-size: var(--v-font);
+}
+#mgEconomyShop .mg-econ-shell {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: min(500px, 94vw);
+  max-height: none;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 16px 0 0 0;
+  border: 1px solid var(--v-line);
+  background: var(--v-surface);
+  padding: var(--v-pad);
+  box-shadow: -20px 0 80px #01091166;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #416879 transparent;
+}
+#mgEconomyShop header {
+  position: sticky;
+  top: calc(-1 * var(--v-pad));
+  z-index: 2;
+  background: var(--v-surface);
+  padding: 12px 0 14px;
+  border-bottom: 1px solid var(--v-line);
+  margin-bottom: 12px;
+}
+#mgEconomyShop h2 {
+  font-size: 23px;
+  letter-spacing: -0.04em;
+  font-weight: 650;
+}
+#mgEconomyShop header small {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--v-accent);
+}
+#mgEconomyShop button,
+#mgEconomyStats button,
+.mg-c1-panel button {
+  border: 1px solid var(--v-line);
+  background: var(--v-raised);
+  color: var(--v-text);
+  border-radius: 8px;
+  padding: 8px 11px;
+  font-size: 11px;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
+}
+#mgEconomyShop button:hover:not(:disabled),
+#mgEconomyStats button:hover,
+.mg-c1-panel button:hover:not(:disabled) {
+  background: #234759;
+  border-color: var(--v-accent);
+}
+#mgEconomyShop [data-close] {
+  min-width: 68px;
+}
+#mgEconomyShop p {
+  font-size: 11px;
+  color: var(--v-muted);
+  line-height: 1.5;
+}
+#mgEconomyShop .mg-industrial-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin: 16px 0 8px;
+}
+#mgEconomyShop .mg-industrial-filters label {
+  font-size: 10px;
+  color: var(--v-muted);
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+#mgEconomyShop .mg-industrial-filters label:last-child {
+  grid-column: 1/-1;
+}
+#mgEconomyShop input,
+#mgEconomyShop select {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  height: 34px;
+  background: var(--v-bg);
+  border: 1px solid var(--v-line);
+  border-radius: 7px;
+  color: var(--v-text);
+  padding: 6px 8px;
+  font-size: 11px;
+}
+#mgEconomyShop input[type="checkbox"] {
+  width: auto;
+  height: auto;
+}
+#mgEconomyShop [data-detail] {
+  accent-color: var(--v-accent);
+}
+#mgEconomyShop .mg-build-card {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) 48px;
+  gap: 10px;
+  padding: var(--v-gap) 0;
+  border-top: 1px solid var(--v-line);
+  align-items: start;
+}
+.mg-build-preview {
+  background: linear-gradient(140deg, #1a3a48, #102b37);
+  border: 1px solid #527b8b45;
+  border-radius: 9px;
+  overflow: hidden;
+}
+.mg-building-preview {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+#mgEconomyShop .mg-build-card small {
+  font-size: 8px;
+  color: var(--v-accent);
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+#mgEconomyShop .mg-build-card h4 {
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.3;
+  margin: 3px 0 8px;
+}
+#mgEconomyShop .mg-build-card p {
+  font-size: 10px;
+  line-height: 1.6;
+  margin: 4px 0;
+}
+#mgEconomyShop .mg-build-card .mg-build-output {
+  color: #abd9c4;
+}
+#mgEconomyShop .mg-build-card .mg-build-needs {
+  color: #b1bfcc;
+}
+#mgEconomyShop .mg-build-card .mg-build-reason {
+  color: var(--v-gold);
+}
+#mgEconomyShop .mg-build-card .mg-material-icon {
+  width: 17px;
+  height: 17px;
+  border-radius: 5px;
+  font-size: 8px;
+  margin-right: 3px;
+}
+#mgEconomyShop .mg-build-card > button {
+  padding: 7px 4px;
+  margin-top: 3px;
+}
+#mgEconomyShop .mg-build-card details {
+  font-size: 10px;
+  color: var(--v-muted);
+  margin-top: 6px;
+}
+#mgEconomyShop summary {
+  cursor: pointer;
+  color: var(--v-muted);
+  font-size: 10px;
+}
+#mgEconomyShop footer {
+  border-top: 1px solid var(--v-line);
+  padding-top: 12px;
+  font-size: 10px;
+  color: var(--v-muted);
+}
+#mgEconomyShop [data-message] {
+  color: var(--v-gold);
+  font-size: 11px;
+  min-height: 10px;
+}
+body:has(#mgEconomyShop:not([hidden])) :is(#mgTerrainInspector, #mgNextGoal),
+body:has(#mgProgressionPanel:not([hidden]))
+  :is(#mgTerrainInspector, #mgNextGoal) {
+  visibility: hidden;
+}
+/* Research cards form a real prerequisite graph; the SVG is measured on open/resize. */
+.mg-c1-panel {
+  inset: 80px 18px 24px auto;
+  width: min(810px, calc(100vw - 190px));
+  box-sizing: border-box;
+  padding: var(--v-pad);
+  background: var(--v-surface);
+  border-color: var(--v-line);
+  border-radius: 15px;
+  box-shadow: var(--v-shadow);
+  font-size: var(--v-font);
+  scrollbar-width: thin;
+}
+.mg-c1-panel header {
+  top: calc(-1 * var(--v-pad));
+  padding: 12px 0;
+  background: var(--v-surface);
+  border-bottom: 1px solid var(--v-line);
+  gap: 12px;
+}
+.mg-c1-panel h2 {
+  font-size: 22px;
+  letter-spacing: -0.04em;
+}
+.mg-c1-panel > p {
+  color: var(--v-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.mg-c1-tree {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px 20px;
+  margin: 24px 0;
+}
+.mg-c1-tree article {
+  position: relative;
+  z-index: 1;
+  padding: 13px;
+  background: var(--v-raised);
+  border: 1px solid var(--v-line);
+  border-radius: 10px;
+}
+.mg-c1-tree article h3 {
+  font-size: 13px;
+  margin: 0 0 7px;
+}
+.mg-c1-tree article p {
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--v-muted);
+}
+.mg-c1-tree article[data-completed="true"] {
+  border-color: #59a89e;
+  background: linear-gradient(130deg, #1c403e, var(--v-raised));
+}
+.mg-c1-tree article[data-completed="true"] h3:before {
+  content: "✓ ";
+  color: var(--v-accent);
+}
+.mg-c1-tree button {
+  width: 100%;
+  font-size: 10px;
+}
+.mg-c1-tree [data-node="basicIndustry"] {
+  grid-column: 1/-1;
+  justify-self: center;
+  width: calc(50% - 36px);
+}
+.mg-c1-tree [data-node="miningRefining"] {
+  grid-area: 2/1;
+}
+.mg-c1-tree [data-node="constructionTechnology"] {
+  grid-area: 2/2;
+}
+.mg-c1-tree [data-node="electricity"] {
+  grid-area: 3/1;
+}
+.mg-c1-tree [data-node="urbanDevelopment"] {
+  grid-area: 3/2;
+}
+.mg-c1-tree [data-node="electronicsFoundations"] {
+  grid-area: 4/1;
+}
+.mg-c1-tree [data-node="industrialMachinery"] {
+  grid-area: 4/2;
+}
+.mg-research-links {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.mg-c1-discover {
+  columns: 2 220px;
+}
+.mg-c1-discover p {
+  font-size: 11px;
+  color: var(--v-muted);
+  padding: 8px;
+  border: 1px solid var(--v-line);
+  border-radius: 7px;
+}
+.mg-c1-discover b {
+  color: var(--v-text);
+}
+#mgVisualAnnouncement {
+  position: fixed;
+  left: 50%;
+  bottom: 50px;
+  transform: translateX(-50%);
+  z-index: 1400;
+  pointer-events: none;
+  opacity: 0;
+  padding: 12px 22px;
+  border: 1px solid #65c6ba;
+  border-radius: 12px;
+  background: #102d31f5;
+  color: #d9fff0;
+  box-shadow: var(--v-shadow);
+  font-size: 13px;
+}
+.visible#mgVisualAnnouncement {
+  animation: mg-unlock-toast 3.2s both;
+}
+.mg-new-unlock {
+  animation: mg-unlock-pulse 1.2s ease-out;
+}
+@keyframes mg-unlock-toast {
+  0% {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  10%,
+  85% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes mg-unlock-pulse {
+  0% {
+    box-shadow: 0 0 0 0 #70efcf90;
+  }
+  100% {
+    box-shadow: 0 0 0 16px #70efcf00;
+  }
+}
+#mgEconomyStats {
+  top: 80px;
+  right: 18px;
+  bottom: 24px;
+  max-height: none;
+  width: min(390px, 80vw);
+  box-sizing: border-box;
+  background: var(--v-surface);
+  border-color: var(--v-line);
+  color: var(--v-text);
+  padding: var(--v-pad);
+  box-shadow: var(--v-shadow);
+  font-size: 12px;
+  border-radius: 13px;
+  scrollbar-width: thin;
+}
+#mgEconomyStats h3 {
+  font-size: 19px;
+  letter-spacing: -0.025em;
+}
+#mgEconomyStats dt {
+  color: var(--v-muted);
+}
+#mgEconomyStats dd {
+  font-variant-numeric: tabular-nums;
+}
+#mgEconomyStats details {
+  padding: 12px 0;
+  border-top: 1px solid var(--v-line);
+}
+#mgEconomyStats summary {
+  cursor: pointer;
+  color: var(--v-accent);
+  font-size: 12px;
+}
+#mgEconomyStats [data-operations] p {
+  border-top: 1px solid var(--v-line);
+  padding-top: 9px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--v-muted);
+}
+/* Atlas keeps every ownership/entry action and its original IDs. */
+.mg-sw-shell {
+  background: var(--v-surface) !important;
+  border-color: var(--v-line) !important;
+  box-shadow: var(--v-shadow) !important;
+  border-radius: 16px !important;
+}
+.mg-sw-header {
+  background: var(--v-surface) !important;
+  border-bottom: 1px solid var(--v-line) !important;
+  padding: 18px 22px !important;
+}
+.mg-sw-heading h2 {
+  font-size: 26px !important;
+  letter-spacing: -0.045em !important;
+}
+.mg-sw-heading p {
+  font-size: 11px !important;
+  color: var(--v-muted) !important;
+}
+.mg-sw-heading .mg-kicker {
+  font-size: 9px !important;
+  color: var(--v-accent) !important;
+}
+.mg-sw-inspector {
+  background: var(--v-surface) !important;
+  border-left: 1px solid var(--v-line) !important;
+  padding: 22px !important;
+  font-size: 12px !important;
+}
+.mg-sw-inspector h3 {
+  font-size: 20px !important;
+  letter-spacing: -0.025em;
+}
+.mg-sw-livability {
+  border-color: var(--v-line) !important;
+  background: var(--v-raised) !important;
+  border-radius: 9px !important;
+}
+.mg-sw-stats > div,
+.mg-sw-progress {
+  border-color: var(--v-line) !important;
+}
+.mg-sw-inspector .mg-panel-note {
+  font-size: 10px !important;
+  line-height: 1.5;
+  color: var(--v-muted) !important;
+}
+.mg-sw-inspector .mg-btn {
+  font-size: 11px;
+  min-height: 38px;
+  border-radius: 8px;
+}
+.mg-sw-help {
+  font-size: 9px !important;
+  background: #092331d9 !important;
+  border: 1px solid var(--v-line);
+  border-radius: 8px !important;
+}
+#mgSettingsPanel {
+  z-index: 1500 !important;
+  background: var(--v-surface) !important;
+  border: 1px solid var(--v-line) !important;
+  color: var(--v-text);
+  max-height: 85vh !important;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+#mgSettingsPanel label {
+  color: var(--v-muted);
+}
+#mgSettingsPanel select {
+  background: var(--v-bg);
+  color: var(--v-text);
+  border: 1px solid var(--v-line);
+  border-radius: 6px;
+  padding: 8px;
+}
+#mgSettingsPanel .mg-appearance-settings label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+}
+#mgSettingsPanel .mg-appearance-settings h3 {
+  font-size: 13px;
+  color: var(--v-accent);
+  margin: 18px 0 8px;
+}
+#mgSettingsPanel [data-render-controls] {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+#mgSettingsPanel .mg-appearance-settings p {
+  font-size: 11px;
+  color: var(--v-muted);
+}
+#mgConstructionControls {
+  border-color: var(--v-line);
+  background: var(--v-surface);
+  border-radius: 12px;
+  box-shadow: var(--v-shadow);
+  font-size: 12px;
+}
+#mgConstructionControls button {
+  font-size: 11px;
+}
+#mgHome {
+  background:
+    radial-gradient(ellipse at 30% 30%, #17455966, transparent 65%),
+    linear-gradient(130deg, var(--v-bg), #102f3b) !important;
+}
+.mg-home-shell {
+  gap: 40px !important;
+}
+.mg-home-hero h1 {
+  letter-spacing: -0.05em !important;
+  font-weight: 650 !important;
+}
+.mg-world-card {
+  border-color: var(--v-line) !important;
+  background: linear-gradient(140deg, #173444e0, #0c2030f5) !important;
+  border-radius: 16px !important;
+}
+.mg-home-feature-row span {
+  border-color: var(--v-line) !important;
+  color: var(--v-muted) !important;
+}
+.mg-home-kicker {
+  color: var(--v-accent) !important;
+}
+@media (max-width: 1150px) {
+  .mg-brand-lockup {
+    min-width: 170px !important;
+  }
+  #mgVisualWorld {
+    display: none;
+  }
+  #mgResourceStrip {
+    gap: 14px;
+  }
+  .mg-resource {
+    min-width: 60px;
+    gap: 5px;
+  }
+  .mg-resource strong {
+    font-size: 14px;
+  }
+  .mg-topbar {
+    padding: 8px 12px !important;
+  }
+  #mgResourceStrip .mg-material-icon {
+    width: 20px;
+    height: 23px;
+    font-size: 9px;
+  }
+  #mgDock,
+  body.mg-c1-single #mgDock {
+    width: 112px !important;
+  }
+  #mgNextGoal {
+    width: 112px !important;
+  }
+  .mg-location-pill,
+  body.mg-c1-single .mg-location-pill {
+    left: 140px !important;
+  }
+  .mg-c1-panel {
+    width: calc(100vw - 155px);
+  }
+}
+@media (max-width: 760px) {
+  .mg-brand-lockup {
+    min-width: auto !important;
+  }
+  .mg-brand-lockup > div:last-of-type {
+    display: none;
+  }
+  #mgResourceStrip {
+    gap: 8px;
+  }
+  .mg-resource {
+    min-width: 40px;
+  }
+  .mg-resource .mg-material-icon {
+    display: none;
+  }
+  #mgResourceStrip .mg-resource > div > span {
+    font-size: 8px;
+  }
+  .mg-resource strong {
+    font-size: 11px;
+  }
+  #mgDock,
+  body.mg-c1-single #mgDock {
+    width: 88px !important;
+    left: 6px !important;
+  }
+  #mgNextGoal {
+    width: 88px !important;
+    left: 6px !important;
+    padding: 8px !important;
+  }
+  body.mg-c1-single .mg-location-pill,
+  .mg-location-pill {
+    left: 108px !important;
+    font-size: 8px;
+    max-width: calc(100vw - 130px);
+  }
+  #mgTerrainInspector {
+    width: 190px !important;
+    right: 8px !important;
+    font-size: 10px !important;
+  }
+  .mg-c1-panel {
+    inset: 74px 8px 12px 102px;
+    width: auto;
+    padding: 12px;
+  }
+  .mg-c1-tree {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .mg-c1-tree article {
+    grid-area: auto !important;
+  }
+  .mg-c1-tree [data-node="basicIndustry"] {
+    width: auto;
+    justify-self: stretch;
+  }
+  #mgEconomyShop .mg-econ-shell {
+    width: calc(100vw - 102px);
+    padding: 12px;
+  }
+  #mgEconomyShop .mg-build-card {
+    grid-template-columns: 48px minmax(0, 1fr) 43px;
+    gap: 6px;
+  }
+  #mgEconomyShop .mg-build-card h4 {
+    font-size: 12px;
+  }
+  .mg-sw-inspector {
+    padding: 12px !important;
+  }
+  #mgEconomyShop .mg-econ-shell header {
+    top: -12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *:before,
+  *:after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .visible#mgVisualAnnouncement {
+    opacity: 1;
+  }
+}
+#mgDock button span {
+  position: static !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}
+#mgEconomyShop .mg-production-note {
+  margin: 8px 0;
+}
+#mgEconomyShop .mg-production-note summary {
+  font-size: 10px;
+}
+.mg-resource-discovery {
+  border-top: 1px solid var(--v-line);
+  padding: 16px 0;
+}
+.mg-resource-discovery > summary {
+  color: var(--v-accent);
+  cursor: pointer;
+  font-size: 12px;
+}

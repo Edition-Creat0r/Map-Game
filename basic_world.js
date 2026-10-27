@@ -55,7 +55,7 @@
   const DETAIL_ZOOM_THRESHOLD = 0.145;
   const TREE_DETAIL_ZOOM = 0.245;
   const MOUNTAIN_DETAIL_ZOOM = 0.145;
-  const MAX_DETAIL_CHUNKS_PER_FRAME = 32;
+  const MAX_DETAIL_CHUNKS_PER_FRAME = 120;
   const MAX_MOUNTAIN_SYMBOLS = 65;
 
   const state = {
@@ -228,9 +228,12 @@
       const img = new Image();
       img.onload = () => {
         textureImages[key] = img;
-        const tile=document.createElement('canvas');tile.width=tile.height=16;
-        const context=tile.getContext('2d');context.drawImage(img,0,0,16,16);
-        const rgba=context.getImageData(0,0,16,16).data,luma=new Float32Array(256);for(let i=0;i<256;i++)luma[i]=(rgba[i*4]+rgba[i*4+1]+rgba[i*4+2])/3-128;texturePixels[key]=luma;
+        const tile=document.createElement('canvas');tile.width=tile.height=64;
+        const context=tile.getContext('2d');context.drawImage(img,0,0,64,64);
+        const rgba=context.getImageData(0,0,64,64).data,luma=new Float32Array(4096);
+        let mean=0;for(let i=0;i<4096;i++){luma[i]=(rgba[i*4]+rgba[i*4+1]+rgba[i*4+2])/3;mean+=luma[i];}
+        mean/=4096;for(let i=0;i<4096;i++)luma[i]-=mean;
+        texturePixels[key]=luma;
         resolve(true);
       };
       img.onerror = () => {
@@ -268,6 +271,8 @@
     waterShallow: [48, 129, 153],
     forest: [49, 100, 53]
   };
+
+  function mirrorTexture(n) {n=(n%128+128)%128;return n<64?n:127-n;}
 
   function terrainColor(sample, x, z) {
     let base;
@@ -353,18 +358,22 @@
     // Tiny cached texture tiles, blended by continuous biome weights. No patterns
     // or image decoding in raster loops. Global coordinates keep edges aligned.
     const point=globalPoint(x,z);
-    const ix=((Math.floor(point.x/24)%16)+16)%16;
-    const iz=((Math.floor(point.z/24)%16)+16)%16;
+    const tx=Math.floor(point.x/6),tz=Math.floor(point.z/6);
+    const ix=mirrorTexture(tx),iz=mirrorTexture(tz),x1=mirrorTexture(tx+1),z1=mirrorTexture(tz+1);
+    const fx=point.x/6-tx,fz=point.z/6-tz;
     let grain=0;
     for(const id in (texturesReady?sample.biome?.weights:null)){
       const pixels=texturePixels[window.mapGameSharedTerrain.BIOMES[id].texture];
-      if(pixels){const fx=point.x/24-Math.floor(point.x/24),fz=point.z/24-Math.floor(point.z/24);const x1=(ix+1)%16,z1=(iz+1)%16;const top=pixels[iz*16+ix]*(1-fx)+pixels[iz*16+x1]*fx,bottom=pixels[z1*16+ix]*(1-fx)+pixels[z1*16+x1]*fx;grain+=(top*(1-fz)+bottom*fz)*sample.biome.weights[id]*.07;}
+      if(pixels){const top=pixels[iz*64+ix]*(1-fx)+pixels[iz*64+x1]*fx,bottom=pixels[z1*64+ix]*(1-fx)+pixels[z1*64+x1]*fx;grain+=(top*(1-fz)+bottom*fz)*sample.biome.weights[id]*.38;}
     }
+    // Exposed soil follows existing dry/rock/snow material masks, not new geography.
+    const soil=Math.min(.4,(wt.dry||0)*.3+Math.max(0,.48-sample.moisture)*.4)*(1-(wt.snow||0))*(1-(wt.rock||0));
+    if(soil>0&&texturePixels.dirt){const p=texturePixels.dirt,top=p[iz*64+ix]*(1-fx)+p[iz*64+x1]*fx,bottom=p[z1*64+ix]*(1-fx)+p[z1*64+x1]*fx;grain+=(top*(1-fz)+bottom*fz)*soil*.3;base=mixColor(base,[139,119,87],soil*.4);}
     const micro = grain +
       (fbm(point.x, point.z, 610, 3, 15101) - 0.5) * 18;
 
     const canopy=window.mapGameForest.densityAt(sample,point.x,point.z);
-    return window.mapGameEnvironment.color(sample,(base[0]+micro)*(1-canopy*.16),(base[1]+micro)*(1-canopy*.08),(base[2]+micro)*(1-canopy*.10));
+    return window.mapGameEnvironment.color(sample,(base[0]+micro)*(1-canopy*.36),(base[1]+micro)*(1-canopy*.23),(base[2]+micro)*(1-canopy*.30));
   }
 
   function textureKeyForSample(sample) {
@@ -449,13 +458,13 @@
   }
 
   let terrainRevision = 0;
-  let chunkBuildPending = false;
+  let chunkBuildPending = false, chunkBuildingKey = null;
 
-  async function renderChunk(cx,cz){
+  async function renderChunk(cx,cz,pixels=TILE_PIXELS){
     const revision=terrainRevision,territory=state.territory,env=window.mapGameEnvironment;
     const alive=()=>state.active&&terrainRevision===revision&&state.territory===territory;
     const ox=Number(territory.x)*TERRITORY_SIZE,oz=Number(territory.y)*TERRITORY_SIZE;
-    const step=CHUNK_SIZE/TILE_PIXELS,rasterSize=TILE_PIXELS+2;
+    const step=CHUNK_SIZE/pixels,rasterSize=pixels+2;
     const grid=await env.grid(rasterSize,rasterSize,ox+cx*CHUNK_SIZE-step/2,oz+cz*CHUNK_SIZE-step/2,step,window.mapGameSharedTerrain.sample,alive,(sample,x,z)=>terrainColor(sample,x-ox,z-oz));
     if(!grid)return null;
     const data=await env.paint(grid,(sample,x,z)=>terrainColor(sample,x-ox,z-oz),alive);
@@ -488,6 +497,7 @@
     if (state.cache.has(key)) {
       const item = state.cache.get(key);
       item.lastUsed = ++state.cacheClock;
+      if(item.canvas.width-2 < (state.zoom < .6 ? 32 : TILE_PIXELS)) queueChunk(cx,cz);
       return item.canvas;
     }
 
@@ -589,23 +599,27 @@
   // Missing chunks are queued rather than constructed during camera drawing.
   function queueChunk(cx, cz) {
     const key = chunkKey(cx, cz);
-    if (state.cache.has(key) || state.queuedChunks.has(key)) return;
+    const pixels=state.zoom < .6 ? 32 : TILE_PIXELS;
+    const cached=state.cache.get(key);
+    if ((cached && cached.canvas.width-2>=pixels) || state.queuedChunks.has(key) || chunkBuildingKey===key) return;
     state.queuedChunks.add(key);
-    state.generationQueue.push({cx, cz, key});
+    state.generationQueue.push({cx, cz, key, pixels});
   }
 
   async function produceOneChunk() {
     if (chunkBuildPending || !state.active || state.dragging || !state.generationQueue.length) return;
     const job = state.generationQueue.shift();
     state.queuedChunks.delete(job.key);
-    if (state.cache.has(job.key)) return;
+    if (state.cache.has(job.key) && state.cache.get(job.key).canvas.width-2 >= job.pixels) return;
     const revision = terrainRevision;
     chunkBuildPending = true;
+    chunkBuildingKey = job.key;
     let built;
     try {
-      built = await renderChunk(job.cx, job.cz);
+      built = await renderChunk(job.cx, job.cz, job.pixels);
     } finally {
       chunkBuildPending = false;
+      chunkBuildingKey = null;
     }
     if (!built || revision !== terrainRevision || !state.active) return;
     state.cache.set(job.key, {canvas: built, lastUsed: ++state.cacheClock});
@@ -638,17 +652,18 @@
     const worldBottom =
       state.cameraZ + canvas.height / (2 * state.zoom);
 
+    const overscan = state.zoom < .6 ? 0 : 1;
     const minCX =
-      clamp(Math.floor(worldLeft / CHUNK_SIZE) - 1, 0, CHUNKS_PER_SIDE - 1);
+      clamp(Math.floor(worldLeft / CHUNK_SIZE) - overscan, 0, CHUNKS_PER_SIDE - 1);
 
     const maxCX =
-      clamp(Math.floor(worldRight / CHUNK_SIZE) + 1, 0, CHUNKS_PER_SIDE - 1);
+      clamp(Math.floor(worldRight / CHUNK_SIZE) + overscan, 0, CHUNKS_PER_SIDE - 1);
 
     const minCZ =
-      clamp(Math.floor(worldTop / CHUNK_SIZE) - 1, 0, CHUNKS_PER_SIDE - 1);
+      clamp(Math.floor(worldTop / CHUNK_SIZE) - overscan, 0, CHUNKS_PER_SIDE - 1);
 
     const maxCZ =
-      clamp(Math.floor(worldBottom / CHUNK_SIZE) + 1, 0, CHUNKS_PER_SIDE - 1);
+      clamp(Math.floor(worldBottom / CHUNK_SIZE) + overscan, 0, CHUNKS_PER_SIDE - 1);
 
     const visibleChunkCount =
       (maxCX - minCX + 1) *
@@ -674,13 +689,14 @@
           const chunk = getChunk(cx, cz);
           if (!chunk) continue;
 
+          const step = CHUNK_SIZE / (chunk.width - 2);
           const p = worldToScreen(
-            cx * CHUNK_SIZE - CHUNK_SIZE/TILE_PIXELS,
-            cz * CHUNK_SIZE - CHUNK_SIZE/TILE_PIXELS
+            cx * CHUNK_SIZE - step,
+            cz * CHUNK_SIZE - step
           );
 
           const size =
-            (CHUNK_SIZE+2*CHUNK_SIZE/TILE_PIXELS) * state.zoom;
+            (CHUNK_SIZE+2*step) * state.zoom;
 
           ctx.drawImage(
             chunk,
@@ -946,14 +962,18 @@
       <header>
         <div>
           <div class="mg-kicker">BASIC • TERRAIN</div>
-          <h3>Terrain Info</h3>
-        </div>
+          <h3>Terrain</h3>
+        </div><button type="button" data-inspector-toggle aria-label="Collapse terrain inspector" aria-expanded="true">−</button>
       </header>
       <div data-terrain-body>
         Move over the world to inspect terrain.
       </div>
     `;
 
+    panel.querySelector('[data-inspector-toggle]').onclick=()=>{
+      const body=panel.querySelector('[data-terrain-body]'),button=panel.querySelector('[data-inspector-toggle]');
+      body.hidden=!body.hidden;button.textContent=body.hidden?'+':'−';button.setAttribute('aria-expanded',String(!body.hidden));
+    };
     document.body.appendChild(panel);
     state.inspector = panel;
     return panel;
@@ -1312,6 +1332,7 @@
     beginConstruction,
     cancelConstruction,
     forestStats: forestRenderer.getState,
+    textureStats: () => Object.entries(TEXTURE_PATHS).map(([id,path])=>({id,path,loaded:Boolean(texturePixels[id]),sampleSide:64})),
     waterStats: waterRenderer.stats,
     TERRITORY_SIZE,
     CHUNK_SIZE,
@@ -1328,6 +1349,7 @@
       cameraZ: state.cameraZ,
       zoom: state.zoom,
       cachedChunks: state.cache.size,
+      detailedChunks: [...state.cache.values()].filter(v=>v.canvas.width-2>=TILE_PIXELS).length,
       buildingCount: placedBuildings.length,
       construction: Boolean(construction),
       lod:

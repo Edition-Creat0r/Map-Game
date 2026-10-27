@@ -42,7 +42,7 @@ const root = path.resolve(__dirname, ".."),
     [
       "comparison",
       ["tests/economy-performance.cjs", path.join(output, "comparison")],
-      { MAP_GAME_BASELINE_REF: "03adac1" },
+      { MAP_GAME_BASELINE_REF: process.env.MAP_GAME_VISUAL_BASELINE || "03adac1" },
     ],
     [
       "shop-comparison",

@@ -15,7 +15,7 @@ for (const file of execFileSync("git", ["ls-tree", "-r", "--name-only", base], {
 })
   .trim()
   .split("\n"))
-  if (/^[^/]+\.(js|css|html)$/.test(file))
+  if (/\.(js|css|html)$/.test(file))
     baseline.set(
       "/" + file,
       execFileSync("git", ["show", `${base}:${file}`], {

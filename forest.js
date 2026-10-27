@@ -148,11 +148,11 @@
       }
     return trees;
   }
-  // Keep a cached canopy until typical crowns exceed about 30 screen pixels.
+  // Presentation weights only; candidate IDs, density, species and sizes stay fixed.
   function lod(zoom) {
     return {
-      medium: smooth((zoom - 0.58) / 0.14),
-      close: smooth((zoom - 0.72) / 0.2),
+      medium: smooth((zoom - 0.18) / 0.1),
+      close: smooth((zoom - 0.22) / 0.1),
     };
   }
   window.mapGameForest = Object.freeze({

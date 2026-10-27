@@ -64,7 +64,7 @@
     Object.entries(values || {})
       .map(
         ([k, v]) =>
-          `${k === "money" ? "$" : esc(resource(k)) + " "}${fmt(v)}${rate ? "/min" : ""}`,
+          `${window.mapGameVisuals?.icon(k) || ""}${k === "money" ? "$" : esc(resource(k)) + " "}${fmt(v)}${rate ? "/min" : ""}`,
       )
       .join(" · ");
   function ensure() {
@@ -75,7 +75,7 @@
     shop.setAttribute("role", "dialog");
     shop.setAttribute("aria-modal", "true");
     shop.setAttribute("aria-label", "Construction shop");
-    shop.innerHTML = `<div class="mg-econ-shell"><header><div><small>SINGLEPLAYER · CONSTRUCTION</small><h2>Industrial construction</h2></div><button data-close aria-label="Close shop">Close ×</button></header><p>Choose a building, then click a suitable site. R rotates; Escape cancels. Payment happens only when placed.</p><p>Production and recipe inputs: 1.2× while visibly online; 1× offline, with no elapsed-time cap. Upkeep is unboosted.</p><p>120 industrial definitions · availability follows your materials and research. Five starter contracts remain available.</p><div class="mg-industrial-filters"><label>Category <select data-category><option value="starter">Starter buildings</option><option value="all">All buildings</option><option value="industries">All industries</option>${Object.entries(
+    shop.innerHTML = `<div class="mg-econ-shell"><header><div><small>SINGLEPLAYER · CONSTRUCTION</small><h2>Construction</h2></div><button data-close aria-label="Close shop">Close ×</button></header><p>Choose a building, then click a suitable site. R rotates; Escape cancels. Payment happens only when placed.</p><details class="mg-production-note"><summary>Production rates</summary><p>Production and recipe inputs: 1.2× while online; 1× offline, with no time cap. Upkeep is unboosted.</p></details><p>Homes, utilities and industry. Research opens new possibilities.</p><div class="mg-industrial-filters"><label>Category <select data-category><option value="starter">Starter buildings</option><option value="all">All buildings</option><option value="industries">All industries</option>${Object.entries(
       labels,
     )
       .map(([id, name]) => `<option value="${id}">${name}</option>`)
@@ -85,6 +85,10 @@
     document.body.appendChild(shop);
     shop.querySelector("[data-detail]").onchange = () => render();
     shop.querySelector("[data-close]").onclick = hideShop;
+    shop.addEventListener("click", (e) => {
+      if (e.target === shop) hideShop();
+    });
+    window.mapGameVisuals?.trapDialog(shop);
     for (const selector of [
       "[data-category]",
       "[data-availability]",
@@ -162,35 +166,60 @@
         `${filtered.length} entries · page ${page + 1} / ${pages}`;
       shop.querySelector("[data-prev]").disabled = page === 0;
       shop.querySelector("[data-next]").disabled = page === pages - 1;
-      shop.querySelector("[data-list]").innerHTML =
+      const list = shop.querySelector("[data-list]");
+      const renderKey = JSON.stringify([
+        category,
+        status,
+        search,
+        page,
+        snap.enabled,
+        active,
+        shop.querySelector("[data-detail]").checked,
         filtered
           .slice(page * PAGE, (page + 1) * PAGE)
-          .map((d) => {
-            const r = d.economy,
-              locked = P.reason(snap, d);
-            const reason = locked
-              ? locked
-              : !snap.enabled
-                ? "Singleplayer only"
-                : !active
-                  ? "Enter a local territory"
-                  : !window.mapGameEconomy.canAfford(d.cost)
-                    ? "Insufficient construction resources"
-                    : "";
-            const production = Object.keys(r.production || {}).length
-              ? amounts(r.production, true)
-              : r.housing
-                ? `Housing +${r.housing} · growth ${r.growth}/min when powered`
-                : `Energy capacity +${r.energySupply}`;
-            return `<article data-catalog-id="${d.id}"><div><small>${esc(d.sectorLabel || d.category)} · ${locked ? "Discover" : "Available"}</small><h4>${esc(d.name)}</h4><p>${amounts(d.cost)} · footprint ${d.footprint.join(" × ")} m</p><p>Base output: ${production}</p><p>Base inputs: ${Object.keys(r.inputs || {}).length ? amounts(r.inputs, true) : d.industrial ? "Local extraction — no material input" : "No material inputs (starter contract)"}</p><p>Energy ${r.energyUse || 0} · workers ${r.workforce || 0} · upkeep $${r.upkeep || 0}/min</p>${d.industrial ? `<p ${shop.querySelector("[data-detail]").checked ? "" : "hidden"}>${esc(d.logistics.storageClass)} goods · advanced upgrades planned</p>` : ""}<p>Requires dry terrain, slope ≤ 0.54, no overlap. Stocks are shared across your Singleplayer world.</p></div><div><button data-buy="${d.id}" ${reason ? "disabled" : ""}>Place</button><p>${esc(reason)}</p></div></article>`;
-          })
-          .join("") || "<p>No matching buildings.</p>";
+          .map((d) => [
+            d.id,
+            P.reason(snap, d),
+            window.mapGameEconomy.canAfford(d.cost),
+          ]),
+      ]);
+      if (list.dataset.renderKey !== renderKey) {
+        const focused = document.activeElement?.dataset.buy;
+        list.innerHTML =
+          filtered
+            .slice(page * PAGE, (page + 1) * PAGE)
+            .map((d) => {
+              const r = d.economy,
+                locked = P.reason(snap, d);
+              const reason = locked
+                ? locked
+                : !snap.enabled
+                  ? "Singleplayer only"
+                  : !active
+                    ? "Enter a local territory"
+                    : !window.mapGameEconomy.canAfford(d.cost)
+                      ? "Insufficient construction resources"
+                      : "";
+              const production = Object.keys(r.production || {}).length
+                ? amounts(r.production, true)
+                : r.housing
+                  ? `Housing +${r.housing} · growth ${r.growth}/min when powered`
+                  : `Energy capacity +${r.energySupply}`;
+              return `<article data-catalog-id="${d.id}" class="mg-build-card"><div class="mg-build-preview">${window.mapGameVisuals?.preview(d) || ""}</div><div class="mg-build-copy"><small>${esc(d.sectorLabel || d.category)} · ${locked ? "Discover" : "Available"}</small><h4>${esc(d.name)}</h4><p class="mg-build-cost">${amounts(d.cost)}</p><p class="mg-build-output">${production}</p><p class="mg-build-needs">ϟ ${r.energyUse || 0} · ♙ ${r.workforce || 0} workers · $${r.upkeep || 0}/min upkeep</p><details ${shop.querySelector("[data-detail]").checked ? "open" : ""}><summary>Recipe & site</summary><p>Inputs: ${Object.keys(r.inputs || {}).length ? amounts(r.inputs, true) : "No material inputs"}</p><p>${d.footprint.join(" × ")} m · dry ground · slope ≤ 0.54 · no overlap</p></details><p class="mg-build-reason" id="reason-${d.id}">${esc(reason)}</p></div><button data-buy="${d.id}" aria-describedby="reason-${d.id}" ${reason ? "disabled" : ""}>Place</button></article>`;
+            })
+            .join("") || "<p>No matching buildings.</p>";
+        list.dataset.renderKey = renderKey;
+        if (focused) {
+          const button = list.querySelector(`[data-buy="${focused}"]`);
+          if (button && !button.disabled) button.focus();
+        }
+      }
     }
     if (stats && !stats.hidden) {
       const s = snap.summary,
         inventoryOpen = stats.querySelector("[data-inventory]")?.open,
         legacyOpen = stats.querySelector("[data-legacy]")?.open;
-      stats.innerHTML = `<header><h3>World statistics</h3><button data-collapse aria-label="Collapse statistics">−</button></header><p>Singleplayer economy ${snap.enabled ? "· active" : "· paused"}</p><dl><dt>Money</dt><dd>$${fmt(snap.money)}</dd><dt>Steel</dt><dd>${fmt(snap.steel)}</dd><dt>Carbon</dt><dd>${fmt(snap.carbon)}</dd><dt>Energy</dt><dd>${fmt(s.energyUsed)} used / ${fmt(s.energySupply)} capacity</dd><dt>Requested power</dt><dd>${fmt(s.requestedEnergy)} · deficit ${fmt(s.energyDeficit)}</dd><dt>Population</dt><dd>${fmt(s.population)} / ${fmt(s.housing)} housed</dd><dt>Workforce</dt><dd>${s.workforceUsed} used / ${s.workforce} available</dd><dt>Requested workers</dt><dd>${s.requestedWorkforce} · deficit ${s.workforceDeficit}</dd><dt>Money production</dt><dd>$${fmt(snap.incomePerMin)}/min</dd><dt>Upkeep</dt><dd>$${fmt(s.upkeep)}/min</dd></dl><details data-inventory ${inventoryOpen ? "open" : ""}><summary>Unlocked materials</summary><dl>${
+      stats.innerHTML = `<header><h3>City & inventory</h3><button data-collapse aria-label="Collapse statistics">−</button></header><p>Singleplayer economy ${snap.enabled ? "· active" : "· paused"}</p><dl><dt>Money</dt><dd>$${fmt(snap.money)}</dd><dt>Steel</dt><dd>${fmt(snap.steel)}</dd><dt>Carbon</dt><dd>${fmt(snap.carbon)}</dd><dt>Energy</dt><dd>${fmt(s.energyUsed)} used / ${fmt(s.energySupply)} capacity</dd><dt>Requested power</dt><dd>${fmt(s.requestedEnergy)} · deficit ${fmt(s.energyDeficit)}</dd><dt>Population</dt><dd>${fmt(s.population)} / ${fmt(s.housing)} housed</dd><dt>Workforce</dt><dd>${s.workforceUsed} used / ${s.workforce} available</dd><dt>Requested workers</dt><dd>${s.requestedWorkforce} · deficit ${s.workforceDeficit}</dd><dt>Money production</dt><dd>$${fmt(snap.incomePerMin)}/min</dd><dt>Upkeep</dt><dd>$${fmt(s.upkeep)}/min</dd></dl><details data-inventory ${inventoryOpen ? "open" : ""}><summary>Unlocked materials</summary><dl>${
         [...R.data.materials]
           .filter(
             (m) =>
@@ -200,7 +229,10 @@
           )
           .map((m) => [m, snap[m.id] ?? snap.inventory?.[m.id] ?? 0])
           .filter(() => true)
-          .map(([m, n]) => `<dt>${esc(m.name)}</dt><dd>${fmt(n)}</dd>`)
+          .map(
+            ([m, n]) =>
+              `<dt>${window.mapGameVisuals?.icon(m.id) || ""}${esc(m.name)}</dt><dd>${fmt(n)}</dd>`,
+          )
           .join("") || "<dt>No extracted materials yet</dt>"
       }</dl></details><details data-legacy ${legacyOpen ? "open" : ""}><summary>Legacy Inventory</summary><dl>${
         R.data.materials
@@ -212,10 +244,10 @@
           )
           .map(
             (m) =>
-              `<dt>${esc(m.name)}</dt><dd>${fmt(snap[m.id] ?? snap.inventory?.[m.id] ?? 0)}</dd>`,
+              `<dt>${window.mapGameVisuals?.icon(m.id) || ""}${esc(m.name)}</dt><dd>${fmt(snap[m.id] ?? snap.inventory?.[m.id] ?? 0)}</dd>`,
           )
           .join("") || "<dt>No hidden balances</dt>"
-      }</dl></details><p>${esc(snap.error || (snap.catchingUp ? "Settling offline production…" : snap.clockNotice || "1× offline · no time cap · exact saved checkpoints"))}</p><div data-operations></div><footer><button data-op-prev>Previous</button> <span data-op-page></span> <button data-op-next>Next</button></footer>`;
+      }</dl></details><p>${esc(snap.error || (snap.catchingUp ? "Settling offline production…" : snap.clockNotice || "Your city keeps producing while you are away."))}</p><div data-operations></div><footer><button data-op-prev>Previous</button> <span data-op-page></span> <button data-op-next>Next</button></footer>`;
       const pages = Math.max(1, Math.ceil(s.buildings.length / OPERATIONS));
       operationsPage = Math.min(operationsPage, pages - 1);
       stats.querySelector("[data-op-page]").textContent =
@@ -248,8 +280,12 @@
   }
   function showShop() {
     ensure();
+    const research = document.getElementById("mgProgressionPanel");
+    if (research) research.hidden = true;
+    if (stats) stats.hidden = true;
     message = "";
     shop.hidden = false;
+    shop.setAttribute("aria-modal", "true");
     render();
     shop.querySelector("[data-close]").focus();
   }
@@ -258,6 +294,9 @@
   }
   function toggleStats() {
     ensure();
+    hideShop();
+    const research = document.getElementById("mgProgressionPanel");
+    if (research) research.hidden = true;
     stats.hidden = !stats.hidden;
     render();
   }

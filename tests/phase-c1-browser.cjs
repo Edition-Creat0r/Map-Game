@@ -205,6 +205,7 @@ fs.mkdirSync(output, { recursive: true });
     ),
     100,
   );
+  await page.locator("#mgNextGoal [data-priority-options]").evaluate(el=>{el.open=true});
   await page.selectOption("#mgNextGoal [data-priority]", "automatic");
   await page.click("#mgNextGoal [data-plan]");
   assert.equal(

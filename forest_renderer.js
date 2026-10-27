@@ -26,6 +26,7 @@
       olive: "tree_round_olive.png",
       willow: "tree_deciduous_mint_large.png",
       flowering: "tree_cherry_pink.png",
+      scrub: "tree_round_olive.png",
     };
     for (const [id, name] of Object.entries(sprites)) {
       const img = new Image();
@@ -41,23 +42,25 @@
       atlas.width = 64;
       atlas.height = 96;
       const c = atlas.getContext("2d");
-      c.fillStyle = "#655342";
-      c.fillRect(29, 68, 6, 25);
-      for (let level = 2; level >= 0; level--) {
-        const y = 8 + level * 20,
-          w = 15 + level * 7;
-        c.fillStyle = species === "spruce" ? "#345e53" : "#486b56";
+      c.fillStyle = "#63503c";
+      c.fillRect(29, 57, 6, 36);
+      for (let level = 5; level >= 0; level--) {
+        const y = 8 + level * 10,
+          w = 10 + level * 3.5;
+        c.fillStyle = species === "spruce" ? "#244d43" : "#385b40";
         c.beginPath();
-        c.moveTo(32, y);
-        c.lineTo(32 - w, y + 42);
-        c.lineTo(32 + w, y + 42);
+        c.moveTo(32, y - 7);
+        for (let k = 0; k <= 8; k++) {
+          const t = k / 8;
+          c.lineTo(32 - w + 2 * w * t, y + 21 - Math.sin(t * Math.PI * 8) * 2);
+        }
         c.closePath();
         c.fill();
-        c.fillStyle = species === "spruce" ? "#638977" : "#82916c";
+        c.fillStyle = species === "spruce" ? "#507c67" : "#729061";
         c.beginPath();
-        c.moveTo(32, y);
-        c.lineTo(32 - w, y + 42);
-        c.lineTo(29, y + 35);
+        c.moveTo(32, y - 7);
+        c.lineTo(32 - w, y + 19);
+        c.lineTo(29, y + 13);
         c.closePath();
         c.fill();
       }
@@ -155,6 +158,7 @@
       active = true;
       nowCamera = camera;
       const { x, z, zoom, width, height, originX, originZ } = camera;
+      const shadows = window.mapGameRuntime?.scene?.shadowsEnabled !== false;
       // Padding includes crowns whose roots lie outside the viewport.
       const weights = forest.lod(zoom);
       // Large/high-DPI views fall back smoothly to cached coarse cover instead
@@ -171,7 +175,26 @@
         drawn = 0;
         return;
       }
-      const margin = weights.close === 1 ? 256 / zoom + 140 : 100;
+      let margin =
+        weights.close === 1 && weights.medium === 1 ? 128 / zoom + 140 : 100;
+      const tileCount = (pad) =>
+        (Math.floor((x + width / (2 * zoom) + pad) / SIZE) -
+          Math.floor((x - width / (2 * zoom) - pad) / SIZE) +
+          1) *
+        (Math.floor((z + height / (2 * zoom) + pad) / SIZE) -
+          Math.floor((z - height / (2 * zoom) - pad) / SIZE) +
+          1);
+      if (tileCount(margin) > CACHE_LIMIT) {
+        // A partial-detail view needs no translated viewport padding.
+        weights.medium = Math.min(weights.medium, 0.999);
+        margin = 100;
+        if (tileCount(margin) > CACHE_LIMIT) {
+          active = false;
+          queue.length = 0;
+          drawn = 0;
+          return;
+        }
+      }
       const left = Math.max(originX, x - width / (2 * zoom) - margin),
         right = Math.min(
           originX + terrain.SIZE,
@@ -243,14 +266,15 @@
         layer.width === width &&
         layer.height === height &&
         layer.revision === tileRevision &&
-        Math.abs((x - layer.x) * zoom) < 160 &&
-        Math.abs((z - layer.z) * zoom) < 160
+        layer.shadows === shadows &&
+        Math.abs((x - layer.x) * zoom) < 96 &&
+        Math.abs((z - layer.z) * zoom) < 96
       ) {
         ctx.globalAlpha = 1;
         ctx.drawImage(
           layer.canvas,
-          -256 + (layer.x - x) * zoom,
-          -256 + (layer.z - z) * zoom,
+          -128 + (layer.x - x) * zoom,
+          -128 + (layer.z - z) * zoom,
         );
         ctx.restore();
         return;
@@ -261,15 +285,15 @@
       if (close === 1 && medium === 1) {
         newLayer = layer?.canvas || document.createElement("canvas");
         if (
-          newLayer.width !== width + 512 ||
-          newLayer.height !== height + 512
+          newLayer.width !== width + 256 ||
+          newLayer.height !== height + 256
         ) {
-          newLayer.width = width + 512;
-          newLayer.height = height + 512;
+          newLayer.width = width + 256;
+          newLayer.height = height + 256;
         }
         target = newLayer.getContext("2d");
         target.clearRect(0, 0, newLayer.width, newLayer.height);
-        offset = 256;
+        offset = 128;
       }
       if (medium > 0) {
         for (const tile of visible)
@@ -289,8 +313,23 @@
         for (const t of trees) {
           const px = offset + width / 2 + (t.x - x) * zoom,
             py = offset + height / 2 + (t.z - z) * zoom,
-            h = t.size * zoom,
+            h = t.size * zoom * 1.16,
             img = images[t.species];
+          if (shadows) {
+            target.globalAlpha = medium * 0.19;
+            target.fillStyle = "#0b2021";
+            target.beginPath();
+            target.ellipse(
+              px + h * 0.14,
+              py + h * 0.015,
+              h * 0.32,
+              h * 0.09,
+              -0.25,
+              0,
+              Math.PI * 2,
+            );
+            target.fill();
+          }
           if (close < 1) {
             target.globalAlpha = medium * (1 - close);
             primitive(target, t, px, py, h);
@@ -326,9 +365,10 @@
           width,
           height,
           revision: tileRevision,
+          shadows,
         };
         ctx.globalAlpha = 1;
-        ctx.drawImage(newLayer, -256, -256);
+        ctx.drawImage(newLayer, -128, -128);
       }
       drawn = trees.length;
       ctx.restore();

@@ -15,7 +15,7 @@ for (const file of execFileSync("git", ["ls-tree", "-r", "--name-only", base], {
 })
   .trim()
   .split("\n"))
-  if (/^[^/]+\.(js|css|html)$/.test(file))
+  if (/\.(js|css|html)$/.test(file))
     baseline.set(
       "/" + file,
       execFileSync("git", ["show", `${base}:${file}`], {
@@ -136,7 +136,7 @@ for (const file of execFileSync("git", ["ls-tree", "-r", "--name-only", base], {
         await page.waitForTimeout(120);
       }
       await page.waitForFunction(
-        () => mapGameBasicWorld.getState().cachedChunks >= 12,
+        () => {const s=mapGameBasicWorld.getState();return (s.detailedChunks ?? s.cachedChunks)>=12;},
       );
       report.detailReadyMs = Date.now() - detail;
       report.detailPan = await gesture("#basicCanvas");
