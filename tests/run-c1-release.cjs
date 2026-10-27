@@ -52,6 +52,10 @@ const root = path.resolve(__dirname, ".."),
       ],
     ],
     ["model", ["tests/phase-c1-benchmark.cjs", path.join(output, "model")]],
+    [
+      "rc-performance",
+      ["tests/economy-rc-benchmark.cjs", path.join(output, "rc-performance")],
+    ],
   ];
 (async () => {
   const results = [];

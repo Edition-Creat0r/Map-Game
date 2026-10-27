@@ -80,7 +80,21 @@ for (const count of [100, 1000, 10000])
       const sets = { B: [], C1: [] },
         init = { B: [], C1: [] };
       let baseline;
-      for (let round = 0; round < 3; round++)
+      // Warm both solvers equally for each city/scenario before collecting data.
+      // Retain raw samples: a three-sample mixed-process median hid variance.
+      for (let warm = 0; warm < 2; warm++)
+        for (const model of [B, M]) {
+          const state = model.normalize(raw, epoch);
+          model.bindContracts(state, defs, 3);
+          if (model === M) P.init(state, defs, { legacy: true });
+          let result;
+          do {
+            result = model.advance(state, epoch + 1000 * year, false, defs, {
+              maxEvaluations: 64,
+            });
+          } while (!result.complete);
+        }
+      for (let round = 0; round < 5; round++)
         for (const [variant, model] of round % 2
           ? [
               ["C1", M],
@@ -112,8 +126,12 @@ for (const count of [100, 1000, 10000])
             `${count} ${scenario} ${variant}`,
           );
         }
-      const median = (a) => a.sort((x, y) => x - y)[1];
+      const median = (a) =>
+        a.slice().sort((x, y) => x - y)[Math.floor(a.length / 2)];
       const record = {
+        warmupsPerVariant: 2,
+        samplesPerVariant: 5,
+        rawSamples: sets,
         count,
         scenario,
         growing,

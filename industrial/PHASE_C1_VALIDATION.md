@@ -1,5 +1,7 @@
 # Phase C1 validation and release gate
 
+**RC follow-up:** see `PHASE_C1_RC.md` for controlled profiling that supersedes the original three-sample performance concern. Historical measurements below remain as recorded. No runtime optimization was retained; final candidate reports are under `/workspace/industrial-c1-rc/`.
+
 Branch: `feature/0.3.4-industrial-revolution`, based on validated Phase B `03adac1`. The branch contains rendering stabilization, biomes, forests, terrain/hydrology polish, starter economy and Phases A/B. Current remote main `49b7dcac7395c409b2343c42b6efd5924394cb86` is an ancestor, with no conflicting main-only changes when fetched for this review. C1 is an additive implementation of the official amendment; C2–F remain future work.
 
 ## Implemented and checked
