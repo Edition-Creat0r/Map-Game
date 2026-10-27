@@ -20,7 +20,8 @@
     message = "",
     lastSnapshot = null,
     page = 0,
-    operationsPage = 0;
+    operationsPage = 0,
+    shopReturn = null;
   const counts = R.data.buildings.reduce(
     (a, d) => {
       a[d.availability]++;
@@ -279,6 +280,8 @@
     }
   }
   function showShop() {
+    if (!document.activeElement?.closest?.("#mgEconomyShop"))
+      shopReturn = document.activeElement;
     ensure();
     const research = document.getElementById("mgProgressionPanel");
     if (research) research.hidden = true;
@@ -290,7 +293,10 @@
     shop.querySelector("[data-close]").focus();
   }
   function hideShop() {
-    if (shop) shop.hidden = true;
+    if (shop && !shop.hidden) {
+      shop.hidden = true;
+      if (shopReturn?.isConnected) shopReturn.focus();
+    }
   }
   function toggleStats() {
     ensure();

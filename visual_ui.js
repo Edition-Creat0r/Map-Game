@@ -96,6 +96,7 @@
     if (panel.dataset.focusTrap) return;
     panel.dataset.focusTrap = "true";
     panel.addEventListener("keydown", (e) => {
+      if (panel.hidden) return;
       if (e.key === "Tab") {
         const a = [
           ...panel.querySelectorAll(
