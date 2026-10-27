@@ -53,11 +53,9 @@
   // draw one lightweight overview raster, then switch to chunks as you zoom.
   const OVERVIEW_PIXELS = 160; // startup-safe overview; detail streams later
   const DETAIL_ZOOM_THRESHOLD = 0.145;
-  const TREE_CLUSTER_ZOOM = 0.155;
   const TREE_DETAIL_ZOOM = 0.245;
   const MOUNTAIN_DETAIL_ZOOM = 0.145;
   const MAX_DETAIL_CHUNKS_PER_FRAME = 32;
-  const MAX_TREE_SYMBOLS = 80;
   const MAX_MOUNTAIN_SYMBOLS = 65;
 
   const state = {
@@ -85,8 +83,6 @@
     queuedChunks: new Set(),
     generationQueue: [],
     lastInteraction: 0,
-    treeImages: [],
-    treesLoading: false
   };
 
   // ----------------------------------------------------------
@@ -195,6 +191,11 @@
     return window.mapGameSharedTerrain.local(Number(t.x)||0,Number(t.y)||0,localX,localZ);
   }
 
+  function terrainElevation(localX,localZ) {
+    const t=state.territory || {x:0,y:0};
+    return window.mapGameSharedTerrain.elevationAt((Number(t.x)||0)*TERRITORY_SIZE+localX,(Number(t.y)||0)*TERRITORY_SIZE+localZ);
+  }
+
   // ----------------------------------------------------------
   // Color / art helpers
   // ----------------------------------------------------------
@@ -219,6 +220,7 @@
   };
 
   const textureImages = {};
+  const texturePixels = {};
   let texturesReady = false;
 
   function loadTextureImage(key, path) {
@@ -226,6 +228,9 @@
       const img = new Image();
       img.onload = () => {
         textureImages[key] = img;
+        const tile=document.createElement('canvas');tile.width=tile.height=16;
+        const context=tile.getContext('2d');context.drawImage(img,0,0,16,16);
+        const rgba=context.getImageData(0,0,16,16).data,luma=new Float32Array(256);for(let i=0;i<256;i++)luma[i]=(rgba[i*4]+rgba[i*4+1]+rgba[i*4+2])/3-128;texturePixels[key]=luma;
         resolve(true);
       };
       img.onerror = () => {
@@ -243,7 +248,9 @@
         ([key, path]) => loadTextureImage(key, path)
       )
     );
-    texturesReady = true;
+    texturesReady = true;textureRevision++;
+    terrainRevision++;state.cache.clear();state.queuedChunks.clear();state.generationQueue.length=0;
+    state.overviewReady=false;state.needsDraw=true;
   }
 
   const COLORS = {
@@ -265,14 +272,7 @@
   function terrainColor(sample, x, z) {
     let base;
 
-    if (sample.water) {
-      const waterNoise = fbm(x, z, 850, 3, 14101);
-      return mixColor(
-        COLORS.waterDeep,
-        COLORS.waterShallow,
-        clamp(waterNoise * 0.85, 0, 1)
-      );
-    }
+    if(sample.water)return window.mapGameEnvironment.color(sample,0,0,0);
 
     switch (sample.terrain) {
       case "dry_plains":
@@ -346,14 +346,25 @@
     let sum=0,r=0,g=0,bb=0;
     for(const [color,amount] of materials){sum+=amount;r+=color[0]*amount;g+=color[1]*amount;bb+=color[2]*amount;}
     if(sum>0.01 && !sample.water){base=mixColor(base,[r/sum,g/sum,bb/sum],.65);}
-    const micro =
-      (fbm(x, z, 610, 3, 15101) - 0.5) * 18;
+    if (sample.biome) {
+      const amount=.72*(1-Math.min(1,(wt.rock||0)+(wt.snow||0))*.8);
+      base=mixColor(base,sample.biome.color,amount);
+    }
+    // Tiny cached texture tiles, blended by continuous biome weights. No patterns
+    // or image decoding in raster loops. Global coordinates keep edges aligned.
+    const point=globalPoint(x,z);
+    const ix=((Math.floor(point.x/24)%16)+16)%16;
+    const iz=((Math.floor(point.z/24)%16)+16)%16;
+    let grain=0;
+    for(const id in (texturesReady?sample.biome?.weights:null)){
+      const pixels=texturePixels[window.mapGameSharedTerrain.BIOMES[id].texture];
+      if(pixels){const fx=point.x/24-Math.floor(point.x/24),fz=point.z/24-Math.floor(point.z/24);const x1=(ix+1)%16,z1=(iz+1)%16;const top=pixels[iz*16+ix]*(1-fx)+pixels[iz*16+x1]*fx,bottom=pixels[z1*16+ix]*(1-fx)+pixels[z1*16+x1]*fx;grain+=(top*(1-fz)+bottom*fz)*sample.biome.weights[id]*.07;}
+    }
+    const micro = grain +
+      (fbm(point.x, point.z, 610, 3, 15101) - 0.5) * 18;
 
-    return [
-      clamp(Math.round(base[0] + micro), 0, 255),
-      clamp(Math.round(base[1] + micro), 0, 255),
-      clamp(Math.round(base[2] + micro), 0, 255)
-    ];
+    const canopy=window.mapGameForest.densityAt(sample,point.x,point.z);
+    return window.mapGameEnvironment.color(sample,(base[0]+micro)*(1-canopy*.16),(base[1]+micro)*(1-canopy*.08),(base[2]+micro)*(1-canopy*.10));
   }
 
   function textureKeyForSample(sample) {
@@ -383,139 +394,36 @@
     return Math.round(sample.elevation * 940);
   }
 
-  function hillShade(localX, localZ, step = 56) {
-    // Detail-only hillshade. Far-zoom overview computes shading from its
-    // already-sampled elevation grid instead of resampling terrain 4x/pixel.
-    const west = terrainSample(localX - step, localZ).elevation;
-    const east = terrainSample(localX + step, localZ).elevation;
-    const north = terrainSample(localX, localZ - step).elevation;
-    const south = terrainSample(localX, localZ + step).elevation;
-
-    const dx = east - west;
-    const dz = south - north;
-
-    const light =
-      (-dx * 0.68) +
-      (-dz * 0.52);
-
-    return clamp(light * 2.7, -0.22, 0.22);
-  }
-
-  // ----------------------------------------------------------
-  // Territory overview LOD
-  // ----------------------------------------------------------
-
-  function buildOverview() {
-    if (state.overviewReady && state.overviewCanvas) {
-      return state.overviewCanvas;
-    }
-
-    const off = document.createElement("canvas");
-    off.width = OVERVIEW_PIXELS;
-    off.height = OVERVIEW_PIXELS;
-
-    const c = off.getContext("2d", { alpha: false });
-    const image = c.createImageData(OVERVIEW_PIXELS, OVERVIEW_PIXELS);
-    const data = image.data;
-
-    // Sample terrain ONCE per overview pixel.
-    const elevation = new Float32Array(OVERVIEW_PIXELS * OVERVIEW_PIXELS);
-    const samples = new Array(OVERVIEW_PIXELS * OVERVIEW_PIXELS);
-
-    for (let py = 0; py < OVERVIEW_PIXELS; py++) {
-      const wz =
-        (py + 0.5) /
-        OVERVIEW_PIXELS *
-        TERRITORY_SIZE;
-
-      for (let px = 0; px < OVERVIEW_PIXELS; px++) {
-        const wx =
-          (px + 0.5) /
-          OVERVIEW_PIXELS *
-          TERRITORY_SIZE;
-
-        const index = py * OVERVIEW_PIXELS + px;
-        const s = terrainSample(wx, wz);
-
-        samples[index] = s;
-        elevation[index] = s.elevation;
+  let overviewJob=null,overviewData=null,textureRevision=0;
+  async function buildOverview(){
+    if(state.overviewReady&&state.overviewCanvas)return state.overviewCanvas;
+    const territory=state.territory;
+    if(overviewJob?.territory===territory)return overviewJob.promise;
+    const job={territory};overviewJob=job;
+    const alive=()=>state.active&&state.territory===territory;
+    job.promise=(async()=>{
+      const env=window.mapGameEnvironment,step=TERRITORY_SIZE/OVERVIEW_PIXELS;
+      if(!overviewData||overviewData.territory!==territory){
+        const grid=await env.grid(OVERVIEW_PIXELS,OVERVIEW_PIXELS,Number(territory.x)*TERRITORY_SIZE+step/2,Number(territory.y)*TERRITORY_SIZE+step/2,step,window.mapGameSharedTerrain.sample,alive);
+        if(!grid||!alive())return null;overviewData={territory,grid};
       }
-    }
-
-    // Shade from neighboring cached elevation values. This is dramatically
-    // cheaper than calling terrainSample four extra times per pixel.
-    for (let py = 0; py < OVERVIEW_PIXELS; py++) {
-      for (let px = 0; px < OVERVIEW_PIXELS; px++) {
-        const index = py * OVERVIEW_PIXELS + px;
-        const s = samples[index];
-
-        const wx =
-          (px + 0.5) /
-          OVERVIEW_PIXELS *
-          TERRITORY_SIZE;
-
-        const wz =
-          (py + 0.5) /
-          OVERVIEW_PIXELS *
-          TERRITORY_SIZE;
-
-        const west =
-          elevation[
-            py * OVERVIEW_PIXELS +
-            Math.max(0, px - 1)
-          ];
-
-        const east =
-          elevation[
-            py * OVERVIEW_PIXELS +
-            Math.min(OVERVIEW_PIXELS - 1, px + 1)
-          ];
-
-        const north =
-          elevation[
-            Math.max(0, py - 1) * OVERVIEW_PIXELS +
-            px
-          ];
-
-        const south =
-          elevation[
-            Math.min(OVERVIEW_PIXELS - 1, py + 1) * OVERVIEW_PIXELS +
-            px
-          ];
-
-        const shade =
-          s.water
-            ? 0
-            : clamp(
-                ((west - east) * 0.90 + (north - south) * 0.72) * 3.0,
-                -0.31,
-                0.27
-              );
-
-        const color = terrainColor(s, wx, wz);
-        const i = index * 4;
-
-        data[i] = clamp(color[0] + shade * 255, 0, 255);
-        data[i + 1] = clamp(color[1] + shade * 255, 0, 255);
-        data[i + 2] = clamp(color[2] + shade * 255, 0, 255);
-        data[i + 3] = 255;
-      }
-    }
-
-    c.putImageData(image, 0, 0);
-
-    // Forest color is already encoded continuously in the terrain raster.
-    // Do not overlay a grid of circles at far zoom; it reveals the sampling
-    // lattice and looks like dots instead of a forest.
-
-    state.overviewCanvas = off;
-    state.overviewReady = true;
-
-    return off;
+      while(alive()){
+        const revision=textureRevision;
+        const data=await env.paint(overviewData.grid,(sample,x,z)=>terrainColor(sample,x-Number(territory.x)*TERRITORY_SIZE,z-Number(territory.y)*TERRITORY_SIZE),alive);
+        if(!data||!alive())return null;
+        if(revision!==textureRevision)continue;
+        const off=document.createElement('canvas');off.width=off.height=OVERVIEW_PIXELS;
+        off.getContext('2d',{alpha:false}).putImageData(new ImageData(data,OVERVIEW_PIXELS,OVERVIEW_PIXELS),0,0);
+        state.overviewCanvas=off;state.overviewReady=true;state.needsDraw=true;return off;
+      }return null;
+    })().finally(()=>{if(overviewJob===job)overviewJob=null;});
+    return job.promise;
   }
 
   function drawOverview() {
-    const overview = buildOverview();
+    if(!state.overviewReady)void buildOverview().catch(error=>console.error('Overview generation failed:',error));
+    const overview=state.overviewCanvas;
+    if(!overview)return;
 
     const a = worldToScreen(0, 0);
     const b = worldToScreen(TERRITORY_SIZE, TERRITORY_SIZE);
@@ -540,54 +448,20 @@
     return `${cx},${cz}`;
   }
 
-  function renderChunk(cx, cz) {
-    const off = document.createElement("canvas");
-    off.width = TILE_PIXELS;
-    off.height = TILE_PIXELS;
+  let terrainRevision = 0;
+  let chunkBuildPending = false;
 
-    const c = off.getContext("2d", { alpha: false });
-    const image = c.createImageData(TILE_PIXELS, TILE_PIXELS);
-    const data = image.data;
-
-    const worldX0 = cx * CHUNK_SIZE;
-    const worldZ0 = cz * CHUNK_SIZE;
-
-    for (let py = 0; py < TILE_PIXELS; py++) {
-      for (let px = 0; px < TILE_PIXELS; px++) {
-        const localX =
-          worldX0 +
-          px /
-          Math.max(1, TILE_PIXELS - 1) *
-          CHUNK_SIZE;
-
-        const localZ =
-          worldZ0 +
-          py /
-          Math.max(1, TILE_PIXELS - 1) *
-          CHUNK_SIZE;
-
-        const sample = terrainSample(localX, localZ);
-        const color = terrainColor(sample, localX, localZ);
-        const shade = sample.water ? 0 : hillShade(localX, localZ, 42);
-
-        const i = (py * TILE_PIXELS + px) * 4;
-
-        data[i] = clamp(color[0] + shade * 255, 0, 255);
-        data[i + 1] = clamp(color[1] + shade * 255, 0, 255);
-        data[i + 2] = clamp(color[2] + shade * 255, 0, 255);
-        data[i + 3] = 255;
-      }
-    }
-
-    c.putImageData(image, 0, 0);
-
-    // 0.3.2A3.2: Do not paint square image patches onto chunks. They
-    // expose a rectangular grid and don't agree across chunk edges.
-    // Shared biome weights already provide smooth material colors; a
-    // world-anchored seamless weighted texture compositor comes next.
-    drawChunkArt(c, cx, cz);
-
-    return off;
+  async function renderChunk(cx,cz){
+    const revision=terrainRevision,territory=state.territory,env=window.mapGameEnvironment;
+    const alive=()=>state.active&&terrainRevision===revision&&state.territory===territory;
+    const ox=Number(territory.x)*TERRITORY_SIZE,oz=Number(territory.y)*TERRITORY_SIZE;
+    const step=CHUNK_SIZE/TILE_PIXELS,rasterSize=TILE_PIXELS+2;
+    const grid=await env.grid(rasterSize,rasterSize,ox+cx*CHUNK_SIZE-step/2,oz+cz*CHUNK_SIZE-step/2,step,window.mapGameSharedTerrain.sample,alive,(sample,x,z)=>terrainColor(sample,x-ox,z-oz));
+    if(!grid)return null;
+    const data=await env.paint(grid,(sample,x,z)=>terrainColor(sample,x-ox,z-oz),alive);
+    if(!data||!alive())return null;
+    const off=document.createElement('canvas');off.width=off.height=rasterSize;
+    off.getContext('2d',{alpha:false}).putImageData(new ImageData(data,rasterSize,rasterSize),0,0);return off;
   }
 
   function drawChunkArt(c, cx, cz) {
@@ -709,437 +583,8 @@
     };
   }
 
-  function drawTreeSymbol(screenX, screenY, radius, seed) {
-    const shadowX = radius * 0.34;
-    const shadowY = radius * 0.42;
-
-    ctx.beginPath();
-    ctx.arc(
-      screenX + shadowX,
-      screenY + shadowY,
-      radius * 0.96,
-      0,
-      Math.PI * 2
-    );
-    ctx.fillStyle = "rgba(13,35,19,.24)";
-    ctx.fill();
-
-    // Irregular layered crown rather than one perfect circle.
-    const lobes = 5;
-    for (let i = 0; i < lobes; i++) {
-      const angle =
-        (i / lobes) * Math.PI * 2 +
-        hash32(seed, i, state.seed + 41001) * 0.55;
-
-      const rr =
-        radius *
-        (0.38 + hash32(seed, i + 11, state.seed + 42001) * 0.23);
-
-      const ox = Math.cos(angle) * radius * 0.36;
-      const oy = Math.sin(angle) * radius * 0.32;
-
-      ctx.beginPath();
-      ctx.arc(
-        screenX + ox,
-        screenY + oy,
-        rr,
-        0,
-        Math.PI * 2
-      );
-
-      ctx.fillStyle =
-        i % 2 === 0
-          ? "rgba(34,91,43,.96)"
-          : "rgba(44,108,49,.96)";
-
-      ctx.fill();
-    }
-
-    ctx.beginPath();
-    ctx.arc(
-      screenX - radius * 0.22,
-      screenY - radius * 0.24,
-      radius * 0.28,
-      0,
-      Math.PI * 2
-    );
-    ctx.fillStyle = "rgba(111,154,80,.72)";
-    ctx.fill();
-  }
-
-  function drawForestLOD() {
-    if (state.zoom < TREE_CLUSTER_ZOOM) return;
-
-    const bounds = visibleWorldBounds();
-
-    // At medium zoom, each deterministic 220m cell may show one canopy
-    // cluster. At close zoom, 96m cells reveal individual trees.
-    const cell =
-      state.zoom >= TREE_DETAIL_ZOOM
-        ? 96
-        : 220;
-
-    const startX =
-      Math.max(0, Math.floor(bounds.left / cell) - 1);
-
-    const endX =
-      Math.min(
-        Math.ceil(TERRITORY_SIZE / cell),
-        Math.floor(bounds.right / cell) + 1
-      );
-
-    const startZ =
-      Math.max(0, Math.floor(bounds.top / cell) - 1);
-
-    const endZ =
-      Math.min(
-        Math.ceil(TERRITORY_SIZE / cell),
-        Math.floor(bounds.bottom / cell) + 1
-      );
-
-    const close =
-      state.zoom >= TREE_DETAIL_ZOOM;
-
-    let drawn = 0;
-
-    for (let gz = startZ; gz <= endZ; gz++) {
-      for (let gx = startX; gx <= endX; gx++) {
-        const r1 = hash32(gx, gz, state.seed + 31001);
-        const r2 = hash32(gx, gz, state.seed + 32001);
-
-        const wx =
-          gx * cell +
-          r1 * cell;
-
-        const wz =
-          gz * cell +
-          r2 * cell;
-
-        if (
-          wx < 0 ||
-          wz < 0 ||
-          wx > TERRITORY_SIZE ||
-          wz > TERRITORY_SIZE
-        ) {
-          continue;
-        }
-
-        const s = terrainSample(wx, wz);
-
-        if (
-          s.water ||
-          s.forest < 0.48
-        ) {
-          continue;
-        }
-
-        const spawn =
-          hash32(gx, gz, state.seed + 33001);
-
-        if (
-          spawn >
-          clamp(
-            (s.forest - 0.38) * 1.28,
-            0,
-            0.92
-          )
-        ) {
-          continue;
-        }
-
-        if (drawn >= MAX_TREE_SYMBOLS) return;
-
-        const p = worldToScreen(wx, wz);
-        drawn++;
-
-        if (close) {
-          const radius =
-            clamp(
-              3.1 + state.zoom * 9,
-              3.2,
-              8.5
-            );
-
-          drawTreeSymbol(
-            p.x,
-            p.y,
-            radius,
-            gx * 100000 + gz
-          );
-        } else {
-          const radius =
-            clamp(
-              cell * state.zoom * 0.28,
-              5,
-              14
-            );
-
-          const grad =
-            ctx.createRadialGradient(
-              p.x - radius * 0.2,
-              p.y - radius * 0.25,
-              radius * 0.1,
-              p.x,
-              p.y,
-              radius
-            );
-
-          grad.addColorStop(0, "rgba(78,128,65,.48)");
-          grad.addColorStop(0.55, "rgba(38,92,44,.42)");
-          grad.addColorStop(1, "rgba(24,68,34,.04)");
-
-          ctx.fillStyle = grad;
-          ctx.beginPath();
-          ctx.arc(
-            p.x,
-            p.y,
-            radius,
-            0,
-            Math.PI * 2
-          );
-          ctx.fill();
-        }
-      }
-    }
-  }
-
-  function drawMountainRidges() {
-    if (state.zoom < MOUNTAIN_DETAIL_ZOOM) return;
-
-    const bounds = visibleWorldBounds();
-    const cell =
-      state.zoom >= 0.20
-        ? 180
-        : 340;
-
-    const sx =
-      Math.max(0, Math.floor(bounds.left / cell) - 1);
-
-    const ex =
-      Math.min(
-        Math.ceil(TERRITORY_SIZE / cell),
-        Math.floor(bounds.right / cell) + 1
-      );
-
-    const sz =
-      Math.max(0, Math.floor(bounds.top / cell) - 1);
-
-    const ez =
-      Math.min(
-        Math.ceil(TERRITORY_SIZE / cell),
-        Math.floor(bounds.bottom / cell) + 1
-      );
-
-    ctx.save();
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-
-    let drawn = 0;
-
-    for (let gz = sz; gz <= ez; gz++) {
-      for (let gx = sx; gx <= ex; gx++) {
-        const wx =
-          gx * cell +
-          hash32(gx, gz, state.seed + 35001) * cell;
-
-        const wz =
-          gz * cell +
-          hash32(gx, gz, state.seed + 36001) * cell;
-
-        const s = terrainSample(wx, wz);
-
-        if (
-          s.water ||
-          (
-            s.terrain !== "mountain" &&
-            s.terrain !== "high_rock" &&
-            s.terrain !== "snow_peak"
-          )
-        ) {
-          continue;
-        }
-
-        if (drawn >= MAX_MOUNTAIN_SYMBOLS) {
-          ctx.restore();
-          return;
-        }
-
-        drawn++;
-        const p = worldToScreen(wx, wz);
-
-        const size =
-          clamp(
-            (12 + s.steepness * 23) *
-            Math.sqrt(state.zoom / 0.1),
-            10,
-            34
-          );
-
-        // Dark downslope mass.
-        ctx.fillStyle = "rgba(48,47,43,.30)";
-        ctx.beginPath();
-        ctx.moveTo(
-          p.x - size,
-          p.y + size * 0.65
-        );
-        ctx.lineTo(
-          p.x,
-          p.y - size * 0.92
-        );
-        ctx.lineTo(
-          p.x + size * 1.05,
-          p.y + size * 0.72
-        );
-        ctx.closePath();
-        ctx.fill();
-
-        // Lit ridge face.
-        ctx.fillStyle =
-          s.terrain === "snow_peak"
-            ? "rgba(224,229,221,.65)"
-            : "rgba(155,151,133,.28)";
-
-        ctx.beginPath();
-        ctx.moveTo(
-          p.x,
-          p.y - size * 0.92
-        );
-        ctx.lineTo(
-          p.x - size,
-          p.y + size * 0.65
-        );
-        ctx.lineTo(
-          p.x - size * 0.12,
-          p.y + size * 0.22
-        );
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.strokeStyle =
-          s.terrain === "snow_peak"
-            ? "rgba(241,244,238,.72)"
-            : "rgba(76,74,68,.42)";
-
-        ctx.lineWidth =
-          clamp(
-            1 + state.zoom * 3,
-            1,
-            2.5
-          );
-
-        ctx.beginPath();
-        ctx.moveTo(
-          p.x - size * 0.72,
-          p.y + size * 0.46
-        );
-        ctx.lineTo(
-          p.x,
-          p.y - size * 0.92
-        );
-        ctx.lineTo(
-          p.x + size * 0.74,
-          p.y + size * 0.48
-        );
-        ctx.stroke();
-      }
-    }
-
-    ctx.restore();
-  }
-
-
-  // 0.3.2A2: Deterministic regional waterways; a provisional visual layer.
-  // Full hydrological flow/accumulation will replace this art layer later.
-  function drawWaterways() {
-    const left = state.cameraX - canvas.width / (2 * state.zoom);
-    const right = state.cameraX + canvas.width / (2 * state.zoom);
-    const top = state.cameraZ - canvas.height / (2 * state.zoom);
-    const bottom = state.cameraZ + canvas.height / (2 * state.zoom);
-    const worldOffsetX = (Number(state.territory?.x) || 0) * TERRITORY_SIZE;
-    const worldOffsetZ = (Number(state.territory?.y) || 0) * TERRITORY_SIZE;
-    const globalLeft = left + worldOffsetX;
-    const globalRight = right + worldOffsetX;
-    // Drainage-like connected ribbons. They are anchored in GLOBAL world space,
-    // so water continues between neighboring territories without resetting.
-    const spacing = 10500;
-    const first = Math.floor((globalLeft - 4500) / spacing);
-    const last = Math.ceil((globalRight + 4500) / spacing);
-    ctx.save();
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    for (let channel = first; channel <= last; channel++) {
-      const phase = channel * 1.73;
-      const riverX = gz => channel * spacing + 3200 +
-        Math.sin(gz / 2800 + phase) * 1050 + Math.sin(gz / 800 + phase * 2) * 175;
-      const step = Math.max(100, Math.min(350, 5 / state.zoom * 100));
-      const start = Math.floor((top + worldOffsetZ - 500) / step) * step;
-      const end = bottom + worldOffsetZ + 500;
-      ctx.beginPath();
-      let begun = false;
-      for (let gz = start; gz <= end; gz += step) {
-        const x = riverX(gz) - worldOffsetX;
-        const z = gz - worldOffsetZ;
-        const p = worldToScreen(x, z);
-        if (!begun) { ctx.moveTo(p.x, p.y); begun = true; }
-        else ctx.lineTo(p.x, p.y);
-      }
-      if (begun) {
-        const width = Math.max(1.7, 36 * state.zoom);
-        ctx.strokeStyle = 'rgba(46,65,57,.43)';
-        ctx.lineWidth = width + Math.max(2, 12 * state.zoom);
-        ctx.stroke();
-        ctx.strokeStyle = '#347f9b';
-        ctx.lineWidth = width;
-        ctx.stroke();
-        ctx.strokeStyle = 'rgba(125,204,217,.38)';
-        ctx.lineWidth = Math.max(0.8, width * .18);
-        ctx.stroke();
-      }
-    }
-    ctx.restore();
-  }
-
-  function loadTreeSprites() {
-    if (state.treesLoading) return;
-    state.treesLoading = true;
-    const names = [
-      'tree_small_green.png', 'tree_round_olive.png',
-      'tree_round_dark_teal.png', 'tree_small_teal.png',
-      'tree_deciduous_mint_large.png', 'tree_round_white_blossom.png'
-    ];
-    for (const name of names) {
-      const img = new Image();
-      img.onload = () => { state.needsDraw = true; };
-      img.src = 'assets/environment/trees/' + name;
-      state.treeImages.push(img);
-    }
-  }
-
-  function drawTreeSprites() {
-    if (state.zoom < .28 || state.dragging || !state.treeImages.length) return;
-    const cell = state.zoom < .65 ? 105 : 72;
-    const left = Math.max(0, state.cameraX - canvas.width / (2 * state.zoom));
-    const right = Math.min(TERRITORY_SIZE, state.cameraX + canvas.width / (2 * state.zoom));
-    const top = Math.max(0, state.cameraZ - canvas.height / (2 * state.zoom));
-    const bottom = Math.min(TERRITORY_SIZE, state.cameraZ + canvas.height / (2 * state.zoom));
-    let drawn = 0;
-    for (let iz = Math.floor(top / cell); iz <= Math.ceil(bottom / cell) && drawn < 95; iz++) {
-      for (let ix = Math.floor(left / cell); ix <= Math.ceil(right / cell) && drawn < 95; ix++) {
-        const wx = (ix + hash32(ix, iz, state.seed + 144)) * cell;
-        const wz = (iz + hash32(ix, iz, state.seed + 194)) * cell;
-        const s = terrainSample(wx, wz);
-        if (s.water || s.steepness > .69 || s.forest < .43) continue;
-        if (hash32(ix, iz, state.seed + 293) > Math.min(.94, Math.pow(s.forest, 1.3) * 1.1)) continue;
-        const img = state.treeImages[Math.floor(hash32(ix, iz, state.seed + 294) * state.treeImages.length)];
-        if (!img?.complete || !img.naturalWidth) continue;
-        const p = worldToScreen(wx, wz);
-        const h = Math.max(17, Math.min(70, state.zoom * (52 + hash32(ix, iz, state.seed + 411) * 45)));
-        const w = h * img.naturalWidth / img.naturalHeight;
-        ctx.drawImage(img, p.x - w / 2, p.y - h * .80, w, h);
-        drawn++;
-      }
-    }
-  }
+  const waterRenderer=window.createMapGameWaterRenderer(ctx,()=>{state.needsDraw=true});
+  const forestRenderer=window.createMapGameForestRenderer(ctx,()=>{state.needsDraw=true});
 
   // Missing chunks are queued rather than constructed during camera drawing.
   function queueChunk(cx, cz) {
@@ -1149,12 +594,20 @@
     state.generationQueue.push({cx, cz, key});
   }
 
-  function produceOneChunk() {
-    if (!state.active || state.dragging || !state.generationQueue.length) return;
+  async function produceOneChunk() {
+    if (chunkBuildPending || !state.active || state.dragging || !state.generationQueue.length) return;
     const job = state.generationQueue.shift();
     state.queuedChunks.delete(job.key);
     if (state.cache.has(job.key)) return;
-    const built = renderChunk(job.cx, job.cz);
+    const revision = terrainRevision;
+    chunkBuildPending = true;
+    let built;
+    try {
+      built = await renderChunk(job.cx, job.cz);
+    } finally {
+      chunkBuildPending = false;
+    }
+    if (!built || revision !== terrainRevision || !state.active) return;
     state.cache.set(job.key, {canvas: built, lastUsed: ++state.cacheClock});
     pruneCache();
     state.needsDraw = true;
@@ -1205,6 +658,12 @@
       state.zoom < DETAIL_ZOOM_THRESHOLD ||
       visibleChunkCount > MAX_DETAIL_CHUNKS_PER_FRAME;
 
+    // Discard queued work outside the current view before spending CPU on it.
+    state.generationQueue = state.generationQueue.filter(job => {
+      const visible = !useOverview && job.cx >= minCX && job.cx <= maxCX && job.cz >= minCZ && job.cz <= maxCZ;
+      if (!visible) state.queuedChunks.delete(job.key);
+      return visible;
+    });
     drawOverview();
     if (!useOverview) {
       ctx.imageSmoothingEnabled = true;
@@ -1216,12 +675,12 @@
           if (!chunk) continue;
 
           const p = worldToScreen(
-            cx * CHUNK_SIZE,
-            cz * CHUNK_SIZE
+            cx * CHUNK_SIZE - CHUNK_SIZE/TILE_PIXELS,
+            cz * CHUNK_SIZE - CHUNK_SIZE/TILE_PIXELS
           );
 
           const size =
-            CHUNK_SIZE * state.zoom + 1.5;
+            (CHUNK_SIZE+2*CHUNK_SIZE/TILE_PIXELS) * state.zoom;
 
           ctx.drawImage(
             chunk,
@@ -1235,12 +694,13 @@
     }
 
     // Natural art is drawn in world space, never baked into chunk edges.
-    drawWaterways();
-    if (!state.dragging) {
-      if (state.zoom < .28) drawForestLOD();
-      drawTreeSprites();
-    }
+    waterRenderer.draw({x:state.cameraX+Number(state.territory.x)*TERRITORY_SIZE,z:state.cameraZ+Number(state.territory.y)*TERRITORY_SIZE,scale:state.zoom,width:canvas.width,height:canvas.height});
+    forestRenderer.draw({x:state.cameraX+Number(state.territory.x)*TERRITORY_SIZE,
+      z:state.cameraZ+Number(state.territory.y)*TERRITORY_SIZE,zoom:state.zoom,
+      width:canvas.width,height:canvas.height,originX:Number(state.territory.x)*TERRITORY_SIZE,
+      originZ:Number(state.territory.y)*TERRITORY_SIZE});
 
+    drawEconomyBuildings();
     drawTerritoryBorder();
     drawScale();
     drawHoverMarker();
@@ -1321,6 +781,138 @@
     ctx.restore();
   }
 
+  // Economy objects are separate from cached terrain/forest imagery.
+  let construction = null,
+    constructionPanel = null,
+    placedBuildings = [],
+    operationStatus = new Map(),
+    constructionDown = null;
+  function refreshBuildings(snap) {
+    placedBuildings = (
+      document.body.dataset.world === "singleplayer"
+        ? snap.placedIncomeItems || []
+        : []
+    ).filter((b) => b.territoryId === state.territory?.id);
+    operationStatus = new Map(
+      snap.summary.buildings.map((b) => [b.id, b.operating]),
+    );
+    if (state.active && placedBuildings.length) state.needsDraw = true;
+  }
+  window.mapGameEconomy.subscribe(refreshBuildings);
+  function constructionData(point) {
+    return {
+      territoryId: state.territory.id,
+      x: point.x,
+      z: point.z,
+      rotation: construction.rotation,
+    };
+  }
+  function updateConstruction(point) {
+    if (!construction || !point) return;
+    construction.point = point;
+    construction.analysis = window.mapGameEconomy.checkPlacement(
+      construction.def,
+      constructionData(point),
+    );
+    constructionPanel.querySelector("[data-reason]").textContent = construction
+      .analysis.allowed
+      ? "Suitable site · click to build"
+      : construction.analysis.reasons.join(" · ");
+    state.needsDraw = true;
+  }
+  function cancelConstruction() {
+    construction = null;
+    constructionDown = null;
+    if (constructionPanel) constructionPanel.hidden = true;
+    state.needsDraw = true;
+  }
+  function beginConstruction(def) {
+    if (!state.active || !window.mapGameEconomy.snapshot().enabled) return;
+    if (!constructionPanel) {
+      constructionPanel = document.createElement("aside");
+      constructionPanel.id = "mgConstructionControls";
+      constructionPanel.innerHTML =
+        '<b data-name></b><div>Click to build · R rotates · Escape cancels · right-drag to pan</div><div data-reason role="status"></div><button data-rotate>Rotate</button> <button data-cancel>Cancel</button>';
+      document.body.appendChild(constructionPanel);
+      constructionPanel.querySelector("[data-cancel]").onclick =
+        cancelConstruction;
+      constructionPanel.querySelector("[data-rotate]").onclick = () => {
+        if (construction) {
+          construction.rotation =
+            (construction.rotation + Math.PI / 2) % (Math.PI * 2);
+          updateConstruction(construction.point);
+        }
+      };
+    }
+    construction = { def, rotation: 0, point: null, analysis: null };
+    constructionPanel.hidden = false;
+    constructionPanel.querySelector("[data-name]").textContent = def.name;
+    updateConstruction({ x: state.cameraX, z: state.cameraZ });
+  }
+  function drawStructure(row, def, ghost = false) {
+    const p = worldToScreen(row.x, row.z),
+      fp = def.footprint || [40, 40];
+    const w = fp[0] * state.zoom,
+      d = fp[1] * state.zoom;
+    if (
+      p.x + w < 0 ||
+      p.x - w > canvas.width ||
+      p.y + d < 0 ||
+      p.y - d > canvas.height
+    )
+      return;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(row.rotation || 0);
+    if (!ghost) {
+      ctx.fillStyle = "rgba(0,0,0,.38)";
+      ctx.fillRect(-w / 2 + 3, -d / 2 + 4, w, d);
+    }
+    ctx.fillStyle = ghost
+      ? construction.analysis?.allowed
+        ? "#57df9a99"
+        : "#ed727899"
+      : {
+          Residential: "#c3b69a",
+          Infrastructure: "#839cab",
+          Industrial: "#8497a0",
+          Commercial: "#8dbbc6",
+        }[def.category] || "#acb6ae";
+    ctx.fillRect(-w / 2, -d / 2, w, d);
+    ctx.strokeStyle = ghost
+      ? "#f2ffff"
+      : operationStatus.get(row.id) === false
+        ? "#ffc474"
+        : "#d9e6e8";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(-w / 2, -d / 2, w, d);
+    ctx.beginPath();
+    ctx.moveTo(-w / 2, 0);
+    ctx.lineTo(w / 2, 0);
+    ctx.stroke();
+    ctx.restore();
+    if (!ghost && state.zoom > 0.55) {
+      ctx.fillStyle = "#f2ffff";
+      ctx.font = "11px system-ui";
+      ctx.fillText(def.name, p.x - w / 2, p.y - d / 2 - 5);
+    }
+  }
+  const buildingDefinitions = new Map(
+    window.mapGameBuildings.CATALOG.map(d => [d.id, d])
+  );
+  function drawEconomyBuildings() {
+    for (const row of placedBuildings) {
+      const def = buildingDefinitions.get(row.type);
+      if (def) drawStructure(row, def);
+    }
+    if (construction?.point)
+      drawStructure(
+        { ...construction.point, rotation: construction.rotation },
+        construction.def,
+        true,
+      );
+  }
+
   let lastChunkBuild = 0;
   function loop(now) {
     if (state.active && !state.dragging && state.generationQueue.length && now - lastChunkBuild > 80) {
@@ -1379,17 +971,17 @@
     const s = terrainSample(x, z);
 
     const step = 40;
-    const ex = terrainSample(x + step, z).elevation;
-    const wx = terrainSample(x - step, z).elevation;
-    const nz = terrainSample(x, z - step).elevation;
-    const sz = terrainSample(x, z + step).elevation;
+    const ex = terrainElevation(x + step, z);
+    const wx = terrainElevation(x - step, z);
+    const nz = terrainElevation(x, z - step);
+    const sz = terrainElevation(x, z + step);
 
     const slope =
       Math.hypot(ex - wx, sz - nz) * 11;
 
     body.innerHTML = `
       <div class="mg-basic-terrain-name">
-        ${escapeHtml(titleForTerrain(s.terrain))}
+        ${escapeHtml(s.biome?.label || titleForTerrain(s.terrain))}
       </div>
 
       <dl>
@@ -1430,26 +1022,38 @@
   // Input
   // ----------------------------------------------------------
 
-  canvas.addEventListener("pointerdown", event => {
+  canvas.addEventListener("pointerdown", (event) => {
     if (!state.active) return;
 
+    if (construction && event.button === 0) {
+      constructionDown = { x: event.clientX, y: event.clientY };
+      updateConstruction(screenToWorld(event.clientX, event.clientY));
+      return;
+    }
     state.dragging = true;
     state.lastX = event.clientX;
     state.lastY = event.clientY;
     canvas.setPointerCapture?.(event.pointerId);
   });
 
-  canvas.addEventListener("pointermove", event => {
+  canvas.addEventListener("pointermove", (event) => {
     if (!state.active) return;
 
     const world = screenToWorld(event.clientX, event.clientY);
 
     state.hoverWorld = {
       x: clamp(world.x, 0, TERRITORY_SIZE),
-      z: clamp(world.z, 0, TERRITORY_SIZE)
+      z: clamp(world.z, 0, TERRITORY_SIZE),
     };
 
     updateInspector(state.hoverWorld);
+    if (
+      construction &&
+      (!construction.updatedAt || performance.now() - construction.updatedAt > 80)
+    ) {
+      construction.updatedAt = performance.now();
+      updateConstruction(world);
+    }
 
     if (state.dragging) {
       const dx = event.clientX - state.lastX;
@@ -1459,8 +1063,8 @@
       const scaleX = canvas.width / Math.max(1, rect.width);
       const scaleY = canvas.height / Math.max(1, rect.height);
 
-      state.cameraX -= dx * scaleX / state.zoom;
-      state.cameraZ -= dy * scaleY / state.zoom;
+      state.cameraX -= (dx * scaleX) / state.zoom;
+      state.cameraZ -= (dy * scaleY) / state.zoom;
 
       state.lastX = event.clientX;
       state.lastY = event.clientY;
@@ -1479,9 +1083,42 @@
     } catch (_) {}
   }
 
-  canvas.addEventListener("pointerup", stopDrag);
-  canvas.addEventListener("pointercancel", stopDrag);
-  canvas.addEventListener("pointerleave", event => {
+  canvas.addEventListener("contextmenu", (e) => {
+    if (construction) e.preventDefault();
+  });
+  canvas.addEventListener("pointerup", (event) => {
+    if (construction && constructionDown && event.button === 0) {
+      const down = constructionDown;
+      constructionDown = null;
+      if (Math.hypot(event.clientX - down.x, event.clientY - down.y) < 5) {
+        updateConstruction(screenToWorld(event.clientX, event.clientY));
+        if (construction.analysis.allowed) {
+          const id = crypto.randomUUID();
+          const paid = window.mapGameEconomy.purchaseAndRegisterBuilding(
+            construction.def,
+            {
+              id,
+              type: construction.def.id,
+              ...constructionData(construction.point),
+              ownerId: "local",
+              variant: 0,
+            },
+          );
+          if (paid) cancelConstruction();
+          else
+            constructionPanel.querySelector("[data-reason]").textContent =
+              window.mapGameEconomy.snapshot().error ||
+              "Purchase failed; no construction was charged.";
+        }
+      }
+    }
+    stopDrag(event);
+  });
+  canvas.addEventListener("pointercancel", (event) => {
+    constructionDown = null;
+    stopDrag(event);
+  });
+  canvas.addEventListener("pointerleave", (event) => {
     if (event.buttons === 0) {
       state.dragging = false;
     }
@@ -1489,21 +1126,16 @@
 
   canvas.addEventListener(
     "wheel",
-    event => {
+    (event) => {
       if (!state.active) return;
 
       event.preventDefault();
 
       const before = screenToWorld(event.clientX, event.clientY);
 
-      const factor =
-        event.deltaY < 0 ? 1.10 : 1 / 1.10;
+      const factor = event.deltaY < 0 ? 1.1 : 1 / 1.1;
 
-      state.zoom = clamp(
-        state.zoom * factor,
-        state.minZoom,
-        state.maxZoom
-      );
+      state.zoom = clamp(state.zoom * factor, state.minZoom, state.maxZoom);
 
       const after = screenToWorld(event.clientX, event.clientY);
 
@@ -1514,19 +1146,29 @@
       clampCamera();
       state.needsDraw = true;
     },
-    { passive: false }
+    { passive: false },
   );
 
   window.addEventListener("resize", () => {
     state.needsDraw = true;
   });
 
-  window.addEventListener("keydown", event => {
+  window.addEventListener("keydown", (event) => {
     if (!state.active) return;
+    if (event.target.closest?.("input,textarea,select")) return;
+    if (construction && event.key === "Escape") {
+      cancelConstruction();
+      event.preventDefault();
+      return;
+    }
+    if (construction && event.key.toLowerCase() === "r") {
+      construction.rotation =
+        (construction.rotation + Math.PI / 2) % (Math.PI * 2);
+      updateConstruction(construction.point);
+      return;
+    }
 
-    const speed =
-      (event.shiftKey ? 1100 : 480) /
-      Math.max(0.035, state.zoom);
+    const speed = (event.shiftKey ? 1100 : 480) / Math.max(0.035, state.zoom);
 
     let moved = false;
 
@@ -1580,16 +1222,20 @@
   }
 
   async function enterTerritory(territory) {
+    cancelConstruction();
     state.territory = territory;
+    refreshBuildings(window.mapGameEconomy.snapshot());
     if (!window.mapGameSharedTerrain) throw new Error("Shared terrain module not loaded. Check world_terrain.js path.");
     state.seed = window.mapGameSharedTerrain.seed;
 
+    terrainRevision++;
+    forestRenderer.reset();
     state.cache.clear();
     state.queuedChunks.clear();
     state.generationQueue.length = 0;
     state.cacheClock = 0;
     state.overviewCanvas = null;
-    state.overviewReady = false;
+    state.overviewReady = false;overviewData=null;overviewJob=null;
 
     state.cameraX = TERRITORY_SIZE / 2;
     state.cameraZ = TERRITORY_SIZE / 2;
@@ -1609,16 +1255,17 @@
     state.needsDraw = true;
 
     ensureInspector().hidden = false;
+    state.inspector.querySelector('[data-terrain-body]').textContent='Move over the world to inspect terrain.';
 
     // Yield so the loading overlay visibly updates first.
     await new Promise(resolve => requestAnimationFrame(resolve));
 
     loadTerrainTextures().then(() => { state.needsDraw = true; });
-    loadTreeSprites();
+
 
     // Build one lightweight territory overview. Detailed chunks are generated
     // only after the player zooms in enough to need them.
-    buildOverview();
+    await buildOverview();
 
     state.needsDraw = true;
     draw();
@@ -1632,6 +1279,10 @@
   }
 
   function leave() {
+    cancelConstruction();
+    placedBuildings=[];
+    forestRenderer.pause();waterRenderer.pause();
+    terrainRevision++;
     state.active = false;
     canvas.hidden = true;
     canvas.classList.remove("active");
@@ -1648,14 +1299,20 @@
   }
 
   function invalidate() {
+    terrainRevision++;
+    forestRenderer.reset();
     state.cache.clear();
     state.overviewCanvas = null;
-    state.overviewReady = false;
+    state.overviewReady = false;overviewData=null;overviewJob=null;
     state.needsDraw = true;
   }
 
   window.mapGameBasicWorld = {
-    VERSION: "0.3.2A3",
+    VERSION: "0.3.3D",
+    beginConstruction,
+    cancelConstruction,
+    forestStats: forestRenderer.getState,
+    waterStats: waterRenderer.stats,
     TERRITORY_SIZE,
     CHUNK_SIZE,
     CHUNKS_PER_SIDE,
@@ -1671,6 +1328,8 @@
       cameraZ: state.cameraZ,
       zoom: state.zoom,
       cachedChunks: state.cache.size,
+      buildingCount: placedBuildings.length,
+      construction: Boolean(construction),
       lod:
         state.zoom < DETAIL_ZOOM_THRESHOLD
           ? "overview"

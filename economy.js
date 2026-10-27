@@ -1,323 +1,581 @@
-// ============================================================
-// MAP GAME — economy.js
-// Alpha 0.2.1E
-//
-// Singleplayer/local economy foundation.
-// Offline $/min == online $/min exactly.
-// Offline time is capped at 12 hours to keep saves balanced.
-//
-// Central World economy must later be server authoritative.
-// ============================================================
-
+// Singleplayer economy adapter. One canonical, versioned localStorage transaction.
 (() => {
   "use strict";
-
-  const SAVE_KEY = "mapgame_economy_021e";
-  const OFFLINE_CAP_MINUTES = 12 * 60;
-
-  const DEFAULT = {
-    money: 400000,
-    iron: 200,
-    steel: 100,
-    concrete: 500,
-    glass: 180,
-    placedIncomeItems: [],
-    lastEconomyTick: Date.now(),
-    totalEarned: 0
-  };
-
-  let state = load();
-  let lastTick = Date.now();
-  let tickTimer = null;
-  let listeners = new Set();
-
-  function load() {
+  const Progression = window.mapGameProgression;
+  const Model = window.mapGameEconomyModel,
+    SAVE_KEY = "mapgame_economy_021e",
+    WORLD_KEY = "mapGame_alpha021_firstPlayable";
+  let catchup = null,
+    catchupTimer = null,
+    sessionClock = null;
+  let summaryCache = null,
+    catchupWorker = null,
+    catchupEngine = "cooperative";
+  function currentSummary() {
+    if (!summaryCache || summaryCache.online !== online)
+      summaryCache = { online, value: Model.summary(state, catalog(), online) };
+    return summaryCache.value;
+  }
+  let requested = false,
+    releaseWriter = null;
+  let state,
+    stored,
+    timer = null,
+    enabled = false,
+    error = "",
+    online = false,
+    offlineResult = { earned: 0, elapsedMinutes: 0, rate: 0 };
+  const listeners = new Set(),
+    catalog = () => window.mapGameBuildings?.CATALOG || [];
+  function readState() {
+    summaryCache = null;
     try {
-      const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || "{}");
-      return {
-        ...DEFAULT,
-        ...raw,
-        placedIncomeItems: Array.isArray(raw.placedIncomeItems)
-          ? raw.placedIncomeItems
-          : []
-      };
-    } catch (_) {
-      return { ...DEFAULT };
+      stored = localStorage.getItem(SAVE_KEY);
+      const raw = JSON.parse(stored || "{}");
+      if (!raw || typeof raw !== "object" || Array.isArray(raw))
+        throw Error("Invalid economy save");
+      if (raw.economy?.version > Model.SCHEMA_VERSION)
+        throw Error("Economy save is from a newer version");
+      let legacy = [];
+      try {
+        legacy =
+          JSON.parse(localStorage.getItem(WORLD_KEY) || "{}").buildings || [];
+      } catch (_) {}
+      if (!Array.isArray(legacy) || raw.economy) legacy = [];
+      state = Model.normalize(raw, Date.now(), legacy);
+      // Keep inherited utility support only for populated legacy saves.
+      if (!raw.economy && state.placedIncomeItems.length) {
+        state.economy.legacyUtilities = true;
+        for (const row of state.placedIncomeItems) row.legacyEconomy = true;
+        state.economy.population = state.placedIncomeItems.reduce(
+          (sum, row) =>
+            sum +
+            (catalog().find((d) => d.id === row.type)?.population || 0) *
+              row.level,
+          0,
+        );
+      }
+      Model.bindContracts(state, catalog(), raw.economy?.version || 0);
+      Progression.init(state, catalog(), {
+        legacy: Boolean(stored || legacy.length),
+      });
+      Progression.refresh(state);
+      error = "";
+      for (const row of state.placedIncomeItems)
+        if (!row.footprint)
+          row.footprint = (
+            catalog().find((v) => v.id === row.type)?.footprint || [40, 40]
+          ).slice();
+    } catch (e) {
+      error = `Economy save cannot be opened: ${e.message}. Original data has been retained.`;
+      state = Model.normalize({}, Date.now());
     }
   }
-
-  function save() {
-    state.lastEconomyTick = Date.now();
-    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-  }
-
-  function catalog() {
-    return window.mapGameBuildings?.CATALOG || [];
-  }
-
-  function utilitySummary() {
-    const defs = catalog();
-    let powerSupply = 18;
-    let waterSupply = 16;
-    let cleanAirSupply = 28;
-    let powerDemand = 0;
-    let waterDemand = 0;
-    let pollution = 0;
-
-    for (const placed of state.placedIncomeItems) {
-      const def = defs.find(v => v.id === placed.type);
-      if (!def) continue;
-      const level = Number(placed.level || 1);
-
-      powerSupply += Number(def.powerSupply || 0) * level;
-      waterSupply += Number(def.waterSupply || 0) * level;
-      cleanAirSupply += Number(def.cleanAirSupply || 0) * level;
-
-      powerDemand += Number(def.powerUse || 0) * level;
-      waterDemand += Number(def.waterUse || 0) * level;
-      pollution += Number(def.pollution || 0) * level;
-    }
-
-    const cleanAirDemand = Math.max(0, pollution);
-    const powerRatio = powerDemand <= 0 ? 1 : Math.min(1, powerSupply / powerDemand);
-    const waterRatio = waterDemand <= 0 ? 1 : Math.min(1, waterSupply / waterDemand);
-    const airRatio = cleanAirDemand <= 0 ? 1 : Math.min(1, cleanAirSupply / cleanAirDemand);
-
+  readState();
+  function snapshot() {
+    const snap = Model.clone(state),
+      s = currentSummary();
     return {
-      powerSupply,
-      waterSupply,
-      cleanAirSupply,
-      powerDemand,
-      waterDemand,
-      pollution,
-      cleanAirDemand,
-      powerRatio,
-      waterRatio,
-      airRatio,
-      operationalRatio: Math.min(powerRatio, waterRatio, airRatio)
+      ...snap,
+      enabled: enabled && !error && !catchup,
+      catchingUp: Boolean(catchup),
+      catchupEngine,
+      clockNotice: state.economy.clockNotice || "",
+      error,
+      incomePerMin:
+        enabled && !error ? s.production.money * (online ? 1.2 : 1) : 0,
+      summary: s,
+      utilities: {
+        powerSupply: s.energySupply,
+        powerDemand: s.requestedEnergy,
+        waterSupply: 0,
+        waterDemand: 0,
+        cleanAirSupply: 0,
+        cleanAirDemand: 0,
+      },
     };
   }
-
-  function buildingOperationalRatio(def, summary) {
-    if (!def) return 0;
-    let ratio = 1;
-    if (Number(def.powerUse || 0) > 0) ratio = Math.min(ratio, summary.powerRatio);
-    if (Number(def.waterUse || 0) > 0) ratio = Math.min(ratio, summary.waterRatio);
-    if (Number(def.pollution || 0) > 0) ratio = Math.min(ratio, summary.airRatio);
-    return Math.max(0, Math.min(1, ratio));
-  }
-
-  function incomePerMinute() {
-    const defs = catalog();
-    const summary = utilitySummary();
-    let total = 0;
-
-    for (const placed of state.placedIncomeItems) {
-      const def = defs.find(v => v.id === placed.type);
-      if (!def) continue;
-
-      const level = Number(placed.level || 1);
-      total +=
-        Number(def.incomePerMin || 0) *
-        level *
-        buildingOperationalRatio(def, summary);
-    }
-
-    return total;
-  }
-
   function emit() {
     const snap = snapshot();
-    listeners.forEach(fn => {
-      try { fn(snap); } catch (_) {}
-    });
-    window.dispatchEvent(
-      new CustomEvent("mapgame:economy", { detail: snap })
+    for (const fn of listeners) {
+      try {
+        fn(snap);
+      } catch (e) {
+        console.error("Economy UI:", e);
+      }
+    }
+    window.dispatchEvent(new CustomEvent("mapgame:economy", { detail: snap }));
+  }
+  function transaction(change) {
+    if (!enabled || error) return false;
+    const previous = state;
+    state = Model.clone(state);
+    try {
+      if (localStorage.getItem(SAVE_KEY) !== stored)
+        throw Error(
+          "Another tab changed this economy. Reload before continuing",
+        );
+      const result = change(state);
+      if (!result || result.steps !== 0) summaryCache = null;
+      if (result === false) {
+        state = previous;
+        return false;
+      }
+      Progression.refresh(state);
+      state.economy.revision++;
+      const serialized = JSON.stringify(state);
+      localStorage.setItem(SAVE_KEY, serialized);
+      stored = serialized;
+      return result ?? true;
+    } catch (e) {
+      state = previous;
+      error = `Economy paused: ${e.message}`;
+      return false;
+    }
+  }
+  function activeOnline() {
+    return enabled && !document.hidden;
+  }
+  const monotonic = () =>
+    typeof performance !== "undefined" ? performance.now() : null;
+  function resetClock() {
+    sessionClock = { wall: Date.now(), mono: monotonic() };
+  }
+  function advancePass(target, boost) {
+    return transaction((s) =>
+      Model.advance(s, target, boost, catalog(), {
+        maxEvaluations: s.placedIncomeItems.length > 1000 ? 2 : 32,
+      }),
     );
   }
-
-  function snapshot() {
-    return {
-      ...state,
-      incomePerMin: incomePerMinute(),
-      utilities: utilitySummary()
+  function finishCatchup() {
+    const job = catchup;
+    catchup = null;
+    online = activeOnline();
+    if (!sessionClock) resetClock();
+    offlineResult = {
+      steps: job.steps,
+      earned: job.earned,
+      elapsedMinutes: job.elapsedMinutes,
+      rate: currentSummary().production.money,
     };
-  }
-
-  function credit(amount) {
-    const v = Math.max(0, Number(amount) || 0);
-    state.money += v;
-    state.totalEarned += v;
-  }
-
-  function debit(amount) {
-    const v = Math.max(0, Number(amount) || 0);
-    if (state.money < v) return false;
-    state.money -= v;
-    return true;
-  }
-
-  function applyOfflineIncome() {
-    const now = Date.now();
-    const last = Number(state.lastEconomyTick || now);
-    const elapsedMinutes = Math.max(
-      0,
-      Math.min(
-        OFFLINE_CAP_MINUTES,
-        (now - last) / 60000
-      )
-    );
-
-    const rate = incomePerMinute();
-    const earned = rate * elapsedMinutes;
-
-    if (earned > 0) {
-      credit(earned);
-    }
-
-    state.lastEconomyTick = now;
-    save();
-    emit();
-
-    return {
-      elapsedMinutes,
-      rate,
-      earned
-    };
-  }
-
-  function tick() {
-    const now = Date.now();
-    const elapsedMinutes = Math.max(0, (now - lastTick) / 60000);
-    lastTick = now;
-
-    const rate = incomePerMinute();
-    if (rate > 0 && elapsedMinutes > 0) {
-      // Exact same formula used offline:
-      // $/min * elapsed minutes.
-      credit(rate * elapsedMinutes);
-    }
-
-    save();
     emit();
   }
-
-  function start() {
-    if (tickTimer) return;
-    lastTick = Date.now();
-    tickTimer = setInterval(tick, 1000);
-  }
-
-  function stop() {
-    if (!tickTimer) return;
-    clearInterval(tickTimer);
-    tickTimer = null;
-    save();
-  }
-
-  function registerPlacedBuilding(type, id, level = 1) {
-    const def = catalog().find(v => v.id === type);
-    if (!def) return false;
-    if (state.placedIncomeItems.some(v => v.id === id)) return true;
-
-    state.placedIncomeItems.push({
-      id,
-      type,
-      level,
-      createdAt: Date.now()
-    });
-
-    save();
-    emit();
-    return true;
-  }
-
-  function removePlacedBuilding(id) {
-    const before = state.placedIncomeItems.length;
-    state.placedIncomeItems =
-      state.placedIncomeItems.filter(v => v.id !== id);
-    if (state.placedIncomeItems.length !== before) {
-      save();
+  function continueCatchup() {
+    if (!enabled || error || !catchup) return;
+    const result = advancePass(catchup.target, catchup.online);
+    if (!result) {
+      catchup = null;
       emit();
-      return true;
+      return;
     }
-    return false;
+    catchup.steps += result.steps;
+    catchup.earned += result.earned;
+    if (result.complete) return finishCatchup();
+    catchupTimer = setTimeout(continueCatchup, 0);
   }
-
-  function canAfford(cost = {}) {
-    for (const [key, value] of Object.entries(cost)) {
-      if ((state[key] || 0) < Number(value || 0)) return false;
+  function launchCatchup() {
+    if (
+      typeof Worker === "undefined" ||
+      state.placedIncomeItems.length <= 256
+    ) {
+      catchupEngine = "cooperative";
+      continueCatchup();
+      return;
     }
-    return true;
+    const job = catchup,
+      before = state.money;
+    function fallback() {
+      catchupWorker?.terminate();
+      catchupWorker = null;
+      if (catchup !== job || !enabled) return;
+      catchupEngine = "cooperative";
+      continueCatchup();
+    }
+    try {
+      const worker = new Worker("economy_worker.js?v=3404");
+      catchupWorker = worker;
+      catchupEngine = "worker";
+      catchupWorker.onerror = (event) => {
+        event.preventDefault();
+        fallback();
+      };
+      catchupWorker.onmessage = ({ data }) => {
+        if (catchupWorker !== worker || catchup !== job || !enabled) return;
+        if (data.error || data.state?.economy?.lastTick !== job.target) {
+          fallback();
+          return;
+        }
+        catchupWorker.terminate();
+        catchupWorker = null;
+        const result = transaction((s) => {
+          Object.assign(s, data.state);
+          return data.result;
+        });
+        if (!result) {
+          catchup = null;
+          emit();
+          return;
+        }
+        summaryCache = { online: true, value: data.summaryOnline };
+        job.steps += result.steps;
+        job.earned += state.money - before;
+        finishCatchup();
+      };
+      catchupWorker.postMessage({
+        state: Model.clone(state),
+        defs: catalog(),
+        target: job.target,
+        online: job.online,
+      });
+    } catch (_) {
+      fallback();
+    }
   }
-
-  function spend(cost = {}) {
-    if (!canAfford(cost)) return false;
-    for (const [key, value] of Object.entries(cost)) {
-      state[key] = Math.max(
-        0,
-        Number(state[key] || 0) - Number(value || 0)
+  function settle() {
+    if (!enabled || error || catchup) return false;
+    const now = Date.now(),
+      mono = monotonic();
+    let suspiciousClock = false;
+    if (
+      sessionClock &&
+      mono !== null &&
+      now - sessionClock.wall - (mono - sessionClock.mono) > 5000
+    ) {
+      suspiciousClock = true;
+      const recorded = transaction((s) => {
+        s.economy.clockAnomalies = (s.economy.clockAnomalies || 0) + 1;
+        s.economy.clockNotice =
+          "Clock or suspension gap detected: offline 1× applied, with no time cap. Local dates cannot be verified.";
+        return { steps: 0 };
+      });
+      if (!recorded) return false;
+    }
+    const elapsedMinutes = Math.max(0, (now - state.economy.lastTick) / 60000),
+      boost =
+        !suspiciousClock && online && now - state.economy.lastTick <= 60000;
+    const result = advancePass(now, boost);
+    if (result && !result.complete) {
+      catchup = {
+        target: now,
+        online: boost,
+        steps: result.steps,
+        earned: result.earned,
+        elapsedMinutes,
+      };
+      launchCatchup();
+    }
+    if (online !== activeOnline()) summaryCache = null;
+    online = activeOnline();
+    resetClock();
+    return result;
+  }
+  function setEnabled(value) {
+    if (requested === !!value) return;
+    requested = !!value;
+    if (!requested) {
+      if (enabled) settle();
+      enabled = false;
+      clearTimeout(catchupTimer);
+      catchupWorker?.terminate();
+      catchupWorker = null;
+      catchup = null;
+      sessionClock = null;
+      online = false;
+      clearInterval(timer);
+      timer = null;
+      if (releaseWriter) {
+        releaseWriter();
+        releaseWriter = null;
+      }
+      emit();
+      return;
+    }
+    if (error) {
+      emit();
+      return;
+    }
+    if (!navigator.locks) {
+      error =
+        "Economy paused: this browser needs Web Locks on a secure origin to protect local saves.";
+      emit();
+      return;
+    }
+    navigator.locks
+      .request(
+        "mapgame-singleplayer-economy-writer",
+        { ifAvailable: true },
+        async (lock) => {
+          if (!requested) return;
+          if (!lock) {
+            error =
+              "Economy is open in another tab. Close that tab and reload here.";
+            emit();
+            return;
+          }
+          // The tab may have sat on Home while the previous writer finished.
+          // Read the latest canonical record only after acquiring the lease.
+          readState();
+          if (error) {
+            emit();
+            return;
+          }
+          enabled = true;
+          catchup = {
+            target: Date.now(),
+            online: false,
+            steps: 0,
+            earned: 0,
+            elapsedMinutes: Math.max(
+              0,
+              (Date.now() - state.economy.lastTick) / 60000,
+            ),
+          };
+          resetClock();
+          launchCatchup();
+          timer = setInterval(() => {
+            if (catchup) return;
+            settle();
+            emit();
+          }, 1000);
+          emit();
+          await new Promise((resolve) => {
+            releaseWriter = resolve;
+          });
+        },
+      )
+      .catch((e) => {
+        error = `Economy paused: ${e.message}`;
+        enabled = false;
+        emit();
+      });
+  }
+  function purchaseAndRegisterBuilding(def, data) {
+    if (
+      !enabled ||
+      error ||
+      catchup ||
+      !def ||
+      typeof data?.id !== "string" ||
+      !data.id
+    )
+      return false;
+    // IDs are transaction identities: replays never charge or create twice.
+    const prior = state.placedIncomeItems.find((v) => v.id === data.id);
+    if (prior)
+      return (
+        prior.type === def.id &&
+        prior.territoryId === data.territoryId &&
+        prior.x === data.x &&
+        prior.z === data.z &&
+        (prior.rotation || 0) === (data.rotation || 0)
       );
-    }
-    save();
-    emit();
-    return true;
-  }
-
-  function purchaseAndRegisterBuilding(def, buildingData) {
-    if (!def || !buildingData?.id) return false;
-    if (!spend(def.cost || {})) return false;
-
-    state.placedIncomeItems.push({
-      id: buildingData.id,
-      type: def.id,
-      level: Number(buildingData.level || 1),
-      territoryId: buildingData.territoryId || null,
-      x: Number(buildingData.x || 0),
-      z: Number(buildingData.z || 0),
-      rotation: Number(buildingData.rotation || 0),
-      variant: Number(buildingData.variant || 0),
-      createdAt: Date.now()
+    const actual = catalog().find((v) => v.id === def.id && v.economy);
+    if (!actual || Progression.reason(state, actual)) return false;
+    settle();
+    if (catchup || error) return false;
+    const result = transaction((s) => {
+      Model.flushPending(s, catalog());
+      if (
+        !Model.placement(
+          s,
+          actual,
+          data,
+          window.mapGameSharedTerrain,
+          reservedSites(),
+        ).allowed
+      )
+        return false;
+      if (!Model.spend(s, actual.cost)) return false;
+      const row = {
+        ...data,
+        economyContract: null,
+        progressionAcquired: 1,
+        type: actual.id,
+        footprint: actual.footprint.slice(),
+        level: 1,
+        createdAt: Date.now(),
+        recipeId: actual.recipeId || null,
+        recipeVersion: actual.recipeVersion || 1,
+      };
+      Model.pinContract(s, row, actual);
+      s.placedIncomeItems.push(row);
+      return true;
     });
-
-    save();
     emit();
-    return true;
+    return !!result;
   }
-
-  function listPlacedBuildings(territoryId = null) {
-    return state.placedIncomeItems.filter(v =>
-      !territoryId || v.territoryId === territoryId
+  function listPlacedBuildings(id = null) {
+    return Model.clone(
+      state.placedIncomeItems.filter((v) => !id || v.territoryId === id),
     );
   }
-
-  function subscribe(fn) {
-    listeners.add(fn);
-    fn(snapshot());
-    return () => listeners.delete(fn);
+  let worldRecord,
+    exclusions = [];
+  function reservedSites() {
+    const record = localStorage.getItem(WORLD_KEY);
+    if (record !== worldRecord) {
+      worldRecord = record;
+      exclusions = [];
+      try {
+        const capital = JSON.parse(record || "{}").capital;
+        if (capital && Number.isFinite(capital.x) && Number.isFinite(capital.z))
+          exclusions = [
+            {
+              ...capital,
+              territoryId: capital.territoryId || capital.territory_id,
+              footprint: [150, 150],
+              rotation: 0,
+              reserved: true,
+            },
+          ];
+      } catch (_) {}
+    }
+    return exclusions;
   }
-
+  function checkPlacement(def, data) {
+    const actual = catalog().find((d) => d.id === def?.id && d.economy);
+    const locked = Progression.reason(state, actual);
+    if (locked) return { allowed: false, reasons: [locked] };
+    def = actual;
+    if (!enabled || error || catchup)
+      return {
+        allowed: false,
+        reasons: [
+          error ||
+            (catchup
+              ? "Offline economy catch-up is still running"
+              : "Economy construction is Singleplayer only"),
+        ],
+      };
+    return Model.placement(
+      state,
+      def,
+      data,
+      window.mapGameSharedTerrain,
+      reservedSites(),
+    );
+  }
+  function spend(cost) {
+    if (catchup) return false;
+    settle();
+    if (catchup) return false;
+    const result = transaction((s) => {
+      Model.flushPending(s, catalog());
+      return Model.spend(s, cost);
+    });
+    emit();
+    return !!result;
+  }
+  function credit(amount, legacyAmount) {
+    // The road tool historically calls credit("money", amount).
+    if (amount === "money") amount = legacyAmount;
+    if (!Number.isFinite(amount) || amount < 0 || catchup) return false;
+    settle();
+    if (catchup) return false;
+    const result = transaction((s) => {
+      Model.flushPending(s, catalog());
+      return Model.credit(s, amount);
+    });
+    emit();
+    return !!result;
+  }
   window.mapGameEconomy = {
-    VERSION: "0.2.1F",
-    OFFLINE_CAP_MINUTES,
+    VERSION: "0.3.4C1",
+    purchaseReason: (id) =>
+      Progression.reason(
+        state,
+        catalog().find((d) => d.id === id),
+      ),
+    completeResearch: (id) => {
+      if (!enabled || error || catchup) return false;
+      settle();
+      if (catchup || error) return false;
+      const result = transaction((s) => {
+        Model.flushPending(s, catalog());
+        return Progression.complete(s, id, Model);
+      });
+      emit();
+      return !!result;
+    },
+    setOperatingPriority: (mode) => {
+      if (!enabled || error || catchup) return false;
+      settle();
+      if (catchup || error) return false;
+      const result = transaction((s) => {
+        Model.flushPending(s, catalog());
+        return Progression.priorities(s, catalog(), mode, Model);
+      });
+      emit();
+      return !!result;
+    },
+    SAVE_KEY,
+    OFFLINE_CAP_MINUTES: null,
     snapshot,
-    incomePerMinute,
-    applyOfflineIncome,
-    start,
-    stop,
-    registerPlacedBuilding,
-    removePlacedBuilding,
-    purchaseAndRegisterBuilding,
-    listPlacedBuildings,
-    utilitySummary,
-    canAfford,
+    getStatus: () => ({
+      enabled: enabled && !error && !catchup,
+      catchingUp: Boolean(catchup),
+      engine: catchupEngine,
+      error,
+    }),
+    setEnabled,
+    incomePerMinute: () => snapshot().incomePerMin,
+    utilitySummary: () => snapshot().utilities,
+    applyOfflineIncome: () => ({ ...offlineResult }),
+    start: () => setEnabled(true),
+    stop: () => setEnabled(false),
+    canAfford: (cost) =>
+      enabled && !error && !catchup && Model.canAfford(state, cost),
     spend,
     credit,
-    debit,
-    subscribe,
-    save
+    debit: (amount) =>
+      Number.isFinite(amount) && amount >= 0 && spend({ money: amount }),
+    purchaseAndRegisterBuilding,
+    listPlacedBuildings,
+    checkPlacement,
+    // Legacy callers may query registered IDs, but cannot bypass construction payment.
+    registerPlacedBuilding: (type, id) =>
+      state.placedIncomeItems.some((v) => v.id === id && v.type === type),
+    removePlacedBuilding: () => false,
+    subscribe: (fn) => {
+      listeners.add(fn);
+      fn(snapshot());
+      return () => listeners.delete(fn);
+    },
+    save: () => {
+      const result = settle();
+      emit();
+      return !!result;
+    },
   };
-
-  window.addEventListener("beforeunload", save);
-  console.log("Map Game economy 0.2.1F ready.");
+  document.addEventListener("visibilitychange", () => {
+    settle();
+    emit();
+  });
+  let resumeOnShow = false;
+  window.addEventListener("pagehide", () => {
+    resumeOnShow = requested;
+    setEnabled(false);
+  });
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted && resumeOnShow) setEnabled(true);
+  });
+  window.addEventListener("beforeunload", () => {
+    settle();
+  });
+  window.addEventListener("storage", (e) => {
+    if (e.key !== SAVE_KEY && e.key !== null) return;
+    // Late events from an old document are harmless if the canonical value
+    // already matches. A Home/read-only tab can refresh without awarding time.
+    if (localStorage.getItem(SAVE_KEY) === stored) return;
+    if (enabled)
+      error =
+        "Economy paused: storage changed in another tab. Reload before continuing.";
+    else {
+      const denied = requested ? error : "";
+      readState();
+      if (denied && !error) error = denied;
+    }
+    emit();
+  });
 })();

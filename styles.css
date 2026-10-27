@@ -763,6 +763,7 @@ button {
 }
 
 .mg-modal-close {
+  z-index: 1;
   position: absolute;
   right: 13px;
   top: 13px;
@@ -3457,3 +3458,149 @@ body[data-graphics="basic"] [data-action="hub"] {
 .mg-sw-livability strong{font-size:21px}
 .mg-sw-stats{gap:5px}
 @media(max-width:740px){.mg-sw-body{grid-template-columns:minmax(0,1fr) 190px}.mg-sw-stream-status{display:none}}
+
+/* 0.3.3D text-first economy panels. No preview engine or offscreen UI rebuilds. */
+#mgEconomyShop[hidden],
+#mgEconomyStats[hidden],
+#mgConstructionControls[hidden] {
+  display: none;
+}
+#mgEconomyShop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(0, 7, 15, 0.8);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: #e5f3f7;
+  font: 14px/1.5 system-ui;
+}
+.mg-econ-shell {
+  width: min(1050px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  background: #0b1c28;
+  border: 1px solid #4a798a;
+  border-radius: 14px;
+  padding: 24px;
+}
+.mg-econ-shell header,
+#mgEconomyStats header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+.mg-econ-shell h2,
+.mg-econ-shell h4,
+#mgEconomyStats h3 {
+  margin: 0;
+}
+.mg-econ-shell article {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid #294653;
+  padding: 14px 0;
+}
+.mg-econ-shell p {
+  margin: 5px 0;
+  color: #bdd1da;
+}
+.mg-econ-shell button,
+#mgEconomyStats button,
+#mgConstructionControls button {
+  padding: 8px 16px;
+  border: 1px solid #6094a7;
+  border-radius: 7px;
+  background: #163f50;
+  color: #e8f8ff;
+  cursor: pointer;
+  font: inherit;
+}
+.mg-econ-shell button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.mg-econ-shell [data-message] {
+  color: #ffd49c;
+}
+#mgEconomyStats {
+  position: fixed;
+  right: 20px;
+  top: 88px;
+  z-index: 220;
+  width: min(360px, 85vw);
+  max-height: 75vh;
+  overflow: auto;
+  padding: 18px;
+  background: #0b1c28f5;
+  border: 1px solid #4a798a;
+  border-radius: 12px;
+  color: #e5f3f7;
+  font: 13px/1.5 system-ui;
+}
+#mgEconomyStats dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+}
+#mgEconomyStats dd {
+  margin: 0;
+  text-align: right;
+}
+#mgConstructionControls {
+  position: fixed;
+  left: 50%;
+  bottom: 78px;
+  transform: translateX(-50%);
+  z-index: 230;
+  max-width: 85vw;
+  padding: 12px;
+  background: #0b1c28f5;
+  border: 1px solid #4a798a;
+  border-radius: 10px;
+  color: #e5f3f7;
+  font: 14px/1.5 system-ui;
+}
+#mgConstructionControls [data-reason] {
+  color: #ffd49c;
+}
+
+/* Phase B: catalog navigation and filters; no warehouse or research behavior. */
+.mg-industrial-filters { display:flex;gap:16px;flex-wrap:wrap;margin:16px 0; }
+.mg-industrial-filters label { display:grid;gap:5px; }
+.mg-industrial-filters input,.mg-industrial-filters select { background:#102c3c;color:#e5f3f7;border:1px solid #6094a7;border-radius:6px;padding:8px;font:inherit; }
+.mg-econ-shell footer,#mgEconomyStats footer { display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:16px; }
+
+/* C1 beginner navigation: advanced actions remain in More. */
+body.mg-c1-single #mgDock:not(.mg-c1-more) [data-advanced] { display:none; }
+body:not(.mg-c1-single) #mgDock [data-c1] { display:none; }
+#mgNextGoal {position:fixed;left:18px;top:90px;z-index:210;width:min(315px,38vw);padding:12px;border:1px solid #4a798a;border-radius:10px;background:#0b1c28ed;color:#e5f3f7;font:12px/1.5 system-ui;pointer-events:auto;}
+#mgNextGoal p {margin:4px 0;}
+#mgNextGoal select,#mgNextGoal button {max-width:100%;background:#163f50;color:#e8f8ff;border:1px solid #6094a7;padding:5px;}
+#mgNextGoal[hidden],#mgProgressionPanel[hidden] {display:none;}
+.mg-c1-panel {position:fixed;inset:6vh 8vw;z-index:1150;overflow:auto;background:#0b1c28;color:#e5f3f7;border:1px solid #4a798a;border-radius:12px;padding:24px;font:14px/1.5 system-ui;}
+.mg-c1-panel header {display:flex;justify-content:space-between;align-items:center;position:sticky;top:-24px;background:#0b1c28;z-index:1;}
+.mg-c1-panel button {background:#163f50;color:#e8f8ff;border:1px solid #6094a7;border-radius:6px;padding:10px;cursor:pointer;}
+.mg-c1-panel button:disabled {opacity:.6;cursor:default;}
+.mg-c1-tree {display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+.mg-c1-tree article {border:1px solid #4a798a;border-radius:8px;padding:12px;}
+.mg-c1-discover {columns:2 280px;}
+.mg-c1-discover p {break-inside:avoid;}
+@media(max-width:700px){#mgNextGoal {top:75px;width:220px;font-size:10px;}.mg-c1-panel{inset:2vh 2vw;padding:14px;}}
+body.mg-c1-single #mgDock [data-action="shop"] {order:1;}
+body.mg-c1-single #mgDock [data-c1="industry"] {order:2;}
+body.mg-c1-single #mgDock [data-c1="research"] {order:3;}
+body.mg-c1-single #mgDock [data-action="map"] {order:4;}
+body.mg-c1-single #mgDock [data-c1="more"] {order:5;}
+body.mg-c1-single #mgDock [data-advanced] {order:6;}
+body.mg-c1-single #mgDock {display:flex;flex-direction:column;width:140px;max-height:calc(100vh - 85px);overflow:auto;}
+body.mg-c1-single #mgDock button {flex-shrink:0;font-size:13px;min-height:42px;}
+body.mg-c1-single #mgDock button span {position:static;opacity:1;visibility:visible;transform:none;font-size:12px;}
+#mgNextGoal {left:166px;}
+@media(max-width:700px){body.mg-c1-single #mgDock{width:90px;}#mgNextGoal{left:108px;width:180px;}}
+body.mg-c1-single .mg-location-pill {left:166px;top:75px;}
+#mgNextGoal {top:120px;}
+@media(max-width:700px){body.mg-c1-single .mg-location-pill{left:108px;}#mgNextGoal{top:120px;}}

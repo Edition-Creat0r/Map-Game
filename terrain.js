@@ -168,7 +168,7 @@ const rockNormal =
 
 const sandNormal =
   makeTexture(
-    "assets/textures/sand/sand_normal.jpg",
+    "assets/textures/sand/sand.normal.jpg",
     12
   );
 

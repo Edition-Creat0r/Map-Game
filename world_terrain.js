@@ -33,6 +33,69 @@
     catch(_){return DEFAULT_SEED;}
   }
   const seed=readSeed();
+  // Metadata is intentionally independent of ownership, saves and tree placement.
+  const BIOMES = Object.freeze({
+    temperate_forest: Object.freeze({label:'Temperate forest',color:Object.freeze([61,112,66]),texture:'grass'}),
+    grassland: Object.freeze({label:'Grassland',color:Object.freeze([115,151,79]),texture:'grass'}),
+    dry_plains: Object.freeze({label:'Dry plains',color:Object.freeze([168,149,91]),texture:'dryPlains'}),
+    taiga: Object.freeze({label:'Taiga',color:Object.freeze([64,104,93]),texture:'rockyGrass'}),
+    alpine: Object.freeze({label:'Alpine',color:Object.freeze([123,128,118]),texture:'rock'}),
+    tundra_snow: Object.freeze({label:'Tundra / snow',color:Object.freeze([193,205,194]),texture:'snow'}),
+    wetlands: Object.freeze({label:'Wetlands',color:Object.freeze([62,113,82]),texture:'wetGround'}),
+    coastal: Object.freeze({label:'Coastal',color:Object.freeze([171,163,118]),texture:'sand'})
+  });
+  const biomeIds = Object.keys(BIOMES);
+  function classifyBiome(y,elevation,moisture,temperature,steepness,water,rock,snow) {
+    const extent = (window.mapGameWorldConfig?.WORLD_ROWS || 316) * SIZE;
+    const latitude = clamp(Math.abs(y / extent - .5) * 2);
+    const climateTemperature = clamp(temperature * .60 + (1-latitude) * .40 - Math.max(0,elevation-.55)*.35);
+    // Provisional shoreline proxy, NOT a river, drainage or measured coast distance.
+    const waterProximity = 1-smooth((elevation-.32)/.085);
+    const cold = smooth((.40-climateTemperature)/.18);
+    const cool = smooth((.57-climateTemperature)/.22);
+    const high = smooth((rock-.38)/.48);
+    const damp = smooth((moisture-.48)/.24);
+    const dry = smooth((.52-moisture)/.24);
+    const coast = waterProximity * (1-smooth(steepness/.6));
+    const lowWet = damp * (1-smooth((elevation-.40)/.22)) * (1-cold);
+    const weights = {
+      temperate_forest: damp*(1-cool)*(1-high)*(1-coast),
+      grassland: (.20+(1-damp)*(1-dry))*(1-cold)*(1-high)*(1-coast),
+      dry_plains: dry*(1-cool)*(1-high)*(1-coast)*1.6,
+      taiga: cool*(1-cold)*(.35+damp)*(1-high),
+      alpine: high*(1-cold)*(1-snow),
+      tundra_snow: cold+snow,
+      wetlands: lowWet*1.8,
+      coastal: water ? 2 : coast*2
+    };
+    let total=0;
+    for(const id of biomeIds) total+=weights[id];
+    let id='grassland', strongest=-1, r=0,g=0,b=0;
+    for(const key of biomeIds) {
+      const weight=weights[key]/total;
+      weights[key]=weight;
+      if(weight>strongest){strongest=weight;id=key;}
+      const color=BIOMES[key].color;
+      r+=color[0]*weight;g+=color[1]*weight;b+=color[2]*weight;
+    }
+    return {id,label:BIOMES[id].label,weights,color:[r,g,b],latitude,temperature:climateTemperature,waterProximity};
+  }
+  // Height-only queries avoid allocating biome/climate data for hillshade.
+  // Keep landform arithmetic identical to sample(); parity tests guard it.
+  function elevationAt(x,y){
+    // 350km-scale landform, 90km mountain belts, 8km local detail.
+    // Global meter coordinates guarantee continuity between territories.
+    const continent=octave(x,y,350000,seed+101,3);
+    const base=octave(x,y,105000,seed+211,3);
+    const spine=noise(x,y,138000,seed+311);
+    const mountainMask=smooth((spine-.43)/.20);
+    const r=noise(x,y,48000,seed+411);
+    const ridge=Math.pow(1-Math.abs(r*2-1),1.75)*mountainMask;
+    const hills=octave(x,y,18000,seed+521,3);
+    const micro=noise(x,y,3400,seed+631);
+    const elevation=clamp(.18+(.38*continent)+(.21*base)+(.59*ridge)+(.15*(hills-.5))+.025*(micro-.5));
+    return elevation;
+  }
   function sample(x,y){
     // 350km-scale landform, 90km mountain belts, 8km local detail.
     // Global meter coordinates guarantee continuity between territories.
@@ -67,6 +130,7 @@
     else if(wet>.45)terrain='wet_grassland';
     else if(forest>.65)terrain='forest';
     return {elevation,moisture,temperature,ridge,steepness,forest,water,terrain,
+      biome:classifyBiome(y,elevation,moisture,temperature,steepness,water,rock,snow),
       weights:{grass,rockyGrass,rock,snow,dry,wet,soil},
       buildability:water?'BLOCKED':steepness>.78?'VERY DIFFICULT':steepness>.54?'DIFFICULT':steepness>.32?'GOOD':'EXCELLENT'};
   }
@@ -79,5 +143,5 @@
        forest:s.terrain==='forest'};
   }
   function local(tx,ty,x,y){return sample(tx*SIZE+x,ty*SIZE+y);}
-  window.mapGameSharedTerrain={VERSION:'0.3.2A3.2',SIZE,seed,sample,strategic,local};
+  window.mapGameSharedTerrain={VERSION:'0.3.3A',SIZE,seed,BIOMES,sample,elevationAt,strategic,local};
 })();

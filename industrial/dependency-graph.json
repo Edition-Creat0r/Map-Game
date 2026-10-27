@@ -1,0 +1,3151 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "money",
+      "name": "Money",
+      "unit": "credits",
+      "storageClass": "general",
+      "aliases": [
+        "Money",
+        "cash",
+        "currency"
+      ]
+    },
+    {
+      "id": "iron",
+      "name": "Iron",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": [
+        "Iron"
+      ]
+    },
+    {
+      "id": "steel",
+      "name": "Steel",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": [
+        "Steel"
+      ]
+    },
+    {
+      "id": "carbon",
+      "name": "Carbon",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": [
+        "Carbon"
+      ]
+    },
+    {
+      "id": "concrete",
+      "name": "Concrete",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": [
+        "Concrete"
+      ]
+    },
+    {
+      "id": "glass",
+      "name": "Glass",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": [
+        "Glass"
+      ]
+    },
+    {
+      "id": "ironOre",
+      "name": "Iron Ore",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "coal",
+      "name": "Coal",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "silica",
+      "name": "Silica",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "limestone",
+      "name": "Limestone",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "copperOre",
+      "name": "Copper Ore",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "bauxite",
+      "name": "Bauxite",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "crudeOil",
+      "name": "Crude Oil",
+      "unit": "game units",
+      "storageClass": "liquid",
+      "aliases": []
+    },
+    {
+      "id": "naturalGas",
+      "name": "Natural Gas",
+      "unit": "game units",
+      "storageClass": "liquid",
+      "aliases": []
+    },
+    {
+      "id": "sulfur",
+      "name": "Sulfur",
+      "unit": "game units",
+      "storageClass": "hazardous",
+      "aliases": []
+    },
+    {
+      "id": "salt",
+      "name": "Salt",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "phosphate",
+      "name": "Phosphate",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "lithiumOre",
+      "name": "Lithium Ore",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "titaniumOre",
+      "name": "Titanium Ore",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "rareEarthOre",
+      "name": "Rare Earth Ore",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "copper",
+      "name": "Copper",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "aluminum",
+      "name": "Aluminum",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "fuel",
+      "name": "Fuel",
+      "unit": "game units",
+      "storageClass": "liquid",
+      "aliases": []
+    },
+    {
+      "id": "industrialGas",
+      "name": "Industrial Gas",
+      "unit": "game units",
+      "storageClass": "liquid",
+      "aliases": []
+    },
+    {
+      "id": "silicon",
+      "name": "Silicon",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "lithium",
+      "name": "Lithium",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "titanium",
+      "name": "Titanium",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "rareEarths",
+      "name": "Rare Earths",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "alloySteel",
+      "name": "Alloy Steel",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "cement",
+      "name": "Cement",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "bricks",
+      "name": "Bricks",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "beams",
+      "name": "Beams",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "steelPlate",
+      "name": "Steel Plate",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "wire",
+      "name": "Wire",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "cable",
+      "name": "Cable",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "pipes",
+      "name": "Pipes",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "insulation",
+      "name": "Insulation",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "ceramics",
+      "name": "Ceramics",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "constructionModules",
+      "name": "Construction Modules",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "plastic",
+      "name": "Plastic",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "rubber",
+      "name": "Rubber",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "industrialAcid",
+      "name": "Industrial Acid",
+      "unit": "game units",
+      "storageClass": "hazardous",
+      "aliases": []
+    },
+    {
+      "id": "fertilizer",
+      "name": "Fertilizer",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "paint",
+      "name": "Paint",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "lubricant",
+      "name": "Lubricant",
+      "unit": "game units",
+      "storageClass": "liquid",
+      "aliases": []
+    },
+    {
+      "id": "industrialResin",
+      "name": "Industrial Resin",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "compositeFiber",
+      "name": "Composite Fiber",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "polymerFilm",
+      "name": "Polymer Film",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "coolant",
+      "name": "Coolant",
+      "unit": "game units",
+      "storageClass": "liquid",
+      "aliases": []
+    },
+    {
+      "id": "industrialSolvent",
+      "name": "Industrial Solvent",
+      "unit": "game units",
+      "storageClass": "hazardous",
+      "aliases": []
+    },
+    {
+      "id": "adhesive",
+      "name": "Adhesive",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "syntheticTextiles",
+      "name": "Synthetic Textiles",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "composites",
+      "name": "Composites",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "semiconductors",
+      "name": "Semiconductors",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "circuitBoards",
+      "name": "Circuit Boards",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "processors",
+      "name": "Processors",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "sensors",
+      "name": "Sensors",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "displays",
+      "name": "Displays",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "batteries",
+      "name": "Batteries",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "powerElectronics",
+      "name": "Power Electronics",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "controlSystems",
+      "name": "Control Systems",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "communicationModules",
+      "name": "Communication Modules",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "precisionElectronics",
+      "name": "Precision Electronics",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "quantumModules",
+      "name": "Quantum Modules",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "tools",
+      "name": "Tools",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "gears",
+      "name": "Gears",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "motors",
+      "name": "Motors",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "pumps",
+      "name": "Pumps",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "bearings",
+      "name": "Bearings",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "industrialMachinery",
+      "name": "Industrial Machinery",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "precisionTools",
+      "name": "Precision Tools",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "turbines",
+      "name": "Turbines",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "automationModules",
+      "name": "Automation Modules",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "heavyMachinery",
+      "name": "Heavy Machinery",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "roboticArms",
+      "name": "Robotic Arms",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "industrialRobots",
+      "name": "Industrial Robots",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "chassis",
+      "name": "Chassis",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "engines",
+      "name": "Engines",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "tires",
+      "name": "Tires",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "vehicleParts",
+      "name": "Vehicle Parts",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "utilityVehicles",
+      "name": "Utility Vehicles",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "freightTrucks",
+      "name": "Freight Trucks",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "buses",
+      "name": "Buses",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "passengerCars",
+      "name": "Passenger Cars",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "electricVehicles",
+      "name": "Electric Vehicles",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "railAssemblies",
+      "name": "Rail Assemblies",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "ships",
+      "name": "Ships",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "autonomousVehicles",
+      "name": "Autonomous Vehicles",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "airframes",
+      "name": "Airframes",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "jetEngines",
+      "name": "Jet Engines",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "avionics",
+      "name": "Avionics",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "aerospaceComposites",
+      "name": "Aerospace Composites",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "aircraftParts",
+      "name": "Aircraft Parts",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "civilAircraft",
+      "name": "Civil Aircraft",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "satelliteParts",
+      "name": "Satellite Parts",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "satellites",
+      "name": "Satellites",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "launchAssemblies",
+      "name": "Launch Assemblies",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "orbitalPlatforms",
+      "name": "Orbital Platforms",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "householdGoods",
+      "name": "Household Goods",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "appliances",
+      "name": "Appliances",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "electricalGoods",
+      "name": "Electrical Goods",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "medicalSupplies",
+      "name": "Medical Supplies",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "packaging",
+      "name": "Packaging",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "workwear",
+      "name": "Workwear",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "furniture",
+      "name": "Furniture",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "consumerDevices",
+      "name": "Consumer Devices",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "medicalDevices",
+      "name": "Medical Devices",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "industrialConsumables",
+      "name": "Industrial Consumables",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "advancedAppliances",
+      "name": "Advanced Appliances",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "luxuryGoods",
+      "name": "Luxury Goods",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "protectiveEquipment",
+      "name": "Protective Equipment",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "fieldSupplies",
+      "name": "Field Supplies",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "communicationsEquipment",
+      "name": "Communications Equipment",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "opticalEquipment",
+      "name": "Optical Equipment",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "equipmentParts",
+      "name": "Equipment Parts",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "transportEquipment",
+      "name": "Transport Equipment",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "aircraftEquipment",
+      "name": "Aircraft Equipment",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "navalEquipment",
+      "name": "Naval Equipment",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "precisionEquipment",
+      "name": "Precision Equipment",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    },
+    {
+      "id": "strategicEquipment",
+      "name": "Strategic Equipment",
+      "unit": "game units",
+      "storageClass": "general",
+      "aliases": []
+    }
+  ],
+  "edges": [
+    {
+      "from": "ironOre",
+      "to": "iron",
+      "building": "ironSmelter",
+      "recipe": "ironSmelterRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "playable"
+    },
+    {
+      "from": "iron",
+      "to": "steel",
+      "building": "steelFoundry",
+      "recipe": "steelFoundryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "playable"
+    },
+    {
+      "from": "carbon",
+      "to": "steel",
+      "building": "steelFoundry",
+      "recipe": "steelFoundryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 6,
+      "outputPerMinute": 6,
+      "availability": "playable"
+    },
+    {
+      "from": "coal",
+      "to": "carbon",
+      "building": "cokeWorks",
+      "recipe": "cokeWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "playable"
+    },
+    {
+      "from": "copperOre",
+      "to": "copper",
+      "building": "copperSmelter",
+      "recipe": "copperSmelterRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "playable"
+    },
+    {
+      "from": "bauxite",
+      "to": "aluminum",
+      "building": "aluminumRefinery",
+      "recipe": "aluminumRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "playable"
+    },
+    {
+      "from": "carbon",
+      "to": "aluminum",
+      "building": "aluminumRefinery",
+      "recipe": "aluminumRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 6,
+      "outputPerMinute": 6,
+      "availability": "playable"
+    },
+    {
+      "from": "crudeOil",
+      "to": "fuel",
+      "building": "oilRefinery",
+      "recipe": "oilRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "playable"
+    },
+    {
+      "from": "naturalGas",
+      "to": "industrialGas",
+      "building": "gasProcessor",
+      "recipe": "gasProcessorRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "playable"
+    },
+    {
+      "from": "silica",
+      "to": "silicon",
+      "building": "siliconRefinery",
+      "recipe": "siliconRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "playable"
+    },
+    {
+      "from": "carbon",
+      "to": "silicon",
+      "building": "siliconRefinery",
+      "recipe": "siliconRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 6,
+      "outputPerMinute": 6,
+      "availability": "playable"
+    },
+    {
+      "from": "lithiumOre",
+      "to": "lithium",
+      "building": "lithiumRefinery",
+      "recipe": "lithiumRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "titaniumOre",
+      "to": "titanium",
+      "building": "titaniumRefinery",
+      "recipe": "titaniumRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "carbon",
+      "to": "titanium",
+      "building": "titaniumRefinery",
+      "recipe": "titaniumRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 6,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "rareEarthOre",
+      "to": "rareEarths",
+      "building": "rareEarthRefinery",
+      "recipe": "rareEarthRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 18,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "steel",
+      "to": "alloySteel",
+      "building": "alloyFoundry",
+      "recipe": "alloyFoundryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "titanium",
+      "to": "alloySteel",
+      "building": "alloyFoundry",
+      "recipe": "alloyFoundryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 6,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "limestone",
+      "to": "cement",
+      "building": "cementKiln",
+      "recipe": "cementKilnRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 8,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "carbon",
+      "to": "cement",
+      "building": "cementKiln",
+      "recipe": "cementKilnRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "cement",
+      "to": "concrete",
+      "building": "concreteBatchPlant",
+      "recipe": "concreteBatchPlantRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "silica",
+      "to": "concrete",
+      "building": "concreteBatchPlant",
+      "recipe": "concreteBatchPlantRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 8,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "silica",
+      "to": "glass",
+      "building": "glassWorks",
+      "recipe": "glassWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 8,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "industrialGas",
+      "to": "glass",
+      "building": "glassWorks",
+      "recipe": "glassWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "limestone",
+      "to": "bricks",
+      "building": "brickKiln",
+      "recipe": "brickKilnRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "silica",
+      "to": "bricks",
+      "building": "brickKiln",
+      "recipe": "brickKilnRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "steel",
+      "to": "beams",
+      "building": "beamMill",
+      "recipe": "beamMillRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 8,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "steel",
+      "to": "steelPlate",
+      "building": "plateMill",
+      "recipe": "plateMillRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 8,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "copper",
+      "to": "wire",
+      "building": "wireMill",
+      "recipe": "wireMillRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "wire",
+      "to": "cable",
+      "building": "cableWorks",
+      "recipe": "cableWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "plastic",
+      "to": "cable",
+      "building": "cableWorks",
+      "recipe": "cableWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "steel",
+      "to": "pipes",
+      "building": "pipeMill",
+      "recipe": "pipeMillRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "glass",
+      "to": "insulation",
+      "building": "insulationWorks",
+      "recipe": "insulationWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "plastic",
+      "to": "insulation",
+      "building": "insulationWorks",
+      "recipe": "insulationWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "silica",
+      "to": "ceramics",
+      "building": "ceramicsWorks",
+      "recipe": "ceramicsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 8,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "aluminum",
+      "to": "ceramics",
+      "building": "ceramicsWorks",
+      "recipe": "ceramicsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "concrete",
+      "to": "constructionModules",
+      "building": "moduleWorks",
+      "recipe": "moduleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 8,
+      "outputPerMinute": 4,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "beams",
+      "to": "constructionModules",
+      "building": "moduleWorks",
+      "recipe": "moduleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "glass",
+      "to": "constructionModules",
+      "building": "moduleWorks",
+      "recipe": "moduleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "fuel",
+      "to": "plastic",
+      "building": "polymerWorks",
+      "recipe": "polymerWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "industrialGas",
+      "to": "plastic",
+      "building": "polymerWorks",
+      "recipe": "polymerWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "fuel",
+      "to": "rubber",
+      "building": "rubberWorks",
+      "recipe": "rubberWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "sulfur",
+      "to": "rubber",
+      "building": "rubberWorks",
+      "recipe": "rubberWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "sulfur",
+      "to": "industrialAcid",
+      "building": "acidWorks",
+      "recipe": "acidWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "industrialGas",
+      "to": "industrialAcid",
+      "building": "acidWorks",
+      "recipe": "acidWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "phosphate",
+      "to": "fertilizer",
+      "building": "fertilizerWorks",
+      "recipe": "fertilizerWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 8,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "industrialGas",
+      "to": "fertilizer",
+      "building": "fertilizerWorks",
+      "recipe": "fertilizerWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "fuel",
+      "to": "paint",
+      "building": "paintWorks",
+      "recipe": "paintWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "salt",
+      "to": "paint",
+      "building": "paintWorks",
+      "recipe": "paintWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "fuel",
+      "to": "lubricant",
+      "building": "lubricantWorks",
+      "recipe": "lubricantWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 8,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "fuel",
+      "to": "industrialResin",
+      "building": "resinWorks",
+      "recipe": "resinWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "industrialGas",
+      "to": "industrialResin",
+      "building": "resinWorks",
+      "recipe": "resinWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "carbon",
+      "to": "compositeFiber",
+      "building": "fiberWorks",
+      "recipe": "fiberWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 8,
+      "outputPerMinute": 4,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "industrialResin",
+      "to": "compositeFiber",
+      "building": "fiberWorks",
+      "recipe": "fiberWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "plastic",
+      "to": "polymerFilm",
+      "building": "filmWorks",
+      "recipe": "filmWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "industrialGas",
+      "to": "coolant",
+      "building": "coolantWorks",
+      "recipe": "coolantWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "salt",
+      "to": "coolant",
+      "building": "coolantWorks",
+      "recipe": "coolantWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "fuel",
+      "to": "industrialSolvent",
+      "building": "solventWorks",
+      "recipe": "solventWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "industrialGas",
+      "to": "industrialSolvent",
+      "building": "solventWorks",
+      "recipe": "solventWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "industrialResin",
+      "to": "adhesive",
+      "building": "adhesiveWorks",
+      "recipe": "adhesiveWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "industrialSolvent",
+      "to": "adhesive",
+      "building": "adhesiveWorks",
+      "recipe": "adhesiveWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "plastic",
+      "to": "syntheticTextiles",
+      "building": "textileWorks",
+      "recipe": "textileWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "industrialResin",
+      "to": "syntheticTextiles",
+      "building": "textileWorks",
+      "recipe": "textileWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "playable"
+    },
+    {
+      "from": "compositeFiber",
+      "to": "composites",
+      "building": "compositeWorks",
+      "recipe": "compositeWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 8,
+      "outputPerMinute": 4,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "industrialResin",
+      "to": "composites",
+      "building": "compositeWorks",
+      "recipe": "compositeWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 4,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "silicon",
+      "to": "semiconductors",
+      "building": "semiconductorFab",
+      "recipe": "semiconductorFabRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "industrialGas",
+      "to": "semiconductors",
+      "building": "semiconductorFab",
+      "recipe": "semiconductorFabRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "copper",
+      "to": "circuitBoards",
+      "building": "boardWorks",
+      "recipe": "boardWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "plastic",
+      "to": "circuitBoards",
+      "building": "boardWorks",
+      "recipe": "boardWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "semiconductors",
+      "to": "circuitBoards",
+      "building": "boardWorks",
+      "recipe": "boardWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "semiconductors",
+      "to": "processors",
+      "building": "processorFab",
+      "recipe": "processorFabRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "rareEarths",
+      "to": "processors",
+      "building": "processorFab",
+      "recipe": "processorFabRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "semiconductors",
+      "to": "memory",
+      "building": "memoryFab",
+      "recipe": "memoryFabRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "circuitBoards",
+      "to": "sensors",
+      "building": "sensorWorks",
+      "recipe": "sensorWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "glass",
+      "to": "sensors",
+      "building": "sensorWorks",
+      "recipe": "sensorWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "glass",
+      "to": "displays",
+      "building": "displayWorks",
+      "recipe": "displayWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "semiconductors",
+      "to": "displays",
+      "building": "displayWorks",
+      "recipe": "displayWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "lithium",
+      "to": "batteries",
+      "building": "batteryWorks",
+      "recipe": "batteryWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "copper",
+      "to": "batteries",
+      "building": "batteryWorks",
+      "recipe": "batteryWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "semiconductors",
+      "to": "powerElectronics",
+      "building": "powerElectronicsWorks",
+      "recipe": "powerElectronicsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "copper",
+      "to": "powerElectronics",
+      "building": "powerElectronicsWorks",
+      "recipe": "powerElectronicsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "circuitBoards",
+      "to": "controlSystems",
+      "building": "controlWorks",
+      "recipe": "controlWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "processors",
+      "to": "controlSystems",
+      "building": "controlWorks",
+      "recipe": "controlWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "circuitBoards",
+      "to": "communicationModules",
+      "building": "communicationsWorks",
+      "recipe": "communicationsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "rareEarths",
+      "to": "communicationModules",
+      "building": "communicationsWorks",
+      "recipe": "communicationsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "sensors",
+      "to": "precisionElectronics",
+      "building": "precisionElectronicsWorks",
+      "recipe": "precisionElectronicsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "processors",
+      "to": "precisionElectronics",
+      "building": "precisionElectronicsWorks",
+      "recipe": "precisionElectronicsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "memory",
+      "to": "precisionElectronics",
+      "building": "precisionElectronicsWorks",
+      "recipe": "precisionElectronicsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "precisionElectronics",
+      "to": "quantumModules",
+      "building": "quantumModuleWorks",
+      "recipe": "quantumModuleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "rareEarths",
+      "to": "quantumModules",
+      "building": "quantumModuleWorks",
+      "recipe": "quantumModuleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "steel",
+      "to": "tools",
+      "building": "toolWorks",
+      "recipe": "toolWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "steel",
+      "to": "gears",
+      "building": "gearWorks",
+      "recipe": "gearWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "lubricant",
+      "to": "gears",
+      "building": "gearWorks",
+      "recipe": "gearWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "steel",
+      "to": "motors",
+      "building": "motorWorks",
+      "recipe": "motorWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "wire",
+      "to": "motors",
+      "building": "motorWorks",
+      "recipe": "motorWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "steel",
+      "to": "pumps",
+      "building": "pumpWorks",
+      "recipe": "pumpWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "pipes",
+      "to": "pumps",
+      "building": "pumpWorks",
+      "recipe": "pumpWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "steel",
+      "to": "bearings",
+      "building": "bearingWorks",
+      "recipe": "bearingWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "lubricant",
+      "to": "bearings",
+      "building": "bearingWorks",
+      "recipe": "bearingWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "playable"
+    },
+    {
+      "from": "gears",
+      "to": "industrialMachinery",
+      "building": "machineWorks",
+      "recipe": "machineWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "motors",
+      "to": "industrialMachinery",
+      "building": "machineWorks",
+      "recipe": "machineWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "tools",
+      "to": "industrialMachinery",
+      "building": "machineWorks",
+      "recipe": "machineWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "alloySteel",
+      "to": "precisionTools",
+      "building": "precisionToolWorks",
+      "recipe": "precisionToolWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "sensors",
+      "to": "precisionTools",
+      "building": "precisionToolWorks",
+      "recipe": "precisionToolWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "alloySteel",
+      "to": "turbines",
+      "building": "turbineWorks",
+      "recipe": "turbineWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "bearings",
+      "to": "turbines",
+      "building": "turbineWorks",
+      "recipe": "turbineWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "controlSystems",
+      "to": "automationModules",
+      "building": "automationWorks",
+      "recipe": "automationWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "motors",
+      "to": "automationModules",
+      "building": "automationWorks",
+      "recipe": "automationWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "industrialMachinery",
+      "to": "heavyMachinery",
+      "building": "heavyMachineWorks",
+      "recipe": "heavyMachineWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "beams",
+      "to": "heavyMachinery",
+      "building": "heavyMachineWorks",
+      "recipe": "heavyMachineWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "precisionTools",
+      "to": "roboticArms",
+      "building": "robotArmWorks",
+      "recipe": "robotArmWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "automationModules",
+      "to": "roboticArms",
+      "building": "robotArmWorks",
+      "recipe": "robotArmWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "roboticArms",
+      "to": "industrialRobots",
+      "building": "robotWorks",
+      "recipe": "robotWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "precisionElectronics",
+      "to": "industrialRobots",
+      "building": "robotWorks",
+      "recipe": "robotWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 2,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "beams",
+      "to": "chassis",
+      "building": "chassisWorks",
+      "recipe": "chassisWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "playable"
+    },
+    {
+      "from": "steelPlate",
+      "to": "chassis",
+      "building": "chassisWorks",
+      "recipe": "chassisWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "playable"
+    },
+    {
+      "from": "gears",
+      "to": "engines",
+      "building": "engineWorks",
+      "recipe": "engineWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "bearings",
+      "to": "engines",
+      "building": "engineWorks",
+      "recipe": "engineWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "steel",
+      "to": "engines",
+      "building": "engineWorks",
+      "recipe": "engineWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "rubber",
+      "to": "tires",
+      "building": "tireWorks",
+      "recipe": "tireWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 1,
+      "availability": "playable"
+    },
+    {
+      "from": "wire",
+      "to": "tires",
+      "building": "tireWorks",
+      "recipe": "tireWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "playable"
+    },
+    {
+      "from": "chassis",
+      "to": "vehicleParts",
+      "building": "vehiclePartsWorks",
+      "recipe": "vehiclePartsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "motors",
+      "to": "vehicleParts",
+      "building": "vehiclePartsWorks",
+      "recipe": "vehiclePartsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "tires",
+      "to": "vehicleParts",
+      "building": "vehiclePartsWorks",
+      "recipe": "vehiclePartsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "vehicleParts",
+      "to": "utilityVehicles",
+      "building": "utilityVehicleWorks",
+      "recipe": "utilityVehicleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "engines",
+      "to": "utilityVehicles",
+      "building": "utilityVehicleWorks",
+      "recipe": "utilityVehicleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "vehicleParts",
+      "to": "freightTrucks",
+      "building": "truckWorks",
+      "recipe": "truckWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "engines",
+      "to": "freightTrucks",
+      "building": "truckWorks",
+      "recipe": "truckWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "chassis",
+      "to": "buses",
+      "building": "busWorks",
+      "recipe": "busWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "engines",
+      "to": "buses",
+      "building": "busWorks",
+      "recipe": "busWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "glass",
+      "to": "buses",
+      "building": "busWorks",
+      "recipe": "busWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "vehicleParts",
+      "to": "passengerCars",
+      "building": "carWorks",
+      "recipe": "carWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "engines",
+      "to": "passengerCars",
+      "building": "carWorks",
+      "recipe": "carWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "glass",
+      "to": "passengerCars",
+      "building": "carWorks",
+      "recipe": "carWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "vehicleParts",
+      "to": "electricVehicles",
+      "building": "electricVehicleWorks",
+      "recipe": "electricVehicleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "batteries",
+      "to": "electricVehicles",
+      "building": "electricVehicleWorks",
+      "recipe": "electricVehicleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "powerElectronics",
+      "to": "electricVehicles",
+      "building": "electricVehicleWorks",
+      "recipe": "electricVehicleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "beams",
+      "to": "railAssemblies",
+      "building": "railWorks",
+      "recipe": "railWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "motors",
+      "to": "railAssemblies",
+      "building": "railWorks",
+      "recipe": "railWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "controlSystems",
+      "to": "railAssemblies",
+      "building": "railWorks",
+      "recipe": "railWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "steelPlate",
+      "to": "ships",
+      "building": "shipWorks",
+      "recipe": "shipWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "engines",
+      "to": "ships",
+      "building": "shipWorks",
+      "recipe": "shipWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "controlSystems",
+      "to": "ships",
+      "building": "shipWorks",
+      "recipe": "shipWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "electricVehicles",
+      "to": "autonomousVehicles",
+      "building": "autonomousVehicleWorks",
+      "recipe": "autonomousVehicleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "precisionElectronics",
+      "to": "autonomousVehicles",
+      "building": "autonomousVehicleWorks",
+      "recipe": "autonomousVehicleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "aluminum",
+      "to": "airframes",
+      "building": "airframeWorks",
+      "recipe": "airframeWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1.5,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "alloySteel",
+      "to": "airframes",
+      "building": "airframeWorks",
+      "recipe": "airframeWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "turbines",
+      "to": "jetEngines",
+      "building": "jetEngineWorks",
+      "recipe": "jetEngineWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "titanium",
+      "to": "jetEngines",
+      "building": "jetEngineWorks",
+      "recipe": "jetEngineWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "controlSystems",
+      "to": "avionics",
+      "building": "avionicsWorks",
+      "recipe": "avionicsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "sensors",
+      "to": "avionics",
+      "building": "avionicsWorks",
+      "recipe": "avionicsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "composites",
+      "to": "aerospaceComposites",
+      "building": "aerospaceCompositeWorks",
+      "recipe": "aerospaceCompositeWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "titanium",
+      "to": "aerospaceComposites",
+      "building": "aerospaceCompositeWorks",
+      "recipe": "aerospaceCompositeWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "airframes",
+      "to": "aircraftParts",
+      "building": "aircraftPartsWorks",
+      "recipe": "aircraftPartsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "aerospaceComposites",
+      "to": "aircraftParts",
+      "building": "aircraftPartsWorks",
+      "recipe": "aircraftPartsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "aircraftParts",
+      "to": "civilAircraft",
+      "building": "civilAircraftWorks",
+      "recipe": "civilAircraftWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "jetEngines",
+      "to": "civilAircraft",
+      "building": "civilAircraftWorks",
+      "recipe": "civilAircraftWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "avionics",
+      "to": "civilAircraft",
+      "building": "civilAircraftWorks",
+      "recipe": "civilAircraftWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "aluminum",
+      "to": "satelliteParts",
+      "building": "satellitePartsWorks",
+      "recipe": "satellitePartsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "precisionElectronics",
+      "to": "satelliteParts",
+      "building": "satellitePartsWorks",
+      "recipe": "satellitePartsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "satelliteParts",
+      "to": "satellites",
+      "building": "satelliteWorks",
+      "recipe": "satelliteWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "avionics",
+      "to": "satellites",
+      "building": "satelliteWorks",
+      "recipe": "satelliteWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "aerospaceComposites",
+      "to": "launchAssemblies",
+      "building": "launchAssemblyWorks",
+      "recipe": "launchAssemblyWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "controlSystems",
+      "to": "launchAssemblies",
+      "building": "launchAssemblyWorks",
+      "recipe": "launchAssemblyWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "turbines",
+      "to": "launchAssemblies",
+      "building": "launchAssemblyWorks",
+      "recipe": "launchAssemblyWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "launchAssemblies",
+      "to": "orbitalPlatforms",
+      "building": "orbitalPlatformWorks",
+      "recipe": "orbitalPlatformWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "satellites",
+      "to": "orbitalPlatforms",
+      "building": "orbitalPlatformWorks",
+      "recipe": "orbitalPlatformWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "industrialRobots",
+      "to": "orbitalPlatforms",
+      "building": "orbitalPlatformWorks",
+      "recipe": "orbitalPlatformWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "plastic",
+      "to": "householdGoods",
+      "building": "householdGoodsWorks",
+      "recipe": "householdGoodsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "playable"
+    },
+    {
+      "from": "steel",
+      "to": "householdGoods",
+      "building": "householdGoodsWorks",
+      "recipe": "householdGoodsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "playable"
+    },
+    {
+      "from": "motors",
+      "to": "appliances",
+      "building": "applianceWorks",
+      "recipe": "applianceWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "circuitBoards",
+      "to": "appliances",
+      "building": "applianceWorks",
+      "recipe": "applianceWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "steelPlate",
+      "to": "appliances",
+      "building": "applianceWorks",
+      "recipe": "applianceWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "wire",
+      "to": "electricalGoods",
+      "building": "electricalGoodsWorks",
+      "recipe": "electricalGoodsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "plastic",
+      "to": "electricalGoods",
+      "building": "electricalGoodsWorks",
+      "recipe": "electricalGoodsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "semiconductors",
+      "to": "electricalGoods",
+      "building": "electricalGoodsWorks",
+      "recipe": "electricalGoodsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "plastic",
+      "to": "medicalSupplies",
+      "building": "medicalSupplyWorks",
+      "recipe": "medicalSupplyWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "industrialGas",
+      "to": "medicalSupplies",
+      "building": "medicalSupplyWorks",
+      "recipe": "medicalSupplyWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "glass",
+      "to": "medicalSupplies",
+      "building": "medicalSupplyWorks",
+      "recipe": "medicalSupplyWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "polymerFilm",
+      "to": "packaging",
+      "building": "packagingWorks",
+      "recipe": "packagingWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "playable"
+    },
+    {
+      "from": "syntheticTextiles",
+      "to": "workwear",
+      "building": "workwearWorks",
+      "recipe": "workwearWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "playable"
+    },
+    {
+      "from": "steel",
+      "to": "furniture",
+      "building": "furnitureWorks",
+      "recipe": "furnitureWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "playable"
+    },
+    {
+      "from": "plastic",
+      "to": "furniture",
+      "building": "furnitureWorks",
+      "recipe": "furnitureWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "playable"
+    },
+    {
+      "from": "syntheticTextiles",
+      "to": "furniture",
+      "building": "furnitureWorks",
+      "recipe": "furnitureWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "playable"
+    },
+    {
+      "from": "processors",
+      "to": "consumerDevices",
+      "building": "consumerDeviceWorks",
+      "recipe": "consumerDeviceWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "displays",
+      "to": "consumerDevices",
+      "building": "consumerDeviceWorks",
+      "recipe": "consumerDeviceWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "batteries",
+      "to": "consumerDevices",
+      "building": "consumerDeviceWorks",
+      "recipe": "consumerDeviceWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "precisionElectronics",
+      "to": "medicalDevices",
+      "building": "medicalDeviceWorks",
+      "recipe": "medicalDeviceWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "ceramics",
+      "to": "medicalDevices",
+      "building": "medicalDeviceWorks",
+      "recipe": "medicalDeviceWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "lubricant",
+      "to": "industrialConsumables",
+      "building": "consumablesWorks",
+      "recipe": "consumablesWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "playable"
+    },
+    {
+      "from": "adhesive",
+      "to": "industrialConsumables",
+      "building": "consumablesWorks",
+      "recipe": "consumablesWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "playable"
+    },
+    {
+      "from": "appliances",
+      "to": "advancedAppliances",
+      "building": "advancedApplianceWorks",
+      "recipe": "advancedApplianceWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "controlSystems",
+      "to": "advancedAppliances",
+      "building": "advancedApplianceWorks",
+      "recipe": "advancedApplianceWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "consumerDevices",
+      "to": "luxuryGoods",
+      "building": "luxuryGoodsWorks",
+      "recipe": "luxuryGoodsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "rareEarths",
+      "to": "luxuryGoods",
+      "building": "luxuryGoodsWorks",
+      "recipe": "luxuryGoodsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "syntheticTextiles",
+      "to": "luxuryGoods",
+      "building": "luxuryGoodsWorks",
+      "recipe": "luxuryGoodsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "composites",
+      "to": "protectiveEquipment",
+      "building": "protectiveEquipmentWorks",
+      "recipe": "protectiveEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "syntheticTextiles",
+      "to": "protectiveEquipment",
+      "building": "protectiveEquipmentWorks",
+      "recipe": "protectiveEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "medicalSupplies",
+      "to": "fieldSupplies",
+      "building": "fieldSupplyWorks",
+      "recipe": "fieldSupplyWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "packaging",
+      "to": "fieldSupplies",
+      "building": "fieldSupplyWorks",
+      "recipe": "fieldSupplyWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "communicationModules",
+      "to": "communicationsEquipment",
+      "building": "fieldCommunicationsWorks",
+      "recipe": "fieldCommunicationsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "batteries",
+      "to": "communicationsEquipment",
+      "building": "fieldCommunicationsWorks",
+      "recipe": "fieldCommunicationsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "sensors",
+      "to": "opticalEquipment",
+      "building": "opticalEquipmentWorks",
+      "recipe": "opticalEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "glass",
+      "to": "opticalEquipment",
+      "building": "opticalEquipmentWorks",
+      "recipe": "opticalEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "alloySteel",
+      "to": "equipmentParts",
+      "building": "equipmentPartsWorks",
+      "recipe": "equipmentPartsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "precisionTools",
+      "to": "equipmentParts",
+      "building": "equipmentPartsWorks",
+      "recipe": "equipmentPartsWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "utilityVehicles",
+      "to": "transportEquipment",
+      "building": "transportEquipmentWorks",
+      "recipe": "transportEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "protectiveEquipment",
+      "to": "transportEquipment",
+      "building": "transportEquipmentWorks",
+      "recipe": "transportEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "aircraftParts",
+      "to": "aircraftEquipment",
+      "building": "aircraftEquipmentWorks",
+      "recipe": "aircraftEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "avionics",
+      "to": "aircraftEquipment",
+      "building": "aircraftEquipmentWorks",
+      "recipe": "aircraftEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "ships",
+      "to": "navalEquipment",
+      "building": "navalEquipmentWorks",
+      "recipe": "navalEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "communicationsEquipment",
+      "to": "navalEquipment",
+      "building": "navalEquipmentWorks",
+      "recipe": "navalEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "precisionElectronics",
+      "to": "precisionEquipment",
+      "building": "precisionEquipmentWorks",
+      "recipe": "precisionEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "equipmentParts",
+      "to": "precisionEquipment",
+      "building": "precisionEquipmentWorks",
+      "recipe": "precisionEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "precisionEquipment",
+      "to": "strategicEquipment",
+      "building": "strategicEquipmentWorks",
+      "recipe": "strategicEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "industrialRobots",
+      "to": "strategicEquipment",
+      "building": "strategicEquipmentWorks",
+      "recipe": "strategicEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    },
+    {
+      "from": "satelliteParts",
+      "to": "strategicEquipment",
+      "building": "strategicEquipmentWorks",
+      "recipe": "strategicEquipmentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 0.5,
+      "outputPerMinute": 0.5,
+      "availability": "definitionsOnly"
+    }
+  ],
+  "topologicalOrder": [
+    "rareEarthOre",
+    "rareEarths",
+    "titaniumOre",
+    "lithiumOre",
+    "lithium",
+    "phosphate",
+    "salt",
+    "sulfur",
+    "naturalGas",
+    "industrialGas",
+    "coolant",
+    "fertilizer",
+    "industrialAcid",
+    "crudeOil",
+    "fuel",
+    "industrialSolvent",
+    "industrialResin",
+    "adhesive",
+    "lubricant",
+    "industrialConsumables",
+    "paint",
+    "rubber",
+    "plastic",
+    "syntheticTextiles",
+    "workwear",
+    "polymerFilm",
+    "packaging",
+    "bauxite",
+    "copperOre",
+    "copper",
+    "batteries",
+    "wire",
+    "tires",
+    "cable",
+    "limestone",
+    "silica",
+    "bricks",
+    "coal",
+    "ironOre",
+    "glass",
+    "medicalSupplies",
+    "fieldSupplies",
+    "insulation",
+    "carbon",
+    "compositeFiber",
+    "composites",
+    "protectiveEquipment",
+    "cement",
+    "concrete",
+    "titanium",
+    "aerospaceComposites",
+    "silicon",
+    "semiconductors",
+    "electricalGoods",
+    "powerElectronics",
+    "displays",
+    "memory",
+    "processors",
+    "consumerDevices",
+    "luxuryGoods",
+    "circuitBoards",
+    "communicationModules",
+    "communicationsEquipment",
+    "controlSystems",
+    "sensors",
+    "opticalEquipment",
+    "avionics",
+    "precisionElectronics",
+    "quantumModules",
+    "aluminum",
+    "satelliteParts",
+    "satellites",
+    "ceramics",
+    "medicalDevices",
+    "iron",
+    "steel",
+    "furniture",
+    "householdGoods",
+    "bearings",
+    "motors",
+    "automationModules",
+    "gears",
+    "engines",
+    "tools",
+    "industrialMachinery",
+    "pipes",
+    "pumps",
+    "steelPlate",
+    "appliances",
+    "advancedAppliances",
+    "ships",
+    "navalEquipment",
+    "beams",
+    "railAssemblies",
+    "chassis",
+    "buses",
+    "vehicleParts",
+    "electricVehicles",
+    "autonomousVehicles",
+    "passengerCars",
+    "freightTrucks",
+    "utilityVehicles",
+    "transportEquipment",
+    "heavyMachinery",
+    "constructionModules",
+    "alloySteel",
+    "airframes",
+    "aircraftParts",
+    "aircraftEquipment",
+    "turbines",
+    "launchAssemblies",
+    "jetEngines",
+    "civilAircraft",
+    "precisionTools",
+    "equipmentParts",
+    "precisionEquipment",
+    "roboticArms",
+    "industrialRobots",
+    "strategicEquipment",
+    "orbitalPlatforms",
+    "money"
+  ]
+}

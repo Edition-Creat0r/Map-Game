@@ -19,7 +19,7 @@
 
 
   window.mapGameWorldConfig = Object.freeze({
-    VERSION: "0.3.2A",
+    VERSION: "0.3.4C1",
     WORLD_COLS,
     WORLD_ROWS,
     TERRITORY_SIZE,

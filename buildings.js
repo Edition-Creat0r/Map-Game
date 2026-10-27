@@ -347,6 +347,61 @@
     }
   ];
 
+  // 0.3.3D: starter rules reuse existing identities, footprints and visual models.
+  const STARTER_RULES = {
+    smallHouse: {
+      name: "Residential Home",
+      cost: { money: 12000, steel: 2 },
+      housing: 20,
+      growth: 2,
+      energyUse: 1,
+      upkeep: 1,
+    },
+    powerPlant: {
+      name: "Small Power Plant",
+      cost: { money: 25000, steel: 10, carbon: 5 },
+      energySupply: 40,
+      upkeep: 6,
+    },
+    steelMill: {
+      name: "Steel Factory",
+      cost: { money: 45000, steel: 15, carbon: 5 },
+      energyUse: 10,
+      workforce: 6,
+      production: { steel: 6 },
+      upkeep: 12,
+    },
+    carbonPlant: {
+      name: "Carbon Facility",
+      cost: { money: 35000, steel: 10 },
+      energyUse: 8,
+      workforce: 4,
+      production: { carbon: 4 },
+      upkeep: 10,
+    },
+    cornerStore: {
+      name: "Commercial Store",
+      cost: { money: 18000, steel: 4 },
+      energyUse: 3,
+      workforce: 4,
+      production: { money: 180 },
+      upkeep: 8,
+    },
+  };
+  for (const def of CATALOG) {
+    if (!STARTER_RULES[def.id]) continue;
+    const { name, cost, ...rules } = STARTER_RULES[def.id];
+    // Preserve the old catalog rates for already placed legacy buildings in migration.
+    def.legacyEconomy = {
+      production: { money: def.incomePerMin || 0 },
+      energyUse: def.powerUse || 0,
+      energySupply: def.powerSupply || 0,
+      housing: def.population || 0,
+      growth: def.population ? 2 : 0,
+    };
+    Object.assign(def, { name, cost, economy: rules });
+  }
+
   function item(id) {
     return CATALOG.find(v => v.id === id) || CATALOG[0];
   }
@@ -911,6 +966,7 @@
     const B = window.BABYLON;
     const scene = runtime.scene;
     const def = item(data.type);
+    const modelType = def.visual?.existingModelId || data.type;
     const regular =
       runtime.graphicsPreset === "REGULAR" ||
       runtime.graphicsPreset === "DEEP";
@@ -1046,7 +1102,7 @@
       }
     } else if (def.category === "Industrial") {
       visual = warehouse(B, scene, root, 0, 0, w * 0.92, d * 0.86, mats, data.variant || 0);
-      if (["steelMill", "carbonPlant"].includes(data.type)) {
+      if (["steelMill", "carbonPlant"].includes(modelType)) {
         const stacks = regular ? 3 : 2;
         for (let i = 0; i < stacks; i++) {
           const stack = B.MeshBuilder.CreateCylinder("factoryStack", {

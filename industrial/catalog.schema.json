@@ -1,0 +1,323 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://map-game.invalid/spec/industrial-catalog-v1",
+  "title": "0.3.4 Phase B industrial catalog",
+  "type": "object",
+  "required": [
+    "version",
+    "materials",
+    "buildings",
+    "models",
+    "technologies"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/material"
+      }
+    },
+    "buildings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/building"
+      }
+    },
+    "models": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/id"
+      }
+    },
+    "technologies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/technology"
+      }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][A-Za-z0-9_]*$"
+    },
+    "amounts": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/id"
+      },
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1000000000000
+      }
+    },
+    "material": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "unit",
+        "storageClass"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "storageClass": {
+          "enum": [
+            "bulk",
+            "liquid",
+            "general",
+            "precision",
+            "hazardous"
+          ]
+        },
+        "aliases": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "recipe": {
+      "type": "object",
+      "required": [
+        "id",
+        "inputsPerMinute",
+        "outputsPerMinute",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "inputsPerMinute": {
+          "$ref": "#/$defs/amounts"
+        },
+        "outputsPerMinute": {
+          "$ref": "#/$defs/amounts"
+        },
+        "technology": {
+          "$ref": "#/$defs/id"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "building": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "sector",
+        "era",
+        "footprint",
+        "cost",
+        "recipes",
+        "operating",
+        "visual",
+        "maxLevel",
+        "specializations",
+        "technology",
+        "logistics",
+        "availability"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "sector": {
+          "enum": [
+            "mining",
+            "refining",
+            "construction",
+            "chemicals",
+            "electronics",
+            "machinery",
+            "vehicles",
+            "aerospace",
+            "consumer",
+            "defense",
+            "housing",
+            "power",
+            "commerce",
+            "services",
+            "logistics"
+          ]
+        },
+        "era": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6
+        },
+        "footprint": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "cost": {
+          "$ref": "#/$defs/amounts"
+        },
+        "recipes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recipe"
+          }
+        },
+        "operating": {
+          "type": "object",
+          "required": [
+            "energy",
+            "workers",
+            "upkeep"
+          ],
+          "properties": {
+            "energy": {
+              "type": "number",
+              "minimum": 0
+            },
+            "workers": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "upkeep": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": true
+        },
+        "visual": {
+          "type": "object",
+          "required": [
+            "existingModelId",
+            "styles"
+          ],
+          "properties": {
+            "existingModelId": {
+              "$ref": "#/$defs/id"
+            },
+            "styles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        "maxLevel": {
+          "const": 10
+        },
+        "specializations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "Production",
+              "Efficiency",
+              "Automation",
+              "Logistics"
+            ]
+          }
+        },
+        "logistics": {
+          "type": "object",
+          "properties": {
+            "storageClass": {
+              "type": "string"
+            },
+            "capacity": {
+              "type": "number",
+              "minimum": 0
+            },
+            "throughputPerMinute": {
+              "type": "number",
+              "minimum": 0
+            },
+            "districtRequired": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": true
+        },
+        "technology": {
+          "$ref": "#/$defs/id"
+        },
+        "availability": {
+          "enum": [
+            "playable",
+            "futureLocked",
+            "definitionsOnly"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "technology": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "era",
+        "prerequisites",
+        "available"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "era": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6
+        },
+        "prerequisites": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "available": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
