@@ -6,6 +6,7 @@ const output = process.argv[2] || "/tmp/map-game-industrial";
 fs.mkdirSync(output, { recursive: true });
 (async () => {
   const reports = [];
+  const industrial = process.env.INDUSTRIAL_FIXTURE === "phase_b";
   for (const count of [1000, 10000]) {
     const browser = await chromium.launch({
       executablePath: process.env.CHROMIUM_PATH || "/usr/bin/chromium",
@@ -23,53 +24,69 @@ fs.mkdirSync(output, { recursive: true });
     page.on("response", (q) => {
       if (q.status() >= 400) r.http.push([q.url(), q.status()]);
     });
-    await page.addInitScript((count) => {
-      const native = Date.now.bind(Date),
-        year = 365.25 * 86400000;
-      Date.now = () => native() + 1000 * year;
-      if (!localStorage.getItem("industrialFixture")) {
-        const types = [
-          "smallHouse",
-          "powerPlant",
-          "steelMill",
-          "carbonPlant",
-          "cornerStore",
-          "smallHouse",
-        ];
-        const rows = Array.from({ length: count }, (_, i) => ({
-          id: "stress_" + i,
-          type: types[i % 6],
-          territoryId: "T_190_27",
-          x: 100 + (i % 100) * 200,
-          z: 100 + Math.floor(i / 100) * 200,
-        }));
-        localStorage.setItem(
-          "mapgame_economy_021e",
-          JSON.stringify({
-            money: 1e12,
-            steel: 100,
-            carbon: 40,
-            placedIncomeItems: rows,
-            unknown: "preserve",
-            economy: {
-              version: 1,
-              lastTick: native(),
-              population: 0,
-              future: "keep",
-            },
-          }),
-        );
-        localStorage.setItem("industrialFixture", "yes");
-      }
-      window.cityLongTasks = [];
-      new PerformanceObserver((list) => {
-        for (const e of list.getEntries())
-          window.cityLongTasks.push({
-            start: e.startTime,
-            duration: e.duration,
-          });
-      }).observe({ type: "longtask", buffered: true });
-    }, count);
+    await page.addInitScript(
+      ({ count, industrial }) => {
+        const native = Date.now.bind(Date),
+          year = 365.25 * 86400000;
+        Date.now = () => native() + 1000 * year;
+        if (!localStorage.getItem("industrialFixture")) {
+          const types = industrial
+            ? [
+                "smallHouse",
+                "smallHouse",
+                "powerPlant",
+                "ironMine",
+                "coalMine",
+                "ironSmelter",
+                "cokeWorks",
+                "steelFoundry",
+                "cornerStore",
+              ]
+            : [
+                "smallHouse",
+                "powerPlant",
+                "steelMill",
+                "carbonPlant",
+                "cornerStore",
+                "smallHouse",
+              ];
+          const rows = Array.from({ length: count }, (_, i) => ({
+            id: "stress_" + i,
+            type: types[i % types.length],
+            territoryId: "T_190_27",
+            x: 100 + (i % 100) * 200,
+            z: 100 + Math.floor(i / 100) * 200,
+          }));
+          localStorage.setItem(
+            "mapgame_economy_021e",
+            JSON.stringify({
+              money: 1e12,
+              steel: 100,
+              iron: 0,
+              carbon: 40,
+              placedIncomeItems: rows,
+              unknown: "preserve",
+              economy: {
+                version: industrial ? 3 : 1,
+                lastTick: native(),
+                population: 0,
+                future: "keep",
+              },
+            }),
+          );
+          localStorage.setItem("industrialFixture", "yes");
+        }
+        window.cityLongTasks = [];
+        new PerformanceObserver((list) => {
+          for (const e of list.getEntries())
+            window.cityLongTasks.push({
+              start: e.startTime,
+              duration: e.duration,
+            });
+        }).observe({ type: "longtask", buffered: true });
+      },
+      { count, industrial },
+    );
     await page.goto(process.env.MAP_GAME_TEST_URL || "http://127.0.0.1:8001");
     await page.waitForFunction(
       () => document.querySelector("#mgStartSingle")?.disabled === false,
@@ -109,12 +126,19 @@ fs.mkdirSync(output, { recursive: true });
         checkpoint: s.economy.lastTick,
         money: s.money,
         steel: s.steel,
+        ironOre: s.inventory?.ironOre,
+        coal: s.inventory?.coal,
         offline: mapGameEconomy.applyOfflineIncome(),
         unknown: s.unknown,
         future: s.economy.future,
       };
     });
-    assert.equal(r.catchup.version, 2);
+    assert.equal(r.catchup.version, 3);
+    if (industrial) {
+      assert.ok(r.catchup.ironOre > 0);
+      assert.ok(r.catchup.coal > 0);
+      assert.ok(r.catchup.steel>100);
+    }
     assert.equal(r.catchup.engine, "worker");
     assert.equal(r.catchup.unknown, "preserve");
     assert.equal(r.catchup.future, "keep");

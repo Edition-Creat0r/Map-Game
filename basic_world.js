@@ -897,9 +897,12 @@
       ctx.fillText(def.name, p.x - w / 2, p.y - d / 2 - 5);
     }
   }
+  const buildingDefinitions = new Map(
+    window.mapGameBuildings.CATALOG.map(d => [d.id, d])
+  );
   function drawEconomyBuildings() {
     for (const row of placedBuildings) {
-      const def = window.mapGameBuildings.CATALOG.find((d) => d.id === row.type);
+      const def = buildingDefinitions.get(row.type);
       if (def) drawStructure(row, def);
     }
     if (construction?.point)

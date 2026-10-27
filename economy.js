@@ -54,6 +54,7 @@
           0,
         );
       }
+      Model.bindContracts(state, catalog(), raw.economy?.version || 0);
       error = "";
       for (const row of state.placedIncomeItems)
         if (!row.footprint)
@@ -186,7 +187,7 @@
       continueCatchup();
     }
     try {
-      const worker = new Worker("economy_worker.js?v=3401");
+      const worker = new Worker("economy_worker.js?v=3402");
       catchupWorker = worker;
       catchupEngine = "worker";
       catchupWorker.onerror = (event) => {
@@ -364,7 +365,8 @@
         (prior.rotation || 0) === (data.rotation || 0)
       );
     const actual = catalog().find((v) => v.id === def.id && v.economy);
-    if (!actual) return false;
+    if (!actual || (actual.industrial && actual.availability !== "playable"))
+      return false;
     settle();
     if (catchup || error) return false;
     const result = transaction((s) => {
@@ -380,13 +382,18 @@
       )
         return false;
       if (!Model.spend(s, actual.cost)) return false;
-      s.placedIncomeItems.push({
+      const row = {
         ...data,
+        economyContract: null,
         type: actual.id,
         footprint: actual.footprint.slice(),
         level: 1,
         createdAt: Date.now(),
-      });
+        recipeId: actual.recipeId || null,
+        recipeVersion: actual.recipeVersion || 1,
+      };
+      Model.pinContract(s, row, actual);
+      s.placedIncomeItems.push(row);
       return true;
     });
     emit();
@@ -421,6 +428,15 @@
     return exclusions;
   }
   function checkPlacement(def, data) {
+    if (def?.industrial && def.availability !== "playable")
+      return {
+        allowed: false,
+        reasons: [
+          def.availability === "definitionsOnly"
+            ? "Definition only — activation reserved for a later phase"
+            : `Era ${def.era} / ${def.technology} is future-locked until progression is implemented`,
+        ],
+      };
     if (!enabled || error || catchup)
       return {
         allowed: false,
@@ -464,7 +480,7 @@
     return !!result;
   }
   window.mapGameEconomy = {
-    VERSION: "0.3.4A",
+    VERSION: "0.3.4B",
     SAVE_KEY,
     OFFLINE_CAP_MINUTES: null,
     snapshot,

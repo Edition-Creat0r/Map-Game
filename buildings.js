@@ -966,6 +966,7 @@
     const B = window.BABYLON;
     const scene = runtime.scene;
     const def = item(data.type);
+    const modelType = def.visual?.existingModelId || data.type;
     const regular =
       runtime.graphicsPreset === "REGULAR" ||
       runtime.graphicsPreset === "DEEP";
@@ -1101,7 +1102,7 @@
       }
     } else if (def.category === "Industrial") {
       visual = warehouse(B, scene, root, 0, 0, w * 0.92, d * 0.86, mats, data.variant || 0);
-      if (["steelMill", "carbonPlant"].includes(data.type)) {
+      if (["steelMill", "carbonPlant"].includes(modelType)) {
         const stacks = regular ? 3 : 2;
         for (let i = 0; i < stacks; i++) {
           const stack = B.MeshBuilder.CreateCylinder("factoryStack", {

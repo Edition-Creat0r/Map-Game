@@ -3567,3 +3567,9 @@ body[data-graphics="basic"] [data-action="hub"] {
 #mgConstructionControls [data-reason] {
   color: #ffd49c;
 }
+
+/* Phase B: catalog navigation and filters; no warehouse or research behavior. */
+.mg-industrial-filters { display:flex;gap:16px;flex-wrap:wrap;margin:16px 0; }
+.mg-industrial-filters label { display:grid;gap:5px; }
+.mg-industrial-filters input,.mg-industrial-filters select { background:#102c3c;color:#e5f3f7;border:1px solid #6094a7;border-radius:6px;padding:8px;font:inherit; }
+.mg-econ-shell footer,#mgEconomyStats footer { display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:16px; }

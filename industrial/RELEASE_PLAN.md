@@ -1,6 +1,6 @@
 # 0.3.4 Industrial Revolution — phased contract
 
-Integration branch: `feature/0.3.4-industrial-revolution`, from `feature/0.3.3d-economy` (8042c84). Only Phase A is implemented in this report. B–F below are specifications and gates, not shipped features. Stop after reporting Phase A results.
+Integration branch: `feature/0.3.4-industrial-revolution`, from `feature/0.3.3d-economy` (8042c84). Phases A and B are implemented; see `PHASE_A_VALIDATION.md` and `PHASE_B_VALIDATION.md`. C–F remain future specifications and gates. Stop after reporting Phase B; do not automatically begin Phase C.
 
 | Phase | Deliverable | Gate before advancing |
 | --- | --- | --- |
@@ -15,7 +15,7 @@ Every phase supplies a change summary, balance tables, migration notes, screensh
 
 ## Catalog contract for Phase B
 
-`catalog.schema.json` is a reviewable JSON Schema specification, not a runtime registry or 120 already-implemented buildings. IDs are stable; recipes reference material IDs rather than translated labels. Catalog validation must enforce unique IDs, existing material/model/technology references, nonnegative finite amounts, productive recipes, storage-class compatibility, and explicit handling of cycles. All rates are per game minute. The schema permits unknown fields for forward compatibility; semantic validation is required in addition to shape checks.
+`catalog.schema.json` is the implemented Phase B contract. The 120 definitions and versioned materials are in `catalog.json`, with runtime validation/integration in `registry.js` and `integration.js`. Availability is explicit: 56 playable, 54 future-locked and 10 definitions only; the five starter contracts remain available. IDs are stable; recipes reference material IDs rather than translated labels. Catalog validation must enforce unique IDs, existing material/model/technology references, nonnegative finite amounts, productive recipes, storage-class compatibility, and explicit handling of cycles. All rates are per game minute. The schema permits unknown fields for forward compatibility; semantic validation is required in addition to shape checks.
 
 The 120-building industrial budget is:
 
@@ -33,15 +33,15 @@ The 120-building industrial budget is:
 | Defense manufacturing | 10 | Civilian alloys/machinery/electronics → equipment and supply inventory |
 | **Industrial total** | **120** | Housing, utilities, warehouses and services are additional |
 
-Proposed storage classes: bulk, liquid, general, precision, hazardous. Phase B will add a versioned inventory registry while retaining Money/Steel/Carbon aliases and prominent display. Phase C supplies actual warehouse/network capacity; Phase A's existing 10^12 numeric resource ceiling is not a warehouse simulation.
+Proposed storage classes: bulk, liquid, general, precision, hazardous. Phase B adds a versioned inventory registry while retaining Money/Steel/Carbon aliases and prominent display. Phase C supplies actual warehouse/network capacity; Phase A's existing 10^12 numeric resource ceiling is not a warehouse simulation.
 
 Each building references an existing renderer/model identity and configurable footprint, purchase costs, operating power/workers/upkeep, recipe, era/technology, logistics properties and styles. Definitions support ten upgrade levels and Production, Efficiency, Automation and Logistics specialization metadata. Upgrade effects, costs and unlocks are not activated until Phase D; avoid silently reinterpreting existing building levels.
 
 ## Production graph
 
-The active Phase A graph is unchanged: housing + power → workers; workers + power + upkeep → starter steel, carbon and commercial money. Starter industrial feedstock remains implicit until Phase B's explicit, migrated recipe expansion.
+The active Phase A graph is unchanged: housing + power → workers; workers + power + upkeep → starter steel, carbon and commercial money. Starter contracts deliberately retain their implicit feedstock for compatibility. The new Phase B industrial entries consume explicit input/output recipes, without changing those five starter contracts.
 
-The following graph is **planned**, not active:
+The following graph describes catalog dependencies. Early industrial chains are active in Phase B; later-era and defense nodes remain locked/inactive. Consult `AVAILABILITY.md` for exact status:
 
 ```mermaid
 flowchart LR
@@ -67,7 +67,7 @@ flowchart LR
   Power[Electricity] -. operation .-> Machinery
 ```
 
-Outputs of a tick cannot finance inputs of that same tick. Online speed consumes proportionally more inputs as well as producing more outputs; upkeep and capacity are not boosted. Phase A tests this rule with prototype recipes over the six existing resources, without changing the five live recipes. Storage overflow/blocked outputs and logistics will need explicit Phase B/C policies rather than assuming goods teleport indefinitely.
+Outputs of a tick cannot finance inputs of that same tick. Online speed consumes proportionally more inputs as well as producing more outputs; upkeep and capacity are not boosted. Phase A tests this rule with prototype recipes over the six existing resources, without changing the five starter recipes; the Phase B catalog now supplies explicit industrial recipes. Storage overflow/blocked outputs and logistics will need explicit Phase B/C policies rather than assuming goods teleport indefinitely.
 
 ## City and progression contract
 

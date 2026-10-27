@@ -215,7 +215,7 @@ test("v1 migration preserves unknown state and pending online time; unsafe times
   raw.future = "keep";
   delete raw.economy.precision;
   const migrated = M.normalize(raw, epoch);
-  assert.equal(migrated.economy.version, 2);
+  assert.equal(migrated.economy.version, M.SCHEMA_VERSION);
   assert.equal(migrated.future, "keep");
   assert.deepEqual(migrated.economy.future, { custom: 42 });
   const before = migrated.money;

@@ -3,9 +3,16 @@
   "use strict";
   const STEP_MS = 10000,
     LIMIT = 1e12,
-    SCHEMA_VERSION = 2;
+    SCHEMA_VERSION = 3;
   const RESOURCES = ["money", "steel", "carbon", "iron", "concrete", "glass"];
-  const KEYS = [...RESOURCES, "population"];
+  const Registry =
+    typeof module !== "undefined"
+      ? require("./industrial/registry.js")
+      : root.mapGameIndustrialRegistry;
+  if (!Registry) throw Error("Material registry must load before the economy");
+  const MATERIALS = Registry.materialIds,
+    materialSet = new Set(MATERIALS),
+    legacySet = new Set(RESOURCES);
   const SCALE = 300000000000n,
     MAX = BigInt(LIMIT) * SCALE;
   const finite = (v, fallback = 0) =>
@@ -28,7 +35,12 @@
   const number = (v) => Number(v / SCALE) + Number(v % SCALE) / Number(SCALE);
   const micro = (v) => (units(finite(v)) + 150000n) / 300000n;
   function balance(state, key) {
-    const value = key === "population" ? state.economy.population : state[key];
+    const value =
+      key === "population"
+        ? state.economy.population
+        : legacySet.has(key) || key === "totalEarned"
+          ? state[key]
+          : state.inventory?.[key];
     const saved = state.economy.precision?.[key];
     if (
       typeof saved === "string" &&
@@ -44,7 +56,9 @@
     value = min(MAX, max(0n, value));
     state.economy.precision[key] = String(value);
     if (key === "population") state.economy.population = number(value);
-    else state[key] = number(value);
+    else if (legacySet.has(key) || key === "totalEarned")
+      state[key] = number(value);
+    else state.inventory[key] = number(value);
   }
   function normalize(raw = {}, now = 0, legacyBuildings = []) {
     const state = clone(raw),
@@ -59,6 +73,10 @@
     for (const key of RESOURCES)
       state[key] = raw[key] === undefined ? defaults[key] : finite(raw[key]);
     state.totalEarned = finite(raw.totalEarned);
+    state.inventory = { ...(raw.inventory || {}) };
+    for (const key of MATERIALS)
+      if (!legacySet.has(key))
+        state.inventory[key] = finite(raw.inventory?.[key]);
     const seen = new Set();
     state.placedIncomeItems = [
       ...(Array.isArray(raw.placedIncomeItems) ? raw.placedIncomeItems : []),
@@ -77,6 +95,20 @@
         level: Math.max(1, Math.min(100, finite(v.level, 1))),
       }));
     const old = raw.economy || {};
+    if (
+      old.version !== undefined &&
+      (!Number.isInteger(old.version) ||
+        old.version < 0 ||
+        old.version > SCHEMA_VERSION)
+    )
+      throw Error("Unsupported economy save version");
+    if (
+      old.materialRegistryVersion !== undefined &&
+      (!Number.isInteger(old.materialRegistryVersion) ||
+        old.materialRegistryVersion < 0 ||
+        old.materialRegistryVersion > Registry.VERSION)
+    )
+      throw Error("Unsupported material registry version");
     state.economy = {
       ...old,
       version: SCHEMA_VERSION,
@@ -92,19 +124,19 @@
       pendingBoostMs: Math.trunc(finite(old.pendingBoostMs)),
       revision: finite(old.revision),
       precision: { ...(old.precision || {}) },
+      materialRegistryVersion: Registry.VERSION,
+      rules: { ...(old.rules || {}) },
     };
     state.economy.pendingBoostMs = Math.min(
       state.economy.pendingMs,
       state.economy.pendingBoostMs,
     );
-    for (const key of [...KEYS, "totalEarned"])
+    for (const key of [...MATERIALS, "population", "totalEarned"])
       write(state, key, balance(state, key));
     state.lastEconomyTick = state.economy.lastTick;
     return state;
   }
-  function definition(row, defs) {
-    const d = defs.get(row.type);
-    if (!d) return null;
+  function rawDefinition(row, d) {
     return (
       (row.legacyEconomy ? d.legacyEconomy : d.economy) || {
         production: { money: finite(d.incomePerMin) },
@@ -117,15 +149,62 @@
       }
     );
   }
+  function pinContract(state, row, def) {
+    if (
+      typeof row.economyContract === "string" &&
+      Object.hasOwn(state.economy.rules, row.economyContract)
+    )
+      return;
+    const key =
+      (def.industrial
+        ? `industrial-v${def.recipeVersion || Registry.VERSION}:`
+        : row.legacyEconomy
+          ? "legacy:"
+          : "starter-v1:") + def.id;
+    if (!state.economy.rules[key])
+      state.economy.rules[key] = clone(rawDefinition(row, def));
+    row.economyContract = key;
+  }
+  function bindContracts(state, catalog, oldVersion = SCHEMA_VERSION) {
+    const defs = new Map(catalog.map((d) => [d.id, d]));
+    for (const row of state.placedIncomeItems) {
+      const d = defs.get(row.type);
+      if (!d) continue;
+      if (oldVersion < 3 && d.industrial) {
+        row.economyUnavailable =
+          "Unknown pre-catalog building retained inactive";
+        continue;
+      }
+      pinContract(state, row, d);
+    }
+  }
+  function definition(row, defs, state) {
+    const d = defs.get(row.type);
+    if (
+      !d ||
+      row.economyUnavailable ||
+      (d.industrial && d.availability !== "playable")
+    )
+      return null;
+    return typeof row.economyContract === "string" &&
+      Object.hasOwn(state.economy.rules, row.economyContract)
+      ? state.economy.rules[row.economyContract]
+      : rawDefinition(row, d);
+  }
   function compiled(state, catalog) {
     const defs = new Map(catalog.map((d) => [d.id, d])),
       templates = new Map();
-    return state.placedIncomeItems
+    const entries = state.placedIncomeItems
       .map((row, order) => {
-        const def = definition(row, defs);
+        const def = definition(row, defs, state);
         if (!def) return null;
         const level = row.level;
-        const key = JSON.stringify([row.type, !!row.legacyEconomy, level]);
+        const key = JSON.stringify([
+          row.type,
+          !!row.legacyEconomy,
+          level,
+          row.economyContract,
+        ]);
         if (templates.has(key)) return { row, order, ...templates.get(key) };
         const entry = {
           row,
@@ -137,13 +216,31 @@
           housing: units(finite(def.housing) * level),
           growth: micro(finite(def.growth) * level),
           upkeep: micro(finite(def.upkeep) * level),
-          inputs: RESOURCES.map((k) => micro(finite(def.inputs?.[k]) * level)),
-          outputs: RESOURCES.map((k) =>
-            micro(finite(def.production?.[k]) * level),
-          ),
-          invalidInput: Object.keys(def.inputs || {}).some(
-            (k) => !RESOURCES.includes(k),
-          ),
+          inputs: Object.entries(def.inputs || {})
+            .filter(([, v]) => v > 0)
+            .map(([k, v]) => [k, micro(finite(v) * level)]),
+          outputs: Object.entries(def.production || {})
+            .filter(([, v]) => v > 0)
+            .map(([k, v]) => [k, micro(finite(v) * level)]),
+          invalidInput:
+            [
+              ...Object.entries(def.inputs || {}),
+              ...Object.entries(def.production || {}),
+            ].some(
+              ([k, v]) => !materialSet.has(k) || !Number.isFinite(v) || v < 0,
+            ) ||
+            [
+              "energyUse",
+              "workforce",
+              "upkeep",
+              "growth",
+              "housing",
+              "energySupply",
+            ].some(
+              (k) =>
+                def[k] !== undefined &&
+                (!Number.isFinite(def[k]) || def[k] < 0),
+            ),
         };
         const { row: ignoredRow, order: ignoredOrder, ...template } = entry;
         templates.set(key, template);
@@ -153,6 +250,36 @@
       .sort(
         (a, b) => Number(!!b.supply) - Number(!!a.supply) || a.order - b.order,
       );
+    entries.frame = frame(entries);
+    return entries;
+  }
+  function frame(entries) {
+    const active = new Set(["money"]);
+    for (const v of entries)
+      for (const [key] of [...v.inputs, ...v.outputs])
+        if (materialSet.has(key)) active.add(key);
+    const resources = [
+        "money",
+        ...MATERIALS.filter((k) => k !== "money" && active.has(k)),
+      ],
+      keys = [...resources, "population"],
+      indices = new Map(resources.map((k, i) => [k, i]));
+    const slots = new Map();
+    function indexed(list) {
+      if (!slots.has(list))
+        slots.set(
+          list,
+          list
+            .filter(([k]) => indices.has(k))
+            .map(([k, n]) => [indices.get(k), n]),
+        );
+      return slots.get(list);
+    }
+    for (const v of entries) {
+      v.inputSlots = indexed(v.inputs);
+      v.outputSlots = indexed(v.outputs);
+    }
+    return { resources, keys, pop: resources.length };
   }
   function evaluate(
     state,
@@ -162,16 +289,17 @@
     details = true,
     trace = false,
   ) {
-    const values = KEYS.map((k) => balance(state, k)),
-      lower = KEYS.map(() => null),
-      upper = KEYS.map(() => null);
-    const use = RESOURCES.map(() => 0n),
-      output = RESOURCES.map(() => 0n),
+    const { keys, resources, pop } = entries.frame;
+    const values = keys.map((k) => balance(state, k)),
+      lower = keys.map(() => null),
+      upper = keys.map(() => null);
+    const use = resources.map(() => 0n),
+      output = resources.map(() => 0n),
       rate = { money: 0, steel: 0, carbon: 0 },
       buildings = [],
       signature = [];
     const housing = entries.reduce((s, v) => s + v.housing, 0n),
-      population = min(housing, values[6]);
+      population = min(housing, values[pop]);
     let energySupply = state.economy.legacyUtilities ? 18 : 0,
       energyUsed = 0,
       workforceUsed = 0,
@@ -192,21 +320,27 @@
       return pass;
     }
     for (const v of entries) {
-      const costs = v.inputs.map((n) => n * throughput);
-      costs[0] += v.upkeep * elapsed;
-      let finance = true,
+      const costs = v.inputSlots.map(([i, n]) => [i, n * throughput]);
+      const moneyCost = v.upkeep * elapsed;
+      let finance = guard(0, use[0] + moneyCost),
         material = true;
-      for (let i = 0; i < 6; i++)
-        if (costs[i] > 0n) {
-          const ok = guard(i, use[i] + costs[i]);
-          if (!ok) {
-            if (i === 0) finance = false;
-            else material = false;
+      const shortages = details ? [] : null;
+      for (const [i, n] of costs)
+        if (!guard(i, use[i] + n + (i === 0 ? moneyCost : 0n))) {
+          if (i === 0) finance = false;
+          else {
+            material = false;
+            if (details)
+              shortages.push({
+                material: resources[i],
+                required: number(n),
+                available: number(max(0n, values[i] - use[i])),
+              });
           }
         }
       if (v.workers > 0)
         guard(
-          6,
+          pop,
           (BigInt(Math.ceil(workforceUsed + v.workers)) * 5n * SCALE + 2n) / 3n,
         );
       let reason = "Operating";
@@ -224,21 +358,27 @@
         energyUsed += v.power;
         workforceUsed += v.workers;
         growth += v.growth * elapsed;
-        for (let i = 0; i < 6; i++) {
-          use[i] += costs[i];
-          output[i] += v.outputs[i] * throughput;
-        }
-        for (const k of Object.keys(rate))
-          rate[k] += finite(v.def.production?.[k]) * v.row.level;
+        use[0] += moneyCost;
+        for (const [i, n] of costs) use[i] += n;
+        for (const [i, n] of v.outputSlots) output[i] += n * throughput;
+        for (const [key] of v.outputs)
+          rate[key] =
+            (rate[key] || 0) + finite(v.def.production[key]) * v.row.level;
       }
       if (details)
-        buildings.push({ id: v.row.id, type: v.row.type, operating, reason });
+        buildings.push({
+          id: v.row.id,
+          type: v.row.type,
+          operating,
+          reason,
+          ...(shortages?.length ? { shortages } : {}),
+        });
     }
     const flow = output.map((v, i) => v - use[i]);
     flow.push(growth);
-    const caps = [...RESOURCES.map(() => MAX), min(MAX, housing)],
+    const caps = [...resources.map(() => MAX), min(MAX, housing)],
       clamped = [];
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < keys.length; i++) {
       const after = values[i] + flow[i];
       if (after >= caps[i]) {
         clamped.push(i);
@@ -270,6 +410,7 @@
       growth: (number(growth) * 60000) / duration,
       production: rate,
       buildings,
+      keys,
       values,
       flow,
       caps,
@@ -288,6 +429,7 @@
       online ? STEP_MS : 0,
     );
     const {
+      keys,
       values,
       flow,
       caps,
@@ -298,12 +440,26 @@
       gross,
       ...visible
     } = s;
+    const known = new Set(visible.buildings.map((b) => b.id)),
+      byId = new Map(defs.map((d) => [d.id, d]));
+    for (const row of state.placedIncomeItems)
+      if (!known.has(row.id))
+        visible.buildings.push({
+          id: row.id,
+          type: row.type,
+          operating: false,
+          reason:
+            row.economyUnavailable ||
+            (!byId.has(row.type)
+              ? "Unknown building retained inactive"
+              : "Future-locked catalog entry"),
+        });
     return visible;
   }
   function apply(state, s, count = 1) {
     const n = BigInt(count);
-    for (let i = 0; i < 7; i++)
-      write(state, KEYS[i], min(s.caps[i], s.values[i] + s.flow[i] * n));
+    for (let i = 0; i < s.keys.length; i++)
+      write(state, s.keys[i], min(s.caps[i], s.values[i] + s.flow[i] * n));
     write(state, "totalEarned", balance(state, "totalEarned") + s.gross * n);
   }
   function repetitions(history, start, current, limit) {
@@ -312,7 +468,7 @@
     for (let j = start; j < history.length; j++) {
       const step = history[j];
       if (step.clamped.some((i) => delta[i] !== 0n)) return { count: 0, delta };
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < current.length; i++) {
         const base = step.values[i],
           d = delta[i],
           first = base + d,
@@ -386,8 +542,8 @@
           );
         if (jump.count > 0) {
           const n = BigInt(jump.count);
-          for (let i = 0; i < 7; i++)
-            write(state, KEYS[i], s.values[i] + jump.delta[i] * n);
+          for (let i = 0; i < s.keys.length; i++)
+            write(state, s.keys[i], s.values[i] + jump.delta[i] * n);
           const gross = history
             .slice(previous)
             .reduce((sum, t) => sum + t.gross, 0n);
@@ -456,30 +612,31 @@
     e.pendingMs = 0;
     e.pendingBoostMs = 0;
   }
-  function validCost(cost) {
-    return (
-      cost &&
-      typeof cost === "object" &&
-      Object.entries(cost).every(
-        ([k, v]) =>
-          RESOURCES.includes(k) &&
-          typeof v === "number" &&
-          Number.isFinite(v) &&
-          v >= 0 &&
-          v <= LIMIT,
+  function costEntries(cost) {
+    if (!cost || typeof cost !== "object" || Array.isArray(cost)) return null;
+    const result = new Map();
+    for (const [alias, v] of Object.entries(cost)) {
+      const key = Registry.resolve(alias);
+      if (
+        !key ||
+        typeof v !== "number" ||
+        !Number.isFinite(v) ||
+        v < 0 ||
+        v > LIMIT
       )
-    );
+        return null;
+      result.set(key, (result.get(key) || 0n) + units(v));
+    }
+    return [...result];
   }
   function canAfford(state, cost) {
-    return (
-      !!validCost(cost) &&
-      Object.entries(cost).every(([k, v]) => balance(state, k) >= units(v))
-    );
+    const list = costEntries(cost);
+    return !!list && list.every(([k, n]) => balance(state, k) >= n);
   }
   function spend(state, cost) {
-    if (!canAfford(state, cost)) return false;
-    for (const [k, v] of Object.entries(cost))
-      write(state, k, balance(state, k) - units(v));
+    const list = costEntries(cost);
+    if (!list || !list.every(([k, n]) => balance(state, k) >= n)) return false;
+    for (const [k, n] of list) write(state, k, balance(state, k) - n);
     return true;
   }
   function credit(state, amount) {
@@ -565,6 +722,13 @@
     STEP_MS,
     SCHEMA_VERSION,
     RESOURCES,
+    MATERIALS,
+    bindContracts,
+    pinContract,
+    quantity: (state, id) => {
+      const k = Registry.resolve(id);
+      return k ? number(balance(state, k)) : 0;
+    },
     LIMIT,
     normalize,
     advance,
