@@ -72,6 +72,23 @@ fs.mkdirSync(out, { recursive: true });
     ["lake", 67, 22],
   ]) {
     await enter(x, y);
+    if (name === "river") {
+      const target = {
+        x: 5057768.749117619 - 154 * 32768,
+        z: 4990156.036991262 - 152 * 32768,
+      };
+      for (let i = 0; i < 50; i++) {
+        const s = await p.evaluate(() => mapGameBasicWorld.getState()),
+          dx = Math.max(-250, Math.min(250, (s.cameraX - target.x) * s.zoom)),
+          dy = Math.max(-250, Math.min(250, (s.cameraZ - target.z) * s.zoom));
+        if (Math.abs(dx) + Math.abs(dy) < 0.01) break;
+        await p.mouse.move(700, 500);
+        await p.mouse.down();
+        await p.mouse.move(700 + dx, 500 + dy, { steps: 3 });
+        await p.mouse.up();
+      }
+      await p.waitForTimeout(1800);
+    }
     await capture(name + "-normal");
     if (name === "temperate") {
       const box = await p.locator("#basicCanvas").boundingBox();
@@ -86,6 +103,7 @@ fs.mkdirSync(out, { recursive: true });
   }
   await p.evaluate(() => mapGameRuntime.showWorldMap());
   await p.waitForTimeout(1500);
+  r.worldMap = await p.evaluate(() => mapGameStrategicWorld.getState());
   await p.screenshot({ path: path.join(out, "world-map.png") });
   await enter(190, 27);
   await p.click('[data-action="shop"]');

@@ -143,6 +143,7 @@ fs.mkdirSync(out, { recursive: true });
     [1920, 1080],
   ]) {
     await p.setViewportSize({ width, height });
+    await p.waitForTimeout(300);
     await p.waitForFunction(
       () => {
         const s = mapGameBasicWorld.forestStats();
