@@ -29,6 +29,9 @@
     },
     { playable: 0, futureLocked: 0, definitionsOnly: 0 },
   );
+  let selected = null, favorites = [];
+  const favoriteKey = "mapgame_frontier_favorites_v1";
+  try { const v = JSON.parse(localStorage.getItem(favoriteKey) || "[]"); if (Array.isArray(v)) favorites = [...new Set(v.filter(id => typeof id === "string"))].slice(0,125); } catch (_) {}
   const PAGE = 10,
     OPERATIONS = 30;
   const defs = () => window.mapGameBuildings.CATALOG.filter((v) => v.economy);
@@ -76,13 +79,13 @@
     shop.setAttribute("role", "dialog");
     shop.setAttribute("aria-modal", "true");
     shop.setAttribute("aria-label", "Construction shop");
-    shop.innerHTML = `<div class="mg-econ-shell"><header><div><small>SINGLEPLAYER · CONSTRUCTION</small><h2>Construction</h2></div><button data-close aria-label="Close shop">Close ×</button></header><p>Choose a building, then click a suitable site. R rotates; Escape cancels. Payment happens only when placed.</p><details class="mg-production-note"><summary>Production rates</summary><p>Production and recipe inputs: 1.2× while online; 1× offline, with no time cap. Upkeep is unboosted.</p></details><p>Homes, utilities and industry. Research opens new possibilities.</p><div class="mg-industrial-filters"><label>Category <select data-category><option value="starter">Starter buildings</option><option value="all">All buildings</option><option value="industries">All industries</option>${Object.entries(
+    shop.innerHTML = `<div class="mg-econ-shell"><header><div><small>SINGLEPLAYER · CONSTRUCTION</small><h2>The construction frontier</h2></div><button data-close aria-label="Close shop">Close ×</button></header><p>Choose a building, then click a suitable site. R rotates; Escape cancels. Payment happens only when placed.</p><details class="mg-production-note"><summary>Production rates</summary><p>Production and recipe inputs: 1.2× while online; 1× offline, with no time cap. Upkeep is unboosted.</p></details><p>Homes, utilities and industry. Research opens new possibilities.</p><div class="mg-industrial-filters"><label>Category <select data-category><option value="starter">Starter buildings</option><option value="all">All buildings</option><option value="industries">All industries</option><option value="residential">Residential</option><option value="commercial">Commercial</option><option value="utilities">Utilities & Energy</option>${Object.entries(
       labels,
     )
       .map(([id, name]) => `<option value="${id}">${name}</option>`)
       .join(
         "",
-      )}</select></label><label>Availability <select data-availability><option value="available">Available now</option><option value="discover">Discover / Research</option><option value="all">All statuses (detailed)</option><option value="playable">Playable</option><option value="futureLocked">Future-locked</option><option value="definitionsOnly">Definitions only</option></select></label><label>Search <input data-search placeholder="Name, material or technology" aria-label="Search industrial catalog"></label></div><label><input type="checkbox" data-detail> Detailed catalog</label><div data-message role="status"></div><div data-list></div><footer><button data-prev>Previous</button> <span data-page></span> <button data-next>Next</button></footer></div>`;
+      )}</select></label><label>Availability <select data-availability><option value="available">Available now</option><option value="discover">Discover / Research</option><option value="all">All statuses (detailed)</option><option value="playable">Playable</option><option value="futureLocked">Future-locked</option><option value="definitionsOnly">Definitions only</option></select></label><label>Search <input data-search placeholder="Name, material or technology" aria-label="Search industrial catalog"></label><label>Sort <select data-sort><option value="catalog">Catalog order</option><option value="name">Name</option><option value="price">Money cost</option><option value="era">Era</option><option value="favorites">Favorites only</option></select></label></div><label><input type="checkbox" data-detail> Detailed catalog</label><nav class="mf-shop-nav" aria-label="Building departments"><button data-department="starter">Starter</button><button data-department="residential">Residential</button><button data-department="commercial">Commercial</button><button data-department="industries">Industry</button><button data-department="mining">Mining</button><button data-department="refining">Refining</button><button data-department="construction">Construction</button><button data-department="utilities">Energy</button><button data-department="electronics">Electronics</button><button data-department="machinery">Machinery</button><button data-department="vehicles">Vehicles</button><button data-department="defense">Military industry</button><button disabled title="No economy construction catalog entries">Infrastructure · Planned</button><button data-upgrades>Upgrades · Planned</button></nav><div data-message role="status"></div><div class="mf-shop-body"><div data-list></div><aside class="mf-shop-inspector" aria-label="Building details" data-building-inspector><h3>Plan your next move.</h3><p>Select a building illustration to inspect its footprint, recipe and operating requirements. Browsing never spends resources.</p></aside></div><footer><button data-prev>Previous</button> <span data-page></span> <button data-next>Next</button></footer></div>`;
     document.body.appendChild(shop);
     shop.querySelector("[data-detail]").onchange = () => render();
     shop.querySelector("[data-close]").onclick = hideShop;
@@ -94,6 +97,7 @@
       "[data-category]",
       "[data-availability]",
       "[data-search]",
+      "[data-sort]",
     ])
       shop
         .querySelector(selector)
@@ -113,6 +117,15 @@
       render();
     };
     shop.querySelector("[data-list]").onclick = (e) => {
+      const star = e.target.closest("[data-favorite]");
+      if (star) {
+        const id = star.dataset.favorite;
+        favorites = favorites.includes(id) ? favorites.filter(v => v !== id) : [...favorites,id];
+        try { localStorage.setItem(favoriteKey, JSON.stringify(favorites)); } catch (_) { window.mapGameVisuals?.announce("Favorites apply this session; storage is unavailable."); }
+        render(); return;
+      }
+      const inspect = e.target.closest("[data-inspect]");
+      if (inspect) { selected = inspect.dataset.inspect; renderInspector(lastSnapshot || window.mapGameEconomy.snapshot()); return; }
       const button = e.target.closest("[data-buy]");
       if (!button || button.disabled) return;
       const def = defs().find((v) => v.id === button.dataset.buy);
@@ -124,6 +137,14 @@
       }
       hideShop();
       window.mapGameBasicWorld.beginConstruction(def);
+    };
+    shop.querySelectorAll("[data-department]").forEach(b => b.onclick = () => {
+      shop.querySelector("[data-category]").value = b.dataset.department; page = 0; render();
+    });
+    shop.querySelector("[data-upgrades]").onclick = () => {
+      selected = null;
+      shop.querySelector("[data-building-inspector]").dataset.key = "";
+      shop.querySelector("[data-building-inspector]").innerHTML = '<h3>Factory upgrades</h3><p>Ten levels and four specialization tracks are reserved. No upgrade transactions or economic effects are enabled.</p><ul><li>Production</li><li>Efficiency</li><li>Automation</li><li>Logistics</li></ul><button disabled>Upgrades · Coming soon</button>';
     };
     stats = document.createElement("aside");
     stats.id = "mgEconomyStats";
@@ -152,7 +173,10 @@
           (category === "all" ||
             (category === "starter" && !d.industrial) ||
             (category === "industries" && d.industrial) ||
-            d.sector === category) &&
+            d.sector === category ||
+            (category === "residential" && d.id === "smallHouse") ||
+            (category === "commercial" && d.id === "cornerStore") ||
+            (category === "utilities" && d.id === "powerPlant")) &&
           (status === "all" ||
             (status === "available" || status === "playable"
               ? !P.reason(snap, d)
@@ -161,6 +185,12 @@
                 : (d.availability || "playable") === status)) &&
           searchText.get(d.id).includes(search),
       );
+      const sort = shop.querySelector("[data-sort]").value;
+      if (sort === "favorites") { for (let i=filtered.length-1;i>=0;i--) if (!favorites.includes(filtered[i].id)) filtered.splice(i,1); }
+      if (sort === "name") filtered.sort((a,b) => a.name.localeCompare(b.name));
+      if (sort === "price") filtered.sort((a,b) => (a.cost.money||0)-(b.cost.money||0) || a.id.localeCompare(b.id));
+      if (sort === "era") filtered.sort((a,b) => (a.era||1)-(b.era||1) || a.id.localeCompare(b.id));
+      shop.querySelectorAll("[data-department]").forEach(b => b.setAttribute("aria-pressed",String(b.dataset.department===category)));
       const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
       page = Math.max(0, Math.min(page, pages - 1));
       shop.querySelector("[data-page]").textContent =
@@ -172,6 +202,8 @@
         category,
         status,
         search,
+        sort,
+        favorites,
         page,
         snap.enabled,
         active,
@@ -206,7 +238,7 @@
                 : r.housing
                   ? `Housing +${r.housing} · growth ${r.growth}/min when powered`
                   : `Energy capacity +${r.energySupply}`;
-              return `<article data-catalog-id="${d.id}" class="mg-build-card"><div class="mg-build-preview">${window.mapGameVisuals?.preview(d) || ""}</div><div class="mg-build-copy"><small>${esc(d.sectorLabel || d.category)} · ${locked ? "Discover" : "Available"}</small><h4>${esc(d.name)}</h4><p class="mg-build-cost">${amounts(d.cost)}</p><p class="mg-build-output">${production}</p><p class="mg-build-needs">ϟ ${r.energyUse || 0} · ♙ ${r.workforce || 0} workers · $${r.upkeep || 0}/min upkeep</p><details ${shop.querySelector("[data-detail]").checked ? "open" : ""}><summary>Recipe & site</summary><p>Inputs: ${Object.keys(r.inputs || {}).length ? amounts(r.inputs, true) : "No material inputs"}</p><p>${d.footprint.join(" × ")} m · dry ground · slope ≤ 0.54 · no overlap</p></details><p class="mg-build-reason" id="reason-${d.id}">${esc(reason)}</p></div><button data-buy="${d.id}" aria-describedby="reason-${d.id}" ${reason ? "disabled" : ""}>Place</button></article>`;
+              return `<article data-catalog-id="${d.id}" class="mg-build-card"><button class="mg-build-preview" data-inspect="${d.id}" aria-label="Inspect ${esc(d.name)}">${window.mapGameVisuals?.preview(d) || ""}</button><button data-favorite="${d.id}" aria-label="Favorite ${esc(d.name)}" aria-pressed="${favorites.includes(d.id)}">${favorites.includes(d.id) ? "★" : "☆"}</button><div class="mg-build-copy"><small>${esc(d.sectorLabel || d.category)} · Era ${esc(d.era || 1)} · ${locked ? "Discover" : "Available"}</small><h4>${esc(d.name)}</h4><p class="mg-build-cost">${amounts(d.cost)}</p><p class="mg-build-output">${production}</p><p class="mg-build-needs">ϟ ${r.energyUse || 0} · ♙ ${r.workforce || 0} workers · $${r.upkeep || 0}/min upkeep</p><details ${shop.querySelector("[data-detail]").checked ? "open" : ""}><summary>Recipe & site</summary><p>Inputs: ${Object.keys(r.inputs || {}).length ? amounts(r.inputs, true) : "No material inputs"}</p><p>${d.footprint.join(" × ")} m · dry ground · slope ≤ 0.54 · no overlap</p></details><p class="mg-build-reason" id="reason-${d.id}">${esc(reason)}</p></div><button data-buy="${d.id}" aria-describedby="reason-${d.id}" ${reason ? "disabled" : ""}>Place</button></article>`;
             })
             .join("") || "<p>No matching buildings.</p>";
         list.dataset.renderKey = renderKey;
@@ -216,6 +248,7 @@
         }
       }
     }
+    if (shop && !shop.hidden && selected) renderInspector(snap);
     if (stats && !stats.hidden) {
       const s = snap.summary,
         inventoryOpen = stats.querySelector("[data-inventory]")?.open,
@@ -278,6 +311,15 @@
         stats.hidden = true;
       };
     }
+  }
+  function renderInspector(snap) {
+    const d = defs().find(d => d.id === selected); if (!d) return;
+    const r=d.economy, el=shop.querySelector("[data-building-inspector]");
+    const reason=P.reason(snap,d) || (!snap.enabled ? "Singleplayer only" : !window.mapGameBasicWorld?.getState()?.active ? "Enter a local territory" : !window.mapGameEconomy.canAfford(d.cost) ? "Insufficient construction resources" : "");
+    const key=JSON.stringify([d.id,reason]); if (el.dataset.key===key) return; el.dataset.key=key;
+    const active = value => Object.fromEntries(Object.entries(value||{}).map(([k,v]) => [k,v*1.2]));
+    el.innerHTML = `${window.mapGameVisuals?.preview(d)||""}<small>${esc(d.sectorLabel||d.category)} · Era ${esc(d.era||1)}</small><h3>${esc(d.name)}</h3><p>${esc(d.industrial ? "A production site in your manufacturing network." : d.description || "A foundation for your settlement.")}</p><h4>Construction</h4><p>${amounts(d.cost)}</p><p>Footprint: ${d.footprint.join(" × ")} m. Dry authoritative ground; slope ≤ 0.54; no overlap.</p><h4>Base / offline recipe per minute</h4><p>Inputs: ${amounts(r.inputs,true)||"None"}</p><p>Outputs: ${amounts(r.production,true)||"No material output"}</p><h4>Active play · 1.2× throughput</h4><p>Inputs: ${amounts(active(r.inputs),true)||"None"}</p><p>Outputs: ${amounts(active(r.production),true)||"No material output"}</p><h4>Operating requirements</h4><p>Power use ${r.energyUse||0} · supply ${r.energySupply||0}<br>Workers ${r.workforce||0} · upkeep $${fmt(r.upkeep||0)}/min (unboosted)${r.housing ? `<br>Housing ${r.housing} · growth ${r.growth}/min (unboosted)` : ""}</p><p>Insufficient inputs, workers, power or upkeep constrain production under the existing simulation rules. Offline time is uncapped.</p><h4>Research & progression</h4><p>${esc(d.technology ? technology.get(d.technology)||d.technology : "Starter contract")}</p><p>Advancements recognize actual buildings and research; browsing grants no rewards.</p><p>${esc(reason||"Ready to choose a site. No payment until valid placement.")}</p><button data-inspector-place ${reason?"disabled":""}>Place ${esc(d.name)}</button><details><summary>Future upgrades</summary><p>Levels 1–10 · Production, Efficiency, Automation, Logistics. No effects active.</p><button disabled>Upgrade · Planned</button></details>`;
+    el.querySelector("[data-inspector-place]").onclick = () => { hideShop(); window.mapGameBasicWorld.beginConstruction(d); };
   }
   function showShop() {
     if (!document.activeElement?.closest?.("#mgEconomyShop"))

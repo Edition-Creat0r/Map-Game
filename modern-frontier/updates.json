@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "entries": [
+    {"id":"frontier","title":"Modern Frontier","status":"In development","detail":"A new world hub, construction catalog, appearance studio, world backups and Singleplayer advancements. Multiplayer economy awaits backend security validation."},
+    {"id":"restoration","title":"Visual restoration","status":"Validated branch","detail":"Visible normal-zoom forests, clearer terrain, cached rendering and a navy/cyan interface. Not a deployed release announcement."},
+    {"id":"c1","title":"Industrial Revolution · A/B/C1","status":"Validated branch","detail":"Exact uncapped offline production, 120 industrial definitions, 100 player-facing materials and seven introductory research technologies."}
+  ]
+}
