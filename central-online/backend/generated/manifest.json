@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hash": "25c746599779e833aacb5d08821faf2a6bc16418c2d35e2a71bb37928c1b7b11",
+  "seed": 734221,
+  "files": {
+    "buildings.js": "c614b4c3ad25f3c47074c3dfd434c884e45fd90e383fcf520f3dbb757fa4af74",
+    "industrial/catalog-data.js": "fbfc52aef5d37c58394fd5170f5b6451309df1422eb5a1404bebb39a82d85c52",
+    "industrial/registry.js": "5bb63a059293bf8bc582eba00026ecafccd3d5c58bd0c906d50ae45b1bd95ae1",
+    "industrial/integration.js": "db9ab50e345acfb78cec1aec15bc64f83785b6696507e57c4d5334749f9fcbe6",
+    "industrial/player-materials-data.js": "e0951786f7ca24f60459800c79dd54d98225f3b1aa694d2564b2e365d8c26d63",
+    "industrial/research-data.js": "455b01c72afcc64ab3cf6a7e2fd5e578b2096af73fd8af873d59c2f10fd85fed",
+    "industrial/progression.js": "129286aafe97282507b166b0e206ae4e7575a6ede005ae710f7f891f4ed71c1d",
+    "economy_model.js": "b19177d64f2a0d8553147a372535a4c7a4af3310c8b93033f9f350cd163a4510",
+    "world_terrain.js": "fa09bda514f40cb162cca3e8dd01ae5200626bdac5940d1ef840001611d6c995"
+  },
+  "sourceCommit": "bc8945d3deeb99d1074d341c1eccd11ad59a6d82"
+}

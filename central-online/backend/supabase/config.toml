@@ -1,0 +1,7 @@
+project_id = "mapgame-central-041-review"
+
+[functions.central-economy]
+# The handler verifies the real JWT with GoTrue and the legacy protected session.
+# Keep the gateway JWT check too; never deploy with --no-verify-jwt.
+verify_jwt = true
+entrypoint = "./functions/central-economy/index.ts"
