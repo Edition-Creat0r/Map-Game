@@ -402,10 +402,18 @@
           ...(shortages?.length ? { shortages } : {}),
         });
     }
-    const flow = output.map((v, i) => v - use[i]);
-    flow.push(growth);
-    const caps = [...resources.map(() => MAX), min(MAX, housing)],
+    // Fixed-size arrays avoid map/push/spread allocation-site transitions
+    // that repeatedly deoptimize this evaluator under V8. Values and guards
+    // are unchanged, including the final population slot.
+    const flow = new Array(keys.length),
+      caps = new Array(keys.length),
       clamped = [];
+    for (let i = 0; i < resources.length; i++) {
+      flow[i] = output[i] - use[i];
+      caps[i] = MAX;
+    }
+    flow[pop] = growth;
+    caps[pop] = min(MAX, housing);
     for (let i = 0; i < keys.length; i++) {
       const after = values[i] + flow[i];
       if (after >= caps[i]) {

@@ -5,7 +5,7 @@ importScripts(
   "industrial/player-materials-data.js?v=3403",
   "industrial/research-data.js?v=3403",
   "industrial/progression.js?v=3403",
-  "economy_model.js?v=3403",
+  "economy_model.js?v=3404",
 );
 self.onmessage = ({ data }) => {
   try {
