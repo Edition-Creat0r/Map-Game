@@ -861,6 +861,48 @@
       "unit": "game units",
       "storageClass": "general",
       "aliases": []
+    },
+    {
+      "id": "chromiteOre",
+      "name": "Chromite Ore",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "chromium",
+      "name": "Chromium",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "stainlessSteel",
+      "name": "Stainless Steel",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "photoresist",
+      "name": "Photoresist",
+      "unit": "game units",
+      "storageClass": "hazardous",
+      "aliases": []
+    },
+    {
+      "id": "siliconWafers",
+      "name": "Silicon Wafers",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "servoDrives",
+      "name": "Servo Drives",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
     }
   ],
   "edges": [
@@ -3023,9 +3065,180 @@
       "inputPerMinute": 0.5,
       "outputPerMinute": 0.5,
       "availability": "definitionsOnly"
+    },
+    {
+      "from": "chromiteOre",
+      "to": "chromium",
+      "building": "chromiumRefinery",
+      "recipe": "chromiumRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "industrialAcid",
+      "to": "chromium",
+      "building": "chromiumRefinery",
+      "recipe": "chromiumRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "steel",
+      "to": "stainlessSteel",
+      "building": "stainlessSteelWorks",
+      "recipe": "stainlessSteelWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 6,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "chromium",
+      "to": "stainlessSteel",
+      "building": "stainlessSteelWorks",
+      "recipe": "stainlessSteelWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "industrialResin",
+      "to": "photoresist",
+      "building": "photoresistWorks",
+      "recipe": "photoresistWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "industrialSolvent",
+      "to": "photoresist",
+      "building": "photoresistWorks",
+      "recipe": "photoresistWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "silicon",
+      "to": "siliconWafers",
+      "building": "waferFab",
+      "recipe": "waferFabRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 6,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "photoresist",
+      "to": "siliconWafers",
+      "building": "waferFab",
+      "recipe": "waferFabRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "siliconWafers",
+      "to": "servoDrives",
+      "building": "servoDriveWorks",
+      "recipe": "servoDriveWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "powerElectronics",
+      "to": "servoDrives",
+      "building": "servoDriveWorks",
+      "recipe": "servoDriveWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "copper",
+      "to": "servoDrives",
+      "building": "servoDriveWorks",
+      "recipe": "servoDriveWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "concrete",
+      "to": "constructionModules",
+      "building": "stainlessModuleWorks",
+      "recipe": "stainlessModuleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 8,
+      "outputPerMinute": 4,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "stainlessSteel",
+      "to": "constructionModules",
+      "building": "stainlessModuleWorks",
+      "recipe": "stainlessModuleWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 4,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "vehicleParts",
+      "to": "electricVehicles",
+      "building": "electricTransportWorks",
+      "recipe": "electricTransportWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "batteries",
+      "to": "electricVehicles",
+      "building": "electricTransportWorks",
+      "recipe": "electricTransportWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "servoDrives",
+      "to": "electricVehicles",
+      "building": "electricTransportWorks",
+      "recipe": "electricTransportWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "stainlessSteel",
+      "to": "electricVehicles",
+      "building": "electricTransportWorks",
+      "recipe": "electricTransportWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 1,
+      "availability": "futureLocked"
     }
   ],
   "topologicalOrder": [
+    "chromiteOre",
     "rareEarthOre",
     "rareEarths",
     "titaniumOre",
@@ -3039,10 +3252,12 @@
     "coolant",
     "fertilizer",
     "industrialAcid",
+    "chromium",
     "crudeOil",
     "fuel",
     "industrialSolvent",
     "industrialResin",
+    "photoresist",
     "adhesive",
     "lubricant",
     "industrialConsumables",
@@ -3078,9 +3293,11 @@
     "titanium",
     "aerospaceComposites",
     "silicon",
+    "siliconWafers",
     "semiconductors",
     "electricalGoods",
     "powerElectronics",
+    "servoDrives",
     "displays",
     "memory",
     "processors",
@@ -3102,6 +3319,7 @@
     "medicalDevices",
     "iron",
     "steel",
+    "stainlessSteel",
     "furniture",
     "householdGoods",
     "bearings",

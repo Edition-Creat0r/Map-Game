@@ -26,7 +26,7 @@
         consumer: "Consumer Goods",
         defense: "Defense Manufacturing",
       }[d.sector],
-      description: `${d.name} · ${d.availability === "playable" ? "Foundation technology available" : "Future content — not unlocked"}`,
+      description: `${d.name} · ${d.researchRequirements ? "Singleplayer expansion — research and era requirements apply" : d.availability === "playable" ? "Foundation technology available" : "Future content — not unlocked"}`,
       variants: d.visual.styles.slice(),
       economy: {
         inputs: d.recipes[0].inputsPerMinute,

@@ -148,7 +148,8 @@
     }
     const before=JSON.stringify(world.progress);
     if(territory&&!world.progress.explored?.includes(territory))world.progress.explored=[...(world.progress.explored||[]),territory];
-    metrics.population=s.summary.population;metrics.research=completed.length;metrics.territories=world.progress.explored?.length||0;
+    Object.assign(metrics,F.researchMetrics(completed));
+    metrics.population=s.summary.population;metrics.territories=world.progress.explored?.length||0;
     const old=world.progress.completed||[];world.progress=F.advance(world.progress,metrics);
     if(JSON.stringify(world.progress)!==before){persistProgress();const added=world.progress.completed.filter(id=>!old.includes(id));if(added.length){advancementNotice(`Advancement: ${F.goals.find(g=>g.id===added[0]).name}`);if(context?.state==='running')tone('unlock');}}
     lastResearch=completed.length;
@@ -188,10 +189,11 @@
     const focused=document.activeElement?.dataset.pin;
     const branches=['Civilization','Energy','Industry','Exploration','Technology'],positions={},counts={};
     for(const g of F.goals){const col=branches.indexOf(g.branch),row=counts[g.branch]||0;counts[g.branch]=row+1;positions[g.id]={x:col*255,y:60+row*160};}
+    const graphHeight=Math.max(780,60+Math.max(...Object.values(counts))*160);el.style.height=graphHeight+'px';
     const visible=F.goals.filter(g=>p.completed.includes(g.id)||g.pre.every(id=>p.completed.includes(id)));
     const visibleIds=new Set(visible.map(g=>g.id));
     const lines=visible.flatMap(g=>g.pre.filter(id=>visibleIds.has(id)).map(id=>{const a=positions[id],b=positions[g.id];return `<path class="${p.completed.includes(id)?'complete':''}" d="M${a.x+112} ${a.y+130} C${a.x+112} ${a.y+155},${b.x+112} ${b.y-20},${b.x+112} ${b.y}"/>`;})).join('');
-    el.innerHTML=`<svg viewBox="0 0 1290 780" aria-hidden="true">${lines}</svg>${branches.map((b,i)=>`<h3 class="mf-branch-label" style="left:${i*255}px">${b}</h3>`).join('')}${visible.map(g=>{const done=p.completed.includes(g.id),available=g.pre.every(id=>p.completed.includes(id)),pos=positions[g.id];return `<article class="mf-goal ${done?'complete':available?'available':'locked'} ${g.tier.toLowerCase()}" style="left:${pos.x}px;top:${pos.y}px" data-goal-id="${g.id}"><small>${g.tier} / ${done?'Completed':available?'Available':'Locked'}</small><h3>${esc(g.name)}</h3><p>${esc(g.text)}</p><span>${done?'✓ Recognized':`${Math.min(g.target,metrics[g.metric]||0)} / ${g.target}`}</span><button data-pin="${g.id}" aria-pressed="${p.pins.includes(g.id)}">${p.pins.includes(g.id)?'Unpin':'Pin goal'}</button><details><summary>Prerequisites & reward</summary><p>${g.pre.length?g.pre.map(id=>esc(F.goals.find(x=>x.id===id).name)).join(', '):'No prerequisites'}. Reward: permanent recognition. No currency or resource reward.</p></details></article>`;}).join('')}`;
+    el.innerHTML=`<svg viewBox="0 0 1290 ${graphHeight}" aria-hidden="true">${lines}</svg>${branches.map((b,i)=>`<h3 class="mf-branch-label" style="left:${i*255}px">${b}</h3>`).join('')}${visible.map(g=>{const done=p.completed.includes(g.id),available=g.pre.every(id=>p.completed.includes(id)),pos=positions[g.id];return `<article class="mf-goal ${done?'complete':available?'available':'locked'} ${g.tier.toLowerCase()}" style="left:${pos.x}px;top:${pos.y}px" data-goal-id="${g.id}"><small>${g.tier} / ${done?'Completed':available?'Available':'Locked'}</small><h3>${esc(g.name)}</h3><p>${esc(g.text)}</p><span>${done?'✓ Recognized':`${Math.min(g.target,metrics[g.metric]||0)} / ${g.target}`}</span><button data-pin="${g.id}" aria-pressed="${p.pins.includes(g.id)}">${p.pins.includes(g.id)?'Unpin':'Pin goal'}</button><details><summary>Prerequisites & reward</summary><p>${g.pre.length?g.pre.map(id=>esc(F.goals.find(x=>x.id===id).name)).join(', '):'No prerequisites'}. Reward: permanent recognition. No currency or resource reward.</p></details></article>`;}).join('')}`;
     el.dataset.complexity=p.completed.length>8?'mastery':p.completed.length>3?'expansion':'foundations';
     el.querySelectorAll('[data-pin]').forEach(b=>b.onclick=()=>{try{world.progress=F.pin(world.progress,b.dataset.pin);persistProgress();renderGraph();renderPins();}catch(e){dialog.querySelector('[data-goal-message]').textContent=e.message;}});
     if(focused)el.querySelector(`[data-pin="${focused}"]`)?.focus();

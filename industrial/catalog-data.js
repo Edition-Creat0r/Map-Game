@@ -862,6 +862,48 @@
       "unit": "game units",
       "storageClass": "general",
       "aliases": []
+    },
+    {
+      "id": "chromiteOre",
+      "name": "Chromite Ore",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "chromium",
+      "name": "Chromium",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "stainlessSteel",
+      "name": "Stainless Steel",
+      "unit": "game units",
+      "storageClass": "bulk",
+      "aliases": []
+    },
+    {
+      "id": "photoresist",
+      "name": "Photoresist",
+      "unit": "game units",
+      "storageClass": "hazardous",
+      "aliases": []
+    },
+    {
+      "id": "siliconWafers",
+      "name": "Silicon Wafers",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
+    },
+    {
+      "id": "servoDrives",
+      "name": "Servo Drives",
+      "unit": "game units",
+      "storageClass": "precision",
+      "aliases": []
     }
   ],
   "models": [
@@ -8905,6 +8947,526 @@
       },
       "technology": "tech_defense_6",
       "availability": "definitionsOnly"
+    },
+    {
+      "id": "chromiteMine",
+      "name": "Chromite Mine",
+      "sector": "mining",
+      "era": 3,
+      "footprint": [
+        56,
+        48
+      ],
+      "cost": {
+        "money": 42000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "recipes": [
+        {
+          "id": "chromiteMineRecipe",
+          "version": 1,
+          "inputsPerMinute": {},
+          "outputsPerMinute": {
+            "chromiteOre": 12
+          },
+          "technology": "tech_mining_3"
+        }
+      ],
+      "operating": {
+        "energy": 4,
+        "workers": 4,
+        "upkeep": 5
+      },
+      "visual": {
+        "existingModelId": "warehouse",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "logistics": {
+        "storageClass": "bulk",
+        "capacity": 0,
+        "throughputPerMinute": 12,
+        "districtRequired": false,
+        "implemented": false
+      },
+      "technology": "tech_mining_3",
+      "availability": "futureLocked",
+      "researchRequirements": [
+        "advancedMetallurgy"
+      ]
+    },
+    {
+      "id": "chromiumRefinery",
+      "name": "Chromium Refinery",
+      "sector": "refining",
+      "era": 3,
+      "footprint": [
+        64,
+        54
+      ],
+      "cost": {
+        "money": 84000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "recipes": [
+        {
+          "id": "chromiumRefineryRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "chromiteOre": 12,
+            "industrialAcid": 3
+          },
+          "outputsPerMinute": {
+            "chromium": 6
+          },
+          "technology": "tech_refining_3"
+        }
+      ],
+      "operating": {
+        "energy": 8,
+        "workers": 6,
+        "upkeep": 8
+      },
+      "visual": {
+        "existingModelId": "steelMill",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "logistics": {
+        "storageClass": "bulk",
+        "capacity": 0,
+        "throughputPerMinute": 6,
+        "districtRequired": false,
+        "implemented": false
+      },
+      "technology": "tech_refining_3",
+      "availability": "futureLocked",
+      "researchRequirements": [
+        "advancedMetallurgy"
+      ]
+    },
+    {
+      "id": "stainlessSteelWorks",
+      "name": "Stainless Steel Works",
+      "sector": "refining",
+      "era": 4,
+      "footprint": [
+        64,
+        54
+      ],
+      "cost": {
+        "money": 110000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "recipes": [
+        {
+          "id": "stainlessSteelWorksRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "steel": 6,
+            "chromium": 3
+          },
+          "outputsPerMinute": {
+            "stainlessSteel": 6
+          },
+          "technology": "tech_refining_4"
+        }
+      ],
+      "operating": {
+        "energy": 8,
+        "workers": 6,
+        "upkeep": 8
+      },
+      "visual": {
+        "existingModelId": "steelMill",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "logistics": {
+        "storageClass": "bulk",
+        "capacity": 0,
+        "throughputPerMinute": 6,
+        "districtRequired": false,
+        "implemented": false
+      },
+      "technology": "tech_refining_4",
+      "availability": "futureLocked",
+      "researchRequirements": [
+        "advancedMetallurgy"
+      ]
+    },
+    {
+      "id": "photoresistWorks",
+      "name": "Photoresist Works",
+      "sector": "chemicals",
+      "era": 4,
+      "footprint": [
+        64,
+        54
+      ],
+      "cost": {
+        "money": 145000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "recipes": [
+        {
+          "id": "photoresistWorksRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "industrialResin": 3,
+            "industrialSolvent": 3
+          },
+          "outputsPerMinute": {
+            "photoresist": 6
+          },
+          "technology": "tech_chemicals_4"
+        }
+      ],
+      "operating": {
+        "energy": 10,
+        "workers": 6,
+        "upkeep": 10
+      },
+      "visual": {
+        "existingModelId": "carbonPlant",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "logistics": {
+        "storageClass": "hazardous",
+        "capacity": 0,
+        "throughputPerMinute": 6,
+        "districtRequired": false,
+        "implemented": false
+      },
+      "technology": "tech_chemicals_4",
+      "availability": "futureLocked",
+      "researchRequirements": [
+        "precisionFabrication"
+      ]
+    },
+    {
+      "id": "waferFab",
+      "name": "Silicon Wafer Fab",
+      "sector": "electronics",
+      "era": 4,
+      "footprint": [
+        72,
+        60
+      ],
+      "cost": {
+        "money": 190000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "recipes": [
+        {
+          "id": "waferFabRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "silicon": 6,
+            "photoresist": 3
+          },
+          "outputsPerMinute": {
+            "siliconWafers": 6
+          },
+          "technology": "tech_electronics_4"
+        }
+      ],
+      "operating": {
+        "energy": 12,
+        "workers": 8,
+        "upkeep": 12
+      },
+      "visual": {
+        "existingModelId": "warehouse",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "logistics": {
+        "storageClass": "precision",
+        "capacity": 0,
+        "throughputPerMinute": 6,
+        "districtRequired": false,
+        "implemented": false
+      },
+      "technology": "tech_electronics_4",
+      "availability": "futureLocked",
+      "researchRequirements": [
+        "precisionFabrication"
+      ]
+    },
+    {
+      "id": "servoDriveWorks",
+      "name": "Servo Drive Works",
+      "sector": "machinery",
+      "era": 5,
+      "footprint": [
+        72,
+        60
+      ],
+      "cost": {
+        "money": 240000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "recipes": [
+        {
+          "id": "servoDriveWorksRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "siliconWafers": 3,
+            "powerElectronics": 3,
+            "copper": 3
+          },
+          "outputsPerMinute": {
+            "servoDrives": 3
+          },
+          "technology": "tech_machinery_5"
+        }
+      ],
+      "operating": {
+        "energy": 12,
+        "workers": 8,
+        "upkeep": 12
+      },
+      "visual": {
+        "existingModelId": "steelMill",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "logistics": {
+        "storageClass": "precision",
+        "capacity": 0,
+        "throughputPerMinute": 3,
+        "districtRequired": false,
+        "implemented": false
+      },
+      "technology": "tech_machinery_5",
+      "availability": "futureLocked",
+      "researchRequirements": [
+        "industrialAutomation"
+      ]
+    },
+    {
+      "id": "stainlessModuleWorks",
+      "name": "Corrosion-resistant Module Works",
+      "sector": "construction",
+      "era": 4,
+      "footprint": [
+        64,
+        54
+      ],
+      "cost": {
+        "money": 135000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "recipes": [
+        {
+          "id": "stainlessModuleWorksRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "concrete": 8,
+            "stainlessSteel": 2
+          },
+          "outputsPerMinute": {
+            "constructionModules": 4
+          },
+          "technology": "tech_construction_4"
+        }
+      ],
+      "operating": {
+        "energy": 6,
+        "workers": 4,
+        "upkeep": 6
+      },
+      "visual": {
+        "existingModelId": "warehouse",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "logistics": {
+        "storageClass": "bulk",
+        "capacity": 0,
+        "throughputPerMinute": 4,
+        "districtRequired": false,
+        "implemented": false
+      },
+      "technology": "tech_construction_4",
+      "availability": "futureLocked",
+      "researchRequirements": [
+        "advancedMetallurgy"
+      ]
+    },
+    {
+      "id": "electricTransportWorks",
+      "name": "Precision Electric Transport Works",
+      "sector": "vehicles",
+      "era": 6,
+      "footprint": [
+        80,
+        66
+      ],
+      "cost": {
+        "money": 320000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "recipes": [
+        {
+          "id": "electricTransportWorksRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "vehicleParts": 1,
+            "batteries": 2,
+            "servoDrives": 1,
+            "stainlessSteel": 1
+          },
+          "outputsPerMinute": {
+            "electricVehicles": 1
+          },
+          "technology": "tech_vehicles_6"
+        }
+      ],
+      "operating": {
+        "energy": 10,
+        "workers": 6,
+        "upkeep": 10
+      },
+      "visual": {
+        "existingModelId": "warehouse",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "logistics": {
+        "storageClass": "general",
+        "capacity": 0,
+        "throughputPerMinute": 1,
+        "districtRequired": false,
+        "implemented": false
+      },
+      "technology": "tech_vehicles_6",
+      "availability": "futureLocked",
+      "researchRequirements": [
+        "industrialAutomation"
+      ]
     }
   ]
 };if(typeof module!=="undefined")module.exports=data;else root.mapGameIndustrialData=data;})(typeof window!=="undefined"?window:globalThis);

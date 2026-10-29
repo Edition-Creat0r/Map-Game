@@ -1,10 +1,10 @@
 // Large catch-up jobs run without rendering, DOM, storage or multiplayer access.
 importScripts(
-  "industrial/catalog-data.js?v=3403",
-  "industrial/registry.js?v=3403",
-  "industrial/player-materials-data.js?v=3403",
-  "industrial/research-data.js?v=3403",
-  "industrial/progression.js?v=3403",
+  "industrial/catalog-data.js?v=042p1",
+  "industrial/registry.js?v=042p1",
+  "industrial/player-materials-data.js?v=042p1",
+  "industrial/research-data.js?v=042p1",
+  "industrial/progression.js?v=042p1",
   "economy_model.js?v=3404",
 );
 self.onmessage = ({ data }) => {

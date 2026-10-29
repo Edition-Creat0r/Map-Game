@@ -124,6 +124,12 @@ flowchart LR
   navalEquipment["Naval Equipment"]
   precisionEquipment["Precision Equipment"]
   strategicEquipment["Strategic Equipment"]
+  chromiteOre["Chromite Ore"]
+  chromium["Chromium"]
+  stainlessSteel["Stainless Steel"]
+  photoresist["Photoresist"]
+  siliconWafers["Silicon Wafers"]
+  servoDrives["Servo Drives"]
   ironOre -->|ironSmelter| iron
   iron -->|steelFoundry| steel
   carbon -->|steelFoundry| steel
@@ -340,4 +346,21 @@ flowchart LR
   precisionEquipment -->|strategicEquipmentWorks| strategicEquipment
   industrialRobots -->|strategicEquipmentWorks| strategicEquipment
   satelliteParts -->|strategicEquipmentWorks| strategicEquipment
+  chromiteOre -->|chromiumRefinery| chromium
+  industrialAcid -->|chromiumRefinery| chromium
+  steel -->|stainlessSteelWorks| stainlessSteel
+  chromium -->|stainlessSteelWorks| stainlessSteel
+  industrialResin -->|photoresistWorks| photoresist
+  industrialSolvent -->|photoresistWorks| photoresist
+  silicon -->|waferFab| siliconWafers
+  photoresist -->|waferFab| siliconWafers
+  siliconWafers -->|servoDriveWorks| servoDrives
+  powerElectronics -->|servoDriveWorks| servoDrives
+  copper -->|servoDriveWorks| servoDrives
+  concrete -->|stainlessModuleWorks| constructionModules
+  stainlessSteel -->|stainlessModuleWorks| constructionModules
+  vehicleParts -->|electricTransportWorks| electricVehicles
+  batteries -->|electricTransportWorks| electricVehicles
+  servoDrives -->|electricTransportWorks| electricVehicles
+  stainlessSteel -->|electricTransportWorks| electricVehicles
 ```

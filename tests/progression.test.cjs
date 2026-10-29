@@ -30,7 +30,7 @@ function rows(types) {
     custom: "keep",
   }));
 }
-test("frozen JSON and browser mirrors validate exact 100/10/90/21 and six era quotas", () => {
+test("frozen JSON and browser mirrors validate exact 106/10/96/21 and six era quotas", () => {
   assert.deepEqual(P.manifest, require("../industrial/player-materials.json"));
   assert.deepEqual(P.research, require("../industrial/research.json"));
   assert.equal(P.validate().valid, true);
@@ -43,9 +43,9 @@ test("frozen JSON and browser mirrors validate exact 100/10/90/21 and six era qu
     [1, 2, 3, 4, 5, 6].map(
       (era) => P.manifest.materials.filter((m) => m.unlockEra <= era).length,
     ),
-    [10, 25, 45, 65, 85, 100],
+    [10, 25, 47, 70, 91, 106],
   );
-  assert.equal(R.materialIds.length, 121);
+  assert.equal(R.materialIds.length, 127);
 });
 test("invalid manifest IDs, quotas, undefined acquisition and research cycles fail validation", () => {
   for (const mutate of [
@@ -67,6 +67,7 @@ test("research DAG costs, prerequisites and repeated completion are exact and id
   const s = state();
   assert.equal(P.complete(s, "electricity", M), false);
   assert.equal(P.complete(s, "invalid", M), false);
+  s.economy.progression.era = 6; // exercise all ten licenses independently of era milestones
   let paid = 0;
   for (const n of P.research.nodes) {
     const before = s.money;
@@ -78,7 +79,7 @@ test("research DAG costs, prerequisites and repeated completion are exact and id
     assert.equal(s.economy.precision.money, precision);
   }
   assert.equal(s.money, 400000 - paid);
-  assert.equal(new Set(s.economy.progression.completed).size, 7);
+  assert.equal(new Set(s.economy.progression.completed).size, 10);
 });
 test("research cannot overdraw balances or fabricate material inputs", () => {
   const s = state({ money: 100 });
@@ -88,18 +89,19 @@ test("research cannot overdraw balances or fabricate material inputs", () => {
 });
 test("starter economy has reachable next goals and every selected material has an acyclic acquisition path", () => {
   const s = state();
-  for (const n of P.research.nodes) assert.equal(P.complete(s, n.id, M), true);
+  for (const n of P.research.nodes.filter(n => !n.minimumEra)) assert.equal(P.complete(s, n.id, M), true);
   s.placedIncomeItems = rows(Array(10).fill("smallHouse"));
   s.economy.population = 50;
   P.refresh(s);
   assert.equal(s.economy.progression.era, 6);
+  for (const n of P.research.nodes.filter(n => n.minimumEra)) assert.equal(P.complete(s, n.id, M), true);
   assert.equal(
     P.manifest.materials.filter((m) => P.unlocked(s, m.id)).length,
-    100,
+    106,
   );
   const acquired = new Set(["money", "steel", "carbon", "concrete", "glass"]);
   let passes = 0;
-  while (acquired.size < 100 && passes++ < 121) {
+  while (acquired.size < 106 && passes++ < 127) {
     for (const m of P.manifest.materials) {
       if (acquired.has(m.id)) continue;
       const d = defs.find((d) => d.id === m.acquisition.building);
@@ -112,7 +114,7 @@ test("starter economy has reachable next goals and every selected material has a
         acquired.add(m.id);
     }
   }
-  assert.equal(acquired.size, 100);
+  assert.equal(acquired.size, 106);
   assert.ok(P.nextGoal(state()).includes("Build Residential"));
 });
 test("research does not implicitly unlock referenced dependencies or bypass era gates", () => {

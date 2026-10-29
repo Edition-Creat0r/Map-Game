@@ -49,13 +49,13 @@ function drain(s, target, online = false, options = {}) {
 }
 test("canonical JSON and generated browser data agree; sector quotas, IDs, classifications and real model refs validate", () => {
   assert.deepEqual(R.data, require("../industrial/catalog.json"));
-  assert.equal(R.materialIds.length, 121);
-  assert.equal(R.data.buildings.length, 120);
+  assert.equal(R.materialIds.length, 127);
+  assert.equal(R.data.buildings.length, 128);
   assert.deepEqual(
     ["playable", "futureLocked", "definitionsOnly"].map(
       (k) => R.data.buildings.filter((b) => b.availability === k).length,
     ),
-    [56, 54, 10],
+    [56, 62, 10],
   );
   assert.equal(
     R.validate(R.data, {
@@ -63,7 +63,7 @@ test("canonical JSON and generated browser data agree; sector quotas, IDs, class
     }).valid,
     true,
   );
-  assert.equal(defs.filter((d) => d.industrial).length, 120);
+  assert.equal(defs.filter((d) => d.industrial).length, 128);
   assert.equal(defs.filter((d) => !d.industrial && d.economy).length, 5);
   assert.ok(Object.isFrozen(R.data.buildings[0].recipes[0].inputsPerMinute));
 });
@@ -112,7 +112,7 @@ test("cycles, no-input non-extraction and currency minting are rejected", () => 
     mutate(d);
     assert.equal(R.validate(d).valid, false);
   }
-  assert.equal(R.topological.length, 121);
+  assert.equal(R.topological.length, 127);
 });
 test("legacy aliases are single balances; duplicate alias costs cannot overspend", () => {
   const s = city([], {

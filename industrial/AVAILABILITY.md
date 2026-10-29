@@ -1,21 +1,21 @@
-# Phase B availability
+# Industrial catalog availability
 
 Generated from catalog.json. These are industrial entries only; the five starter contracts remain playable separately.
 
 | Sector | Defined | Playable | Future-locked | Definitions only |
 | --- | ---: | ---: | ---: | ---: |
-| mining | 14 | 11 | 3 | 0 |
-| refining | 12 | 8 | 4 | 0 |
-| construction | 12 | 11 | 1 | 0 |
-| chemicals | 14 | 12 | 2 | 0 |
-| electronics | 12 | 2 | 10 | 0 |
-| machinery | 12 | 5 | 7 | 0 |
-| vehicles | 12 | 2 | 10 | 0 |
+| mining | 15 | 11 | 4 | 0 |
+| refining | 14 | 8 | 6 | 0 |
+| construction | 13 | 11 | 2 | 0 |
+| chemicals | 15 | 12 | 3 | 0 |
+| electronics | 13 | 2 | 11 | 0 |
+| machinery | 13 | 5 | 8 | 0 |
+| vehicles | 13 | 2 | 11 | 0 |
 | aerospace | 10 | 0 | 10 | 0 |
 | consumer | 12 | 5 | 7 | 0 |
 | defense | 10 | 0 | 0 | 10 |
 
-Era 1–2 foundational technologies are licensed by this release policy. No research actions, era progression or upgrade effects are implemented. Later-era entries are locked; defense entries are definitions only and do not operate.
+These are static catalog classifications. Singleplayer progression licenses selected later-era factories through research and material/era gates, including the eight 0.4.2 factories. Defense entries remain definitions only. Logistics and upgrades have no effects.
 
 ## playable
 
@@ -30,13 +30,13 @@ Era 1–2 foundational technologies are licensed by this release policy. No rese
 
 ## futureLocked
 
-- **mining:** `lithiumMine`, `titaniumMine`, `rareEarthMine`
-- **refining:** `lithiumRefinery`, `titaniumRefinery`, `rareEarthRefinery`, `alloyFoundry`
-- **construction:** `moduleWorks`
-- **chemicals:** `fiberWorks`, `compositeWorks`
-- **electronics:** `processorFab`, `memoryFab`, `sensorWorks`, `displayWorks`, `batteryWorks`, `powerElectronicsWorks`, `controlWorks`, `communicationsWorks`, `precisionElectronicsWorks`, `quantumModuleWorks`
-- **machinery:** `machineWorks`, `precisionToolWorks`, `turbineWorks`, `automationWorks`, `heavyMachineWorks`, `robotArmWorks`, `robotWorks`
-- **vehicles:** `engineWorks`, `vehiclePartsWorks`, `utilityVehicleWorks`, `truckWorks`, `busWorks`, `carWorks`, `electricVehicleWorks`, `railWorks`, `shipWorks`, `autonomousVehicleWorks`
+- **mining:** `lithiumMine`, `titaniumMine`, `rareEarthMine`, `chromiteMine`
+- **refining:** `lithiumRefinery`, `titaniumRefinery`, `rareEarthRefinery`, `alloyFoundry`, `chromiumRefinery`, `stainlessSteelWorks`
+- **construction:** `moduleWorks`, `stainlessModuleWorks`
+- **chemicals:** `fiberWorks`, `compositeWorks`, `photoresistWorks`
+- **electronics:** `processorFab`, `memoryFab`, `sensorWorks`, `displayWorks`, `batteryWorks`, `powerElectronicsWorks`, `controlWorks`, `communicationsWorks`, `precisionElectronicsWorks`, `quantumModuleWorks`, `waferFab`
+- **machinery:** `machineWorks`, `precisionToolWorks`, `turbineWorks`, `automationWorks`, `heavyMachineWorks`, `robotArmWorks`, `robotWorks`, `servoDriveWorks`
+- **vehicles:** `engineWorks`, `vehiclePartsWorks`, `utilityVehicleWorks`, `truckWorks`, `busWorks`, `carWorks`, `electricVehicleWorks`, `railWorks`, `shipWorks`, `autonomousVehicleWorks`, `electricTransportWorks`
 - **aerospace:** `airframeWorks`, `jetEngineWorks`, `avionicsWorks`, `aerospaceCompositeWorks`, `aircraftPartsWorks`, `civilAircraftWorks`, `satellitePartsWorks`, `satelliteWorks`, `launchAssemblyWorks`, `orbitalPlatformWorks`
 - **consumer:** `applianceWorks`, `electricalGoodsWorks`, `medicalSupplyWorks`, `consumerDeviceWorks`, `medicalDeviceWorks`, `advancedApplianceWorks`, `luxuryGoodsWorks`
 

@@ -193,7 +193,7 @@
       continueCatchup();
     }
     try {
-      const worker = new Worker("economy_worker.js?v=3404");
+      const worker = new Worker("economy_worker.js?v=042p1");
       catchupWorker = worker;
       catchupEngine = "worker";
       catchupWorker.onerror = (event) => {

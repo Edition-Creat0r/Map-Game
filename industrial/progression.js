@@ -36,6 +36,9 @@
   ];
   const byMaterial = new Map(manifest.materials.map((m) => [m.id, m])),
     byResearch = new Map(research.nodes.map((n) => [n.id, n]));
+  function requiredResearch(d) {
+    return [...new Set([sectorResearch[d.sector], ...(d.researchRequirements || [])].filter(Boolean))];
+  }
   function requiredMaterials(d) {
     return [
       ...new Set([
@@ -57,7 +60,7 @@
       t.version !== 1 ||
       m.version !== 1 ||
       m.registryVersion !== 1 ||
-      m.materials?.length !== 100 ||
+      m.materials?.length !== 106 ||
       m.excluded?.length !== 21
     )
       errors.push("Manifest counts/version");
@@ -66,7 +69,7 @@
         errors.push("Duplicate/undefined material " + x.id);
       ids.add(x.id);
     }
-    if (ids.size !== 121) errors.push("Internal registry coverage");
+    if (ids.size !== R.materialIds.length) errors.push("Internal registry coverage");
     const starts = [
       "money",
       "steel",
@@ -79,7 +82,7 @@
       "copperOre",
       "limestone",
     ];
-    const buckets = [10, 15, 20, 20, 20, 15];
+    const buckets = [10, 15, 22, 23, 21, 15];
     for (let i = 1; i <= 6; i++)
       if (
         m.materials.filter((x) => x.unlockEra === i).length !== buckets[i - 1]
@@ -94,8 +97,9 @@
         !n.id ||
         !n.name ||
         !n.cost ||
-        !Object.values(n.cost).every((x) => Number.isFinite(x) && x >= 0) ||
-        Object.keys(n.cost).some((k) => !R.material(k))
+        !Object.values(n.cost).every((x) => Number.isFinite(x) && x >= 0 && x <= 1e12 && Number.isInteger(x * 1e6)) ||
+        Object.keys(n.cost).some((k) => !R.material(k)) ||
+        (n.minimumEra !== undefined && (!Number.isInteger(n.minimumEra) || n.minimumEra < 1 || n.minimumEra > 6))
       )
         errors.push("Research definition " + n.id);
       tech.set(n.id, n);
@@ -117,7 +121,7 @@
         const b = R.building(id);
         if (
           !b ||
-          sectorResearch[b.sector] !== n.id ||
+          !requiredResearch(b).includes(n.id) ||
           !Object.keys(b.recipes[0].outputsPerMinute).every((id) =>
             selected.has(id),
           )
@@ -166,6 +170,9 @@
             errors.push("Later dependency " + x.id + " → " + id);
         }
     }
+    for (const b of R.data.buildings)
+      if (requiredResearch(b).some(id => !tech.has(id)) && b.availability !== 'definitionsOnly')
+        errors.push('Undefined factory research ' + b.id);
     return { valid: !errors.length, errors };
   }
   function freeze(value) {
@@ -294,9 +301,8 @@
         "Unlock materials: " +
         locked.map((id) => R.material(id).name).join(", ")
       );
-    const tech = sectorResearch[d.sector];
-    if (tech && !p.completed.includes(tech))
-      return "Research " + byResearch.get(tech).name;
+    const tech = requiredResearch(d).find(id => !p.completed.includes(id));
+    if (tech) return "Research " + byResearch.get(tech).name;
     return "";
   }
   function researchReason(state, id) {
@@ -304,6 +310,7 @@
       n = byResearch.get(id);
     if (!p || !n) return "Unknown research";
     if (p.completed.includes(id)) return "Completed";
+    if (p.era < (n.minimumEra || 1)) return 'Requires era: ' + eras[n.minimumEra - 1];
     const missing = n.prerequisites.filter((id) => !p.completed.includes(id));
     return missing.length
       ? "Requires " + missing.map((id) => byResearch.get(id).name).join(", ")

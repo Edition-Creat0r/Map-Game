@@ -315,6 +315,77 @@
           4
         ]
       }
+    },
+    {
+      "id": "advancedMetallurgy",
+      "name": "Advanced Metallurgy",
+      "minimumEra": 3,
+      "prerequisites": [
+        "miningRefining",
+        "constructionTechnology"
+      ],
+      "cost": {
+        "money": 8000
+      },
+      "effects": {
+        "materials": [
+          "chromiteOre",
+          "chromium",
+          "stainlessSteel"
+        ],
+        "buildings": [
+          "chromiteMine",
+          "chromiumRefinery",
+          "stainlessSteelWorks",
+          "stainlessModuleWorks"
+        ],
+        "eras": []
+      }
+    },
+    {
+      "id": "precisionFabrication",
+      "name": "Precision Fabrication",
+      "minimumEra": 4,
+      "prerequisites": [
+        "advancedMetallurgy",
+        "electronicsFoundations"
+      ],
+      "cost": {
+        "money": 12000
+      },
+      "effects": {
+        "materials": [
+          "photoresist",
+          "siliconWafers"
+        ],
+        "buildings": [
+          "photoresistWorks",
+          "waferFab"
+        ],
+        "eras": []
+      }
+    },
+    {
+      "id": "industrialAutomation",
+      "name": "Industrial Automation",
+      "minimumEra": 5,
+      "prerequisites": [
+        "precisionFabrication",
+        "industrialMachinery"
+      ],
+      "cost": {
+        "money": 18000
+      },
+      "effects": {
+        "materials": [
+          "servoDrives"
+        ],
+        "buildings": [
+          "servoDriveWorks",
+          "electricTransportWorks"
+        ],
+        "eras": []
+      }
     }
   ]
 }

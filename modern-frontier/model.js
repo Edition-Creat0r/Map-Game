@@ -18,6 +18,9 @@
     {id:'explorer',name:'A wider world',branch:'Exploration',tier:'Milestone',metric:'territories',target:5,pre:['explore'],text:'Visit five different territories after this update.'},
     {id:'research',name:'A spark of invention',branch:'Technology',tier:'Task',metric:'research',target:1,pre:[],text:'Complete your first research technology.'},
     {id:'innovator',name:'Frontier innovator',branch:'Technology',tier:'Legendary',metric:'research',target:7,pre:['research'],text:'Complete all seven introductory research nodes.'},
+    {id:'metallurgyLicense',name:'Beyond ordinary steel',branch:'Technology',tier:'Milestone',metric:'advancedMetallurgy',target:1,pre:['research'],text:'Complete Advanced Metallurgy research.'},
+    {id:'fabricationLicense',name:'Precision frontier',branch:'Technology',tier:'Milestone',metric:'precisionFabrication',target:1,pre:['metallurgyLicense'],text:'Complete Precision Fabrication research.'},
+    {id:'automationLicense',name:'An automated future',branch:'Technology',tier:'Legendary',metric:'industrialAutomation',target:1,pre:['fabricationLicense'],text:'Complete Industrial Automation research. Recognition only; no production bonus.'},
   ];
   function object(v) { return v && typeof v==='object' && !Array.isArray(v); }
   function safeJSON(text) {
@@ -92,6 +95,14 @@
     for(const k of KEYS) old.records[k]===null?storage.removeItem(k):storage.setItem(k,old.records[k]);
     storage.removeItem(JOURNAL); return true;
   }
+  function researchMetrics(completed=[]) {
+    const done=new Set(completed);
+    const introductory=['basicIndustry','miningRefining','constructionTechnology','electricity','urbanDevelopment','electronicsFoundations','industrialMachinery'];
+    return {research:introductory.filter(id=>done.has(id)).length,
+      advancedMetallurgy:done.has('advancedMetallurgy')?1:0,
+      precisionFabrication:done.has('precisionFabrication')?1:0,
+      industrialAutomation:done.has('industrialAutomation')?1:0};
+  }
   function advance(saved, metrics) {
     const next={...saved,version:1,completed:[...new Set(saved?.completed||[])],pins:[...new Set(saved?.pins||[])].filter(id=>goals.some(g=>g.id===id)).slice(0,3),explored:[...new Set(saved?.explored||[])]};
     for(const g of goals) if(!next.completed.includes(g.id) && g.pre.every(id=>next.completed.includes(id)) && Number(metrics[g.metric]||0)>=g.target) next.completed.push(g.id);
@@ -127,7 +138,7 @@
     for(const g of goals) { if(seen.has(g.id)||g.target<=0||g.pre.some(id=>!seen.has(id))) throw Error('Invalid advancement graph.'); seen.add(g.id); }
     return true;
   }
-  const api={KEYS,JOURNAL,MAX_BYTES,goals,safeJSON,validateBackup,validateWorld,snapshot,restore,recover,advance,pin,validateGoals,imageDimensions};
+  const api={KEYS,JOURNAL,MAX_BYTES,goals,safeJSON,validateBackup,validateWorld,snapshot,restore,recover,advance,pin,validateGoals,imageDimensions,researchMetrics};
   if(typeof module!=='undefined')module.exports=api;
   else { root.mapGameFrontierModel=api; try {if(localStorage.getItem(JOURNAL))root.mapGameFrontierRecoveryError='An interrupted restore needs recovery before play.';} catch(e) {root.mapGameFrontierRecoveryError=e.message;} }
 })(typeof window!=='undefined'?window:globalThis);

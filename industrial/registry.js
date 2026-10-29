@@ -6,13 +6,13 @@
       ? require("./catalog-data.js")
       : root.mapGameIndustrialData;
   const SECTORS = {
-    mining: 14,
-    refining: 12,
-    construction: 12,
-    chemicals: 14,
-    electronics: 12,
-    machinery: 12,
-    vehicles: 12,
+    mining: 15,
+    refining: 14,
+    construction: 13,
+    chemicals: 15,
+    electronics: 13,
+    machinery: 13,
+    vehicles: 13,
     aerospace: 10,
     consumer: 12,
     defense: 10,
@@ -146,6 +146,11 @@
       )
         fail(`Invalid future upgrade metadata ${b.id}`);
       if (!tech.has(b.technology)) fail(`Unknown technology in ${b.id}`);
+      if (b.researchRequirements !== undefined &&
+        (!Array.isArray(b.researchRequirements) ||
+          new Set(b.researchRequirements).size !== b.researchRequirements.length ||
+          b.researchRequirements.some(id => typeof id !== 'string' || !ID.test(id))))
+        fail(`Invalid research requirements ${b.id}`);
       if (
         !CLASSES.includes(b.logistics?.storageClass) ||
         !amount(b.logistics?.capacity) ||
@@ -282,8 +287,8 @@
     for (const [s, count] of Object.entries(SECTORS))
       if (d.buildings.filter((b) => b.sector === s).length !== count)
         fail(`Wrong sector count ${s}`);
-    if (d.buildings.length !== 120)
-      fail("Exactly 120 industrial definitions are required");
+    if (d.buildings.length !== 128)
+      fail("Exactly 128 industrial definitions are required for 0.4.2 Phase 1");
     for (const id of ["money", "steel", "carbon", "iron", "concrete", "glass"])
       if (!materials.has(id)) fail(`Missing legacy resource ${id}`);
     return { valid: !errors.length, errors, topological };

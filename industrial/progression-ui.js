@@ -83,14 +83,14 @@
       })
       .join(
         "",
-      )}</div><details class="mg-resource-discovery"><summary>Discover future materials</summary><p>${P.manifest.materials.filter((m) => P.unlocked(s, m.id)).length} / 100 unlocked · resources for your growing city.</p><div class="mg-c1-discover">${
+      )}</div><details class="mg-resource-discovery"><summary>Discover future materials</summary><p>${P.manifest.materials.filter((m) => P.unlocked(s, m.id)).length} / ${P.manifest.materials.length} unlocked · resources for your growing city.</p><div class="mg-c1-discover">${
       P.manifest.materials
         .filter((m) => !P.unlocked(s, m.id))
         .map(
           (m) =>
             `<p><b>${esc(window.mapGameIndustrialRegistry.material(m.id).name)}</b> · ${P.eras[m.unlockEra - 1]} · ${m.unlockRequirements.map((id) => esc(P.research.nodes.find((n) => n.id === id).name)).join(", ")} · acquire from ${esc(window.mapGameIndustrialRegistry.building(m.acquisition.building)?.name || "Commercial building")}</p>`,
         )
-        .join("") || "<p>All 100 materials unlocked.</p>"
+        .join("") || `<p>All ${P.manifest.materials.length} materials unlocked.</p>`
     }</div></details>`;
     if (focused) panel.querySelector(`[data-research="${focused}"]`)?.focus();
     requestAnimationFrame(drawLinks);

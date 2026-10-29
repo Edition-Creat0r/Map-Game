@@ -95,7 +95,7 @@ const graph = [
 ];
 fs.writeFileSync(path.join(__dirname, "PRODUCTION_GRAPH.md"), graph.join("\n"));
 const availability = [
-  "# Phase B availability",
+  "# Industrial catalog availability",
   "",
   "Generated from catalog.json. These are industrial entries only; the five starter contracts remain playable separately.",
   "",
@@ -110,7 +110,7 @@ for (const sector of Object.keys(R.SECTORS)) {
 }
 availability.push(
   "",
-  "Era 1–2 foundational technologies are licensed by this release policy. No research actions, era progression or upgrade effects are implemented. Later-era entries are locked; defense entries are definitions only and do not operate.",
+  "These are static catalog classifications. Singleplayer progression licenses selected later-era factories through research and material/era gates, including the eight 0.4.2 factories. Defense entries remain definitions only. Logistics and upgrades have no effects.",
   "",
 );
 for (const status of ["playable", "futureLocked", "definitionsOnly"]) {

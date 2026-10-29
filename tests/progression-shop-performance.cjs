@@ -55,7 +55,8 @@ for (const file of execFileSync("git", ["ls-tree", "-r", "--name-only", base], {
                   : "text/html",
               body: baseline.get(file),
             });
-          return route.continue();
+          // Preserve earlier explicit CDN test routes for non-baseline requests.
+          return route.fallback();
         });
       await page.goto(origin);
       await page.waitForFunction(
