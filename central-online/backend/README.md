@@ -1,6 +1,13 @@
 # Checkpoint 1 — review-only Central economy backend
 
-**Not deployed. Multiplayer purchases remain disabled in the game.** This package is for an authorized maintainer's isolated staging review. Existing Singleplayer UI, saves, economy and authentication/ownership clients are unchanged. Checkpoints 2–6 have not started.
+**Not deployed. Multiplayer purchases remain disabled in the game.** This package is for an authorized maintainer's isolated staging review. Existing Singleplayer UI, saves, economy and authentication/ownership clients are unchanged by Checkpoint 1. Checkpoint 2 exists separately on the branch and is not part of this deployment.
+
+Offline follow-up: [staging-only security draft and dependency review](staging-only/README.md),
+[Windows CLI guide](WINDOWS_STAGING_DEPLOYMENT.md), and
+[private schema export/review/import procedure](staging-only/WINDOWS_SCHEMA_REVIEW.md).
+Owner-supplied metadata has since identified legacy session/ownership issues;
+complete exported-schema review and genuine staging tests remain outstanding.
+No live credentials, hosted SQL or remote deployment were used for that follow-up.
 
 ## What exists
 
@@ -15,7 +22,7 @@
 
 ## Actual audit/access status
 
-This environment has no Supabase administration connector, project/database credentials, schema dump, deployed RPC definitions or RLS policy source. The client supplies expected names/columns (`world_members`, `territory_claims`, `capitals`, protected-session RPCs), not proof of their actual deployed constraints/authorization. **No live metadata or user rows were queried.** Local PostgreSQL uses an explicitly synthetic compatibility schema; local HTTP tests inject authentication/session results. They are not real Supabase accounts or staging security certification.
+Original Checkpoint 1 preparation had no verified hosted schema/RLS export or project/database credentials. The owner later supplied two metadata exports for offline review, identifying the issues documented in `staging-only/README.md`; a complete schema-only export is still not confirmed. Client code and exported definitions are not independent verification of the deployed constraints/authorization. **No live metadata or user rows were queried by this offline follow-up.** Local PostgreSQL uses an explicitly synthetic compatibility schema; local HTTP tests inject authentication/session results. They are not real Supabase accounts or staging security certification.
 
 An authorized maintainer must run `preflight.sql` against an isolated authorized staging clone, privately review its output and reconcile every expected legacy contract before applying migrations. In particular, confirm claims cannot be created/transferred/recovered for another account; membership cannot be used to bypass eligibility; heartbeat binds the session and world to `auth.uid()`; function search paths/grants are safe; realtime/REST cannot leak private records; and service keys never reach browser bundles.
 

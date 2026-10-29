@@ -1,0 +1,10 @@
+# Keep real schema exports, credentials and test artifacts outside this package.
+private/
+*.dump
+*.backup
+*.private.sql
+*.private.json
+.env
+.env.*
+logs/
+results/
