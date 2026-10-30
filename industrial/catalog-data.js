@@ -904,6 +904,90 @@
       "unit": "game units",
       "storageClass": "precision",
       "aliases": []
+    },
+    {
+      "id": "nickelOre",
+      "name": "Nickel Ore",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "nickel",
+      "name": "Nickel",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "manganeseOre",
+      "name": "Manganese Ore",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "manganese",
+      "name": "Manganese",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "graphiteOre",
+      "name": "Graphite Ore",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "graphite",
+      "name": "Graphite",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "bioResin",
+      "name": "Bio-resin",
+      "storageClass": "general",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "precisionCastings",
+      "name": "Precision Castings",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "machineFrames",
+      "name": "Machine Frames",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "thermalComponents",
+      "name": "Thermal Components",
+      "storageClass": "precision",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "opticalGlass",
+      "name": "Optical Glass",
+      "storageClass": "precision",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "fiberOpticCable",
+      "name": "Fiber-optic Cable",
+      "storageClass": "precision",
+      "unit": "game units",
+      "aliases": []
     }
   ],
   "models": [
@@ -9467,6 +9551,788 @@
       "researchRequirements": [
         "industrialAutomation"
       ]
+    },
+    {
+      "id": "nickelMine",
+      "name": "Nickel Mine",
+      "sector": "mining",
+      "era": 3,
+      "cost": {
+        "money": 42000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "operating": {
+        "energy": 4,
+        "workers": 4,
+        "upkeep": 5
+      },
+      "footprint": [
+        56,
+        48
+      ],
+      "researchRequirements": [
+        "advancedMetallurgy"
+      ],
+      "recipes": [
+        {
+          "id": "nickelMineRecipe",
+          "version": 1,
+          "inputsPerMinute": {},
+          "outputsPerMinute": {
+            "nickelOre": 12
+          },
+          "technology": "tech_mining_3"
+        }
+      ],
+      "technology": "tech_mining_3",
+      "visual": {
+        "existingModelId": "warehouse",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "availability": "futureLocked",
+      "logistics": {
+        "storageClass": "bulk",
+        "capacity": 0,
+        "throughputPerMinute": 12,
+        "districtRequired": false,
+        "implemented": false
+      }
+    },
+    {
+      "id": "nickelRefinery",
+      "name": "Nickel Refinery",
+      "sector": "refining",
+      "era": 3,
+      "cost": {
+        "money": 85000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "operating": {
+        "energy": 8,
+        "workers": 6,
+        "upkeep": 8
+      },
+      "footprint": [
+        64,
+        54
+      ],
+      "researchRequirements": [
+        "advancedMetallurgy"
+      ],
+      "recipes": [
+        {
+          "id": "nickelRefineryRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "nickelOre": 12,
+            "carbon": 3
+          },
+          "outputsPerMinute": {
+            "nickel": 6
+          },
+          "technology": "tech_refining_3"
+        }
+      ],
+      "technology": "tech_refining_3",
+      "visual": {
+        "existingModelId": "steelMill",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "availability": "futureLocked",
+      "logistics": {
+        "storageClass": "bulk",
+        "capacity": 0,
+        "throughputPerMinute": 6,
+        "districtRequired": false,
+        "implemented": false
+      }
+    },
+    {
+      "id": "manganeseMine",
+      "name": "Manganese Mine",
+      "sector": "mining",
+      "era": 3,
+      "cost": {
+        "money": 40000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "operating": {
+        "energy": 4,
+        "workers": 4,
+        "upkeep": 5
+      },
+      "footprint": [
+        56,
+        48
+      ],
+      "researchRequirements": [
+        "advancedMetallurgy"
+      ],
+      "recipes": [
+        {
+          "id": "manganeseMineRecipe",
+          "version": 1,
+          "inputsPerMinute": {},
+          "outputsPerMinute": {
+            "manganeseOre": 12
+          },
+          "technology": "tech_mining_3"
+        }
+      ],
+      "technology": "tech_mining_3",
+      "visual": {
+        "existingModelId": "warehouse",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "availability": "futureLocked",
+      "logistics": {
+        "storageClass": "bulk",
+        "capacity": 0,
+        "throughputPerMinute": 12,
+        "districtRequired": false,
+        "implemented": false
+      }
+    },
+    {
+      "id": "manganeseRefinery",
+      "name": "Manganese Refinery",
+      "sector": "refining",
+      "era": 3,
+      "cost": {
+        "money": 80000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "operating": {
+        "energy": 7,
+        "workers": 6,
+        "upkeep": 7
+      },
+      "footprint": [
+        64,
+        54
+      ],
+      "researchRequirements": [
+        "advancedMetallurgy"
+      ],
+      "recipes": [
+        {
+          "id": "manganeseRefineryRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "manganeseOre": 12,
+            "industrialAcid": 3
+          },
+          "outputsPerMinute": {
+            "manganese": 6
+          },
+          "technology": "tech_refining_3"
+        }
+      ],
+      "technology": "tech_refining_3",
+      "visual": {
+        "existingModelId": "steelMill",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "availability": "futureLocked",
+      "logistics": {
+        "storageClass": "bulk",
+        "capacity": 0,
+        "throughputPerMinute": 6,
+        "districtRequired": false,
+        "implemented": false
+      }
+    },
+    {
+      "id": "graphiteMine",
+      "name": "Graphite Mine",
+      "sector": "mining",
+      "era": 3,
+      "cost": {
+        "money": 45000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "operating": {
+        "energy": 4,
+        "workers": 4,
+        "upkeep": 5
+      },
+      "footprint": [
+        56,
+        48
+      ],
+      "researchRequirements": [
+        "advancedMaterialsScience"
+      ],
+      "recipes": [
+        {
+          "id": "graphiteMineRecipe",
+          "version": 1,
+          "inputsPerMinute": {},
+          "outputsPerMinute": {
+            "graphiteOre": 12
+          },
+          "technology": "tech_mining_3"
+        }
+      ],
+      "technology": "tech_mining_3",
+      "visual": {
+        "existingModelId": "warehouse",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "availability": "futureLocked",
+      "logistics": {
+        "storageClass": "bulk",
+        "capacity": 0,
+        "throughputPerMinute": 12,
+        "districtRequired": false,
+        "implemented": false
+      }
+    },
+    {
+      "id": "graphitePurifier",
+      "name": "Graphite Purification Works",
+      "sector": "refining",
+      "era": 3,
+      "cost": {
+        "money": 90000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "operating": {
+        "energy": 8,
+        "workers": 6,
+        "upkeep": 8
+      },
+      "footprint": [
+        64,
+        54
+      ],
+      "researchRequirements": [
+        "advancedMaterialsScience"
+      ],
+      "recipes": [
+        {
+          "id": "graphitePurifierRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "graphiteOre": 12,
+            "industrialAcid": 3
+          },
+          "outputsPerMinute": {
+            "graphite": 6
+          },
+          "technology": "tech_refining_3"
+        }
+      ],
+      "technology": "tech_refining_3",
+      "visual": {
+        "existingModelId": "steelMill",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "availability": "futureLocked",
+      "logistics": {
+        "storageClass": "bulk",
+        "capacity": 0,
+        "throughputPerMinute": 6,
+        "districtRequired": false,
+        "implemented": false
+      }
+    },
+    {
+      "id": "bioResinWorks",
+      "name": "Bio-resin Works",
+      "sector": "chemicals",
+      "era": 4,
+      "cost": {
+        "money": 130000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6
+      },
+      "operating": {
+        "energy": 9,
+        "workers": 6,
+        "upkeep": 9
+      },
+      "footprint": [
+        64,
+        54
+      ],
+      "researchRequirements": [
+        "advancedMaterialsScience"
+      ],
+      "recipes": [
+        {
+          "id": "bioResinWorksRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "naturalGas": 4,
+            "fertilizer": 2,
+            "industrialSolvent": 1
+          },
+          "outputsPerMinute": {
+            "bioResin": 3
+          },
+          "technology": "tech_chemicals_4"
+        }
+      ],
+      "technology": "tech_chemicals_4",
+      "visual": {
+        "existingModelId": "carbonPlant",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "availability": "futureLocked",
+      "logistics": {
+        "storageClass": "general",
+        "capacity": 0,
+        "throughputPerMinute": 3,
+        "districtRequired": false,
+        "implemented": false
+      }
+    },
+    {
+      "id": "precisionCastingWorks",
+      "name": "Precision Casting Works",
+      "sector": "refining",
+      "era": 4,
+      "cost": {
+        "money": 160000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6,
+        "nickel": 4
+      },
+      "operating": {
+        "energy": 10,
+        "workers": 8,
+        "upkeep": 10
+      },
+      "footprint": [
+        64,
+        54
+      ],
+      "researchRequirements": [
+        "precisionManufacturing"
+      ],
+      "recipes": [
+        {
+          "id": "precisionCastingWorksRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "steel": 6,
+            "nickel": 2,
+            "manganese": 2,
+            "bioResin": 1
+          },
+          "outputsPerMinute": {
+            "precisionCastings": 3
+          },
+          "technology": "tech_refining_4"
+        }
+      ],
+      "technology": "tech_refining_4",
+      "visual": {
+        "existingModelId": "steelMill",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "availability": "futureLocked",
+      "logistics": {
+        "storageClass": "bulk",
+        "capacity": 0,
+        "throughputPerMinute": 3,
+        "districtRequired": false,
+        "implemented": false
+      }
+    },
+    {
+      "id": "machineFrameWorks",
+      "name": "Machine Frame Works",
+      "sector": "machinery",
+      "era": 5,
+      "cost": {
+        "money": 210000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6,
+        "precisionCastings": 6
+      },
+      "operating": {
+        "energy": 10,
+        "workers": 6,
+        "upkeep": 10
+      },
+      "footprint": [
+        72,
+        60
+      ],
+      "researchRequirements": [
+        "precisionManufacturing"
+      ],
+      "recipes": [
+        {
+          "id": "machineFrameWorksRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "precisionCastings": 3,
+            "beams": 3
+          },
+          "outputsPerMinute": {
+            "machineFrames": 3
+          },
+          "technology": "tech_machinery_5"
+        }
+      ],
+      "technology": "tech_machinery_5",
+      "visual": {
+        "existingModelId": "steelMill",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "availability": "futureLocked",
+      "logistics": {
+        "storageClass": "bulk",
+        "capacity": 0,
+        "throughputPerMinute": 3,
+        "districtRequired": false,
+        "implemented": false
+      }
+    },
+    {
+      "id": "thermalComponentWorks",
+      "name": "Thermal Component Works",
+      "sector": "machinery",
+      "era": 4,
+      "cost": {
+        "money": 150000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6,
+        "graphite": 6
+      },
+      "operating": {
+        "energy": 10,
+        "workers": 6,
+        "upkeep": 10
+      },
+      "footprint": [
+        64,
+        54
+      ],
+      "researchRequirements": [
+        "precisionManufacturing"
+      ],
+      "recipes": [
+        {
+          "id": "thermalComponentWorksRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "graphite": 3,
+            "copper": 3,
+            "aluminum": 3
+          },
+          "outputsPerMinute": {
+            "thermalComponents": 3
+          },
+          "technology": "tech_machinery_4"
+        }
+      ],
+      "technology": "tech_machinery_4",
+      "visual": {
+        "existingModelId": "steelMill",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "availability": "futureLocked",
+      "logistics": {
+        "storageClass": "precision",
+        "capacity": 0,
+        "throughputPerMinute": 3,
+        "districtRequired": false,
+        "implemented": false
+      }
+    },
+    {
+      "id": "opticalGlassWorks",
+      "name": "Optical Glass Works",
+      "sector": "construction",
+      "era": 4,
+      "cost": {
+        "money": 180000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6,
+        "thermalComponents": 4
+      },
+      "operating": {
+        "energy": 12,
+        "workers": 8,
+        "upkeep": 12
+      },
+      "footprint": [
+        64,
+        54
+      ],
+      "researchRequirements": [
+        "opticalEngineering"
+      ],
+      "recipes": [
+        {
+          "id": "opticalGlassWorksRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "glass": 6,
+            "silica": 3,
+            "thermalComponents": 1
+          },
+          "outputsPerMinute": {
+            "opticalGlass": 3
+          },
+          "technology": "tech_construction_4"
+        }
+      ],
+      "technology": "tech_construction_4",
+      "visual": {
+        "existingModelId": "warehouse",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "availability": "futureLocked",
+      "logistics": {
+        "storageClass": "precision",
+        "capacity": 0,
+        "throughputPerMinute": 3,
+        "districtRequired": false,
+        "implemented": false
+      }
+    },
+    {
+      "id": "fiberOpticWorks",
+      "name": "Fiber-optic Cable Works",
+      "sector": "electronics",
+      "era": 5,
+      "cost": {
+        "money": 240000,
+        "steel": 6,
+        "carbon": 2,
+        "concrete": 12,
+        "glass": 6,
+        "opticalGlass": 6
+      },
+      "operating": {
+        "energy": 10,
+        "workers": 6,
+        "upkeep": 10
+      },
+      "footprint": [
+        72,
+        60
+      ],
+      "researchRequirements": [
+        "opticalEngineering"
+      ],
+      "recipes": [
+        {
+          "id": "fiberOpticWorksRecipe",
+          "version": 1,
+          "inputsPerMinute": {
+            "opticalGlass": 3,
+            "plastic": 3,
+            "copper": 2
+          },
+          "outputsPerMinute": {
+            "fiberOpticCable": 3
+          },
+          "technology": "tech_electronics_5"
+        }
+      ],
+      "technology": "tech_electronics_5",
+      "visual": {
+        "existingModelId": "warehouse",
+        "styles": [
+          "Modern",
+          "Traditional",
+          "Brick",
+          "Steampunk",
+          "Cyberpunk"
+        ]
+      },
+      "maxLevel": 10,
+      "specializations": [
+        "Production",
+        "Efficiency",
+        "Automation",
+        "Logistics"
+      ],
+      "availability": "futureLocked",
+      "logistics": {
+        "storageClass": "precision",
+        "capacity": 0,
+        "throughputPerMinute": 3,
+        "districtRequired": false,
+        "implemented": false
+      }
     }
   ]
 };if(typeof module!=="undefined")module.exports=data;else root.mapGameIndustrialData=data;})(typeof window!=="undefined"?window:globalThis);

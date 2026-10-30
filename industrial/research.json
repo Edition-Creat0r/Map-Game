@@ -386,6 +386,106 @@
         ],
         "eras": []
       }
+    },
+    {
+      "id": "advancedMaterialsScience",
+      "name": "Advanced Materials Science",
+      "minimumEra": 3,
+      "prerequisites": [
+        "advancedMetallurgy",
+        "basicIndustry"
+      ],
+      "cost": {
+        "money": 12000,
+        "nickel": 6,
+        "manganese": 6
+      },
+      "effects": {
+        "materials": [
+          "graphiteOre",
+          "graphite",
+          "bioResin"
+        ],
+        "buildings": [
+          "graphiteMine",
+          "graphitePurifier",
+          "bioResinWorks"
+        ],
+        "eras": []
+      }
+    },
+    {
+      "id": "precisionManufacturing",
+      "name": "Precision Manufacturing",
+      "minimumEra": 4,
+      "prerequisites": [
+        "advancedMaterialsScience",
+        "industrialMachinery"
+      ],
+      "cost": {
+        "money": 18000,
+        "graphite": 12,
+        "bioResin": 6
+      },
+      "effects": {
+        "materials": [
+          "precisionCastings",
+          "machineFrames",
+          "thermalComponents"
+        ],
+        "buildings": [
+          "precisionCastingWorks",
+          "machineFrameWorks",
+          "thermalComponentWorks"
+        ],
+        "eras": []
+      }
+    },
+    {
+      "id": "opticalEngineering",
+      "name": "Optical Engineering",
+      "minimumEra": 4,
+      "prerequisites": [
+        "precisionManufacturing",
+        "electronicsFoundations"
+      ],
+      "cost": {
+        "money": 18000,
+        "thermalComponents": 6,
+        "precisionCastings": 6
+      },
+      "effects": {
+        "materials": [
+          "opticalGlass",
+          "fiberOpticCable"
+        ],
+        "buildings": [
+          "opticalGlassWorks",
+          "fiberOpticWorks"
+        ],
+        "eras": []
+      }
+    },
+    {
+      "id": "telecommunications",
+      "name": "Telecommunications",
+      "minimumEra": 5,
+      "prerequisites": [
+        "opticalEngineering",
+        "urbanDevelopment"
+      ],
+      "cost": {
+        "money": 30000,
+        "fiberOpticCable": 20,
+        "machineFrames": 8,
+        "thermalComponents": 8
+      },
+      "purpose": "Material-funded capstone research/recognition; no implicit output boost or networking simulation.",
+      "effects": {
+        "materials": [],
+        "buildings": [],
+        "eras": []
+      }
     }
   ]
 }

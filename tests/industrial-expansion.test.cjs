@@ -28,7 +28,7 @@ function city(types=[],extra={}){
 function drain(s,target,online=false,options={}){let r,passes=0;do{r=M.advance(s,target,online,defs,options);assert.ok(++passes<5000);}while(!r.complete);return passes;}
 test('bounded expansion preserves every existing material, factory, license and unlock record verbatim',()=>{
  const old=JSON.parse(fromBase('industrial/catalog.json'));
- assert.equal(R.materialIds.length,127);assert.equal(R.data.buildings.length,128);assert.equal(defs.filter(d=>d.economy).length,133);
+ assert.equal(R.materialIds.length,139);assert.equal(R.data.buildings.length,140);assert.equal(defs.filter(d=>d.economy).length,145);
  for(const key of ['materials','buildings','technologies'])for(const item of old[key])assert.deepEqual(R.data[key].find(x=>x.id===item.id),item);
  for(const key of ['materials','excluded'])for(const item of JSON.parse(fromBase('industrial/player-materials.json'))[key])assert.deepEqual(P.manifest[key].find(x=>x.id===item.id),item);
  for(const item of JSON.parse(fromBase('industrial/research.json')).nodes)assert.deepEqual(P.research.nodes.find(x=>x.id===item.id),item);
@@ -61,7 +61,7 @@ test('new recipes reject undefined references, unsafe numbers, duplicate recipes
 test('three appended research nodes enforce prerequisites, era, exact costs and idempotency',()=>{
  const s=city();s.economy.progression.completed=[];s.economy.progression.era=6;
  assert.equal(P.complete(s,'advancedMetallurgy',M),false);
- for(const n of P.research.nodes.filter(n=>!researchIds.includes(n.id)))assert.equal(P.complete(s,n.id,M),true);
+ for(const n of P.research.nodes.filter(n=>!n.minimumEra))assert.equal(P.complete(s,n.id,M),true);
  for(const [i,id] of researchIds.entries()){
   const node=P.research.nodes.find(n=>n.id===id);
   s.economy.progression.era=node.minimumEra-1;
@@ -76,7 +76,7 @@ test('new factory licenses cannot be bypassed using an old fully researched save
  assert.equal(P.manifest.materials.filter(m=>P.unlocked(s,m.id)).length,100);
  for(const id of buildingIds)assert.notEqual(P.reason(s,defs.find(d=>d.id===id)),'');
  for(const id of researchIds)assert.equal(P.complete(s,id,M),true);
- assert.equal(P.manifest.materials.filter(m=>P.unlocked(s,m.id)).length,106);
+ assert.equal(P.manifest.materials.filter(m=>P.unlocked(s,m.id)).length,110);
 });
 test('new advancements recognize actual expansion research without changing old goals or awarding resources',()=>{
  const F=require('../modern-frontier/model.js');
@@ -134,7 +134,7 @@ test('worker imports the expanded catalog and returns the same exact industrial 
  vm.createContext(ctx);
  ctx.importScripts=(...files)=>{for(const file of files)vm.runInContext(fs.readFileSync(path.join(root,file.split('?')[0]),'utf8'),ctx);};
  vm.runInContext(fs.readFileSync(path.join(root,'economy_worker.js'),'utf8'),ctx);
- assert.equal(ctx.mapGameIndustrialRegistry.materialIds.length,127);
+ assert.equal(ctx.mapGameIndustrialRegistry.materialIds.length,139);
  const s=city(['smallHouse','smallHouse','smallHouse','powerPlant','powerPlant',...buildingIds]),ref=M.clone(s);
  ctx.onmessage({data:{state:s,defs,target:epoch+3600000,online:true}});
  assert.equal(response.error,undefined);drain(ref,epoch+3600000,true);
@@ -148,7 +148,7 @@ test('baseline save reload retains unknown fields, inventories, pinned contracts
  original.economy.progression.era=6;original.economy.progression.completed=OldP.research.nodes.map(n=>n.id);
  const frozen=M.clone(original),s=M.normalize(original,epoch);M.bindContracts(s,defs);P.init(s,defs);
  assert.deepEqual(original,frozen);assert.deepEqual(s.custom,original.custom);assert.deepEqual(s.inventory.unknownFuture,original.inventory.unknownFuture);
- assert.deepEqual(s.economy.rules,original.economy.rules);assert.deepEqual(s.economy.progression,original.economy.progression);
+ assert.deepEqual(s.economy.rules,original.economy.rules);assert.deepEqual(s.economy.progression,{...original.economy.progression,manifestVersion:2});
  for(const [id,value] of Object.entries(original.economy.precision))assert.equal(s.economy.precision[id],value);
  for(const id of materialIds)assert.equal(s.economy.precision[id],'0');
  Old.advance(original,epoch+3600000,true,oldDefs);drain(s,epoch+3600000,true);

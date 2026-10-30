@@ -130,6 +130,18 @@ flowchart LR
   photoresist["Photoresist"]
   siliconWafers["Silicon Wafers"]
   servoDrives["Servo Drives"]
+  nickelOre["Nickel Ore"]
+  nickel["Nickel"]
+  manganeseOre["Manganese Ore"]
+  manganese["Manganese"]
+  graphiteOre["Graphite Ore"]
+  graphite["Graphite"]
+  bioResin["Bio-resin"]
+  precisionCastings["Precision Castings"]
+  machineFrames["Machine Frames"]
+  thermalComponents["Thermal Components"]
+  opticalGlass["Optical Glass"]
+  fiberOpticCable["Fiber-optic Cable"]
   ironOre -->|ironSmelter| iron
   iron -->|steelFoundry| steel
   carbon -->|steelFoundry| steel
@@ -363,4 +375,41 @@ flowchart LR
   batteries -->|electricTransportWorks| electricVehicles
   servoDrives -->|electricTransportWorks| electricVehicles
   stainlessSteel -->|electricTransportWorks| electricVehicles
+  nickelOre -->|nickelRefinery| nickel
+  carbon -->|nickelRefinery| nickel
+  manganeseOre -->|manganeseRefinery| manganese
+  industrialAcid -->|manganeseRefinery| manganese
+  graphiteOre -->|graphitePurifier| graphite
+  industrialAcid -->|graphitePurifier| graphite
+  naturalGas -->|bioResinWorks| bioResin
+  fertilizer -->|bioResinWorks| bioResin
+  industrialSolvent -->|bioResinWorks| bioResin
+  steel -->|precisionCastingWorks| precisionCastings
+  nickel -->|precisionCastingWorks| precisionCastings
+  manganese -->|precisionCastingWorks| precisionCastings
+  bioResin -->|precisionCastingWorks| precisionCastings
+  precisionCastings -->|machineFrameWorks| machineFrames
+  beams -->|machineFrameWorks| machineFrames
+  graphite -->|thermalComponentWorks| thermalComponents
+  copper -->|thermalComponentWorks| thermalComponents
+  aluminum -->|thermalComponentWorks| thermalComponents
+  glass -->|opticalGlassWorks| opticalGlass
+  silica -->|opticalGlassWorks| opticalGlass
+  thermalComponents -->|opticalGlassWorks| opticalGlass
+  opticalGlass -->|fiberOpticWorks| fiberOpticCable
+  plastic -->|fiberOpticWorks| fiberOpticCable
+  copper -->|fiberOpticWorks| fiberOpticCable
+  research_advancedMaterialsScience["Research: Advanced Materials Science"]
+  research_precisionManufacturing["Research: Precision Manufacturing"]
+  research_opticalEngineering["Research: Optical Engineering"]
+  research_telecommunications["Research: Telecommunications"]
+  nickel -->|6 per research purchase| research_advancedMaterialsScience
+  manganese -->|6 per research purchase| research_advancedMaterialsScience
+  graphite -->|12 per research purchase| research_precisionManufacturing
+  bioResin -->|6 per research purchase| research_precisionManufacturing
+  thermalComponents -->|6 per research purchase| research_opticalEngineering
+  precisionCastings -->|6 per research purchase| research_opticalEngineering
+  fiberOpticCable -->|20 per research purchase| research_telecommunications
+  machineFrames -->|8 per research purchase| research_telecommunications
+  thermalComponents -->|8 per research purchase| research_telecommunications
 ```

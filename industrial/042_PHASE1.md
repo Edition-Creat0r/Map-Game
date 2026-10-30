@@ -1,5 +1,8 @@
 # Map Game 0.4.2 — Industrial Expansion, Phase 1
 
+> Historical d62525e release record. Retained content is extended by [0.4.2A](042A_DESIGN.md); current totals/tests are in [0.4.2A validation](042A_VALIDATION.md).
+
+
 Base: `feature/modern-frontier` at `bc8945d3deeb99d1074d341c1eccd11ad59a6d82`. New branch: `feature/0.4.2-industrial-expansion`. The 0.4.1 security-review commit is not an ancestor. No Supabase, authentication, ownership, server code or migrations are changed. Singleplayer only. No merge into main.
 
 ## Audit and scope

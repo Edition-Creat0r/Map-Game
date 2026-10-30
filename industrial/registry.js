@@ -6,12 +6,12 @@
       ? require("./catalog-data.js")
       : root.mapGameIndustrialData;
   const SECTORS = {
-    mining: 15,
-    refining: 14,
-    construction: 13,
-    chemicals: 15,
-    electronics: 13,
-    machinery: 13,
+    mining: 18,
+    refining: 18,
+    construction: 14,
+    chemicals: 16,
+    electronics: 14,
+    machinery: 15,
     vehicles: 13,
     aerospace: 10,
     consumer: 12,
@@ -287,8 +287,8 @@
     for (const [s, count] of Object.entries(SECTORS))
       if (d.buildings.filter((b) => b.sector === s).length !== count)
         fail(`Wrong sector count ${s}`);
-    if (d.buildings.length !== 128)
-      fail("Exactly 128 industrial definitions are required for 0.4.2 Phase 1");
+    if (d.buildings.length !== 140)
+      fail("Exactly 140 industrial definitions are required for 0.4.2A");
     for (const id of ["money", "steel", "carbon", "iron", "concrete", "glass"])
       if (!materials.has(id)) fail(`Missing legacy resource ${id}`);
     return { valid: !errors.length, errors, topological };

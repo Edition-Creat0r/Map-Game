@@ -2,6 +2,12 @@
   "version": 1,
   "entries": [
     {
+      "id": "industrial042a",
+      "title": "Balanced Industrial Expansion · 0.4.2A",
+      "status": "Feature branch",
+      "detail": "Twelve additional materials and factories extend the retained six-material expansion. Four new research IDs plus the existing Advanced Metallurgy license form the new chains. Minigame Studio is requirements only; no deployment is announced."
+    },
+    {
       "id": "industrial042",
       "title": "Industrial Expansion · Phase 1",
       "status": "Feature branch",

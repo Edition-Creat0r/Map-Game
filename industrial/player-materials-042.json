@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "id": "industrial-042",
+  "baseManifestVersion": 1,
+  "materials": [
+    {
+      "id": "chromiteOre",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "advancedMetallurgy"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "chromiteMine"
+      }
+    },
+    {
+      "id": "chromium",
+      "unlockEra": 3,
+      "unlockRequirements": [
+        "advancedMetallurgy"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "chromiumRefinery"
+      }
+    },
+    {
+      "id": "stainlessSteel",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "advancedMetallurgy"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "stainlessSteelWorks"
+      }
+    },
+    {
+      "id": "photoresist",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "precisionFabrication"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "photoresistWorks"
+      }
+    },
+    {
+      "id": "siliconWafers",
+      "unlockEra": 4,
+      "unlockRequirements": [
+        "precisionFabrication"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "waferFab"
+      }
+    },
+    {
+      "id": "servoDrives",
+      "unlockEra": 5,
+      "unlockRequirements": [
+        "industrialAutomation"
+      ],
+      "visibility": "progression",
+      "acquisition": {
+        "building": "servoDriveWorks"
+      }
+    }
+  ]
+}

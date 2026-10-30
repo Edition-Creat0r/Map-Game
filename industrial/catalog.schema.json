@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://map-game.invalid/spec/industrial-catalog-v1",
-  "title": "0.4.2 Phase 1 industrial catalog",
+  "title": "0.4.2A additive industrial catalog",
   "type": "object",
   "required": [
     "version",

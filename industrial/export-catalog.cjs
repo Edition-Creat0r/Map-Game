@@ -1,7 +1,8 @@
 // Review artifacts derived from the exact runtime data. No economy state writes.
 const fs = require("node:fs"),
   path = require("node:path"),
-  R = require("./registry.js");
+  R = require("./registry.js"),
+  P = require("./progression.js");
 const { data } = R,
   quote = (v) => '"' + String(v).replaceAll('"', '""') + '"';
 const columns = [
@@ -51,6 +52,9 @@ fs.writeFileSync(
   [columns, ...rows].map((r) => r.map(quote).join(",")).join("\n") + "\n",
 );
 const edges = [];
+const researchConsumers = P.research.nodes.flatMap(n => Object.entries(n.cost)
+  .filter(([id]) => id !== 'money')
+  .map(([material, amount]) => ({material, research:n.id, amount, minimumEra:n.minimumEra || 1, once:true})));
 for (const b of data.buildings)
   for (const [from, inputRate] of Object.entries(b.recipes[0].inputsPerMinute))
     for (const [to, outputRate] of Object.entries(
@@ -73,6 +77,8 @@ fs.writeFileSync(
       version: 1,
       nodes: data.materials,
       edges,
+      researchNodes: P.research.nodes,
+      researchConsumers,
       topologicalOrder: R.topological,
     },
     null,
@@ -90,6 +96,9 @@ const graph = [
     .filter((m) => m.id !== "money")
     .map((m) => `  ${m.id}["${m.name}"]`),
   ...edges.map((e) => `  ${e.from} -->|${e.building}| ${e.to}`),
+  ...P.research.nodes.filter(n => researchConsumers.some(c => c.research === n.id))
+    .map(n => `  research_${n.id}["Research: ${n.name}"]`),
+  ...researchConsumers.map(c => `  ${c.material} -->|${c.amount} per research purchase| research_${c.research}`),
   "```",
   "",
 ];
@@ -110,7 +119,7 @@ for (const sector of Object.keys(R.SECTORS)) {
 }
 availability.push(
   "",
-  "These are static catalog classifications. Singleplayer progression licenses selected later-era factories through research and material/era gates, including the eight 0.4.2 factories. Defense entries remain definitions only. Logistics and upgrades have no effects.",
+  "These are static catalog classifications. Singleplayer progression licenses selected later-era factories through research and material/era gates, including the eight retained 0.4.2 and twelve additional 0.4.2A factories. Defense entries remain definitions only. Logistics and upgrades have no effects.",
   "",
 );
 for (const status of ["playable", "futureLocked", "definitionsOnly"]) {

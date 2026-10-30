@@ -903,6 +903,90 @@
       "unit": "game units",
       "storageClass": "precision",
       "aliases": []
+    },
+    {
+      "id": "nickelOre",
+      "name": "Nickel Ore",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "nickel",
+      "name": "Nickel",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "manganeseOre",
+      "name": "Manganese Ore",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "manganese",
+      "name": "Manganese",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "graphiteOre",
+      "name": "Graphite Ore",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "graphite",
+      "name": "Graphite",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "bioResin",
+      "name": "Bio-resin",
+      "storageClass": "general",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "precisionCastings",
+      "name": "Precision Castings",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "machineFrames",
+      "name": "Machine Frames",
+      "storageClass": "bulk",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "thermalComponents",
+      "name": "Thermal Components",
+      "storageClass": "precision",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "opticalGlass",
+      "name": "Optical Glass",
+      "storageClass": "precision",
+      "unit": "game units",
+      "aliases": []
+    },
+    {
+      "id": "fiberOpticCable",
+      "name": "Fiber-optic Cable",
+      "storageClass": "precision",
+      "unit": "game units",
+      "aliases": []
     }
   ],
   "edges": [
@@ -3235,9 +3319,805 @@
       "inputPerMinute": 1,
       "outputPerMinute": 1,
       "availability": "futureLocked"
+    },
+    {
+      "from": "nickelOre",
+      "to": "nickel",
+      "building": "nickelRefinery",
+      "recipe": "nickelRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "carbon",
+      "to": "nickel",
+      "building": "nickelRefinery",
+      "recipe": "nickelRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "manganeseOre",
+      "to": "manganese",
+      "building": "manganeseRefinery",
+      "recipe": "manganeseRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "industrialAcid",
+      "to": "manganese",
+      "building": "manganeseRefinery",
+      "recipe": "manganeseRefineryRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "graphiteOre",
+      "to": "graphite",
+      "building": "graphitePurifier",
+      "recipe": "graphitePurifierRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 12,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "industrialAcid",
+      "to": "graphite",
+      "building": "graphitePurifier",
+      "recipe": "graphitePurifierRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 6,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "naturalGas",
+      "to": "bioResin",
+      "building": "bioResinWorks",
+      "recipe": "bioResinWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 4,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "fertilizer",
+      "to": "bioResin",
+      "building": "bioResinWorks",
+      "recipe": "bioResinWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "industrialSolvent",
+      "to": "bioResin",
+      "building": "bioResinWorks",
+      "recipe": "bioResinWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "steel",
+      "to": "precisionCastings",
+      "building": "precisionCastingWorks",
+      "recipe": "precisionCastingWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 6,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "nickel",
+      "to": "precisionCastings",
+      "building": "precisionCastingWorks",
+      "recipe": "precisionCastingWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "manganese",
+      "to": "precisionCastings",
+      "building": "precisionCastingWorks",
+      "recipe": "precisionCastingWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "bioResin",
+      "to": "precisionCastings",
+      "building": "precisionCastingWorks",
+      "recipe": "precisionCastingWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "precisionCastings",
+      "to": "machineFrames",
+      "building": "machineFrameWorks",
+      "recipe": "machineFrameWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "beams",
+      "to": "machineFrames",
+      "building": "machineFrameWorks",
+      "recipe": "machineFrameWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "graphite",
+      "to": "thermalComponents",
+      "building": "thermalComponentWorks",
+      "recipe": "thermalComponentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "copper",
+      "to": "thermalComponents",
+      "building": "thermalComponentWorks",
+      "recipe": "thermalComponentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "aluminum",
+      "to": "thermalComponents",
+      "building": "thermalComponentWorks",
+      "recipe": "thermalComponentWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "glass",
+      "to": "opticalGlass",
+      "building": "opticalGlassWorks",
+      "recipe": "opticalGlassWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 6,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "silica",
+      "to": "opticalGlass",
+      "building": "opticalGlassWorks",
+      "recipe": "opticalGlassWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "thermalComponents",
+      "to": "opticalGlass",
+      "building": "opticalGlassWorks",
+      "recipe": "opticalGlassWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 1,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "opticalGlass",
+      "to": "fiberOpticCable",
+      "building": "fiberOpticWorks",
+      "recipe": "fiberOpticWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "plastic",
+      "to": "fiberOpticCable",
+      "building": "fiberOpticWorks",
+      "recipe": "fiberOpticWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 3,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    },
+    {
+      "from": "copper",
+      "to": "fiberOpticCable",
+      "building": "fiberOpticWorks",
+      "recipe": "fiberOpticWorksRecipe",
+      "recipeVersion": 1,
+      "inputPerMinute": 2,
+      "outputPerMinute": 3,
+      "availability": "futureLocked"
+    }
+  ],
+  "researchNodes": [
+    {
+      "id": "basicIndustry",
+      "name": "Basic Industry",
+      "prerequisites": [],
+      "cost": {
+        "money": 500
+      },
+      "effects": {
+        "materials": [
+          "industrialAcid",
+          "coolant",
+          "fertilizer",
+          "lubricant",
+          "paint",
+          "plastic",
+          "polymerFilm",
+          "industrialResin",
+          "rubber",
+          "industrialSolvent",
+          "adhesive",
+          "syntheticTextiles",
+          "compositeFiber",
+          "composites"
+        ],
+        "buildings": [
+          "polymerWorks",
+          "rubberWorks",
+          "acidWorks",
+          "fertilizerWorks",
+          "paintWorks",
+          "lubricantWorks",
+          "resinWorks",
+          "fiberWorks",
+          "filmWorks",
+          "coolantWorks",
+          "solventWorks",
+          "adhesiveWorks",
+          "textileWorks",
+          "compositeWorks"
+        ],
+        "eras": [
+          2
+        ]
+      }
+    },
+    {
+      "id": "miningRefining",
+      "name": "Mining and Refining",
+      "prerequisites": [
+        "basicIndustry"
+      ],
+      "cost": {
+        "money": 1000
+      },
+      "effects": {
+        "materials": [
+          "salt",
+          "copper",
+          "iron",
+          "bauxite",
+          "naturalGas",
+          "crudeOil",
+          "phosphate",
+          "sulfur",
+          "aluminum",
+          "industrialGas",
+          "fuel",
+          "silicon",
+          "lithiumOre",
+          "rareEarthOre",
+          "titaniumOre",
+          "lithium",
+          "rareEarths",
+          "titanium",
+          "alloySteel"
+        ],
+        "buildings": [
+          "ironMine",
+          "coalMine",
+          "silicaQuarry",
+          "limestoneQuarry",
+          "copperMine",
+          "bauxiteMine",
+          "oilWell",
+          "gasWell",
+          "sulfurMine",
+          "saltWorks",
+          "phosphateMine",
+          "lithiumMine",
+          "titaniumMine",
+          "rareEarthMine",
+          "ironSmelter",
+          "steelFoundry",
+          "cokeWorks",
+          "copperSmelter",
+          "aluminumRefinery",
+          "oilRefinery",
+          "gasProcessor",
+          "siliconRefinery",
+          "lithiumRefinery",
+          "titaniumRefinery",
+          "rareEarthRefinery",
+          "alloyFoundry"
+        ],
+        "eras": []
+      }
+    },
+    {
+      "id": "constructionTechnology",
+      "name": "Construction Technology",
+      "prerequisites": [
+        "basicIndustry"
+      ],
+      "cost": {
+        "money": 1000
+      },
+      "effects": {
+        "materials": [
+          "bricks",
+          "cement",
+          "wire",
+          "beams",
+          "ceramics",
+          "pipes",
+          "steelPlate",
+          "cable",
+          "insulation",
+          "constructionModules"
+        ],
+        "buildings": [
+          "cementKiln",
+          "concreteBatchPlant",
+          "glassWorks",
+          "brickKiln",
+          "beamMill",
+          "plateMill",
+          "wireMill",
+          "cableWorks",
+          "pipeMill",
+          "insulationWorks",
+          "ceramicsWorks",
+          "moduleWorks"
+        ],
+        "eras": []
+      }
+    },
+    {
+      "id": "electricity",
+      "name": "Electricity",
+      "prerequisites": [
+        "miningRefining"
+      ],
+      "cost": {
+        "money": 1500
+      },
+      "effects": {
+        "materials": [],
+        "buildings": [],
+        "eras": [
+          3
+        ]
+      }
+    },
+    {
+      "id": "urbanDevelopment",
+      "name": "Urban Development",
+      "prerequisites": [
+        "constructionTechnology"
+      ],
+      "cost": {
+        "money": 2000
+      },
+      "effects": {
+        "materials": [
+          "industrialConsumables",
+          "furniture",
+          "householdGoods",
+          "packaging",
+          "workwear",
+          "appliances",
+          "electricalGoods",
+          "medicalSupplies",
+          "consumerDevices",
+          "advancedAppliances",
+          "medicalDevices",
+          "luxuryGoods"
+        ],
+        "buildings": [
+          "householdGoodsWorks",
+          "applianceWorks",
+          "electricalGoodsWorks",
+          "medicalSupplyWorks",
+          "packagingWorks",
+          "workwearWorks",
+          "furnitureWorks",
+          "consumerDeviceWorks",
+          "medicalDeviceWorks",
+          "consumablesWorks",
+          "advancedApplianceWorks",
+          "luxuryGoodsWorks"
+        ],
+        "eras": [
+          6
+        ]
+      }
+    },
+    {
+      "id": "electronicsFoundations",
+      "name": "Electronics Foundations",
+      "prerequisites": [
+        "electricity"
+      ],
+      "cost": {
+        "money": 3000
+      },
+      "effects": {
+        "materials": [
+          "semiconductors",
+          "circuitBoards",
+          "batteries",
+          "displays",
+          "memory",
+          "powerElectronics",
+          "processors",
+          "sensors",
+          "communicationModules",
+          "controlSystems",
+          "precisionElectronics",
+          "quantumModules"
+        ],
+        "buildings": [
+          "semiconductorFab",
+          "boardWorks",
+          "processorFab",
+          "memoryFab",
+          "sensorWorks",
+          "displayWorks",
+          "batteryWorks",
+          "powerElectronicsWorks",
+          "controlWorks",
+          "communicationsWorks",
+          "precisionElectronicsWorks",
+          "quantumModuleWorks"
+        ],
+        "eras": [
+          5
+        ]
+      }
+    },
+    {
+      "id": "industrialMachinery",
+      "name": "Industrial Machinery",
+      "prerequisites": [
+        "miningRefining",
+        "electricity"
+      ],
+      "cost": {
+        "money": 3000
+      },
+      "effects": {
+        "materials": [
+          "bearings",
+          "gears",
+          "motors",
+          "pumps",
+          "tools",
+          "chassis",
+          "tires",
+          "industrialMachinery",
+          "turbines",
+          "engines",
+          "vehicleParts",
+          "freightTrucks",
+          "utilityVehicles",
+          "automationModules",
+          "heavyMachinery",
+          "precisionTools",
+          "buses",
+          "passengerCars",
+          "electricVehicles",
+          "railAssemblies",
+          "roboticArms",
+          "ships",
+          "autonomousVehicles"
+        ],
+        "buildings": [
+          "toolWorks",
+          "gearWorks",
+          "motorWorks",
+          "pumpWorks",
+          "bearingWorks",
+          "machineWorks",
+          "precisionToolWorks",
+          "turbineWorks",
+          "automationWorks",
+          "heavyMachineWorks",
+          "robotArmWorks",
+          "chassisWorks",
+          "engineWorks",
+          "tireWorks",
+          "vehiclePartsWorks",
+          "utilityVehicleWorks",
+          "truckWorks",
+          "busWorks",
+          "carWorks",
+          "electricVehicleWorks",
+          "railWorks",
+          "shipWorks",
+          "autonomousVehicleWorks"
+        ],
+        "eras": [
+          4
+        ]
+      }
+    },
+    {
+      "id": "advancedMetallurgy",
+      "name": "Advanced Metallurgy",
+      "minimumEra": 3,
+      "prerequisites": [
+        "miningRefining",
+        "constructionTechnology"
+      ],
+      "cost": {
+        "money": 8000
+      },
+      "effects": {
+        "materials": [
+          "chromiteOre",
+          "chromium",
+          "stainlessSteel"
+        ],
+        "buildings": [
+          "chromiteMine",
+          "chromiumRefinery",
+          "stainlessSteelWorks",
+          "stainlessModuleWorks"
+        ],
+        "eras": []
+      }
+    },
+    {
+      "id": "precisionFabrication",
+      "name": "Precision Fabrication",
+      "minimumEra": 4,
+      "prerequisites": [
+        "advancedMetallurgy",
+        "electronicsFoundations"
+      ],
+      "cost": {
+        "money": 12000
+      },
+      "effects": {
+        "materials": [
+          "photoresist",
+          "siliconWafers"
+        ],
+        "buildings": [
+          "photoresistWorks",
+          "waferFab"
+        ],
+        "eras": []
+      }
+    },
+    {
+      "id": "industrialAutomation",
+      "name": "Industrial Automation",
+      "minimumEra": 5,
+      "prerequisites": [
+        "precisionFabrication",
+        "industrialMachinery"
+      ],
+      "cost": {
+        "money": 18000
+      },
+      "effects": {
+        "materials": [
+          "servoDrives"
+        ],
+        "buildings": [
+          "servoDriveWorks",
+          "electricTransportWorks"
+        ],
+        "eras": []
+      }
+    },
+    {
+      "id": "advancedMaterialsScience",
+      "name": "Advanced Materials Science",
+      "minimumEra": 3,
+      "prerequisites": [
+        "advancedMetallurgy",
+        "basicIndustry"
+      ],
+      "cost": {
+        "money": 12000,
+        "nickel": 6,
+        "manganese": 6
+      },
+      "effects": {
+        "materials": [
+          "graphiteOre",
+          "graphite",
+          "bioResin"
+        ],
+        "buildings": [
+          "graphiteMine",
+          "graphitePurifier",
+          "bioResinWorks"
+        ],
+        "eras": []
+      }
+    },
+    {
+      "id": "precisionManufacturing",
+      "name": "Precision Manufacturing",
+      "minimumEra": 4,
+      "prerequisites": [
+        "advancedMaterialsScience",
+        "industrialMachinery"
+      ],
+      "cost": {
+        "money": 18000,
+        "graphite": 12,
+        "bioResin": 6
+      },
+      "effects": {
+        "materials": [
+          "precisionCastings",
+          "machineFrames",
+          "thermalComponents"
+        ],
+        "buildings": [
+          "precisionCastingWorks",
+          "machineFrameWorks",
+          "thermalComponentWorks"
+        ],
+        "eras": []
+      }
+    },
+    {
+      "id": "opticalEngineering",
+      "name": "Optical Engineering",
+      "minimumEra": 4,
+      "prerequisites": [
+        "precisionManufacturing",
+        "electronicsFoundations"
+      ],
+      "cost": {
+        "money": 18000,
+        "thermalComponents": 6,
+        "precisionCastings": 6
+      },
+      "effects": {
+        "materials": [
+          "opticalGlass",
+          "fiberOpticCable"
+        ],
+        "buildings": [
+          "opticalGlassWorks",
+          "fiberOpticWorks"
+        ],
+        "eras": []
+      }
+    },
+    {
+      "id": "telecommunications",
+      "name": "Telecommunications",
+      "minimumEra": 5,
+      "prerequisites": [
+        "opticalEngineering",
+        "urbanDevelopment"
+      ],
+      "cost": {
+        "money": 30000,
+        "fiberOpticCable": 20,
+        "machineFrames": 8,
+        "thermalComponents": 8
+      },
+      "purpose": "Material-funded capstone research/recognition; no implicit output boost or networking simulation.",
+      "effects": {
+        "materials": [],
+        "buildings": [],
+        "eras": []
+      }
+    }
+  ],
+  "researchConsumers": [
+    {
+      "material": "nickel",
+      "research": "advancedMaterialsScience",
+      "amount": 6,
+      "minimumEra": 3,
+      "once": true
+    },
+    {
+      "material": "manganese",
+      "research": "advancedMaterialsScience",
+      "amount": 6,
+      "minimumEra": 3,
+      "once": true
+    },
+    {
+      "material": "graphite",
+      "research": "precisionManufacturing",
+      "amount": 12,
+      "minimumEra": 4,
+      "once": true
+    },
+    {
+      "material": "bioResin",
+      "research": "precisionManufacturing",
+      "amount": 6,
+      "minimumEra": 4,
+      "once": true
+    },
+    {
+      "material": "thermalComponents",
+      "research": "opticalEngineering",
+      "amount": 6,
+      "minimumEra": 4,
+      "once": true
+    },
+    {
+      "material": "precisionCastings",
+      "research": "opticalEngineering",
+      "amount": 6,
+      "minimumEra": 4,
+      "once": true
+    },
+    {
+      "material": "fiberOpticCable",
+      "research": "telecommunications",
+      "amount": 20,
+      "minimumEra": 5,
+      "once": true
+    },
+    {
+      "material": "machineFrames",
+      "research": "telecommunications",
+      "amount": 8,
+      "minimumEra": 5,
+      "once": true
+    },
+    {
+      "material": "thermalComponents",
+      "research": "telecommunications",
+      "amount": 8,
+      "minimumEra": 5,
+      "once": true
     }
   ],
   "topologicalOrder": [
+    "graphiteOre",
+    "manganeseOre",
+    "nickelOre",
     "chromiteOre",
     "rareEarthOre",
     "rareEarths",
@@ -3252,10 +4132,13 @@
     "coolant",
     "fertilizer",
     "industrialAcid",
+    "graphite",
+    "manganese",
     "chromium",
     "crudeOil",
     "fuel",
     "industrialSolvent",
+    "bioResin",
     "industrialResin",
     "photoresist",
     "adhesive",
@@ -3285,6 +4168,7 @@
     "fieldSupplies",
     "insulation",
     "carbon",
+    "nickel",
     "compositeFiber",
     "composites",
     "protectiveEquipment",
@@ -3313,12 +4197,16 @@
     "precisionElectronics",
     "quantumModules",
     "aluminum",
+    "thermalComponents",
+    "opticalGlass",
+    "fiberOpticCable",
     "satelliteParts",
     "satellites",
     "ceramics",
     "medicalDevices",
     "iron",
     "steel",
+    "precisionCastings",
     "stainlessSteel",
     "furniture",
     "householdGoods",
@@ -3337,6 +4225,7 @@
     "ships",
     "navalEquipment",
     "beams",
+    "machineFrames",
     "railAssemblies",
     "chassis",
     "buses",

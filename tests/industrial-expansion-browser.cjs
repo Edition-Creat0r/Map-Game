@@ -22,13 +22,13 @@ const research=['advancedMetallurgy','precisionFabrication','industrialAutomatio
   });
   await page.reload();await page.waitForFunction(()=>document.querySelector('#mgStartSingle')?.disabled===false);await page.click('#mgStartSingle');await page.waitForFunction(()=>mapGameEconomy.getStatus().enabled);
   await page.evaluate(async()=>{mapGameStrategicWorld.close();await mapGameRuntime.enterTerritory({x:190,y:27,id:'T_190_27'})});await page.waitForFunction(()=>document.querySelector('#loadingScreen').hidden);
-  assert.equal(await page.evaluate(()=>mapGameIndustrialRegistry.materialIds.length),127);
+  assert.equal(await page.evaluate(()=>mapGameIndustrialRegistry.materialIds.length),139);
   assert.equal(await page.evaluate(()=>mapGameProgression.manifest.materials.filter(m=>mapGameProgression.unlocked(mapGameEconomy.snapshot(),m.id)).length),100);
   await page.click('[data-c1="research"]');await page.screenshot({path:path.join(out,'research-before.png')});
   for(const id of research){await page.locator(`[data-research="${id}"]`).scrollIntoViewIfNeeded();await page.click(`[data-research="${id}"]`);await page.waitForFunction(id=>mapGameEconomy.snapshot().economy.progression.completed.includes(id),id);}
-  assert.equal(await page.evaluate(()=>mapGameProgression.manifest.materials.filter(m=>mapGameProgression.unlocked(mapGameEconomy.snapshot(),m.id)).length),106);
+  assert.equal(await page.evaluate(()=>mapGameProgression.manifest.materials.filter(m=>mapGameProgression.unlocked(mapGameEconomy.snapshot(),m.id)).length),110);
   await page.click('#mgProgressionPanel .mg-resource-discovery summary');
-  assert.match(await page.locator('#mgProgressionPanel').innerText(),/106/);
+  assert.match(await page.locator('#mgProgressionPanel').innerText(),/118/);
   await page.screenshot({path:path.join(out,'research-expanded.png')});await page.click('[data-c1-close]');
   const sites=[];
   for(const id of ids){
@@ -41,7 +41,7 @@ const research=['advancedMetallurgy','precisionFabrication','industrialAutomatio
    const click=await page.evaluate(p=>{const v=mapGameBasicWorld.getState(),r=document.querySelector('#basicCanvas').getBoundingClientRect();return{x:r.x+r.width/2+(p.x-v.cameraX)*v.zoom,y:r.y+r.height/2+(p.z-v.cameraZ)*v.zoom}},{...point});
    await page.mouse.click(click.x,click.y);await page.waitForFunction(id=>mapGameEconomy.listPlacedBuildings().some(b=>b.type===id),id);
   }
-  report.checks.push('Legacy seven-license save retains its 100 unlocked materials; three paid research purchases unlock six more; all eight new factories purchased through canvas placement');
+  report.checks.push('Legacy seven-license save retains its 100 unlocked materials; three retained research purchases unlock six retained materials and four new nickel/manganese materials; all eight new factories purchased through canvas placement');
   await page.screenshot({path:path.join(out,'expansion-factories.png')});
   // An explicit ten-minute offline fixture exercises persisted new recipes.
   await page.evaluate(()=>{const s=JSON.parse(localStorage.getItem(mapGameEconomy.SAVE_KEY));s.economy.lastTick=Date.now()-600000;s.lastEconomyTick=s.economy.lastTick;localStorage.setItem(mapGameEconomy.SAVE_KEY,JSON.stringify(s));});
@@ -55,7 +55,7 @@ const research=['advancedMetallurgy','precisionFabrication','industrialAutomatio
   const frames=page.evaluate(()=>new Promise(resolve=>{const v=[];let last;function frame(t){if(last)v.push(t-last);last=t;if(v.length<120)requestAnimationFrame(frame);else resolve(v)}requestAnimationFrame(frame)}));
   await page.mouse.move(750,600);await page.mouse.down();await page.mouse.move(870,660,{steps:8});await page.mouse.up();await page.mouse.wheel(0,-100);await page.mouse.wheel(0,100);
   const intervals=(await frames).sort((a,b)=>a-b);report.frames={samples:intervals.length,p50:intervals[Math.floor(intervals.length*.5)],p95:intervals[Math.floor(intervals.length*.95)],fps:1000/(intervals.reduce((a,b)=>a+b,0)/intervals.length)};
-  report.longTasks=await page.evaluate(()=>expansionLongTasks);report.result={newFactories:8,materials:106,research:10,produced:Object.fromEntries(['chromium','stainlessSteel','photoresist','siliconWafers','servoDrives','electricVehicles'].map(id=>[id,saved.inventory[id]]))};
+  report.longTasks=await page.evaluate(()=>expansionLongTasks);report.result={newFactories:8,materials:110,research:10,produced:Object.fromEntries(['chromium','stainlessSteel','photoresist','siliconWafers','servoDrives','electricVehicles'].map(id=>[id,saved.inventory[id]]))};
   assert.deepEqual(report.errors,[]);assert.deepEqual(report.http,[]);assert.deepEqual(report.failed,[]);
   fs.writeFileSync(path.join(out,'results.json'),JSON.stringify(report,null,2));
  }catch(error){report.failure=String(error);fs.writeFileSync(path.join(out,'results.json'),JSON.stringify(report,null,2));throw error;}

@@ -1,8 +1,10 @@
-// Deterministic browser mirrors; the two JSON files are frozen release sources.
+// Deterministic mirrors: immutable base manifest plus ordered additive extensions.
 const fs = require("node:fs"),
   path = require("node:path");
 for (const [file, global] of [
   ["player-materials", "mapGamePlayerMaterials"],
+  ["player-materials-042", "mapGamePlayerMaterials042"],
+  ["player-materials-042a", "mapGamePlayerMaterials042A"],
   ["research", "mapGameResearchData"],
 ]) {
   const data = JSON.parse(

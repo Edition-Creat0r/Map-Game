@@ -78,8 +78,9 @@
     panel.innerHTML = `<header><h2>Research · ${P.eras[p.era - 1]}</h2><button data-c1-close>Close ×</button></header><p>${esc(P.nextGoal(s))}</p><p>Invest in ideas that shape your city. Grow your population and industry to reach the next era.</p><div class="mg-c1-tree" aria-label="Technology prerequisites">${P.research.nodes
       .map((n) => {
         const reason = P.researchReason(s, n.id),
+          effects = P.effects(n.id),
           can = !reason && s.enabled && E.canAfford(n.cost);
-        return `<article data-node="${n.id}" data-completed="${p.completed.includes(n.id)}"><h3>${esc(n.name)}</h3><p>${n.prerequisites.length ? "← " + n.prerequisites.map((id) => esc(P.research.nodes.find((x) => x.id === id).name)).join(" + ") : "Start here"}</p><p>$${money(n.cost.money)} · ${n.effects.materials.length} materials · ${n.effects.buildings.length} factory licenses, when their materials and era are reached${n.effects.eras.length ? " · era milestone: " + n.effects.eras.map((e) => P.eras[e - 1]).join(", ") : ""}</p><button data-research="${n.id}" ${can ? "" : "disabled"}>${esc(reason || (!s.enabled ? "Singleplayer only" : can ? "Research" : "Insufficient money"))}</button></article>`;
+        return `<article data-node="${n.id}" data-completed="${p.completed.includes(n.id)}"><h3>${esc(n.name)}</h3><p>${n.prerequisites.length ? "← " + n.prerequisites.map((id) => esc(P.research.nodes.find((x) => x.id === id).name)).join(" + ") : "Start here"}</p><p>${esc(P.costLabel(n.cost))} · ${effects.materials.length} materials · ${effects.buildings.length} factory licenses, when their materials and era are reached${effects.eras.length ? " · era milestone: " + effects.eras.map((e) => P.eras[e - 1]).join(", ") : ""}</p>${n.purpose ? `<p>${esc(n.purpose)}</p>` : ''}<button data-research="${n.id}" ${can ? "" : "disabled"}>${esc(reason || (!s.enabled ? "Singleplayer only" : can ? "Research" : "Insufficient research resources"))}</button></article>`;
       })
       .join(
         "",

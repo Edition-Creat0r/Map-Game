@@ -1,5 +1,8 @@
 # 0.4.2 Industrial Expansion — Phase 1 validation
 
+> Historical d62525e release record. Retained content is extended by [0.4.2A](042A_DESIGN.md); current totals/tests are in [0.4.2A validation](042A_VALIDATION.md).
+
+
 Base: `feature/modern-frontier` at
 `bc8945d3deeb99d1074d341c1eccd11ad59a6d82`.
 Feature: `feature/0.4.2-industrial-expansion`.
