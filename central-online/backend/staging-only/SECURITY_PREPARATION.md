@@ -151,7 +151,7 @@ export or Supabase credential was available or used. No tests were skipped.
 | Original synthetic vulnerability reproductions | 2 passed |
 | New baseline contract/rollback checks | 17 passed |
 | Hardened session/ownership/security/economy integration | 20 passed |
-| PowerShell scanner under official SHA256-verified PowerShell 7.4.6 on Linux | 10 passed |
+| PowerShell scanner under official SHA256-verified PowerShell 7.4.6 on Linux | 18 passed (including conditional-CREATE compatibility regressions) |
 | Existing Checkpoint 1 SQL/economy suite | 17 passed |
 | Existing deterministic game/Singleplayer suite | 101 passed |
 | Existing naming regression suite (isolated, not deployed) | 31 passed |
@@ -185,3 +185,42 @@ Only `.gitignore`, this staging-only documentation, the opt-in draft, local
 scanner and synthetic-test files change. Economy/naming migrations 001–005,
 Edge/client/auth/ownership runtime, Singleplayer and saved data are unchanged.
 Nothing here modifies a hosted database, enables player spending or merges main.
+
+
+## Scanner compatibility follow-up to 8b7cc1d
+
+The table recognition expressions previously accepted `CREATE TABLE public.name`
+but omitted `IF NOT EXISTS`. Lowercase quoted identifiers were already safely
+normalized by the lexer; the missing optional clause caused all five reported
+tables to be missed. The same prefix was used for PK/FK/NOT NULL evidence, so the
+bug also produced secondary constraint warnings. No private export was accessed.
+
+The scanner now recognizes both ordinary and `CREATE TABLE IF NOT EXISTS`
+statements for exact lowercase public-table identifiers, including quoted ones.
+PK/FK/column evidence uses the corrected syntax too. Conditional creation is
+recognized as export evidence only: it does not prove an already-existing target
+table would match the definition. Duplicate definitions retain review findings.
+
+NOT NULL evidence is now separated at table-column depth. Parentheses/commas in
+types and defaults such as `timestamp(6)` and `DEFAULT now()` no longer hide an
+explicit modifier. Nested CHECK/default expressions and literal text cannot count
+as NOT NULL. Complex defaults remain conservatively unresolved, and duplicate
+columns or later DROP NOT NULL retain warnings. Primary-key-implied NOT NULL still
+requires private catalog verification rather than silently dismissing a warning.
+
+Eighteen scanner tests passed under PowerShell 7.4.6, with no skips. The eight new
+cases cover all five supplied headers at lines 212/228/240/252/267 (synthetic
+columns, not copied private definitions), PK/FK recognition, defaults/type
+parentheses, genuine missing NOT NULL, quoted case/lookalikes, duplicate/ambiguous
+DDL, expression false positives, unqualified names and ALTER SET/DROP behavior.
+Three targeted regressions failed against the old scanner before the fix.
+The 39 isolated security cases and 101 deterministic game tests were rerun and
+passed; the SQL draft, migrations and runtime are unchanged by this follow-up.
+Logs are local-only at `/tmp/mapgame-scanner-compat-{before,after,security,game}.log`.
+
+Rerun the unchanged Windows scanner command against your private local file after
+updating this branch. Exit 2 is still expected and means REVIEW REQUIRED. Correct
+recognition does not clear owners/roles, constraint validity, alternative access
+paths, real schema completeness or genuine two-account staging gates. Actual
+Windows execution and review of your real column definitions remain NOT RUN here.
+No export upload is needed or requested.

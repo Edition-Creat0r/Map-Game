@@ -75,3 +75,60 @@ test('input inside a Git checkout is refused and original file remains untouched
  assert.equal(r.status,1);assert.equal(fs.readFileSync(file,'utf8'),baseline);assert.equal(fs.existsSync(path.join(dir,'reports')),false);
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+// Only the supplied CREATE headers/line numbers are copied from the user's
+// report. All column definitions here are hand-authored synthetic fixtures.
+const exactCreateHeaders=[['capitals',212,'world_id text NOT NULL, owner_id uuid NOT NULL, territory_id text NOT NULL, x double precision NOT NULL, z double precision NOT NULL, PRIMARY KEY(world_id,owner_id)'],['territory_claims',228,'world_id text NOT NULL, territory_id text NOT NULL, owner_id uuid NOT NULL, PRIMARY KEY(world_id,territory_id)'],['world_members',240,'world_id text NOT NULL, user_id uuid NOT NULL, PRIMARY KEY(world_id,user_id)'],['world_sessions',252,'world_id text NOT NULL, session_id uuid NOT NULL, user_id uuid NOT NULL, created_at timestamp(6) with time zone DEFAULT now() NOT NULL, last_seen timestamp with time zone DEFAULT now() NOT NULL, conflicted boolean DEFAULT false NOT NULL, PRIMARY KEY(session_id)'],['worlds',267,'id text NOT NULL, PRIMARY KEY(id)']];
+function suppliedHeaders(){const lines=Array(270).fill('');for(const [table,line,columns] of exactCreateHeaders){lines[line-1]=`CREATE TABLE IF NOT EXISTS "public"."${table}" (`;lines[line]=columns;lines[line+1]=');';}return lines.join('\n');}
+test('recognizes all five exact quoted IF NOT EXISTS CREATE headers and their constraints',opts,()=>{
+ const r=scan(suppliedHeaders());assert.equal(r.status,2);
+ for(const [table] of exactCreateHeaders){assert.equal(r.data.findings.some(x=>x.code==='TABLE_'+table),false);assert.equal(r.data.findings.some(x=>x.code==='PK_'+table),false);assert.equal(r.data.findings.some(x=>x.code.startsWith('NOT_NULL_'+table+'_')),false);}
+ assert.equal(r.data.deploymentApproved,false);assert.ok(r.data.findings.some(x=>x.code==='CONSTRAINTS_PENDING'));
+});
+test('NOT NULL distinguishes real column modifiers from nested expressions and string contents',opts,()=>{
+ const r=scan(`CREATE TABLE IF NOT EXISTS "public"."world_sessions" (
+ world_id text DEFAULT concat('a', 'b') NOT NULL,
+ session_id uuid NOT NULL,
+ user_id uuid CHECK(user_id IS NOT NULL),
+ created_at timestamp(6) with time zone DEFAULT now() NOT NULL,
+ last_seen timestamp with time zone DEFAULT coalesce(now(), now()) NOT NULL,
+ conflicted boolean DEFAULT false NOT NULL,
+ label text DEFAULT 'NOT NULL'
+);`);
+ assert.equal(r.status,2);
+ for(const col of ['world_id','session_id','created_at','last_seen','conflicted'])assert.equal(r.data.findings.some(x=>x.code==='NOT_NULL_world_sessions_'+col),false);
+ assert.ok(r.data.findings.some(x=>x.code==='NOT_NULL_world_sessions_user_id'));
+});
+test('conditional table CREATE recognizes inline foreign keys without clearing global review gates',opts,()=>{
+ const r=scan('CREATE TABLE IF NOT EXISTS "public"."world_members" (world_id text NOT NULL,user_id uuid NOT NULL,FOREIGN KEY(world_id) REFERENCES "public"."worlds"(id),FOREIGN KEY(user_id) REFERENCES "auth"."users"(id));');
+ assert.equal(r.status,2);for(const col of ['world_id','user_id'])assert.equal(r.data.findings.some(x=>x.code==='FK_world_members_'+col),false);
+ assert.ok(r.data.findings.some(x=>x.code==='OWNERS_ACLS_PENDING'));
+});
+test('quoted identifier case and lookalikes cannot masquerade as the five public tables',opts,()=>{
+ const r=scan('CREATE TABLE IF NOT EXISTS "PUBLIC"."world_sessions" (session_id uuid NOT NULL); CREATE TABLE IF NOT EXISTS "publіc"."worlds" (id text NOT NULL);');
+ assert.equal(r.status,2);assert.ok(r.data.findings.some(x=>x.code==='TABLE_world_sessions'));assert.ok(r.data.findings.some(x=>x.code==='TABLE_worlds'));
+});
+test('duplicate conditional definitions and later constraint drops retain fail-closed warnings',opts,()=>{
+ const r=scan('CREATE TABLE IF NOT EXISTS "public"."world_sessions" (user_id uuid NOT NULL); CREATE TABLE IF NOT EXISTS "public"."world_sessions" (user_id uuid NOT NULL); ALTER TABLE ONLY "public"."world_sessions" ALTER COLUMN "user_id" DROP NOT NULL;');
+ assert.equal(r.status,2);assert.ok(r.data.findings.some(x=>x.code==='TABLE_world_sessions'));assert.ok(r.data.findings.some(x=>x.code==='NOT_NULL_world_sessions_user_id'));
+});
+
+test('IS NOT NULL defaults and CHECK expressions cannot supply an explicit column constraint',opts,()=>{
+ const r=scan(`CREATE TABLE IF NOT EXISTS "public"."world_sessions" (
+ world_id text DEFAULT 'NOT NULL',
+ session_id uuid CHECK (session_id IS NOT NULL),
+ user_id uuid,
+ created_at timestamp with time zone,
+ last_seen timestamp with time zone,
+ conflicted boolean DEFAULT current_user IS NOT NULL
+);`);
+ assert.equal(r.status,2);for(const col of ['world_id','session_id','user_id','created_at','last_seen','conflicted'])assert.ok(r.data.findings.some(x=>x.code==='NOT_NULL_world_sessions_'+col));
+});
+test('unqualified conditional names and duplicate column definitions remain unresolved',opts,()=>{
+ const r=scan('SET search_path=public; CREATE TABLE IF NOT EXISTS worlds(id text NOT NULL); CREATE TABLE IF NOT EXISTS "public"."world_sessions" (user_id uuid NOT NULL,user_id uuid NOT NULL);');
+ assert.equal(r.status,2);assert.ok(r.data.findings.some(x=>x.code==='TABLE_worlds'));assert.ok(r.data.findings.some(x=>x.code==='NOT_NULL_world_sessions_user_id'));
+});
+test('explicit quoted ALTER SET NOT NULL still supplies evidence after conditional CREATE',opts,()=>{
+ const r=scan('CREATE TABLE IF NOT EXISTS "public"."world_sessions" (user_id uuid); ALTER TABLE ONLY "public"."world_sessions" ALTER COLUMN "user_id" SET NOT NULL;');
+ assert.equal(r.status,2);assert.equal(r.data.findings.some(x=>x.code==='NOT_NULL_world_sessions_user_id'),false);assert.ok(r.data.findings.some(x=>x.code==='CONSTRAINTS_PENDING'));
+});

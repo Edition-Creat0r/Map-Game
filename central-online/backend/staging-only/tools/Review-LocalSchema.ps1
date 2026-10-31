@@ -67,6 +67,37 @@ public sealed class MapGameSqlStatement {
  public MapGameSqlStatement(string code,string body,int line){Code=code;Body=body;Line=line;}
 }
 public static class MapGameSqlReviewLexer {
+ // Only normalized outer CREATE code enters here: strings/comments/bodies
+ // have already been masked. Split columns on commas at table depth only.
+ public static bool HasExplicitNotNull(string code,string column){
+  int open=code.IndexOf('('),depth=0,count=0;bool notNull=false,closed=false;
+  if(open<0)return false;
+  var part=new StringBuilder();var parts=new List<string>();
+  for(int i=open+1;i<code.Length;i++){
+   char c=code[i];
+   if(c=='('){if(depth==0)part.Append(" __nested__ ");depth++;}
+   else if(c==')'){if(depth>0)depth--;else{parts.Add(part.ToString());closed=true;break;}}
+   else if(c==','&&depth==0){parts.Add(part.ToString());part.Clear();}
+   else if(depth==0)part.Append(c);
+  }
+  if(!closed||depth!=0)return false;
+  foreach(string field in parts){
+   if(!Regex.IsMatch(field,@"^\s*"+Regex.Escape(column)+@"\s+"))continue;
+   count++;
+   var modifier=Regex.Match(field,@"\bnot\s+null\b");
+   if(!modifier.Success)continue;
+   string before=field.Substring(0,modifier.Index);
+   var def=Regex.Match(before,@"\bdefault\b");
+   if(!def.Success){notNull=true;continue;}
+   // After DEFAULT, accept only an unambiguous single literal, constant or
+   // function call (with optional simple cast). Complex expressions stay REVIEW.
+   // In particular DEFAULT (... IS NOT NULL), IS NOT NULL and CASE expressions
+   // must not masquerade as an attnotnull modifier.
+   string expression=before.Substring(def.Index+def.Length).Trim();
+   if(Regex.IsMatch(expression,@"^(?:__literal__|true|false|null|current_timestamp|current_date|current_user|[-+]?\d+(?:\.\d+)?|(?:[a-z_][a-z0-9_]*\s*\.\s*)?[a-z_][a-z0-9_]*\s+__nested__)(?:\s*::\s*[a-z_][a-z0-9_]*(?:\s+__nested__)?)?\s*$"))notNull=true;
+  }
+  return count==1&&notNull;
+ }
  public static MapGameSqlStatement[] Read(string s){
   var result=new List<MapGameSqlStatement>();var code=new StringBuilder();var body=new StringBuilder();
   int i=0,line=1,start=1;bool has=false;
@@ -124,7 +155,7 @@ public static class MapGameSqlReviewLexer {
     }
     $tables = @('worlds','world_members','world_sessions','territory_claims','capitals')
     foreach ($table in $tables) {
-        $defs = @($statements | Where-Object Code -Match "^create\s+table\s+(?:only\s+)?public\.$table\s*\(")
+        $defs = @($statements | Where-Object Code -Match "^create\s+table\s+(?:if\s+not\s+exists\s+)?public\s*\.\s*$table\s*\(")
         if ($defs.Count -ne 1) { Add-Finding "TABLE_$table" 'BLOCKER' 0 'Expected exactly one table definition; inspect complete export privately.' }
         $rls = @($statements | Where-Object Code -Match "^alter\s+table\s+(?:only\s+)?public\.$table\s+enable\s+row\s+level\s+security$")
         if ($rls.Count -ne 1) { Add-Finding "RLS_$table" 'BLOCKER' 0 'Expected explicit RLS enable statement; static absence is not proof of live state.' }
@@ -135,7 +166,7 @@ public static class MapGameSqlReviewLexer {
     )
     foreach ($r in $requirements) {
         $table=$r[0]; $columns=($r[1].Split(',') | ForEach-Object { [regex]::Escape($_) }) -join '\s*,\s*'
-        $pk = @($statements | Where-Object { $_.Code -match "^(?:create\s+table|alter\s+table)\s+(?:only\s+)?public\.$table\b" -and $_.Code -match "primary\s+key\s*\(\s*$columns\s*\)" })
+        $pk = @($statements | Where-Object { $_.Code -match "^(?:create\s+table\s+(?:if\s+not\s+exists\s+)?|alter\s+table\s+(?:only\s+)?)(?:public\s*\.\s*$table)\b" -and $_.Code -match "primary\s+key\s*\(\s*$columns\s*\)" })
         if (-not $pk.Count) { Add-Finding "PK_$table" 'BLOCKER' 0 'Required primary key was not recognized. Inline/unusual syntax needs manual review; no constraints are repaired.' }
     }
     $notNull = @{
@@ -145,11 +176,13 @@ public static class MapGameSqlReviewLexer {
         capitals=@('world_id','territory_id','owner_id','x','z')
     }
     foreach ($table in $tables) {
-        $defs = @($statements | Where-Object Code -Match "^create\s+table\s+(?:only\s+)?public\.$table\s*\(")
+        $defs = @($statements | Where-Object Code -Match "^create\s+table\s+(?:if\s+not\s+exists\s+)?public\s*\.\s*$table\s*\(")
         foreach ($column in $notNull[$table]) {
-            $inline = @($defs | Where-Object Code -Match "[(,]\s*$column\s+[^,()]*\bnot\s+null\b")
-            $alter = @($statements | Where-Object Code -Match "^alter\s+table\s+(?:only\s+)?public\.$table\s+alter\s+column\s+$column\s+set\s+not\s+null$")
-            if (-not $inline.Count -and -not $alter.Count) { Add-Finding "NOT_NULL_${table}_$column" 'REVIEW' 0 'Explicit NOT NULL was not recognized. A primary key may supply it; confirm catalog attnotnull privately.' }
+            $inline = @()
+            if ($defs.Count -eq 1 -and [MapGameSqlReviewLexer]::HasExplicitNotNull($defs[0].Code,$column)) { $inline = @($defs[0]) }
+            $alter = @($statements | Where-Object Code -Match "^alter\s+table\s+(?:only\s+)?public\s*\.\s*$table\s+alter\s+column\s+$column\s+set\s+not\s+null$")
+            $drop = @($statements | Where-Object Code -Match "^alter\s+table\s+(?:only\s+)?public\s*\.\s*$table\b.*\balter\s+(?:column\s+)?$column\s+drop\s+not\s+null\b")
+            if ($defs.Count -ne 1 -or $drop.Count -or (-not $inline.Count -and -not $alter.Count)) { Add-Finding "NOT_NULL_${table}_$column" 'REVIEW' 0 'Explicit NOT NULL is absent, ambiguous or later dropped in recognized syntax. A primary key may supply it; confirm catalog attnotnull privately.' }
         }
     }
     $foreignKeys = @(
@@ -161,7 +194,7 @@ public static class MapGameSqlReviewLexer {
     )
     foreach ($r in $foreignKeys) {
         $table=$r[0]; $cols=$r[1].Replace(',', '\s*,\s*'); $target=[regex]::Escape($r[2]); $refs=$r[3].Replace(',', '\s*,\s*')
-        $matches = @($statements | Where-Object { $_.Code -match "^(?:create\s+table|alter\s+table)\s+(?:only\s+)?public\.$table\b" -and $_.Code -match "foreign\s+key\s*\(\s*$cols\s*\)\s+references\s+$target\s*\(\s*$refs\s*\)" -and $_.Code -notmatch '\bnot\s+valid\b|\bdeferrable\b' })
+        $matches = @($statements | Where-Object { $_.Code -match "^(?:create\s+table\s+(?:if\s+not\s+exists\s+)?|alter\s+table\s+(?:only\s+)?)(?:public\s*\.\s*$table)\b" -and $_.Code -match "foreign\s+key\s*\(\s*$cols\s*\)\s+references\s+$target\s*\(\s*$refs\s*\)" -and $_.Code -notmatch '\bnot\s+valid\b|\bdeferrable\b' })
         if (-not $matches.Count) { Add-Finding "FK_${table}_$($r[1].Replace(',','_'))" 'BLOCKER' 0 'Expected validated immediate foreign key was not recognized. Inline or unusual definitions need private catalog verification.' }
     }
     $ownerUnique = @($statements | Where-Object { $_.Code -match '^create\s+unique\s+index\s+.*\bon\s+(?:only\s+)?public\.territory_claims\s+(?:using\s+btree\s*)?\(\s*owner_id\s*\)' -and $_.Code -notmatch '\bwhere\b' })
