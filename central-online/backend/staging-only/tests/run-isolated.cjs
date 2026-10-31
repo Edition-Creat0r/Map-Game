@@ -33,6 +33,7 @@ const sql = (s) =>
       "run",
       "-d",
       "--rm",
+      "--pull=never",
       "--network",
       "none",
       "--name",
@@ -68,13 +69,6 @@ const sql = (s) =>
     sql(
       fs.readFileSync(path.join(__dirname, "legacy-model.fixture.sql"), "utf8"),
     );
-    for (
-      const f of [
-        "001_backend.sql",
-        "002_pin_rules.sql",
-        "003_legacy_coordination.sql",
-      ]
-    ) sql(fs.readFileSync(path.join(dir, "../migrations", f), "utf8"));
     const draft = fs.readFileSync(
       path.join(dir, "draft/000_staging_legacy_security.DRAFT.sql"),
       "utf8",
@@ -104,10 +98,18 @@ const sql = (s) =>
       if (r.status !== 0) throw Error(f + " failed");
     };
     tests("exposure.test.cjs");
+    tests("draft-contract.test.cjs");
     sql(
       "BEGIN;SET LOCAL mapgame.reviewed_staging_project='upcrdvdspypoyferpuxe';SET LOCAL mapgame.legacy_schema_reviewed='yes';" +
         draft + "COMMIT;",
     );
+    for (
+      const f of [
+        "001_backend.sql",
+        "002_pin_rules.sql",
+        "003_legacy_coordination.sql",
+      ]
+    ) sql(fs.readFileSync(path.join(dir, "../migrations", f), "utf8"));
     if (sql("SELECT enabled FROM cw041.settings").trim() !== "f") {
       throw Error("Draft enabled economy");
     }
@@ -120,6 +122,7 @@ const sql = (s) =>
             "network-isolated synthetic schema + real PostgreSQL; NOT live Supabase",
           image,
           approvalGuardPassed: true,
+          order: ["synthetic baseline", "hardening draft", "001", "002", "003"],
           defaultEnabled: false,
           passed: true,
         },

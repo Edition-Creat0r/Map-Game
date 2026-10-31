@@ -443,3 +443,24 @@ test("real SQL session guard integrates with existing handler: two owners, concu
   assert.equal(await query("SELECT count(*) FROM cw041.buildings"), "2");
   await query("UPDATE cw041.settings SET enabled=false");
 });
+
+test('termination is owner-only idempotent cleanup, including stale and conflicted sessions',async()=>{
+ const sa=await join(a),sb=await join(b);
+ await query(`UPDATE public.world_sessions SET last_seen=clock_timestamp()-interval '91 seconds',conflicted=true WHERE session_id='${sa}'`);
+ assert.equal(await beat(a,sa),'f');
+ assert.equal(await as(b,`SELECT public.map_game_end_session('central','${sa}')`),'t');
+ assert.equal(await query(`SELECT count(*) FROM public.world_sessions WHERE session_id='${sa}'`),'1');
+ assert.equal(await as(a,`SELECT public.map_game_end_session('central','${sa}')`),'t');
+ assert.equal(await as(a,`SELECT public.map_game_end_session('central','${sa}')`),'t');
+ assert.equal(await query(`SELECT count(*) FROM public.world_sessions WHERE session_id='${sa}'`),'0');
+ assert.equal(await beat(b,sb),'t');
+});
+test('expired membership cannot authorize claims; explicit rejoin restores only its owner',async()=>{
+ const sa=await join(a);await join(b);
+ await query(`UPDATE public.world_sessions SET last_seen=clock_timestamp()-interval '91 seconds' WHERE session_id='${sa}'`);
+ await deny(claim(a,'T_190_27'));
+ await deny(as(b,`SELECT public.map_game_start_session('central','${sa}','Synthetic')`));
+ await as(a,`SELECT public.map_game_start_session('central','${sa}','Synthetic')`);
+ await claim(a,'T_190_27');
+ assert.equal(await query("SELECT count(*) FROM public.territory_claims"),'1');
+});

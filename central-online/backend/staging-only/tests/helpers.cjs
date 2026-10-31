@@ -14,8 +14,9 @@ function as(actor, sql, role = "authenticated") {
 async function reset() {
   await query(
     `TRUNCATE public.capitals,public.territory_claims,public.world_members,public.world_sessions;
+ DO $$BEGIN IF to_regclass('cw041.settings') IS NOT NULL THEN
  TRUNCATE cw041.audit,cw041.buildings,cw041.operations,cw041.rate_limits,cw041.accounts RESTART IDENTITY CASCADE;
- UPDATE cw041.settings SET enabled=false;`,
+ UPDATE cw041.settings SET enabled=false; END IF; END$$;`,
   );
 }
 async function join(actor, id = randomUUID(), old = false) {

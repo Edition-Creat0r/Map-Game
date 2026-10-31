@@ -1,0 +1,10 @@
+# Private schema review material belongs outside Git AND the game's HTTP root.
+map-game-original-schema.sql
+*.private.sql
+*.private.json
+*.dump
+*.backup
+security-review.json
+security-review.md
+.env
+.env.*

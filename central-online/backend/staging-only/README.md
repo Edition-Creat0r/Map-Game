@@ -6,6 +6,11 @@ credentials were used to prepare this package. Economy runtime, Singleplayer,
 authentication client and ownership renderer are unchanged. Naming/Checkpoint 2
 is not deployed by this package.
 
+Latest offline follow-up: [security preparation](SECURITY_PREPARATION.md),
+[local-only Windows checklist](WINDOWS_NEXT_SESSION.md), and
+[private export scanner](tools/Review-LocalSchema.ps1). These supersede the older
+validation counts, not the outstanding deployment approval gates.
+
 ## Evidence and dependencies
 
 The owner supplied two metadata exports, not a confirmed complete schema-only

@@ -55,6 +55,81 @@ BEGIN
  OR to_regprocedure('public.map_game_end_session(text,uuid)') IS NULL THEN
   RAISE EXCEPTION 'review session signatures/overloads before migration';
  END IF;
+ -- Replacing a function preserves its owner. Do not inherit an unreviewed
+ -- owner, argument default or return contract from the imported baseline.
+ IF EXISTS(SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+   WHERE n.nspname='public' AND p.proname IN('map_game_start_session','map_game_session_heartbeat','map_game_end_session')
+   AND (pg_get_userbyid(p.proowner)<>'postgres' OR p.prorettype<>'boolean'::regtype
+     OR p.proretset OR p.prokind<>'f' OR p.pronargdefaults<>0)) THEN
+  RAISE EXCEPTION 'review session function owners and return/default contracts';
+ END IF;
+ -- Validate, never invent/repair, the legacy identities used by ON CONFLICT,
+ -- ownership locking and the one-claim rule. Unknown exports remain pending.
+ FOR r IN SELECT * FROM (VALUES
+   ('worlds','id'),('world_members','world_id,user_id'),
+   ('world_sessions','session_id'),('territory_claims','world_id,territory_id'),
+   ('capitals','world_id,owner_id')) AS required(tab,cols) LOOP
+  IF NOT EXISTS(SELECT 1 FROM pg_constraint c
+    WHERE c.conrelid=to_regclass('public.'||r.tab) AND c.contype='p'
+      AND c.convalidated AND NOT c.condeferrable
+      AND ARRAY(SELECT a.attname::text FROM unnest(c.conkey) WITH ORDINALITY k(num,ord)
+        JOIN pg_attribute a ON a.attrelid=c.conrelid AND a.attnum=k.num ORDER BY k.ord)=string_to_array(r.cols,',')) THEN
+   RAISE EXCEPTION 'review required primary key: %',r.tab;
+  END IF;
+ END LOOP;
+ FOR r IN SELECT * FROM (VALUES
+   ('worlds','id'),('world_members','world_id'),('world_members','user_id'),
+   ('world_sessions','world_id'),('world_sessions','session_id'),('world_sessions','user_id'),
+   ('world_sessions','created_at'),('world_sessions','last_seen'),('world_sessions','conflicted'),
+   ('territory_claims','world_id'),('territory_claims','territory_id'),('territory_claims','owner_id'),
+   ('capitals','world_id'),('capitals','territory_id'),('capitals','owner_id'),('capitals','x'),('capitals','z')) AS required(tab,col) LOOP
+  IF NOT EXISTS(SELECT 1 FROM pg_attribute WHERE attrelid=to_regclass('public.'||r.tab)
+    AND attname=r.col AND attnotnull AND NOT attisdropped) THEN
+   RAISE EXCEPTION 'review required NOT NULL: %.%',r.tab,r.col;
+  END IF;
+ END LOOP;
+ FOR r IN SELECT * FROM (VALUES
+   ('world_members','world_id','public.worlds','id'),('world_members','user_id','auth.users','id'),
+   ('world_sessions','user_id','auth.users','id'),
+   ('territory_claims','world_id','public.worlds','id'),('territory_claims','owner_id','auth.users','id'),
+   ('capitals','world_id','public.worlds','id'),('capitals','owner_id','auth.users','id'),
+   ('capitals','world_id,territory_id','public.territory_claims','world_id,territory_id')) AS required(tab,cols,target,refs) LOOP
+  IF NOT EXISTS(SELECT 1 FROM pg_constraint c
+    WHERE c.conrelid=to_regclass('public.'||r.tab) AND c.contype='f' AND c.convalidated AND NOT c.condeferrable
+      AND c.confrelid=to_regclass(r.target)
+      AND ARRAY(SELECT a.attname::text FROM unnest(c.conkey) WITH ORDINALITY k(num,ord)
+        JOIN pg_attribute a ON a.attrelid=c.conrelid AND a.attnum=k.num ORDER BY k.ord)=string_to_array(r.cols,',')
+      AND ARRAY(SELECT a.attname::text FROM unnest(c.confkey) WITH ORDINALITY k(num,ord)
+        JOIN pg_attribute a ON a.attrelid=c.confrelid AND a.attnum=k.num ORDER BY k.ord)=string_to_array(r.refs,',')) THEN
+   RAISE EXCEPTION 'review required foreign key: %.%',r.tab,r.cols;
+  END IF;
+ END LOOP;
+ IF NOT EXISTS(SELECT 1 FROM pg_index i WHERE i.indrelid='public.territory_claims'::regclass
+   AND i.indisunique AND i.indisvalid AND i.indisready AND i.indimmediate
+   AND i.indpred IS NULL AND i.indexprs IS NULL AND i.indnkeyatts=1
+   AND (SELECT attname FROM pg_attribute WHERE attrelid=i.indrelid AND attnum=i.indkey[0])='owner_id') THEN
+  RAISE EXCEPTION 'review global one-claim-per-owner unique index';
+ END IF;
+ -- Conservatively include SET ROLE reachability, not only immediate inheritance.
+ IF EXISTS(WITH RECURSIVE reachable(oid) AS (
+   SELECT oid FROM pg_roles WHERE rolname IN('anon','authenticated')
+   UNION SELECT m.roleid FROM pg_auth_members m JOIN reachable rr ON rr.oid=m.member)
+   SELECT 1 FROM reachable rr JOIN pg_roles p ON p.oid=rr.oid WHERE p.rolsuper OR p.rolbypassrls) THEN
+  RAISE EXCEPTION 'review client role membership reaching elevated role';
+ END IF;
+ -- This draft has no approved allowlist for additional baseline definer RPCs
+ -- or user triggers. Stop for schema review rather than guessing they are safe.
+ IF EXISTS(SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+   WHERE n.nspname='public' AND p.prosecdef
+   AND p.proname NOT IN('map_game_start_session','map_game_session_heartbeat','map_game_end_session')
+   AND NOT EXISTS(SELECT 1 FROM pg_depend d WHERE d.classid='pg_proc'::regclass AND d.objid=p.oid AND d.deptype='e')) THEN
+  RAISE EXCEPTION 'review additional public SECURITY DEFINER routines';
+ END IF;
+ IF EXISTS(SELECT 1 FROM pg_trigger t WHERE NOT t.tgisinternal
+   AND t.tgrelid IN('public.worlds'::regclass,'public.world_members'::regclass,'public.world_sessions'::regclass,
+     'public.territory_claims'::regclass,'public.capitals'::regclass)) THEN
+  RAISE EXCEPTION 'review preexisting legacy triggers; baseline-first draft required';
+ END IF;
 END $guard$;
 
 CREATE SCHEMA cw041_staging_security;
@@ -88,6 +163,26 @@ BEGIN
  REVOKE ALL ON public.world_sessions FROM PUBLIC,anon,authenticated;
  FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='world_sessions' LOOP
   EXECUTE format('DROP POLICY %I ON public.world_sessions',p.policyname);
+ END LOOP;
+END $$;
+-- Named-role REVOKEs alone do not remove privileges inherited from other roles.
+DO $$DECLARE role_name text; tab text; col record; priv text;
+BEGIN
+ FOREACH role_name IN ARRAY ARRAY['anon','authenticated'] LOOP
+  FOREACH tab IN ARRAY ARRAY['worlds','world_members','territory_claims','capitals','world_sessions'] LOOP
+   FOREACH priv IN ARRAY ARRAY['TRUNCATE','REFERENCES','TRIGGER'] || CASE WHEN tab='world_sessions' THEN ARRAY['INSERT','UPDATE','DELETE'] ELSE ARRAY[]::text[] END LOOP
+    IF has_table_privilege(role_name,'public.'||tab,priv) THEN
+     RAISE EXCEPTION 'review inherited legacy table privileges';
+    END IF;
+   END LOOP;
+   FOR col IN SELECT attname FROM pg_attribute WHERE attrelid=to_regclass('public.'||tab) AND attnum>0 AND NOT attisdropped LOOP
+    FOREACH priv IN ARRAY ARRAY['REFERENCES'] || CASE WHEN tab='world_sessions' THEN ARRAY['INSERT','UPDATE'] ELSE ARRAY[]::text[] END LOOP
+     IF has_column_privilege(role_name,'public.'||tab,col.attname,priv) THEN
+      RAISE EXCEPTION 'review inherited legacy column privileges';
+     END IF;
+    END LOOP;
+   END LOOP;
+  END LOOP;
  END LOOP;
 END $$;
 CREATE POLICY staging_session_self_read ON public.world_sessions FOR SELECT TO authenticated USING(user_id=auth.uid());
@@ -140,6 +235,8 @@ DECLARE uid uuid;
 BEGIN
  uid:=cw041_staging_security.actor(p_world_id);
  PERFORM pg_advisory_xact_lock(hashtextextended('cw041:session-actor:'||uid::text,0));
+ -- Owner-only idempotent cleanup intentionally accepts expired/conflicted rows.
+ -- It does not renew a session; true is an acknowledgement, not a row count.
  DELETE FROM public.world_sessions WHERE world_id=p_world_id AND session_id=p_session_id AND user_id=uid;
  RETURN true;
 END $$;
