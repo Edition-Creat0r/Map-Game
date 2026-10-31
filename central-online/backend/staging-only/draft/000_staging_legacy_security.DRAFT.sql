@@ -89,14 +89,14 @@ BEGIN
   END IF;
  END LOOP;
  FOR r IN SELECT * FROM (VALUES
-   ('world_members','world_id','public.worlds','id'),('world_members','user_id','auth.users','id'),
-   ('world_sessions','user_id','auth.users','id'),
-   ('territory_claims','world_id','public.worlds','id'),('territory_claims','owner_id','auth.users','id'),
-   ('capitals','world_id','public.worlds','id'),('capitals','owner_id','auth.users','id'),
-   ('capitals','world_id,territory_id','public.territory_claims','world_id,territory_id')) AS required(tab,cols,target,refs) LOOP
+   ('world_members','world_id','public.worlds','id','c'),('world_members','user_id','auth.users','id','c'),
+   ('world_sessions','user_id','auth.users','id','c'),
+   ('territory_claims','world_id','public.worlds','id','c'),('territory_claims','owner_id','auth.users','id','c'),
+   ('capitals','world_id','public.worlds','id','c'),('capitals','owner_id','auth.users','id','c'),
+   ('capitals','world_id,territory_id','public.territory_claims','world_id,territory_id','r')) AS required(tab,cols,target,refs,del) LOOP
   IF NOT EXISTS(SELECT 1 FROM pg_constraint c
     WHERE c.conrelid=to_regclass('public.'||r.tab) AND c.contype='f' AND c.convalidated AND NOT c.condeferrable
-      AND c.confrelid=to_regclass(r.target)
+      AND c.confrelid=to_regclass(r.target) AND c.confdeltype::text=r.del
       AND ARRAY(SELECT a.attname::text FROM unnest(c.conkey) WITH ORDINALITY k(num,ord)
         JOIN pg_attribute a ON a.attrelid=c.conrelid AND a.attnum=k.num ORDER BY k.ord)=string_to_array(r.cols,',')
       AND ARRAY(SELECT a.attname::text FROM unnest(c.confkey) WITH ORDINALITY k(num,ord)
@@ -109,6 +109,13 @@ BEGIN
    AND i.indpred IS NULL AND i.indexprs IS NULL AND i.indnkeyatts=1
    AND (SELECT attname FROM pg_attribute WHERE attrelid=i.indrelid AND attnum=i.indkey[0])='owner_id') THEN
   RAISE EXCEPTION 'review global one-claim-per-owner unique index';
+ END IF;
+ -- FKs establish that a capital references a claim, not that their owners
+ -- agree. Refuse preexisting mismatches; never transfer or auto-repair ownership.
+ IF EXISTS(SELECT 1 FROM public.capitals c LEFT JOIN public.territory_claims t
+   ON t.world_id=c.world_id AND t.territory_id=c.territory_id
+   WHERE t.owner_id IS DISTINCT FROM c.owner_id) THEN
+  RAISE EXCEPTION 'review existing capital and claim ownership mismatch';
  END IF;
  -- Conservatively include SET ROLE reachability, not only immediate inheritance.
  IF EXISTS(WITH RECURSIVE reachable(oid) AS (

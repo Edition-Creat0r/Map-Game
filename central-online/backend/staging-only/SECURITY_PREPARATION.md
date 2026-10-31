@@ -4,6 +4,10 @@ Base: `559b20de995710d3ad68d9eacb1f31ade2e1316b` on the unchanged
 `feature/0.4.1-staging-security-review` branch. Work lives separately on
 `feature/0.4.1-security-preparation`. This package is **not deployment approval**.
 
+Latest deletion follow-up: [confirmed FK/cleanup results and blockers](FOREIGN_KEY_CLEANUP_REVIEW.md).
+The supplied CASCADE/RESTRICT actions are now modeled exactly; passing tests do
+not mean account/world cleanup is authorized or functional under hardening.
+
 ## Reviewed decisions and improvements
 
 - Session start still rejects a foreign session ID before touching the caller's

@@ -1,6 +1,7 @@
 // Synthetic baseline only, before hardening and before economy migrations.
-const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
-const {query}=require('./helpers.cjs');
+const {test,beforeEach}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {query,reset}=require('./helpers.cjs');
+beforeEach(reset);
 const draft=fs.readFileSync(path.join(__dirname,'../draft/000_staging_legacy_security.DRAFT.sql'),'utf8');
 const approved="SET LOCAL mapgame.reviewed_staging_project='upcrdvdspypoyferpuxe';SET LOCAL mapgame.legacy_schema_reviewed='yes';";
 async function refuses(change,error){
@@ -16,6 +17,9 @@ for(const [name,change,error] of [
  ['session auth foreign key','ALTER TABLE public.world_sessions DROP CONSTRAINT world_sessions_user_id_fkey;',/required foreign key/],
  ['capital claim foreign key','ALTER TABLE public.capitals DROP CONSTRAINT capitals_world_id_territory_id_fkey;',/required foreign key/],
  ['unvalidated foreign key','ALTER TABLE public.world_sessions DROP CONSTRAINT world_sessions_user_id_fkey;ALTER TABLE public.world_sessions ADD FOREIGN KEY(user_id) REFERENCES auth.users(id) NOT VALID;',/required foreign key/],
+ ['unreviewed delete action','ALTER TABLE public.world_sessions DROP CONSTRAINT world_sessions_user_id_fkey;ALTER TABLE public.world_sessions ADD FOREIGN KEY(user_id) REFERENCES auth.users(id) ON DELETE RESTRICT;',/required foreign key/],
+ ['capital NO ACTION instead of confirmed RESTRICT','ALTER TABLE public.capitals DROP CONSTRAINT capitals_world_id_territory_id_fkey;ALTER TABLE public.capitals ADD FOREIGN KEY(world_id,territory_id) REFERENCES public.territory_claims(world_id,territory_id) ON DELETE NO ACTION;',/required foreign key/],
+ ['preexisting capital owner mismatch',"INSERT INTO public.territory_claims(world_id,territory_id,owner_id,owner_username) VALUES('central','T_190_27','11111111-1111-4111-8111-111111111111','Synthetic');INSERT INTO public.capitals(world_id,owner_id,owner_username,territory_id,name,x,z) VALUES('central','22222222-2222-4222-8222-222222222222','Synthetic','T_190_27','Test city',500,500);",/capital and claim ownership mismatch/],
  ['owner uniqueness','DROP INDEX public.territory_claims_one_per_owner;',/one-claim-per-owner/],
  ['partial uniqueness','DROP INDEX public.territory_claims_one_per_owner;CREATE UNIQUE INDEX owner_partial ON public.territory_claims(owner_id) WHERE world_id=\'central\';',/one-claim-per-owner/],
  ['function owner','ALTER FUNCTION public.map_game_start_session(text,uuid,text) OWNER TO authenticated;',/function owners/],

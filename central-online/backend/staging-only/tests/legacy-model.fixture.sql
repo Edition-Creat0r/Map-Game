@@ -1,5 +1,7 @@
 -- SYNTHETIC LOCAL TEST MODEL ONLY. NEVER DEPLOY OR IMPORT ON SUPABASE.
 -- Hand-authored from reviewed column/signature contracts, NOT a production dump.
+-- Eight ON DELETE actions explicitly confirmed by the owner; no world_sessions
+-- world FK was supplied. Constraint creation order here is synthetic, not live.
 CREATE ROLE anon NOLOGIN;
 CREATE ROLE authenticated NOLOGIN;
 CREATE ROLE service_role NOLOGIN BYPASSRLS;
@@ -11,17 +13,17 @@ $$;
 GRANT USAGE ON SCHEMA auth TO anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION auth.uid() TO PUBLIC;
 CREATE TABLE public.worlds(id text PRIMARY KEY,name text NOT NULL,created_at timestamptz NOT NULL DEFAULT now());
-CREATE TABLE public.world_members(world_id text NOT NULL REFERENCES public.worlds(id),user_id uuid NOT NULL REFERENCES auth.users(id),
+CREATE TABLE public.world_members(world_id text NOT NULL REFERENCES public.worlds(id) ON DELETE CASCADE,user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
  username text NOT NULL,joined_at timestamptz NOT NULL DEFAULT now(),last_seen timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(world_id,user_id));
-CREATE TABLE public.world_sessions(world_id text NOT NULL,session_id uuid PRIMARY KEY,user_id uuid NOT NULL REFERENCES auth.users(id),
+CREATE TABLE public.world_sessions(world_id text NOT NULL,session_id uuid PRIMARY KEY,user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
  device_id text,username text,created_at timestamptz NOT NULL DEFAULT now(),last_seen timestamptz NOT NULL DEFAULT now(),conflicted boolean NOT NULL DEFAULT false);
-CREATE TABLE public.territory_claims(world_id text NOT NULL REFERENCES public.worlds(id),territory_id text NOT NULL,
- owner_id uuid NOT NULL REFERENCES auth.users(id),owner_username text NOT NULL,claimed_at timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(world_id,territory_id));
+CREATE TABLE public.territory_claims(world_id text NOT NULL REFERENCES public.worlds(id) ON DELETE CASCADE,territory_id text NOT NULL,
+ owner_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,owner_username text NOT NULL,claimed_at timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(world_id,territory_id));
 CREATE UNIQUE INDEX territory_claims_one_per_owner ON public.territory_claims(owner_id);
-CREATE TABLE public.capitals(world_id text NOT NULL REFERENCES public.worlds(id),owner_id uuid NOT NULL REFERENCES auth.users(id),
+CREATE TABLE public.capitals(world_id text NOT NULL REFERENCES public.worlds(id) ON DELETE CASCADE,owner_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
  owner_username text NOT NULL,territory_id text NOT NULL,name text NOT NULL CHECK(char_length(name) BETWEEN 2 AND 32),
  x float8 NOT NULL,z float8 NOT NULL,founded_at timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(world_id,owner_id),
- FOREIGN KEY(world_id,territory_id) REFERENCES public.territory_claims(world_id,territory_id));
+ FOREIGN KEY(world_id,territory_id) REFERENCES public.territory_claims(world_id,territory_id) ON DELETE RESTRICT);
 ALTER TABLE public.worlds ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.world_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.world_sessions ENABLE ROW LEVEL SECURITY;

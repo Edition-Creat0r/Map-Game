@@ -83,7 +83,7 @@ const sql = (s) =>
       );
     }
     if (!guarded) throw Error("Draft approval guard did not fail closed");
-    const tests = (f) => {
+    const tests = (f, stage) => {
       const r = spawnSync(process.execPath, [
         "--test",
         "--test-concurrency=1",
@@ -91,13 +91,14 @@ const sql = (s) =>
       ], {
         cwd: root,
         encoding: "utf8",
-        env: { ...process.env, CW041_TEST_CONTAINER: name },
+        env: { ...process.env, CW041_TEST_CONTAINER: name, CW041_CLEANUP_STAGE: stage || "hardened" },
       });
-      fs.writeFileSync(path.join(out, f + ".log"), r.stdout + "\n" + r.stderr);
+      fs.writeFileSync(path.join(out, (stage ? stage + "-" : "") + f + ".log"), r.stdout + "\n" + r.stderr);
       process.stdout.write(r.stdout);
       if (r.status !== 0) throw Error(f + " failed");
     };
     tests("exposure.test.cjs");
+    tests("cleanup.test.cjs", "baseline");
     tests("draft-contract.test.cjs");
     sql(
       "BEGIN;SET LOCAL mapgame.reviewed_staging_project='upcrdvdspypoyferpuxe';SET LOCAL mapgame.legacy_schema_reviewed='yes';" +
@@ -114,6 +115,7 @@ const sql = (s) =>
       throw Error("Draft enabled economy");
     }
     tests("security.test.cjs");
+    tests("cleanup.test.cjs", "hardened");
     fs.writeFileSync(
       path.join(out, "result.json"),
       JSON.stringify(
