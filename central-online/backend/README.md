@@ -9,6 +9,14 @@ Owner-supplied metadata has since identified legacy session/ownership issues;
 complete exported-schema review and genuine staging tests remain outstanding.
 No live credentials, hosted SQL or remote deployment were used for that follow-up.
 
+Latest offline staging candidate: [scope and gates](staging-only/release-candidate/RELEASE_SCOPE.md),
+[locked source/migration plan](staging-only/release-candidate/CANDIDATE.json),
+[Windows acceptance](staging-only/release-candidate/WINDOWS_ACCEPTANCE.md), and
+[offline results](staging-only/release-candidate/VALIDATION.md). It is pinned to
+`upcrdvdspypoyferpuxe`, still OFF, and supports only non-destructive owner-only
+session recovery. Account/world hard deletion and player-facing shop activation
+remain unavailable. No live enforcement is claimed.
+
 ## What exists
 
 - Server-only frozen copy of the exact validated 125 starter/industrial contracts, 121 canonical materials, six-era/seven-node progression and shared authoritative terrain. Generated sources are trusted repository code, not client-provided executable input. `generated/manifest.json` records each source SHA-256 and a rules fingerprint.

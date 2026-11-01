@@ -6,6 +6,10 @@ const publicKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
 const origins = (Deno.env.get("CENTRAL_ALLOWED_ORIGINS") || "").split(",")
   .filter(Boolean);
 const enabled = Deno.env.get("CENTRAL_ECONOMY_ENABLED") === "true";
+// This reviewed candidate is staging-only, even if wrong secrets are supplied.
+if (enabled && url !== "https://upcrdvdspypoyferpuxe.supabase.co") {
+  throw Error("Staging project mismatch");
+}
 if (
   enabled &&
   (!url.startsWith("https://") || !key || !publicKey || !origins.length)

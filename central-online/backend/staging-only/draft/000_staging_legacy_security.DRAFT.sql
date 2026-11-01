@@ -306,3 +306,61 @@ CREATE TRIGGER staging_capital_identity BEFORE INSERT OR UPDATE OR DELETE ON pub
  FOR EACH ROW EXECUTE FUNCTION cw041_staging_security.guard_legacy_write();
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA cw041_staging_security FROM PUBLIC,anon,authenticated,service_role;
 -- No settings.enabled writes, no economy migration, no production baseline/data.
+
+-- Narrow staging recovery capability: no identity/claim/capital/ledger deletion.
+-- No client/service EXECUTE grant, no role exemption in guard_legacy_write.
+-- Audit has no auth FK: it must survive any separately reviewed future retirement.
+CREATE TABLE cw041_staging_security.session_recovery_audit (
+ operation_id uuid PRIMARY KEY,
+ actor uuid NOT NULL,
+ reason text NOT NULL CHECK(reason IN('stale_session','operator_recovery','staging_test_reset')),
+ operator_name text NOT NULL,
+ applied_at timestamptz NOT NULL,
+ revoked_sessions integer NOT NULL CHECK(revoked_sessions>=0),
+ receipt jsonb NOT NULL
+);
+ALTER TABLE cw041_staging_security.session_recovery_audit ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cw041_staging_security.session_recovery_audit FORCE ROW LEVEL SECURITY;
+CREATE POLICY recovery_owner ON cw041_staging_security.session_recovery_audit TO postgres USING(true) WITH CHECK(true);
+REVOKE ALL ON cw041_staging_security.session_recovery_audit FROM PUBLIC,anon,authenticated,service_role;
+CREATE FUNCTION cw041_staging_security.recover_sessions_offline(p_operation uuid,p_actor uuid,p_reason text)
+RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path=pg_catalog AS $$
+DECLARE prior cw041_staging_security.session_recovery_audit; stamp timestamptz; n integer; economy_on boolean;
+BEGIN
+ -- Explicit owner invocation, NOT an exemption for owner/service writes elsewhere.
+ -- Current role matters: PostgREST SET ROLE authenticated must not pass this check.
+ IF session_user<>'postgres' OR current_user<>'postgres' THEN
+  RAISE EXCEPTION 'staging_operator_required' USING ERRCODE='42501';
+ END IF;
+ IF p_operation IS NULL OR p_actor IS NULL OR p_reason IS NULL
+ OR p_reason NOT IN('stale_session','operator_recovery','staging_test_reset') THEN
+  RAISE EXCEPTION 'invalid_recovery_request' USING ERRCODE='22023';
+ END IF;
+ IF to_regclass('cw041.settings') IS NULL THEN RAISE EXCEPTION 'maintenance_requires_configured_disabled_backend' USING ERRCODE='55000'; END IF;
+ SELECT enabled INTO economy_on FROM cw041.settings WHERE world_id='central' FOR UPDATE;
+ IF NOT FOUND OR economy_on IS DISTINCT FROM false THEN
+  RAISE EXCEPTION 'maintenance_requires_disabled_backend' USING ERRCODE='55000';
+ END IF;
+ PERFORM pg_advisory_xact_lock(hashtextextended('cw041:recovery-operation:'||p_operation::text,0));
+ SELECT * INTO prior FROM cw041_staging_security.session_recovery_audit WHERE operation_id=p_operation;
+ IF FOUND THEN
+  IF prior.actor IS DISTINCT FROM p_actor OR prior.reason IS DISTINCT FROM p_reason THEN
+   RAISE EXCEPTION 'recovery_operation_mismatch' USING ERRCODE='22023';
+  END IF;
+  RETURN prior.receipt;
+ END IF;
+ PERFORM 1 FROM auth.users WHERE id=p_actor FOR KEY SHARE;
+ IF NOT FOUND THEN RAISE EXCEPTION 'recovery_actor_missing' USING ERRCODE='22023'; END IF;
+ -- Same actor lock as protected start/heartbeat/end; scoped to Central only.
+ PERFORM pg_advisory_xact_lock(hashtextextended('cw041:session-actor:'||p_actor::text,0));
+ DELETE FROM public.world_sessions WHERE world_id='central' AND user_id=p_actor;
+ GET DIAGNOSTICS n=ROW_COUNT;
+ stamp:=clock_timestamp();
+ prior.receipt:=jsonb_build_object('operationId',p_operation,'actor',p_actor,'revokedSessions',n,'appliedAt',stamp);
+ INSERT INTO cw041_staging_security.session_recovery_audit(operation_id,actor,reason,operator_name,applied_at,revoked_sessions,receipt)
+ VALUES(p_operation,p_actor,p_reason,session_user,stamp,n,prior.receipt);
+ RETURN prior.receipt;
+END $$;
+REVOKE ALL ON FUNCTION cw041_staging_security.recover_sessions_offline(uuid,uuid,text) FROM PUBLIC,anon,authenticated,service_role;
+-- The trusted DB owner can already alter the database. This audit is not claimed
+-- tamperproof against that owner. No session IDs, credentials or free-form notes.

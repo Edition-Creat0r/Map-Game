@@ -38,3 +38,19 @@ Deno.test("deployed entry defaults to disabled and rejects unapproved origins", 
     await child.output();
   }
 });
+
+Deno.test("enabled staging candidate rejects production configuration before serving", async () => {
+  const result = await new Deno.Command(Deno.execPath(), {
+    args: ["run", "--allow-env", "--allow-net", "/backend/supabase/functions/central-economy/index.ts"],
+    env: {
+      CENTRAL_ECONOMY_ENABLED: "true",
+      SUPABASE_URL: "https://vjwvhtsjdsbcorszzldk.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY: "synthetic-not-a-key",
+      SUPABASE_ANON_KEY: "synthetic-not-a-key",
+      CENTRAL_ALLOWED_ORIGINS: "https://synthetic.test",
+    }, stdout: "piped", stderr: "piped",
+  }).output();
+  if (result.success || !new TextDecoder().decode(result.stderr).includes("Staging project mismatch")) {
+    throw Error("Wrong project configuration must fail before network use");
+  }
+});

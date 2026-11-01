@@ -1,0 +1,66 @@
+{
+  "formatVersion": 1,
+  "baseCommit": "7f7517a8f21daf83db4893f577e14ad95fd6f1df",
+  "stagingProjectRef": "upcrdvdspypoyferpuxe",
+  "productionProjectForbidden": "vjwvhtsjdsbcorszzldk",
+  "status": "BLOCKED_PENDING_PRIVATE_SCHEMA_AND_STAGING_TESTS",
+  "spendingEnabled": false,
+  "liveEnforcementVerified": false,
+  "hardDeletionSupported": false,
+  "approvalsRequired": [
+    "private baseline and complete metadata review",
+    "exact baseline and hardening wrapper approval",
+    "disabled staging deployment approval",
+    "separate temporary two-account spending-test approval"
+  ],
+  "migrationOrder": [
+    {
+      "step": 1,
+      "name": "20261101000100_reviewed_legacy_baseline.sql",
+      "source": null,
+      "sha256": null,
+      "required": "Private reviewed baseline; never supplied by a test fixture or raw unreviewed export"
+    },
+    {
+      "step": 2,
+      "name": "20261101000200_reviewed_staging_hardening.sql",
+      "source": "central-online/backend/staging-only/draft/000_staging_legacy_security.DRAFT.sql",
+      "sha256": "867f3fcf8f7ec47f28b92c27d3f5f2624a31fe91b8153caccf8b4c9c202d5b2a",
+      "required": "Explicitly reviewed same-transaction wrapper with both SET LOCAL acknowledgements; record compiled wrapper hash privately"
+    },
+    {
+      "step": 3,
+      "name": "20261101000300_cp1_backend.sql",
+      "source": "central-online/backend/migrations/001_backend.sql",
+      "sha256": "766ee44761a023f6481ff7b8ec8f33b366c73c4df0b41cb0036a3aed0117c2f9"
+    },
+    {
+      "step": 4,
+      "name": "20261101000400_cp1_pin_rules.sql",
+      "source": "central-online/backend/migrations/002_pin_rules.sql",
+      "sha256": "985449052c25f6441347b710c2a1b637a6fc0998118e88a212007f7e70a2a7fe"
+    },
+    {
+      "step": 5,
+      "name": "20261101000500_cp1_legacy_coordination.sql",
+      "source": "central-online/backend/migrations/003_legacy_coordination.sql",
+      "sha256": "10b3abfd4650fe83a510673aae0956373b4789f468e01113d6c73fa7dc7d88cd"
+    }
+  ],
+  "files": {
+    "central-online/backend/staging-only/draft/000_staging_legacy_security.DRAFT.sql": "867f3fcf8f7ec47f28b92c27d3f5f2624a31fe91b8153caccf8b4c9c202d5b2a",
+    "central-online/backend/migrations/001_backend.sql": "766ee44761a023f6481ff7b8ec8f33b366c73c4df0b41cb0036a3aed0117c2f9",
+    "central-online/backend/migrations/002_pin_rules.sql": "985449052c25f6441347b710c2a1b637a6fc0998118e88a212007f7e70a2a7fe",
+    "central-online/backend/migrations/003_legacy_coordination.sql": "10b3abfd4650fe83a510673aae0956373b4789f468e01113d6c73fa7dc7d88cd",
+    "central-online/backend/rollback-disable.sql": "1c32703ff5b27f406ef4a80df938fe72f3159050f2395c5ef72cccedd8fbcf5b",
+    "central-online/backend/supabase/config.toml": "aa5211513334b4f48e466e51f01be56fe06197daaf08d5866b1e0f50eb01f427",
+    "central-online/backend/supabase/functions/central-economy/index.ts": "d11139ec976529cb2f9eb65f33ef6aab40ab18035138024d96499ae8f5fe1b3d",
+    "central-online/backend/handler.mjs": "f398daecba6173bdec4e3e6b182e30368d04e84f66c9d60beaca0b7251fac363",
+    "central-online/backend/engine.mjs": "3ae6446838a10afc123cd3e1acd5dde6c15ae208bdfd5c5bf48bf5c57068d961",
+    "central-online/backend/generated/rules.mjs": "e0679a267c4ce3ad4a0dbeab2500c4c091ea6ba2a447aca23c403088d5451f68",
+    "central-online/backend/generated/manifest.json": "b39fd42cefcaf37bf3bc3a3bc621ee2ac0c3a98c07babd27c674909854abfdd1",
+    "central-online/backend/staging-only/release-candidate/WINDOWS_ACCEPTANCE.md": "cd803b41df79e0fb390114bb6376ca15de9a062f9ce4fe87152005a1e186a5ec",
+    "central-online/backend/staging-only/release-candidate/RELEASE_SCOPE.md": "3b1adb976f933fd789f44d861b1ea3c0b7fbace456af1c7872b07f711242692a",
+    "central-online/backend/staging-only/release-candidate/build-plan.cjs": "a24e7ee9b8d2a006cd4d191fd172b43bc8385bf04ab4cd9aec90fec3b6b6eb0b"
+  }
+}

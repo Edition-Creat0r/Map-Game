@@ -116,6 +116,8 @@ const sql = (s) =>
     }
     tests("security.test.cjs");
     tests("cleanup.test.cjs", "hardened");
+    tests("maintenance.test.cjs");
+    tests("release-candidate.test.cjs");
     fs.writeFileSync(
       path.join(out, "result.json"),
       JSON.stringify(
@@ -126,6 +128,8 @@ const sql = (s) =>
           approvalGuardPassed: true,
           order: ["synthetic baseline", "hardening draft", "001", "002", "003"],
           defaultEnabled: false,
+          liveStagingVerified: false,
+          hardDeletionSupported: false,
           passed: true,
         },
         null,
