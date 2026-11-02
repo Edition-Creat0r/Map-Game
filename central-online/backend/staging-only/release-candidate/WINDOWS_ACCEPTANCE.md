@@ -4,6 +4,11 @@ Target **upcrdvdspypoyferpuxe** only. Forbidden target **vjwvhtsjdsbcorszzldk**.
 No action below has been run against Supabase by Codex. STOP at every unmet gate.
 This is a backend staging trial; player-facing Central spending remains disabled.
 
+RC2 requires fresh source approval. Historical CANDIDATE.json is preserved and
+its unqualified --check now intentionally rejects the changed protected sources.
+Do not overwrite it or carry RC1 approval forward. See NEXT_COMMANDS_RC2.md for
+one-command-at-a-time instructions.
+
 ## 1. Offline next Lenovo session
 
 In PowerShell 7.2+, preserve any local changes, then fetch/switch the dedicated
@@ -11,7 +16,7 @@ In PowerShell 7.2+, preserve any local changes, then fetch/switch the dedicated
 reported candidate SHA. Do not reset other branches or merge main.
 
 ```powershell
-node central-online/backend/staging-only/release-candidate/build-plan.cjs --check
+node central-online/backend/staging-only/release-candidate/build-plan.cjs --candidate RC2 --check
 node --test central-online/backend/staging-only/tests/candidate-plan.test.cjs
 node central-online/backend/staging-only/tests/run-isolated.cjs (Join-Path $env:TEMP 'mapgame-staging-rc')
 node --test central-online/backend/staging-only/tests/local-schema.test.cjs
@@ -23,6 +28,10 @@ reports outside Git/served folders/OneDrive, private to your Windows account.
 Do not upload exports, keys, tokens, SQL function text or auth responses to chat.
 
 ## 2. Private metadata and baseline gate — no approval yet
+
+Count summaries (five tables, 13 original policies, four signatures) establish
+inventory, not policy predicates, owners or effective access. No private bodies
+or authentication responses should be sent to Codex. Review dependencies locally.
 
 Reconcile the complete schema-only export with both metadata preflights and
 RELEASE_SCOPE.md. Review owners, all four session signatures, PK/FK actions,
@@ -45,7 +54,7 @@ workdir; preserve TLS verify-full and the previous Windows secure-access guide.
 Do not paste credentials in terminal commands/transcripts, source, screenshots
 or chat. Do not borrow production keys or export real users.
 
-Use exactly the five filenames/sources in CANDIDATE.json. The baseline has no
+Use exactly the five filenames/sources in CANDIDATE-RC2.json. The baseline has no
 committed hash because it has not been reviewed here. The hardening source hash
 is committed, but its approved migration wrapper must also be reviewed and hashed:
 

@@ -115,6 +115,7 @@ const sql = (s) =>
       throw Error("Draft enabled economy");
     }
     tests("security.test.cjs");
+    tests("final-review.test.cjs");
     tests("cleanup.test.cjs", "hardened");
     tests("maintenance.test.cjs");
     tests("release-candidate.test.cjs");

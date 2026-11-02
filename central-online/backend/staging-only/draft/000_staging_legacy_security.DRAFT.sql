@@ -162,12 +162,14 @@ BEGIN
   EXECUTE format('REVOKE TRUNCATE,REFERENCES,TRIGGER ON public.%I FROM PUBLIC,anon,authenticated',t);
   FOR c IN SELECT attname FROM pg_attribute WHERE attrelid=to_regclass('public.'||t) AND attnum>0 AND NOT attisdropped LOOP
    EXECUTE format('REVOKE REFERENCES (%I) ON public.%I FROM PUBLIC,anon,authenticated',c.attname,t);
-   IF t='world_sessions' THEN
+   IF t IN('world_sessions','worlds') THEN
     EXECUTE format('REVOKE INSERT (%I),UPDATE (%I) ON public.%I FROM PUBLIC,anon,authenticated',c.attname,c.attname,t);
    END IF;
   END LOOP;
  END LOOP;
  REVOKE ALL ON public.world_sessions FROM PUBLIC,anon,authenticated;
+ -- Central world metadata is operator-provisioned; clients only read worlds.
+ REVOKE INSERT,UPDATE,DELETE ON public.worlds FROM PUBLIC,anon,authenticated;
  FOR p IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='world_sessions' LOOP
   EXECUTE format('DROP POLICY %I ON public.world_sessions',p.policyname);
  END LOOP;
@@ -177,13 +179,13 @@ DO $$DECLARE role_name text; tab text; col record; priv text;
 BEGIN
  FOREACH role_name IN ARRAY ARRAY['anon','authenticated'] LOOP
   FOREACH tab IN ARRAY ARRAY['worlds','world_members','territory_claims','capitals','world_sessions'] LOOP
-   FOREACH priv IN ARRAY ARRAY['TRUNCATE','REFERENCES','TRIGGER'] || CASE WHEN tab='world_sessions' THEN ARRAY['INSERT','UPDATE','DELETE'] ELSE ARRAY[]::text[] END LOOP
+   FOREACH priv IN ARRAY ARRAY['TRUNCATE','REFERENCES','TRIGGER'] || CASE WHEN tab IN('world_sessions','worlds') THEN ARRAY['INSERT','UPDATE','DELETE'] ELSE ARRAY[]::text[] END LOOP
     IF has_table_privilege(role_name,'public.'||tab,priv) THEN
      RAISE EXCEPTION 'review inherited legacy table privileges';
     END IF;
    END LOOP;
    FOR col IN SELECT attname FROM pg_attribute WHERE attrelid=to_regclass('public.'||tab) AND attnum>0 AND NOT attisdropped LOOP
-    FOREACH priv IN ARRAY ARRAY['REFERENCES'] || CASE WHEN tab='world_sessions' THEN ARRAY['INSERT','UPDATE'] ELSE ARRAY[]::text[] END LOOP
+    FOREACH priv IN ARRAY ARRAY['REFERENCES'] || CASE WHEN tab IN('world_sessions','worlds') THEN ARRAY['INSERT','UPDATE'] ELSE ARRAY[]::text[] END LOOP
      IF has_column_privilege(role_name,'public.'||tab,col.attname,priv) THEN
       RAISE EXCEPTION 'review inherited legacy column privileges';
      END IF;
@@ -198,21 +200,24 @@ CREATE UNIQUE INDEX staging_one_session_per_world_actor ON public.world_sessions
 
 CREATE OR REPLACE FUNCTION public.map_game_start_session(p_world_id text,p_session_id uuid,p_username text)
 RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
-DECLARE uid uuid; holder uuid; stamp timestamptz;
+DECLARE uid uuid; holder uuid; holder_world text; stamp timestamptz; changed bigint;
 BEGIN
  uid:=cw041_staging_security.actor(p_world_id);
  IF p_session_id IS NULL THEN RAISE EXCEPTION 'session_required' USING ERRCODE='42501'; END IF;
  PERFORM pg_advisory_xact_lock(hashtextextended('cw041:session-id:'||p_session_id::text,0));
  PERFORM pg_advisory_xact_lock(hashtextextended('cw041:session-actor:'||uid::text,0));
- SELECT user_id INTO holder FROM public.world_sessions WHERE session_id=p_session_id FOR UPDATE;
+ SELECT user_id,world_id INTO holder,holder_world FROM public.world_sessions WHERE session_id=p_session_id FOR UPDATE;
  IF FOUND AND holder IS DISTINCT FROM uid THEN RAISE EXCEPTION 'session_owned_by_another_actor' USING ERRCODE='42501'; END IF;
+ IF FOUND AND holder_world IS DISTINCT FROM p_world_id THEN RAISE EXCEPTION 'session_world_mismatch' USING ERRCODE='42501'; END IF;
  stamp:=clock_timestamp();
  DELETE FROM public.world_sessions WHERE world_id=p_world_id AND user_id=uid AND session_id<>p_session_id;
  INSERT INTO public.world_sessions(world_id,session_id,user_id,device_id,username,created_at,last_seen,conflicted)
  VALUES(p_world_id,p_session_id,uid,NULL,left(coalesce(p_username,'Player'),80),stamp,stamp,false)
  ON CONFLICT(session_id) DO UPDATE SET world_id=EXCLUDED.world_id,device_id=NULL,
   username=EXCLUDED.username,created_at=EXCLUDED.created_at,last_seen=EXCLUDED.last_seen,conflicted=false
- WHERE public.world_sessions.user_id=uid;
+ WHERE public.world_sessions.user_id=uid AND public.world_sessions.world_id=p_world_id;
+ GET DIAGNOSTICS changed=ROW_COUNT;
+ IF changed<>1 THEN RAISE EXCEPTION 'session_collision_rejected' USING ERRCODE='42501'; END IF;
  RETURN true;
 END $$;
 

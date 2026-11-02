@@ -1,6 +1,6 @@
 # Smallest staging multiplayer economy candidate
 
-Base `7f7517a`; dedicated branch `feature/0.4.1-multiplayer-economy-rc`.
+RC2 supersedes source candidate `5f742f2`; dedicated branch `feature/0.4.1-multiplayer-economy-rc`.
 **Backend staging candidate only. Not deployed; not production-ready; spending OFF.**
 No private export, real JWT, secret or hosted Supabase connection was used.
 
@@ -64,11 +64,24 @@ this function to a browser/server service role to make cleanup easier.
 
 ## Exact candidate and deployment boundary
 
-`CANDIDATE.json` locks SHA256s of the SQL, runtime, Edge entry/config, stop script,
-this scope/checklist and plan builder. `node build-plan.cjs --check` detects source,
-order, target or status drift. Regeneration is not approval. The private baseline
-and compiled reviewed hardening wrapper hashes are intentionally unavailable here.
-Until independently approved and recorded privately, the candidate is blocked.
+`CANDIDATE.json` is the immutable historical RC1 approval record; its bytes and
+hash values are retained. It is invalid for the current protected sources and
+`node build-plan.cjs --check` intentionally fails. Its approval does not transfer.
+
+`CANDIDATE-RC2.json` is a separate **unapproved RC2 proposal**, linked to RC1's
+metadata fingerprint and source commit. It locks the 14 exact source SHA256s.
+Use `node build-plan.cjs --candidate RC2 --check` explicitly. Source hashes remain
+byte-exact; only the historical JSON metadata fingerprint tolerates file line
+endings. Neither approved record nor an existing RC2 proposal can be overwritten
+by the builder. Implicit `--write` is refused; only explicit RC2 proposal creation
+can write a new file, once. Regeneration is not approval.
+
+RC2 closes same-user cross-world session reuse, verifies a successful scoped
+upsert, and removes unused player world-metadata INSERT/UPDATE/DELETE (including
+column and inherited grants). It adds no world ownership privilege, role
+exemption or player world-creation API. See REVIEW_RC2.md for proof and severities.
+The private baseline and compiled reviewed hardening wrapper hashes are still
+unavailable here. Until independently reviewed and approved, RC2 is blocked.
 
 Required order, in a fresh verified staging history:
 1. `20261101000100_reviewed_legacy_baseline.sql` — private approved baseline only.

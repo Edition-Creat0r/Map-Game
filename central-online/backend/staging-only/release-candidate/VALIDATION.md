@@ -1,5 +1,10 @@
 # Offline release-candidate validation
 
+Historical RC1 evidence at 5f742f2. Current source/approval state and test counts
+are in [REVIEW_RC2.md](REVIEW_RC2.md). The old unqualified source check intentionally
+fails on RC2; use the explicit RC2 command in NEXT_COMMANDS_RC2.md.
+
+
 Base `7f7517a8f21daf83db4893f577e14ad95fd6f1df` on a new dedicated
 `feature/0.4.1-multiplayer-economy-rc` branch. No Supabase access, private export,
 credentials, deployment, hosted SQL, main merge or player activation occurred.

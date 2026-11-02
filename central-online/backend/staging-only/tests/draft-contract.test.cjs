@@ -27,6 +27,8 @@ for(const [name,change,error] of [
  ['inherited elevated role','GRANT service_role TO authenticated;',/elevated role/],
  ['inherited write grant','CREATE ROLE synthetic_writer NOLOGIN;GRANT synthetic_writer TO authenticated;GRANT UPDATE(last_seen) ON public.world_sessions TO synthetic_writer;',/inherited legacy column/],
  ['inherited claim truncate','CREATE ROLE synthetic_truncator NOLOGIN;GRANT synthetic_truncator TO authenticated;GRANT TRUNCATE ON public.territory_claims TO synthetic_truncator;',/inherited legacy table/],
+ ['inherited world DML','CREATE ROLE synthetic_world_writer NOLOGIN;GRANT synthetic_world_writer TO authenticated;GRANT INSERT ON public.worlds TO synthetic_world_writer;',/inherited legacy table/],
+ ['inherited world column DML','CREATE ROLE synthetic_world_column_writer NOLOGIN;GRANT synthetic_world_column_writer TO authenticated;GRANT UPDATE(name) ON public.worlds TO synthetic_world_column_writer;',/inherited legacy column/],
  ['additional definer RPC',"CREATE FUNCTION public.synthetic_forge() RETURNS void LANGUAGE sql SECURITY DEFINER AS 'UPDATE public.world_sessions SET conflicted=false';GRANT EXECUTE ON FUNCTION public.synthetic_forge() TO authenticated;",/additional public SECURITY DEFINER/],
  ['unknown trigger',"CREATE FUNCTION public.synthetic_hook() RETURNS trigger LANGUAGE plpgsql AS 'BEGIN RETURN NEW; END';CREATE TRIGGER z_synthetic BEFORE UPDATE ON public.world_sessions FOR EACH ROW EXECUTE FUNCTION public.synthetic_hook();",/preexisting legacy triggers/],
 ]) test('draft fails atomically on '+name,()=>refuses(change,error));

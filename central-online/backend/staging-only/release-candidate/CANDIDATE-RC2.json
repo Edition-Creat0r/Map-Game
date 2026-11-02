@@ -1,0 +1,75 @@
+{
+  "formatVersion": 2,
+  "candidateId": "RC2",
+  "baseCommit": "5f742f2008d87276f76b3d8fde0f31580b2abcc4",
+  "supersedes": {
+    "candidateId": "RC1",
+    "manifest": "CANDIDATE.json",
+    "metadataSha256": "1b8a1b533d7d0ebd4a096945f07751f4061d6903e961657b308562a0945b7099",
+    "sourceCommit": "5f742f2008d87276f76b3d8fde0f31580b2abcc4",
+    "status": "INVALID_FOR_CURRENT_SOURCES_APPROVAL_NOT_TRANSFERRED"
+  },
+  "stagingProjectRef": "upcrdvdspypoyferpuxe",
+  "productionProjectForbidden": "vjwvhtsjdsbcorszzldk",
+  "status": "BLOCKED_PENDING_PRIVATE_SCHEMA_AND_STAGING_TESTS",
+  "spendingEnabled": false,
+  "liveEnforcementVerified": false,
+  "hardDeletionSupported": false,
+  "approvalsRequired": [
+    "fresh RC2 protected-source review; RC1 approval does not transfer",
+    "private baseline and complete metadata review",
+    "exact baseline and hardening wrapper approval",
+    "disabled staging deployment approval",
+    "separate temporary two-account spending-test approval"
+  ],
+  "migrationOrder": [
+    {
+      "step": 1,
+      "name": "20261101000100_reviewed_legacy_baseline.sql",
+      "source": null,
+      "sha256": null,
+      "required": "Private reviewed baseline; never supplied by a test fixture or raw unreviewed export"
+    },
+    {
+      "step": 2,
+      "name": "20261101000200_reviewed_staging_hardening.sql",
+      "source": "central-online/backend/staging-only/draft/000_staging_legacy_security.DRAFT.sql",
+      "sha256": "633eb69552e877579d4bb9f4dac310e82e0d311bb89c092af65f65e24356c31e",
+      "required": "Explicitly reviewed same-transaction wrapper with both SET LOCAL acknowledgements; record compiled wrapper hash privately"
+    },
+    {
+      "step": 3,
+      "name": "20261101000300_cp1_backend.sql",
+      "source": "central-online/backend/migrations/001_backend.sql",
+      "sha256": "766ee44761a023f6481ff7b8ec8f33b366c73c4df0b41cb0036a3aed0117c2f9"
+    },
+    {
+      "step": 4,
+      "name": "20261101000400_cp1_pin_rules.sql",
+      "source": "central-online/backend/migrations/002_pin_rules.sql",
+      "sha256": "985449052c25f6441347b710c2a1b637a6fc0998118e88a212007f7e70a2a7fe"
+    },
+    {
+      "step": 5,
+      "name": "20261101000500_cp1_legacy_coordination.sql",
+      "source": "central-online/backend/migrations/003_legacy_coordination.sql",
+      "sha256": "10b3abfd4650fe83a510673aae0956373b4789f468e01113d6c73fa7dc7d88cd"
+    }
+  ],
+  "files": {
+    "central-online/backend/staging-only/draft/000_staging_legacy_security.DRAFT.sql": "633eb69552e877579d4bb9f4dac310e82e0d311bb89c092af65f65e24356c31e",
+    "central-online/backend/migrations/001_backend.sql": "766ee44761a023f6481ff7b8ec8f33b366c73c4df0b41cb0036a3aed0117c2f9",
+    "central-online/backend/migrations/002_pin_rules.sql": "985449052c25f6441347b710c2a1b637a6fc0998118e88a212007f7e70a2a7fe",
+    "central-online/backend/migrations/003_legacy_coordination.sql": "10b3abfd4650fe83a510673aae0956373b4789f468e01113d6c73fa7dc7d88cd",
+    "central-online/backend/rollback-disable.sql": "1c32703ff5b27f406ef4a80df938fe72f3159050f2395c5ef72cccedd8fbcf5b",
+    "central-online/backend/supabase/config.toml": "aa5211513334b4f48e466e51f01be56fe06197daaf08d5866b1e0f50eb01f427",
+    "central-online/backend/supabase/functions/central-economy/index.ts": "d11139ec976529cb2f9eb65f33ef6aab40ab18035138024d96499ae8f5fe1b3d",
+    "central-online/backend/handler.mjs": "f398daecba6173bdec4e3e6b182e30368d04e84f66c9d60beaca0b7251fac363",
+    "central-online/backend/engine.mjs": "3ae6446838a10afc123cd3e1acd5dde6c15ae208bdfd5c5bf48bf5c57068d961",
+    "central-online/backend/generated/rules.mjs": "e0679a267c4ce3ad4a0dbeab2500c4c091ea6ba2a447aca23c403088d5451f68",
+    "central-online/backend/generated/manifest.json": "b39fd42cefcaf37bf3bc3a3bc621ee2ac0c3a98c07babd27c674909854abfdd1",
+    "central-online/backend/staging-only/release-candidate/WINDOWS_ACCEPTANCE.md": "5388ee845871bbd7855524dcff11ce717d34f2a4454b388735098144ecc7005a",
+    "central-online/backend/staging-only/release-candidate/RELEASE_SCOPE.md": "4bd71dcd393c2ae0a86d8e2d28bbbdf3e1b388f26b59f8756ba4225b0c1e331f",
+    "central-online/backend/staging-only/release-candidate/build-plan.cjs": "6df8c785c0ed0693684a1387d129446b71cc7678aa16312818d8d299eab4be18"
+  }
+}

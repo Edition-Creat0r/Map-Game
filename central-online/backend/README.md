@@ -5,14 +5,18 @@
 Offline follow-up: [staging-only security draft and dependency review](staging-only/README.md),
 [Windows CLI guide](WINDOWS_STAGING_DEPLOYMENT.md), and
 [private schema export/review/import procedure](staging-only/WINDOWS_SCHEMA_REVIEW.md).
+RC1 CANDIDATE.json remains unchanged as a historical source-approval record.
+It is invalid for the modified sources; RC2 needs fresh approval and explicit
+`build-plan.cjs --candidate RC2 --check`. No old approval transfers.
+
 Owner-supplied metadata has since identified legacy session/ownership issues;
 complete exported-schema review and genuine staging tests remain outstanding.
 No live credentials, hosted SQL or remote deployment were used for that follow-up.
 
 Latest offline staging candidate: [scope and gates](staging-only/release-candidate/RELEASE_SCOPE.md),
-[locked source/migration plan](staging-only/release-candidate/CANDIDATE.json),
+[RC2 source/migration proposal](staging-only/release-candidate/CANDIDATE-RC2.json),
 [Windows acceptance](staging-only/release-candidate/WINDOWS_ACCEPTANCE.md), and
-[offline results](staging-only/release-candidate/VALIDATION.md). It is pinned to
+[final RC2 security review/results](staging-only/release-candidate/REVIEW_RC2.md). It is pinned to
 `upcrdvdspypoyferpuxe`, still OFF, and supports only non-destructive owner-only
 session recovery. Account/world hard deletion and player-facing shop activation
 remain unavailable. No live enforcement is claimed.
