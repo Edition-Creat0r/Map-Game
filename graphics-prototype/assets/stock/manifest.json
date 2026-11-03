@@ -1,0 +1,92 @@
+{
+  "format": "map-game-graphics",
+  "version": 1,
+  "packId": "frontier-prototype-v1",
+  "license": "CC0-1.0",
+  "models": [
+    {
+      "catalogId": "smallHouse",
+      "source": "procedural-v1",
+      "dimensions": [
+        18,
+        12,
+        22
+      ],
+      "pivot": "base-center"
+    },
+    {
+      "catalogId": "steelMill",
+      "source": "procedural-v1",
+      "dimensions": [
+        118,
+        32,
+        92
+      ],
+      "pivot": "base-center"
+    },
+    {
+      "catalogId": "officeLow",
+      "source": "procedural-v1",
+      "dimensions": [
+        86,
+        24,
+        72
+      ],
+      "pivot": "base-center"
+    }
+  ],
+  "surfaces": {
+    "grass": {
+      "file": "textures/grass.png",
+      "tileMeters": 4
+    },
+    "dirt": {
+      "file": "textures/dirt.png",
+      "tileMeters": 4
+    },
+    "gravel": {
+      "file": "textures/gravel.png",
+      "tileMeters": 4
+    },
+    "asphalt": {
+      "file": "textures/asphalt.png",
+      "tileMeters": 4
+    },
+    "concrete": {
+      "file": "textures/concrete.png",
+      "tileMeters": 4
+    }
+  },
+  "files": [
+    {
+      "path": "textures/grass.png",
+      "kind": "texture",
+      "bytes": 15251,
+      "sha256": "63b3422ada735a8308671241a1da1fbcb07f24bef271fd61266bddcb91cfe3c5"
+    },
+    {
+      "path": "textures/dirt.png",
+      "kind": "texture",
+      "bytes": 14677,
+      "sha256": "5358241e0ef823216f8667d6c4be934def11cd0326f0239f9fee69fda10f326b"
+    },
+    {
+      "path": "textures/gravel.png",
+      "kind": "texture",
+      "bytes": 16390,
+      "sha256": "c2963c247a92fc3ab1ba0161e21b132837a074f219f4b02200ec12510b233bc4"
+    },
+    {
+      "path": "textures/asphalt.png",
+      "kind": "texture",
+      "bytes": 11769,
+      "sha256": "3e9862cc0190044cd7a8e119900a82fe358bb925c6f2066fa51224ff38cfa1bb"
+    },
+    {
+      "path": "textures/concrete.png",
+      "kind": "texture",
+      "bytes": 14512,
+      "sha256": "1a863eeafd139ed83d176e008da447f425751f437b47bbae67c5f8c283e2105d"
+    }
+  ]
+}
