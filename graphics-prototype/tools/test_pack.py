@@ -18,7 +18,10 @@ class PackTests(unittest.TestCase):
   with self.assertRaises(ValueError):build(self.good,self.root)
  def test_traversal(self):
   for name in ['../x.png','/tmp/x.png','textures/../x.png','C:/x.png','textures\\x.png']:
-   with self.assertRaises(ValueError):load_zip(self.altered(entries={'manifest.json':json.dumps(self.m).encode(),name:b'x'}))
+   entries={'manifest.json':json.dumps(self.m).encode(),**self.blobs};blob=entries.pop('textures/grass.png');entries[name]=blob
+   destination=self.root/'unsafe-not-created'
+   with self.assertRaises(ValueError):build(self.altered(entries=entries),destination)
+   self.assertFalse(destination.exists())
  def test_extra_script(self):
   with self.assertRaises(ValueError):load_zip(self.altered(extra={'evil.js':b'alert(1)'}))
  def test_model_ids(self):
@@ -49,4 +52,23 @@ class PackTests(unittest.TestCase):
  def test_bad_png_crc(self):
   b=bytearray(next(iter(self.blobs.values())));b[-1]^=1
   with self.assertRaises(ValueError):png(bytes(b))
+ def test_duplicate_json_keys(self):
+  raw=json.dumps(self.m).replace('"version": 1','"version": 1, "version": 1')
+  with self.assertRaises(ValueError):load_zip(self.altered(entries={'manifest.json':raw.encode(),**self.blobs}))
+ def test_nonfinite_json(self):
+  raw=json.dumps(self.m).replace('"tileMeters": 4','"tileMeters": NaN',1)
+  with self.assertRaises(ValueError):load_zip(self.altered(entries={'manifest.json':raw.encode(),**self.blobs}))
+ def test_zip_expansion_rejected_before_build(self):
+  entries={'manifest.json':json.dumps(self.m).encode(),**self.blobs};entries['textures/grass.png']=b'0'*400000
+  target=self.root/'bomb.zip'
+  with zipfile.ZipFile(target,'w',compression=zipfile.ZIP_DEFLATED) as z:
+   for n,b in entries.items():z.writestr(n,b)
+  destination=self.root/'not-created'
+  with self.assertRaises(ValueError):build(target,destination)
+  self.assertFalse(destination.exists())
+ def test_oversized_png_dimensions(self):
+  from create_pack import chunk
+  import struct,zlib
+  blob=b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',2048,128,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(b'x'))+chunk(b'IEND',b'')
+  with self.assertRaises(ValueError):png(blob)
 if __name__=='__main__':unittest.main()

@@ -1,0 +1,211 @@
+{
+  "scope": "Actual Basic Singleplayer; alternating exact 0a2e157 source baseline; fresh contexts, same camera/seed/assets",
+  "rows": [
+    {
+      "variant": "baseline",
+      "bootMs": 1360,
+      "territoryMs": 1006,
+      "frames": {
+        "fps": 60,
+        "p95": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "camera": {
+        "x": 16384,
+        "z": 16384,
+        "zoom": 0.32,
+        "territory": {
+          "x": 190,
+          "y": 27,
+          "id": "T_190_27",
+          "biome": "tundra",
+          "biomeInfo": {
+            "id": "temperate_forest",
+            "label": "Temperate forest",
+            "weights": {
+              "temperate_forest": 0.28858199868446954,
+              "grassland": 0.2649507678716633,
+              "dry_plains": 0,
+              "taiga": 0.252151531529137,
+              "alpine": 0,
+              "tundra_snow": 0,
+              "wetlands": 0.1943157019147302,
+              "coastal": 0
+            },
+            "color": [
+              76.25811176157197,
+              120.5101833966765,
+              79.36150256425401
+            ],
+            "latitude": 0.8259493670886076,
+            "temperature": 0.47857805873457016,
+            "waterProximity": 0
+          }
+        }
+      },
+      "longTasks": [
+        138,
+        185,
+        66
+      ],
+      "prototypeTextureRequests": [],
+      "errors": [],
+      "http": [],
+      "failed": []
+    },
+    {
+      "variant": "prototype",
+      "bootMs": 1296,
+      "territoryMs": 1251,
+      "frames": {
+        "fps": 60.00600060006,
+        "p95": 16.799999999999272,
+        "max": 16.800000000000182
+      },
+      "camera": {
+        "x": 16384,
+        "z": 16384,
+        "zoom": 0.32,
+        "territory": {
+          "x": 190,
+          "y": 27,
+          "id": "T_190_27",
+          "biome": "tundra",
+          "biomeInfo": {
+            "id": "temperate_forest",
+            "label": "Temperate forest",
+            "weights": {
+              "temperate_forest": 0.28858199868446954,
+              "grassland": 0.2649507678716633,
+              "dry_plains": 0,
+              "taiga": 0.252151531529137,
+              "alpine": 0,
+              "tundra_snow": 0,
+              "wetlands": 0.1943157019147302,
+              "coastal": 0
+            },
+            "color": [
+              76.25811176157197,
+              120.5101833966765,
+              79.36150256425401
+            ],
+            "latitude": 0.8259493670886076,
+            "temperature": 0.47857805873457016,
+            "waterProximity": 0
+          }
+        }
+      },
+      "longTasks": [
+        141,
+        220,
+        107
+      ],
+      "prototypeTextureRequests": [],
+      "errors": [],
+      "http": [],
+      "failed": []
+    },
+    {
+      "variant": "prototype",
+      "bootMs": 1275,
+      "territoryMs": 1027,
+      "frames": {
+        "fps": 60.00300015000751,
+        "p95": 16.700000000000728,
+        "max": 16.800000000000182
+      },
+      "camera": {
+        "x": 16384,
+        "z": 16384,
+        "zoom": 0.32,
+        "territory": {
+          "x": 190,
+          "y": 27,
+          "id": "T_190_27",
+          "biome": "tundra",
+          "biomeInfo": {
+            "id": "temperate_forest",
+            "label": "Temperate forest",
+            "weights": {
+              "temperate_forest": 0.28858199868446954,
+              "grassland": 0.2649507678716633,
+              "dry_plains": 0,
+              "taiga": 0.252151531529137,
+              "alpine": 0,
+              "tundra_snow": 0,
+              "wetlands": 0.1943157019147302,
+              "coastal": 0
+            },
+            "color": [
+              76.25811176157197,
+              120.5101833966765,
+              79.36150256425401
+            ],
+            "latitude": 0.8259493670886076,
+            "temperature": 0.47857805873457016,
+            "waterProximity": 0
+          }
+        }
+      },
+      "longTasks": [
+        134,
+        173
+      ],
+      "prototypeTextureRequests": [],
+      "errors": [],
+      "http": [],
+      "failed": []
+    },
+    {
+      "variant": "baseline",
+      "bootMs": 1262,
+      "territoryMs": 1265,
+      "frames": {
+        "fps": 60.00300015000751,
+        "p95": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "camera": {
+        "x": 16384,
+        "z": 16384,
+        "zoom": 0.32,
+        "territory": {
+          "x": 190,
+          "y": 27,
+          "id": "T_190_27",
+          "biome": "tundra",
+          "biomeInfo": {
+            "id": "temperate_forest",
+            "label": "Temperate forest",
+            "weights": {
+              "temperate_forest": 0.28858199868446954,
+              "grassland": 0.2649507678716633,
+              "dry_plains": 0,
+              "taiga": 0.252151531529137,
+              "alpine": 0,
+              "tundra_snow": 0,
+              "wetlands": 0.1943157019147302,
+              "coastal": 0
+            },
+            "color": [
+              76.25811176157197,
+              120.5101833966765,
+              79.36150256425401
+            ],
+            "latitude": 0.8259493670886076,
+            "temperature": 0.47857805873457016,
+            "waterProximity": 0
+          }
+        }
+      },
+      "longTasks": [
+        134,
+        183
+      ],
+      "prototypeTextureRequests": [],
+      "errors": [],
+      "http": [],
+      "failed": []
+    }
+  ]
+}
