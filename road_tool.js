@@ -1097,6 +1097,14 @@
       return null;
     }
 
+    // Optional render-only replacement; road graph/validation stays authoritative.
+    if (window.mapGameGraphicsPrototype) {
+      try {
+        const replacement = window.mapGameGraphicsPrototype.intersection(runtime(), node, connections, ensureRoadRoot());
+        if (replacement) return replacement;
+      } catch (_) { /* Preserve the existing intersection visual. */ }
+    }
+
     const maxWidth =
       Math.max(
         10,

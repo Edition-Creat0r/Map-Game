@@ -29,7 +29,8 @@ Use embedded PNG/WebP where supported by a future reviewed loader. Near budget
 textures preferred. No completed GLBs are supplied or loaded by this prototype.
 
 Procedural v1 uses prebuilt, material-merged meshes and three distance LODs with
-20% hysteresis. No positions/styles are randomized per frame. A scene owns shared
+approximately 20% hysteresis (near/medium exit ratios 2 and 3; medium/far 5 and 7,
+distance divided by footprint span). LOD checks run at a 100 ms cadence. No positions/styles are randomized per frame. A scene owns shared
 materials/textures; disposed roots leave the LOD registry. Prototype construction
 is opt-in for Regular/Deep; Basic calls the original renderer and loads no tiles.
 The existing paused Regular loop is not activated. The showroom is a separate
@@ -38,7 +39,9 @@ The existing paused Regular loop is not activated. The showroom is a separate
 Four-way intersection uses existing road2 width 14m. Only four same-level,
 near-orthogonal road2 arms qualify; other graph nodes fall back to the old visual.
 Graph IDs, elevations, curves, lane/access rules and saved roads are unchanged.
-Grass/dirt/gravel/asphalt/concrete are material swatches and prototype surfaces;
+Rough terrain uses diffuse StandardMaterials, trilinear filtering and anisotropy 1;
+building surfaces use PBR where appropriate. Showroom shadows are static contacts,
+not live shadow maps. Grass/dirt/gravel/asphalt/concrete are material swatches and prototype surfaces;
 they never replace authoritative water, height, biome, forest or buildability data.
 
 ## Versioned ZIP format / safe workflow
@@ -77,3 +80,7 @@ All five new generated tiles and prototype geometry are original contributions
 under CC0-1.0; code uses repository terms. No third-party assets were downloaded or
 redistributed. Existing repo assets keep their existing licenses; licensing of old
 textures/models was not established, so they are not bundled into this ZIP.
+
+Repository audit found only assets/models/cars/sedan-01.glb, no matching building
+GLBs or local asset-license/attribution catalog. Existing material paths are used
+only by the unchanged baseline renderer; new pack assets are generated originals.
