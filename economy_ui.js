@@ -79,7 +79,7 @@
     shop.setAttribute("role", "dialog");
     shop.setAttribute("aria-modal", "true");
     shop.setAttribute("aria-label", "Construction shop");
-    shop.innerHTML = `<div class="mg-econ-shell"><header><div><small>SINGLEPLAYER · CONSTRUCTION</small><h2>The construction frontier</h2></div><button data-close aria-label="Close shop">Close ×</button></header><p>Choose a building, then click a suitable site. R rotates; Escape cancels. Payment happens only when placed.</p><details class="mg-production-note"><summary>Production rates</summary><p>Production and recipe inputs: 1.2× while online; 1× offline, with no time cap. Upkeep is unboosted.</p></details><p>Homes, utilities and industry. Research opens new possibilities.</p><div class="mg-industrial-filters"><label>Category <select data-category><option value="starter">Starter buildings</option><option value="all">All buildings</option><option value="industries">All industries</option><option value="residential">Residential</option><option value="commercial">Commercial</option><option value="utilities">Utilities & Energy</option>${Object.entries(
+    shop.innerHTML = `<div class="mg-econ-shell"><header><div><small>SINGLEPLAYER · CONSTRUCTION</small><h2>Build your next chapter.</h2></div><button data-close aria-label="Close shop">Close ×</button></header><p>Choose a plan. Find a site. Make it yours. Payment happens only on valid placement. R rotates · Escape cancels.</p><details class="mg-production-note"><summary>Production rates</summary><p>Production and recipe inputs: 1.2× while online; 1× offline, with no time cap. Upkeep is unboosted.</p></details><div class="mg-industrial-filters"><label>Category <select data-category><option value="starter">Starter buildings</option><option value="all">All buildings</option><option value="industries">All industries</option><option value="residential">Residential</option><option value="commercial">Commercial</option><option value="utilities">Utilities & Energy</option>${Object.entries(
       labels,
     )
       .map(([id, name]) => `<option value="${id}">${name}</option>`)
@@ -125,7 +125,7 @@
         render(); return;
       }
       const inspect = e.target.closest("[data-inspect]");
-      if (inspect) { selected = inspect.dataset.inspect; renderInspector(lastSnapshot || window.mapGameEconomy.snapshot()); return; }
+      if (inspect) { selected = inspect.dataset.inspect; render(); return; }
       const button = e.target.closest("[data-buy]");
       if (!button || button.disabled) return;
       const def = defs().find((v) => v.id === button.dataset.buy);
@@ -217,7 +217,7 @@
           ]),
       ]);
       if (list.dataset.renderKey !== renderKey) {
-        const focused = document.activeElement?.dataset.buy;
+        const focusedElement=document.activeElement, focusedKey=["buy","favorite","inspect"].find(k=>focusedElement?.dataset[k]), focused=focusedKey?focusedElement.dataset[focusedKey]:null;
         list.innerHTML =
           filtered
             .slice(page * PAGE, (page + 1) * PAGE)
@@ -233,21 +233,23 @@
                     : !window.mapGameEconomy.canAfford(d.cost)
                       ? "Insufficient construction resources"
                       : "";
+              const state = window.mapGamePremium?.shopState(d,locked,snap.enabled,active,window.mapGameEconomy.canAfford(d.cost)) || {state:reason?"unavailable":"ready",label:locked?"Discover":"Available"};
               const production = Object.keys(r.production || {}).length
                 ? amounts(r.production, true)
                 : r.housing
                   ? `Housing +${r.housing} · growth ${r.growth}/min when powered`
                   : `Energy capacity +${r.energySupply}`;
-              return `<article data-catalog-id="${d.id}" class="mg-build-card"><button class="mg-build-preview" data-inspect="${d.id}" aria-label="Inspect ${esc(d.name)}">${window.mapGameVisuals?.preview(d) || ""}</button><button data-favorite="${d.id}" aria-label="Favorite ${esc(d.name)}" aria-pressed="${favorites.includes(d.id)}">${favorites.includes(d.id) ? "★" : "☆"}</button><div class="mg-build-copy"><small>${esc(d.sectorLabel || d.category)} · Era ${esc(d.era || 1)} · ${locked ? "Discover" : "Available"}</small><h4>${esc(d.name)}</h4><p class="mg-build-cost">${amounts(d.cost)}</p><p class="mg-build-output">${production}</p><p class="mg-build-needs">ϟ ${r.energyUse || 0} · ♙ ${r.workforce || 0} workers · $${r.upkeep || 0}/min upkeep</p><details ${shop.querySelector("[data-detail]").checked ? "open" : ""}><summary>Recipe & site</summary><p>Inputs: ${Object.keys(r.inputs || {}).length ? amounts(r.inputs, true) : "No material inputs"}</p><p>${d.footprint.join(" × ")} m · dry ground · slope ≤ 0.54 · no overlap</p></details><p class="mg-build-reason" id="reason-${d.id}">${esc(reason)}</p></div><button data-buy="${d.id}" aria-describedby="reason-${d.id}" ${reason ? "disabled" : ""}>Place</button></article>`;
+              return `<article data-catalog-id="${d.id}" data-state="${state.state}" data-selected="${selected===d.id}" class="mg-build-card"><button class="mg-build-preview" data-inspect="${d.id}" aria-pressed="${selected===d.id}" aria-label="Inspect ${esc(d.name)}">${window.mapGameVisuals?.preview(d) || ""}</button><button data-favorite="${d.id}" aria-label="Favorite ${esc(d.name)}" aria-pressed="${favorites.includes(d.id)}">${favorites.includes(d.id) ? "★" : "☆"}</button><div class="mg-build-copy"><small>${esc(d.sectorLabel || d.category)} · Era ${esc(d.era || 1)} · ${state.label}</small><h4>${esc(d.name)}</h4><p class="mg-build-cost">${amounts(d.cost)}</p><p class="mg-build-output">${production}</p><p class="mg-build-needs">ϟ ${r.energyUse || 0} · ♙ ${r.workforce || 0} workers · $${r.upkeep || 0}/min upkeep</p><details ${shop.querySelector("[data-detail]").checked ? "open" : ""}><summary>Recipe & site</summary><p>Inputs: ${Object.keys(r.inputs || {}).length ? amounts(r.inputs, true) : "No material inputs"}</p><p>${d.footprint.join(" × ")} m · dry ground · slope ≤ 0.54 · no overlap</p></details><p class="mg-build-reason" id="reason-${d.id}">${esc(reason)}</p></div><button data-buy="${d.id}" aria-describedby="reason-${d.id}" ${reason ? "disabled" : ""}>Place Building <span aria-hidden="true">↗</span></button></article>`;
             })
             .join("") || "<p>No matching buildings.</p>";
         list.dataset.renderKey = renderKey;
         if (focused) {
-          const button = list.querySelector(`[data-buy="${focused}"]`);
+          const button = list.querySelector(`[data-${focusedKey}="${focused}"]`);
           if (button && !button.disabled) button.focus();
         }
       }
     }
+    if(shop&&!shop.hidden){const list=shop.querySelector('[data-list]');if(list.dataset.selection!==String(selected)){list.dataset.selection=String(selected);for(const card of list.querySelectorAll('[data-catalog-id]')){card.dataset.selected=String(card.dataset.catalogId===selected);card.querySelector('[data-inspect]').setAttribute('aria-pressed',card.dataset.selected);}}}
     if (shop && !shop.hidden && selected) renderInspector(snap);
     if (stats && !stats.hidden) {
       const s = snap.summary,
@@ -318,10 +320,13 @@
     const reason=P.reason(snap,d) || (!snap.enabled ? "Singleplayer only" : !window.mapGameBasicWorld?.getState()?.active ? "Enter a local territory" : !window.mapGameEconomy.canAfford(d.cost) ? "Insufficient construction resources" : "");
     const key=JSON.stringify([d.id,reason]); if (el.dataset.key===key) return; el.dataset.key=key;
     const active = value => Object.fromEntries(Object.entries(value||{}).map(([k,v]) => [k,v*1.2]));
-    el.innerHTML = `${window.mapGameVisuals?.preview(d)||""}<small>${esc(d.sectorLabel||d.category)} · Era ${esc(d.era||1)}</small><h3>${esc(d.name)}</h3><p>${esc(d.industrial ? "A production site in your manufacturing network." : d.description || "A foundation for your settlement.")}</p><h4>Construction</h4><p>${amounts(d.cost)}</p><p>Footprint: ${d.footprint.join(" × ")} m. Dry authoritative ground; slope ≤ 0.54; no overlap.</p><h4>Base / offline recipe per minute</h4><p>Inputs: ${amounts(r.inputs,true)||"None"}</p><p>Outputs: ${amounts(r.production,true)||"No material output"}</p><h4>Active play · 1.2× throughput</h4><p>Inputs: ${amounts(active(r.inputs),true)||"None"}</p><p>Outputs: ${amounts(active(r.production),true)||"No material output"}</p><h4>Operating requirements</h4><p>Power use ${r.energyUse||0} · supply ${r.energySupply||0}<br>Workers ${r.workforce||0} · upkeep $${fmt(r.upkeep||0)}/min (unboosted)${r.housing ? `<br>Housing ${r.housing} · growth ${r.growth}/min (unboosted)` : ""}</p><p>Insufficient inputs, workers, power or upkeep constrain production under the existing simulation rules. Offline time is uncapped.</p><h4>Research & progression</h4><p>${esc(d.technology ? technology.get(d.technology)||d.technology : "Starter contract")}</p>${d.researchRequirements ? `<p>Singleplayer licenses: ${d.researchRequirements.map(id=>esc(P.research.nodes.find(n=>n.id===id)?.name||id)).join(", ")}</p>` : ""}<p>Advancements recognize actual buildings and research; browsing grants no rewards.</p><p>${esc(reason||"Ready to choose a site. No payment until valid placement.")}</p><button data-inspector-place ${reason?"disabled":""}>Place ${esc(d.name)}</button><details><summary>Future upgrades</summary><p>Levels 1–10 · Production, Efficiency, Automation, Logistics. No effects active.</p><button disabled>Upgrade · Planned</button></details>`;
+    el.innerHTML = `${window.mapGameVisuals?.preview(d)||""}<small>${esc(d.sectorLabel||d.category)} · Era ${esc(d.era||1)}</small><h3>${esc(d.name)}</h3><p>${esc(d.industrial ? "A production site in your manufacturing network." : d.description || "A foundation for your settlement.")}</p><div class="premium-inspector-action"><p>${esc(reason||"Ready to choose a site. No payment until valid placement.")}</p><button class="premium-place" data-inspector-place ${reason?"disabled":""}>Place Building · ${esc(d.name)} ↗</button></div><h4>Construction costs</h4><p>${amounts(d.cost)}</p><p>Footprint: ${d.footprint.join(" × ")} m. Dry authoritative ground; slope ≤ 0.54; no overlap.</p><h4>Base / offline recipe per minute</h4><p>Inputs: ${amounts(r.inputs,true)||"None"}</p><p>Outputs: ${amounts(r.production,true)||"No material output"}</p><h4>Active play · 1.2× throughput</h4><p>Inputs: ${amounts(active(r.inputs),true)||"None"}</p><p>Outputs: ${amounts(active(r.production),true)||"No material output"}</p><h4>Operating requirements</h4><p>Power use ${r.energyUse||0} · supply ${r.energySupply||0}<br>Workers ${r.workforce||0} · upkeep $${fmt(r.upkeep||0)}/min (unboosted)${r.housing ? `<br>Housing ${r.housing} · growth ${r.growth}/min (unboosted)` : ""}</p><p>Insufficient inputs, workers, power or upkeep constrain production under the existing simulation rules. Offline time is uncapped.</p><h4>Research & progression</h4><p>${esc(d.technology ? technology.get(d.technology)||d.technology : "Starter contract")}</p>${d.researchRequirements ? `<p>Singleplayer licenses: ${d.researchRequirements.map(id=>esc(P.research.nodes.find(n=>n.id===id)?.name||id)).join(", ")}</p>` : ""}<p>Advancements recognize actual buildings and research; browsing grants no rewards.</p><details><summary>Future upgrades</summary><p>Levels 1–10 · Production, Efficiency, Automation, Logistics. No effects active.</p><button disabled>Upgrade · Planned</button></details>`;
     el.querySelector("[data-inspector-place]").onclick = () => { hideShop(); window.mapGameBasicWorld.beginConstruction(d); };
   }
   function showShop() {
+    if(document.getElementById("mgEasyCraft")?.hidden===false)window.mapGameEasyCraft?.hide();
+    if(document.querySelector(".mf-dialog:not([hidden])"))window.mapGameFrontier?.close();
+    const settings=document.getElementById("mgSettingsPanel");if(settings)settings.hidden=true;
     if (!document.activeElement?.closest?.("#mgEconomyShop"))
       shopReturn = document.activeElement;
     ensure();

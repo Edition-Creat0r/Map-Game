@@ -52,6 +52,7 @@
     </span>`;
   }
   function preview(d) {
+    if (window.mapGamePremium) return window.mapGamePremium.preview(d);
     const house = d.category === "Residential",
       plant = d.economy?.energySupply,
       industrial = d.industrial || d.category === "Industrial",
@@ -124,6 +125,10 @@
   function settings() {
     const el = document.getElementById("mgSettingsPanel");
     if (!el) return;
+    if(document.querySelector(".mf-dialog:not([hidden])"))window.mapGameFrontier?.close();
+    window.mapGameEconomyUI?.hideShop();
+    const research=document.getElementById("mgProgressionPanel");if(research)research.hidden=true;
+    if(document.getElementById("mgEasyCraft")?.hidden===false)window.mapGameEasyCraft?.hide();
     settingsReturn = document.activeElement;
     el.hidden = false;
     trapDialog(el);
@@ -194,6 +199,7 @@
       button.setAttribute("aria-label", text.trim());
       button.title = button.title || text.trim();
     }
+    window.mapGamePremium?.settings(panel);
   }
   const fmt = new Intl.NumberFormat(undefined, {
     maximumFractionDigits: 1,
