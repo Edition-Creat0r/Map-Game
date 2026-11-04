@@ -1,0 +1,46 @@
+{
+  "errors": [],
+  "failed": [],
+  "http": [],
+  "checks": [
+    "Nine buildings bought and placed through actual shop/canvas, including five new industrial factories",
+    "Pagination/search, future locks, definition-only entries and API purchase rejection",
+    "Resolved iron bottleneck by building another mine, smelter and home; foundry resumes at full throughput",
+    "Actual mine → iron/carbon → steel production, exact inventory persistence and territory/world navigation",
+    "Pre-catalog steel factory earns its original no-input rate after schema-2 migration",
+    "Interactive full-catalog reference and upstream recipe graph"
+  ],
+  "bottleneck": {
+    "id": "948f2777-1659-4b45-8bcd-a304e1f2a7ce",
+    "type": "steelFoundry",
+    "operating": false,
+    "reason": "Insufficient input materials",
+    "shortages": [
+      {
+        "material": "iron",
+        "required": 2.4,
+        "available": 1.0528
+      }
+    ]
+  },
+  "progression": {
+    "before": 129,
+    "after": 240.45612,
+    "workers": 22,
+    "energy": 30
+  },
+  "production": {
+    "beforeSteel": 70,
+    "afterSteel": 129,
+    "ironOre": 2.15264,
+    "coal": 2.15312,
+    "population": 40,
+    "energy": 9,
+    "workers": 8
+  },
+  "legacy": {
+    "steel": 360,
+    "money": 198860,
+    "contract": "starter-v1:steelMill"
+  }
+}

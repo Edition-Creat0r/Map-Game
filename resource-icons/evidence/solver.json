@@ -1,0 +1,128 @@
+[
+  {
+    "count": 100,
+    "scenario": "mixed-stocked",
+    "years": 1000,
+    "warmups": 2,
+    "samples": 5,
+    "medianMs": 3.7466269999999895,
+    "minMs": 3.1266339999999673,
+    "maxMs": 5.126884000000018,
+    "preparationMedianMs": 0.8753839999999968,
+    "rawSamples": [
+      3.7152719999999704,
+      3.1266339999999673,
+      3.7466269999999895,
+      5.126884000000018,
+      4.183078999999964
+    ],
+    "passes": 1,
+    "evaluations": 24,
+    "tenMinuteReferenceAgreement": true
+  },
+  {
+    "count": 100,
+    "scenario": "mixed-scarce",
+    "years": 1000,
+    "warmups": 2,
+    "samples": 5,
+    "medianMs": 1.918011999999976,
+    "minMs": 1.6167279999999664,
+    "maxMs": 2.840129999999988,
+    "preparationMedianMs": 0.5662880000000428,
+    "rawSamples": [
+      1.918011999999976,
+      1.6167279999999664,
+      1.85961599999996,
+      2.4065729999999803,
+      2.840129999999988
+    ],
+    "passes": 1,
+    "evaluations": 17,
+    "tenMinuteReferenceAgreement": true
+  },
+  {
+    "count": 1000,
+    "scenario": "mixed-stocked",
+    "years": 1000,
+    "warmups": 2,
+    "samples": 5,
+    "medianMs": 23.113013999999907,
+    "minMs": 16.179874999999925,
+    "maxMs": 24.550058000000035,
+    "preparationMedianMs": 1.911155000000008,
+    "rawSamples": [
+      19.26980500000002,
+      23.113013999999907,
+      24.194503000000054,
+      24.550058000000035,
+      16.179874999999925
+    ],
+    "passes": 1,
+    "evaluations": 28,
+    "tenMinuteReferenceAgreement": true
+  },
+  {
+    "count": 1000,
+    "scenario": "mixed-scarce",
+    "years": 1000,
+    "warmups": 2,
+    "samples": 5,
+    "medianMs": 8.288145999999983,
+    "minMs": 5.741966000000048,
+    "maxMs": 13.427598999999987,
+    "preparationMedianMs": 1.4675149999999348,
+    "rawSamples": [
+      8.288145999999983,
+      9.02745200000004,
+      6.527898999999934,
+      13.427598999999987,
+      5.741966000000048
+    ],
+    "passes": 1,
+    "evaluations": 14,
+    "tenMinuteReferenceAgreement": true
+  },
+  {
+    "count": 10000,
+    "scenario": "mixed-stocked",
+    "years": 1000,
+    "warmups": 2,
+    "samples": 5,
+    "medianMs": 86.05175700000018,
+    "minMs": 78.88807300000008,
+    "maxMs": 95.40983400000005,
+    "preparationMedianMs": 8.839627999999948,
+    "rawSamples": [
+      91.13479200000006,
+      86.05175700000018,
+      84.44148899999982,
+      95.40983400000005,
+      78.88807300000008
+    ],
+    "passes": 1,
+    "evaluations": 28,
+    "tenMinuteReferenceAgreement": true
+  },
+  {
+    "count": 10000,
+    "scenario": "mixed-scarce",
+    "years": 1000,
+    "warmups": 2,
+    "samples": 5,
+    "medianMs": 42.22830099999965,
+    "minMs": 39.52864199999976,
+    "maxMs": 43.42480700000033,
+    "preparationMedianMs": 7.998755000000074,
+    "rawSamples": [
+      39.60112900000013,
+      43.42480700000033,
+      42.711289999999735,
+      42.22830099999965,
+      39.52864199999976
+    ],
+    "passes": 1,
+    "evaluations": 14,
+    "tenMinuteReferenceAgreement": true
+  }
+]

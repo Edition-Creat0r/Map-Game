@@ -1,4 +1,4 @@
-import io, pathlib, tempfile, unittest, zipfile
+import io, pathlib, tempfile, unittest, zipfile, struct, zlib
 from PIL import Image
 from audit_zip import audit, EXPECTED
 class AuditTests(unittest.TestCase):
@@ -27,6 +27,21 @@ class AuditTests(unittest.TestCase):
     def test_trailing_content(self):self.rejected(lambda d:d.update({'64px/icon_1.png':self.png+b'javascript:'}))
     def test_invisible(self):
         b=io.BytesIO();Image.new('RGBA',(64,64)).save(b,format='PNG');self.rejected(lambda d:d.update({'64px/icon_1.png':b.getvalue()}))
+    def test_exact_duplicate(self):
+        self.write()
+        with zipfile.ZipFile(self.path,'a') as z:z.writestr('64px/icon_1.png',self.png)
+        with self.assertRaisesRegex(ValueError,'Duplicate'):audit(self.path)
+    def test_png_crc(self):
+        damaged=bytearray(self.png);damaged[45]^=1
+        self.rejected(lambda d:d.update({'64px/icon_1.png':bytes(damaged)}))
+    def test_expansion_ratio(self):
+        self.write(lambda d:d.update({'64px/icon_1.png':b'A'*50000}))
+        with self.assertRaisesRegex(ValueError,'expansion'):audit(self.path)
+    def test_png_decompression_bomb(self):
+        def chunk(k,p):return struct.pack('>I',len(p))+k+p+struct.pack('>I',zlib.crc32(k+p)&0xffffffff)
+        blob=b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',64,64,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(b'\0'*1000000))+chunk(b'IEND',b'')
+        self.write(lambda d:d.update({'64px/icon_1.png':blob}))
+        with self.assertRaisesRegex(ValueError,'PNG decompression'):audit(self.path)
     def test_symlink(self):
         self.write()
         with zipfile.ZipFile(self.path,'a') as z:

@@ -7,7 +7,7 @@
  function mapping(registry,rows){
   const map=new Map();
   for(const row of rows){
-   if(registry.material(row.id)?.id!==row.id||map.has(row.id)||row.license!=='CC0-1.0'||!row.source||!/^assets\/resource-icons\/[a-z0-9-]+\.png$/.test(row.file)&&!(row.id==='money'&&row.file==='assets/resource-icons/credit.svg'))throw Error('Unreviewed/invalid resource icon mapping');
+   if(typeof row?.id!=='string'||registry.material(row.id)?.id!==row.id||map.has(row.id)||row.license!=='CC0-1.0'||typeof row.source!=='string'||!row.source.trim()||typeof row.file!=='string'||!/^assets\/resource-icons\/[a-z0-9-]+\.png$/.test(row.file)&&!(row.id==='money'&&row.file==='assets/resource-icons/credit.svg'))throw Error('Unreviewed/invalid resource icon mapping');
    map.set(row.id,Object.freeze({...row}));
   }
   return map;

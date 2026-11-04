@@ -91,7 +91,8 @@ fs.mkdirSync(out, { recursive: true });
   );
   await p.click('[data-c1="research"]');
   await p.waitForFunction(
-    () => document.querySelectorAll(".mg-research-links path").length === 7,
+    () => document.querySelectorAll(".mg-research-links path").length ===
+      mapGameProgression.research.nodes.reduce((sum,node)=>sum+node.prerequisites.length,0),
   );
   await p.click('[data-research="basicIndustry"]');
   await p.waitForFunction(() =>

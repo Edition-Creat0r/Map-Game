@@ -1,0 +1,12 @@
+{
+  "errors": [],
+  "http": [],
+  "failed": [],
+  "checks": [
+    "Original money ID / artwork loaded; exact stopped ledger unchanged",
+    "Inventory quantity, shop and research icons",
+    "Recipe browsing, automatic-only crafting, Central World disabled",
+    "Repeated collapse, construction navigation, save/reload"
+  ],
+  "expectedDecodeFallback": true
+}

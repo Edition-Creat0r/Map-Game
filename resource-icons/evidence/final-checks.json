@@ -1,0 +1,53 @@
+[
+  {
+    "name": "node",
+    "code": 0,
+    "seconds": 6.45
+  },
+  {
+    "name": "resource-icons",
+    "code": 0,
+    "seconds": 15.07
+  },
+  {
+    "name": "graphics-prototype-sp",
+    "code": 0,
+    "seconds": 9.2
+  },
+  {
+    "name": "modern-frontier",
+    "code": 0,
+    "seconds": 26.61
+  },
+  {
+    "name": "industrial-042a",
+    "code": 0,
+    "seconds": 27.65
+  },
+  {
+    "name": "industrial-expansion",
+    "code": 0,
+    "seconds": 12.05
+  },
+  {
+    "name": "visual-ui",
+    "code": 0,
+    "seconds": 18.34
+  },
+  {
+    "name": "phase-b",
+    "code": 1,
+    "seconds": 19.49
+  },
+  {
+    "name": "city",
+    "code": 0,
+    "seconds": 75.43
+  },
+  {
+    "name": "phase-b-final-exact-catalog-IDs",
+    "code": 0,
+    "report": "phase-b-resolved.json",
+    "resolves": "stale mining pagination and refining reference counts"
+  }
+]

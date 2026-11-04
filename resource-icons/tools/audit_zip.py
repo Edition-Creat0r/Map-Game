@@ -9,7 +9,7 @@ EXPECTED = {f'64px/icon_{i}.png' for i in range(1, 125)}
 def reject(message): raise ValueError(message)
 def png_chunks(blob):
     if blob[:8] != b'\x89PNG\r\n\x1a\n': reject('PNG signature required')
-    pos=8; kinds=[]
+    pos=8; kinds=[]; compressed=b''
     while pos < len(blob):
         if pos+12 > len(blob): reject('Truncated PNG')
         n,=struct.unpack('>I',blob[pos:pos+4]); k=blob[pos+4:pos+8]
@@ -18,10 +18,17 @@ def png_chunks(blob):
         if zlib.crc32(k+payload)&0xffffffff != crc: reject('PNG CRC')
         if k in (b'acTL',b'fcTL',b'fdAT') or not re.fullmatch(b'[A-Za-z]{4}',k): reject('Animated/invalid PNG')
         if k[:1].isupper() and k not in (b'IHDR',b'PLTE',b'IDAT',b'IEND'): reject('Unknown critical chunk')
-        if k == b'IHDR' and (kinds or n!=13): reject('PNG header order')
+        if k == b'IHDR':
+            if kinds or n!=13: reject('PNG header order')
+            if struct.unpack('>II',payload[:8])!=(64,64): reject('Expected 64x64 PNG header')
+        if k == b'IDAT': compressed+=payload
         if k == b'IEND' and (n or pos+12!=len(blob)): reject('PNG trailing bytes')
         kinds.append(k); pos+=n+12
     if kinds[:1]!=[b'IHDR'] or kinds[-1:]!=[b'IEND'] or b'IDAT' not in kinds: reject('PNG structure')
+    # Even 16-bit RGBA Adam7 at 64x64 fits below 64 KiB. Bound PNG's own
+    # deflate stream independently of ZIP expansion and the image decoder.
+    dec=zlib.decompressobj(); raw=dec.decompress(compressed,65537)
+    if len(raw)>65536 or not dec.eof or dec.unconsumed_tail or dec.unused_data: reject('PNG decompression limit/stream')
 def audit(source):
     source=pathlib.Path(source)
     if source.stat().st_size > MAX_TOTAL: reject('Archive size limit')
@@ -56,4 +63,4 @@ def audit(source):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__); parser.add_argument('archive'); args=parser.parse_args()
     try: print(json.dumps(audit(args.archive),indent=2))
-    except (ValueError,OSError,zipfile.BadZipFile,SyntaxError) as e: parser.exit(2,'Audit rejected: '+str(e)+'\n')
+    except (ValueError,OSError,zipfile.BadZipFile,SyntaxError,zlib.error,Image.DecompressionBombError) as e: parser.exit(2,'Audit rejected: '+str(e)+'\n')

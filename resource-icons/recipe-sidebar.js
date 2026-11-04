@@ -6,7 +6,13 @@
  function recipes(catalog){return catalog.filter(d=>d.economy&&Object.keys(d.economy.production||{}).some(k=>k!=='money'));}
  function inventory(s,id){return s[id]??s.inventory?.[id]??0;}
  function contracts(s,id){return (s.placedIncomeItems||[]).filter(r=>r.type===id).map(row=>({row,rule:s.economy?.rules?.[row.economyContract]}));}
- const model={recipes,inventory,contracts};
+ function status(sp,enabled,locked,count,statuses){
+  if(!sp)return 'Central World crafting unavailable: server-authoritative crafting is not connected.';
+  if(!enabled)return 'Singleplayer economy paused or settling.';
+  if(count)return `${statuses.filter(x=>x.operating).length}/${count} factories operating. ${[...new Set(statuses.map(x=>x.reason))].join(' · ')}`;
+  return locked||'Build a factory to start automatic production.';
+ }
+ const model={recipes,inventory,contracts,status};
  if(typeof module!=='undefined'){module.exports=model;return;}
  const E=root.mapGameEconomy,V=root.mapGameVisuals,R=root.mapGameIndustrialRegistry,P=root.mapGameProgression;
  const defs=recipes(root.mapGameBuildings.CATALOG),byId=new Map(defs.map(d=>[d.id,d]));let panel,button,selected=defs[0]?.id,last=null,signature='';
@@ -33,9 +39,11 @@
   const key=JSON.stringify([selected,sp,s.enabled,locked,owned.length,statuses.map(x=>[x.reason,x.operating]),Object.keys({...r.inputs,...r.production}).map(id=>inventory(s,id)),legacy.map(x=>x.rule)]);
   if(signature===key)return;signature=key;
   const first=Object.keys(r.production||{})[0],area=panel.querySelector('[data-recipe-content]');
-  area.innerHTML=`<div class="mg-recipe-hero">${V.icon(first)}<h3>${esc(d.name)}</h3></div><p>Catalog recipe · base/offline rates. Visible online throughput and inputs ×1.2; upkeep is unboosted.</p><h4>Required resources</h4><ul>${amounts(r.inputs,s)}</ul><h4>Output quantity</h4><ul>${amounts(r.production,s)}</ul><p>${fmt(r.energyUse)} power · ${fmt(r.workforce)} workers · $${fmt(r.upkeep)}/min upkeep</p><p data-recipe-status role="status">${!sp?'Central World crafting unavailable: server-authoritative crafting is not connected.':locked?esc(locked):!s.enabled?'Singleplayer economy paused or settling.':owned.length?`${statuses.filter(x=>x.operating).length}/${owned.length} factories operating. ${[...new Set(statuses.map(x=>x.reason))].map(esc).join(' · ')}`:'Build a factory to start automatic production.'}</p>${legacy.length?`<details><summary>Saved contracts retained (${legacy.length})</summary><p>These buildings keep their purchased rules; rates below are per level, before the existing online multiplier. No recipe is replaced.</p>${[...new Map(legacy.map(x=>[JSON.stringify(x.rule),x.rule])).values()].slice(0,10).map(rule=>`<h4>Saved inputs → outputs</h4><ul>${amounts(rule.inputs,s)}</ul><ul>${amounts(rule.production,s)}</ul>`).join('')}</details>`:''}<button disabled>Crafting is automatic at factories</button><button data-recipe-shop ${!sp?'disabled':''}>View construction</button>`;
+  area.innerHTML=`<div class="mg-recipe-hero">${V.icon(first)}<h3>${esc(d.name)}</h3></div><p>Catalog recipe · base/offline rates. Visible online throughput and inputs ×1.2; upkeep is unboosted.</p><h4>Required resources</h4><ul>${amounts(r.inputs,s)}</ul><h4>Output quantity</h4><ul>${amounts(r.production,s)}</ul><p>${fmt(r.energyUse)} power · ${fmt(r.workforce)} workers · $${fmt(r.upkeep)}/min upkeep</p><p data-recipe-status role="status">${esc(status(sp,s.enabled,locked,owned.length,statuses))}</p>${legacy.length?`<details><summary>Saved contracts retained (${legacy.length})</summary><p>These buildings keep their purchased rules; rates below are per level, before the existing online multiplier. No recipe is replaced.</p>${[...new Map(legacy.map(x=>[JSON.stringify(x.rule),x.rule])).values()].slice(0,10).map(rule=>`<h4>Saved inputs → outputs</h4><ul>${amounts(rule.inputs,s)}</ul><ul>${amounts(rule.production,s)}</ul>`).join('')}</details>`:''}<button disabled>Crafting is automatic at factories</button><button data-recipe-shop ${!sp?'disabled':''}>View construction</button>`;
   area.querySelector('[data-recipe-shop]').onclick=()=>{if(document.body.dataset.world!=='singleplayer')return;hide();root.mapGameEconomyUI.showShop();const shop=document.getElementById('mgEconomyShop');shop.querySelector('[data-category]').value='all';shop.querySelector('[data-availability]').value='all';const search=shop.querySelector('[data-search]');search.value=d.id;search.dispatchEvent(new Event('input',{bubbles:true}));};
  }
- E.subscribe(s=>{last=s;install();render(s);});root.addEventListener('mapgame:runtime-ready',install);
+ // Reuse the economy's existing emitted snapshot. subscribe() eagerly clones
+ // the entire city even while closed; an event listener avoids that extra boot copy.
+ root.addEventListener('mapgame:economy',event=>{last=event.detail;install();render(last);});root.addEventListener('mapgame:runtime-ready',install);install();
  root.mapGameEasyCraft={hide,show:()=>{install();button?.click();},model};
 })(globalThis);

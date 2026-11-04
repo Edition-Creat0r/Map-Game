@@ -1,0 +1,117 @@
+[
+  {
+    "name": "node",
+    "code": 0,
+    "seconds": 6.12
+  },
+  {
+    "name": "terrain-pack",
+    "code": 0,
+    "seconds": 2.47
+  },
+  {
+    "name": "resource-pack",
+    "code": 0,
+    "seconds": 0.37
+  },
+  {
+    "name": "resource-icons",
+    "code": 0,
+    "seconds": 13.32
+  },
+  {
+    "name": "graphics-prototype-sp",
+    "code": 0,
+    "seconds": 6.68
+  },
+  {
+    "name": "modern-frontier",
+    "code": 0,
+    "seconds": 30.77
+  },
+  {
+    "name": "industrial-042a",
+    "code": 0,
+    "seconds": 27.13
+  },
+  {
+    "name": "industrial-expansion",
+    "code": 0,
+    "seconds": 12.19
+  },
+  {
+    "name": "visual-ui",
+    "code": 1,
+    "seconds": 37.2
+  },
+  {
+    "name": "visual-restoration",
+    "code": 0,
+    "seconds": 55.38
+  },
+  {
+    "name": "phase-c1",
+    "code": 0,
+    "seconds": 16.58
+  },
+  {
+    "name": "phase-b",
+    "code": 1,
+    "seconds": 8.72
+  },
+  {
+    "name": "economy",
+    "code": 0,
+    "seconds": 21.09
+  },
+  {
+    "name": "forest",
+    "code": 0,
+    "seconds": 33.16
+  },
+  {
+    "name": "environment",
+    "code": 0,
+    "seconds": 19.62
+  },
+  {
+    "name": "industrial",
+    "code": 0,
+    "seconds": 19.16
+  },
+  {
+    "name": "graphics-prototype",
+    "code": 0,
+    "seconds": 104.68
+  },
+  {
+    "name": "industrial-phase-b",
+    "code": 0,
+    "seconds": 21.72
+  },
+  {
+    "name": "industrial-042a-solver",
+    "code": 0,
+    "seconds": 4.65
+  },
+  {
+    "name": "phase-c1-solver",
+    "code": 0,
+    "seconds": 19.83
+  },
+  {
+    "name": "economy-rc-solver",
+    "code": 0,
+    "seconds": 31.43
+  },
+  {
+    "name": "phase-b-solver",
+    "code": 0,
+    "seconds": 1.83
+  },
+  {
+    "name": "industrial-solver",
+    "code": 0,
+    "seconds": 8.3
+  }
+]
