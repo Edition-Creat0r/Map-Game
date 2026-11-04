@@ -116,6 +116,8 @@ fs.mkdirSync(out, { recursive: true });
     economy: localStorage.getItem(mapGameEconomy.SAVE_KEY),
     world: localStorage.getItem("mapGame_alpha021_firstPlayable"),
   }));
+  await p.click('[data-studio-tab="interface"]');
+  await p.locator(".premium-interface-advanced > summary").click();
   await p.selectOption("[data-visual-theme]", "midnight");
   await p.selectOption("[data-visual-density]", "compact");
   const after = await p.evaluate(() => ({

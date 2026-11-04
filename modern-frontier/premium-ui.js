@@ -14,7 +14,7 @@
   if(!home)for(let i=0;i<5;i++)shapes+=`<path d="m${89+i*9} ${commercial?55+i*-4:76-i*4} 5-2v${commercial?24:10}l-5 2Z" fill="#b7e7df" opacity=".8"/>`;
   if(sector==='chemicals'||sector==='refining')shapes+='<ellipse cx="47" cy="87" rx="16" ry="7" fill="#afc2c2"/><path d="M31 87v21q16 13 32 0V87q-16 12-32 0Z" fill="#739b9b"/>';
   if(sector==='mining')shapes+='<path d="m40 109 24-19 19 8 15 16-30 12Z" fill="#77786b" stroke="#b4af90"/>';
-  const svg=`<svg class="mg-building-preview premium-preview" viewBox="0 0 200 146" role="img" aria-label="${esc(d.name)} illustration, footprint ${d.footprint.join(' by ')} metres"><path d="m12 103 92-42 84 38-91 44Z" fill="#071822"/><path d="m12 98 92-42 84 38-91 44Z" fill="#274550" stroke="#69a1ae55"/><path d="m20 100 80-37m-60 46 80-37m-60 46 80-37m-69 47 78-36" stroke="#5d849142"/>${shapes}<path d="m138 116 26-12" stroke="#e8c681" stroke-width="2"/><circle cx="170" cy="102" r="3" fill="${tone}"/></svg>`;
+  const svg=`<svg class="mg-building-preview premium-preview" viewBox="0 0 200 146" role="img" aria-label="${esc(d.name)} illustration, footprint ${esc(d.footprint.join(' by '))} metres"><path d="m12 103 92-42 84 38-91 44Z" fill="#071822"/><path d="m12 98 92-42 84 38-91 44Z" fill="#274550" stroke="#69a1ae55"/><path d="m20 100 80-37m-60 46 80-37m-60 46 80-37m-69 47 78-36" stroke="#5d849142"/>${shapes}<path d="m138 116 26-12" stroke="#e8c681" stroke-width="2"/><circle cx="170" cy="102" r="3" fill="${tone}"/></svg>`;
   cache.set(key,svg);return svg;
  }
  function settings(panel){

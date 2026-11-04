@@ -108,7 +108,15 @@
           ...panel.querySelectorAll(
             'button:not(:disabled),input,select,a[href],summary,[tabindex="0"]',
           ),
-        ].filter((x) => x.getClientRects().length);
+        ].filter((x) => {
+          if (x.tabIndex < 0 || x.matches(":disabled") || x.closest("[hidden],[inert]") || !x.getClientRects().length || getComputedStyle(x).visibility === "hidden") return false;
+          // Closed details can retain layout boxes in Chromium. Their hidden
+          // descendants cannot receive focus; only the summary remains tabbable.
+          for (let parent=x.parentElement; parent && parent!==panel; parent=parent.parentElement) {
+            if (parent.tagName === "DETAILS" && !parent.open && !parent.querySelector(":scope > summary")?.contains(x)) return false;
+          }
+          return true;
+        });
         if (a.length) {
           if (e.shiftKey && document.activeElement === a[0]) {
             e.preventDefault();
@@ -128,7 +136,7 @@
     if(document.querySelector(".mf-dialog:not([hidden])"))window.mapGameFrontier?.close();
     window.mapGameEconomyUI?.hideShop();
     const research=document.getElementById("mgProgressionPanel");if(research)research.hidden=true;
-    if(document.getElementById("mgEasyCraft")?.hidden===false)window.mapGameEasyCraft?.hide();
+    if(document.getElementById("mgEasyCraft")?.hidden===false)window.mapGameEasyCraft?.hide(false);
     settingsReturn = document.activeElement;
     el.hidden = false;
     trapDialog(el);

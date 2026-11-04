@@ -17,7 +17,7 @@
  const E=root.mapGameEconomy,V=root.mapGameVisuals,R=root.mapGameIndustrialRegistry,P=root.mapGameProgression;
  const defs=recipes(root.mapGameBuildings.CATALOG),byId=new Map(defs.map(d=>[d.id,d]));let panel,button,selected=defs[0]?.id,last=null,signature='';
  const fmt=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:2});
- function hide(){if(panel){panel.hidden=true;button?.setAttribute('aria-expanded','false');button?.focus();}}
+ function hide(restoreFocus=true){if(panel){panel.hidden=true;button?.setAttribute('aria-expanded','false');if(restoreFocus)button?.focus();}}
  function install(){
   const dock=document.getElementById('mgDock');if(button||!dock)return;
   button=document.createElement('button');button.id='mgEasyCraftButton';button.textContent='Easy Craft';button.title='Factory recipes and inventory';button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls','mgEasyCraft');dock.append(button);

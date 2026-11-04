@@ -245,7 +245,8 @@
         list.dataset.renderKey = renderKey;
         if (focused) {
           const button = list.querySelector(`[data-${focusedKey}="${focused}"]`);
-          if (button && !button.disabled) button.focus();
+          if (button && !button.disabled) button.focus({preventScroll:true});
+          else shop.querySelector("[data-search]").focus({preventScroll:true});
         }
       }
     }
@@ -324,7 +325,7 @@
     el.querySelector("[data-inspector-place]").onclick = () => { hideShop(); window.mapGameBasicWorld.beginConstruction(d); };
   }
   function showShop() {
-    if(document.getElementById("mgEasyCraft")?.hidden===false)window.mapGameEasyCraft?.hide();
+    if(document.getElementById("mgEasyCraft")?.hidden===false)window.mapGameEasyCraft?.hide(false);
     if(document.querySelector(".mf-dialog:not([hidden])"))window.mapGameFrontier?.close();
     const settings=document.getElementById("mgSettingsPanel");if(settings)settings.hidden=true;
     if (!document.activeElement?.closest?.("#mgEconomyShop"))
