@@ -1,0 +1,47 @@
+[
+  {
+    "name": "node",
+    "code": 0,
+    "seconds": 6.21
+  },
+  {
+    "name": "premium-ui",
+    "code": 0,
+    "seconds": 39.64
+  },
+  {
+    "name": "premium-fallback",
+    "code": 0,
+    "seconds": 2.43
+  },
+  {
+    "name": "modern-frontier",
+    "code": 0,
+    "seconds": 27.4
+  },
+  {
+    "name": "visual-ui",
+    "code": 0,
+    "seconds": 19.4
+  },
+  {
+    "name": "resource-icons",
+    "code": 0,
+    "seconds": 13.56
+  },
+  {
+    "name": "city",
+    "code": 0,
+    "seconds": 74.81
+  },
+  {
+    "name": "performance-reduced",
+    "code": 0,
+    "seconds": 93.93
+  },
+  {
+    "name": "performance-default",
+    "code": 0,
+    "seconds": 104.6
+  }
+]

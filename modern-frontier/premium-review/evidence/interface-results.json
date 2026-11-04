@@ -1,0 +1,44 @@
+{
+  "errors": [],
+  "http": [],
+  "failed": [],
+  "checks": [
+    "Three resolutions: shop/inspector/achievements/settings",
+    "Canonical states, exact cancel/placement charges and real completion",
+    "Favorites, focus retention, tree/list/zoom/keyboard and three pins",
+    "Three settings tabs, disabled unsupported controls, unchanged save bytes",
+    "Reduced-motion notice, preference/achievement persistence, repeated navigation"
+  ],
+  "resolutions": [
+    {
+      "variant": "before",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "variant": "before",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "variant": "before",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "variant": "after",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "variant": "after",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "variant": "after",
+      "width": 1920,
+      "height": 1080
+    }
+  ]
+}

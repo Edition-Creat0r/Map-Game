@@ -1,0 +1,107 @@
+[
+  {
+    "name": "node",
+    "code": 0,
+    "seconds": 6.4
+  },
+  {
+    "name": "terrain-pack",
+    "code": 0,
+    "seconds": 2.47
+  },
+  {
+    "name": "resource-audit",
+    "code": 0,
+    "seconds": 0.37
+  },
+  {
+    "name": "premium-ui",
+    "code": 1,
+    "seconds": 31.16
+  },
+  {
+    "name": "premium-fallback",
+    "code": 0,
+    "seconds": 2.58
+  },
+  {
+    "name": "modern-frontier",
+    "code": 0,
+    "seconds": 31.56
+  },
+  {
+    "name": "visual-ui",
+    "code": 0,
+    "seconds": 23.9
+  },
+  {
+    "name": "resource-icons",
+    "code": 0,
+    "seconds": 15.37
+  },
+  {
+    "name": "graphics-prototype-sp",
+    "code": 0,
+    "seconds": 6.99
+  },
+  {
+    "name": "industrial-042a",
+    "code": 0,
+    "seconds": 37.48
+  },
+  {
+    "name": "industrial-expansion",
+    "code": 0,
+    "seconds": 13.88
+  },
+  {
+    "name": "phase-b",
+    "code": 0,
+    "seconds": 20.47
+  },
+  {
+    "name": "phase-c1",
+    "code": 0,
+    "seconds": 16.91
+  },
+  {
+    "name": "economy",
+    "code": 0,
+    "seconds": 24.34
+  },
+  {
+    "name": "forest",
+    "code": 0,
+    "seconds": 36.36
+  },
+  {
+    "name": "environment",
+    "code": 0,
+    "seconds": 24.52
+  },
+  {
+    "name": "industrial",
+    "code": 0,
+    "seconds": 19.83
+  },
+  {
+    "name": "graphics-prototype",
+    "code": 0,
+    "seconds": 100.38
+  },
+  {
+    "name": "city",
+    "code": 0,
+    "seconds": 78.17
+  },
+  {
+    "name": "shop-benchmark",
+    "code": 0,
+    "seconds": 13.44
+  },
+  {
+    "name": "industrial-solver",
+    "code": 0,
+    "seconds": 4.7
+  }
+]

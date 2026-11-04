@@ -1,0 +1,4 @@
+Initial strong keyboard check failed: Shift+Tab from settings Close could not reach the hidden candidate chosen by the old focus filter.
+Fix: filter disabled, negative-tabindex, inert/hidden and closed-details descendants.
+Latest premium-ui-browser: all checks passed, including Shift+Tab/Tab wrap, focus after removing last favorite, and programmatic planner dismissal.
+Tree-only zoom controls are hidden in native-scrolling list mode.
