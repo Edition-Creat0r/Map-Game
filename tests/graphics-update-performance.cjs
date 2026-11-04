@@ -1,0 +1,23 @@
+// Exact dba4aac procedural renderer vs candidate; identical art/camera/fixtures.
+const {chromium}=require('playwright-core'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{execFileSync}=require('node:child_process');
+const out=process.argv[2]||'/tmp/graphics-update-performance',origin=process.env.MAP_GAME_TEST_URL||'http://127.0.0.1:8017';fs.mkdirSync(out,{recursive:true});
+const previous=execFileSync('git',['show','dba4aac:graphics-prototype/prototype.js']);
+const summarize=a=>{const s=[...a].sort((a,b)=>a-b);return{fps:1000*a.length/a.reduce((a,b)=>a+b),p95:s[Math.floor(s.length*.95)],max:s.at(-1),samples:a.length}};
+(async()=>{const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox','--enable-unsafe-swiftshader']});const report={rows:[],errors:[],http:[],failed:[],scope:'Same software WebGL procedural art; only prototype.js differs from dba4aac'};try{
+ for(const [variant,run]of [['before',0],['after',0],['after',1],['before',1],['before',2],['after',2]]){
+  const p=await b.newPage({viewport:{width:1440,height:1000}});p.on('pageerror',e=>report.errors.push(e.message));p.on('console',m=>{if(m.type()==='error')report.errors.push(m.text())});p.on('response',r=>{if(r.status()>=400)report.http.push([r.url(),r.status()])});p.on('requestfailed',r=>report.failed.push(r.url()));
+  if(variant==='before')await p.route('**/graphics-prototype/prototype.js*',r=>r.fulfill({body:previous,contentType:'application/javascript'}));
+  const start=Date.now();await p.goto(origin+'/graphics-prototype/');await p.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Ready'),null,{timeout:60000});const bootMs=Date.now()-start;
+  await p.evaluate(()=>{window.gpInstrumentation=new BABYLON.SceneInstrumentation(graphicsShowroom.scene);});await p.waitForTimeout(1500);await p.evaluate(()=>graphicsShowroom.resetMetrics());await p.waitForFunction(()=>graphicsShowroom.metrics().intervals.length>=120,null,{timeout:60000});
+  const m=await p.evaluate(()=>{const g=graphicsShowroom,s=g.scene;return{...g.metrics(),drawCalls:gpInstrumentation.drawCallsCounter?.current??null,textures:s.textures.length,internalTextures:g.engine.getLoadedTexturesCache().length,textureRgba8MipEstimateBytes:g.engine.getLoadedTexturesCache().reduce((n,t)=>n+t.width*t.height*4*(t.generateMipMaps?4/3:1),0),vertices:s.meshes.reduce((n,m)=>n+m.getTotalVertices(),0)};});
+  await p.evaluate(()=>graphicsShowroom.resetMetrics());for(let i=0;i<16;i++){await p.evaluate(i=>{const g=graphicsShowroom;g.view(i%3===0?'smallHouse':'overview');g.camera.radius=i%2?380:80;g.camera.target.x+=i*3;},i);await p.waitForTimeout(100);}const motion=await p.evaluate(()=>graphicsShowroom.metrics());assert.equal(motion.meshes,m.meshes);assert.equal(motion.materials,m.materials);
+  report.rows.push({variant,run,bootMs,frames:summarize(m.intervals),motion:summarize(motion.intervals),longTasks:m.longTasks,camera:m.camera,drawCalls:m.drawCalls,meshes:m.meshes,active:m.active,materials:m.materials,textures:m.textures,internalTextures:m.internalTextures,textureRgba8MipEstimateBytes:m.textureRgba8MipEstimateBytes,vertices:m.vertices});
+  if(run===0){for(const view of ['overview','smallHouse','surfaces']){await p.selectOption('#view',view);await p.waitForTimeout(400);await p.screenshot({path:path.join(out,variant+'-'+view+'.png')});}}
+  if(variant==='after'&&run===0){
+   const cache=await p.evaluate(()=>{const g=graphicsShowroom,P=mapGameGraphicsPrototype,first=P.surface(g.scene,'grass',28,28),before={materials:g.scene.materials.length,textures:g.scene.textures.length};let same=true;for(let i=0;i<10000;i++)same&&=P.surface(g.scene,'grass',28,28)===first;const after={materials:g.scene.materials.length,textures:g.scene.textures.length};const invalid=P.surface(g.scene,'grass',NaN,28);first.dispose();const replacement=P.surface(g.scene,'grass',28,28);return{same,before,after,invalid:invalid===null,recreated:replacement!==first&&g.scene.materials.includes(replacement),diagnostics:P.diagnostics(g.scene)};});
+   assert.equal(cache.same,true);assert.deepEqual(cache.before,cache.after);assert.equal(cache.invalid,true);assert.equal(cache.recreated,true);report.surfaceCache=cache;
+  }
+  await p.close();
+ }
+ assert(report.rows.every(r=>JSON.stringify(r.camera)===JSON.stringify(report.rows[0].camera)));assert.deepEqual(report.errors,[]);assert.deepEqual(report.failed,[]);assert.deepEqual(report.http,[]);
+}catch(e){report.failure=e.message;throw e;}finally{fs.writeFileSync(path.join(out,'results.json'),JSON.stringify(report,null,2));await b.close();}})().catch(e=>{console.error(e);process.exitCode=1});

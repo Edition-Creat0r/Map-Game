@@ -39,7 +39,7 @@ The existing paused Regular loop is not activated. The showroom is a separate
 Four-way intersection uses existing road2 width 14m. Only four same-level,
 near-orthogonal road2 arms qualify; other graph nodes fall back to the old visual.
 Graph IDs, elevations, curves, lane/access rules and saved roads are unchanged.
-Rough terrain uses diffuse StandardMaterials, trilinear filtering and anisotropy 1;
+Rough terrain uses diffuse StandardMaterials, bilinear filtering within the nearest mip and anisotropy 1;
 building surfaces use PBR where appropriate. Showroom shadows are static contacts,
 not live shadow maps. Grass/dirt/gravel/asphalt/concrete are material swatches and prototype surfaces;
 they never replace authoritative water, height, biome, forest or buildability data.
@@ -84,3 +84,10 @@ textures/models was not established, so they are not bundled into this ZIP.
 Repository audit found only assets/models/cars/sedan-01.glb, no matching building
 GLBs or local asset-license/attribution catalog. Existing material paths are used
 only by the unchanged baseline renderer; new pack assets are generated originals.
+
+Resource/performance follow-up: `surface(scene,name,width,depth)` now shares a
+material/texture wrapper for identical scene/name/dimensions. Treat returned
+materials as shared and immutable; dispose only when all their users are gone.
+Different dimensions preserve their own UV scale. Disposal invalidates that
+cache entry; scene disposal clears it. The five texture files and world geography
+remain unchanged. See ../resource-icons/REPORT.md for matched measurements.

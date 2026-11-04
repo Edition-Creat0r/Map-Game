@@ -8,7 +8,7 @@
  function lod(previous,ratio){if(previous===0)return ratio>3?1:0;if(previous===2)return ratio<5?1:2;return ratio<2?0:ratio>7?2:1;}
  function resources(scene){
   if(scenes.has(scene))return scenes.get(scene);
-  const B=window.BABYLON,state={materials:{},roots:new Set(),surfaceClones:new Set(),tick:0,textures:[],failed:[]};
+  const B=window.BABYLON,state={materials:{},roots:new Set(),surfaceClones:new Set(),surfaces:new Map(),tick:0,textures:[],failed:[]};
   const colors={wall:[.62,.57,.47],roof:[.20,.25,.28],glass:[.16,.31,.37],trim:[.22,.25,.27],brick:[.48,.28,.21],metal:[.57,.61,.59],line:[.90,.86,.66],grass:[.35,.44,.23],dirt:[.52,.41,.28],gravel:[.49,.50,.47],asphalt:[.21,.23,.25],concrete:[.67,.66,.61]};
   for(const [key,rgb] of Object.entries(colors)){
    const isSurface=['grass','dirt','gravel','asphalt','concrete'].includes(key);
@@ -18,7 +18,8 @@
    if(key==='glass')m.emissiveColor=new B.Color3(.015,.025,.025);
    state.materials[key]=m;
    if(isSurface){
-    const t=new B.Texture(base+'assets/stock/textures/'+key+'.png',scene,false,false,B.Texture.TRILINEAR_SAMPLINGMODE,()=>{},()=>{m.diffuseTexture=null;m.diffuseColor=new B.Color3(...rgb);state.failed.push(key);for(const clone of state.surfaceClones)if(clone.metadata?.prototypeSurface===key){clone.diffuseTexture?.dispose();clone.diffuseTexture=null;clone.diffuseColor=new B.Color3(...rgb);}});t.uScale=t.vScale=1;t.anisotropicFilteringLevel=1;state.textures.push(t);m.diffuseTexture=t;m.diffuseColor=B.Color3.White();
+    // Bilinear within a mip; nearest mip selection avoids trilinear double sampling.
+    const t=new B.Texture(base+'assets/stock/textures/'+key+'.png',scene,false,false,B.Texture.LINEAR_LINEAR_MIPNEAREST,()=>{},()=>{m.diffuseTexture=null;m.diffuseColor=new B.Color3(...rgb);state.failed.push(key);for(const clone of state.surfaceClones)if(clone.metadata?.prototypeSurface===key){clone.diffuseTexture?.dispose();clone.diffuseTexture=null;clone.diffuseColor=new B.Color3(...rgb);}});t.uScale=t.vScale=1;t.anisotropicFilteringLevel=1;state.textures.push(t);m.diffuseTexture=t;m.diffuseColor=B.Color3.White();
    }
   }
   state.observer=scene.onBeforeRenderObservable.add(()=>{
@@ -26,7 +27,7 @@
    const c=scene.activeCamera;if(!c)return;
    for(const root of state.roots){if(root.isDisposed())continue;const ratio=B.Vector3.Distance(c.globalPosition,root.getAbsolutePosition())/root.metadata.graphicSpan,next=lod(root.metadata.graphicLOD,ratio);if(next!==root.metadata.graphicLOD){root.metadata.graphicLOD=next;root._gpLevels.forEach((n,i)=>n.setEnabled(i===next));}}
   });
-  scene.onDisposeObservable.add(()=>{state.roots.clear();state.surfaceClones.clear();scenes.delete(scene);});scenes.set(scene,state);return state;
+  scene.onDisposeObservable.add(()=>{state.roots.clear();state.surfaceClones.clear();state.surfaces.clear();scenes.delete(scene);});scenes.set(scene,state);return state;
  }
  function assembly(scene,parent){
   const B=window.BABYLON,parts=new Map();
@@ -82,8 +83,8 @@
   for(let i=0;i<4;i++){const r=i*Math.PI/2;for(let k=0;k<7;k++){const across=(k-3)*1.8;const x=across*Math.cos(r)+8*Math.sin(r),z=-across*Math.sin(r)+8*Math.cos(r);a.box('line',x,.61,z,1.1,.03,2.8,r);}a.box('concrete',(Math.cos(r)-Math.sin(r))*9,.34,(Math.sin(r)+Math.cos(r))*9,2,.42,2);}
   a.finish();return root;
  }
- function surface(scene,name,width,depth){const state=resources(scene),original=state.materials[name];if(!original)return null;const mat=original.clone('gp-surface-'+name);const key=original.diffuseTexture?'diffuseTexture':'albedoTexture';if(original[key]){mat[key]=original[key].clone();mat[key].uScale=width/4;mat[key].vScale=depth/4;mat[key].anisotropicFilteringLevel=1;}mat.metadata={prototypeSurface:name};state.surfaceClones.add(mat);mat.onDisposeObservable.add(()=>state.surfaceClones.delete(mat));return mat;}
+ function surface(scene,name,width,depth){const state=resources(scene),original=state.materials[name];if(!original||![width,depth].every(v=>Number.isFinite(v)&&v>0))return null;const cacheKey=JSON.stringify([name,width,depth]);if(state.surfaces.has(cacheKey))return state.surfaces.get(cacheKey);const mat=original.clone('gp-surface-'+name);const key=original.diffuseTexture?'diffuseTexture':'albedoTexture';if(original[key]){mat[key]=original[key].clone();mat[key].uScale=width/4;mat[key].vScale=depth/4;mat[key].anisotropicFilteringLevel=1;}mat.metadata={prototypeSurface:name};state.surfaceClones.add(mat);state.surfaces.set(cacheKey,mat);mat.onDisposeObservable.add(()=>{state.surfaceClones.delete(mat);state.surfaces.delete(cacheKey);});return mat;}
  const old=window.mapGameBuildings?.renderPlacedBuilding;
  if(old)window.mapGameBuildings.renderPlacedBuilding=function(runtime,data,parent){if(enabled(runtime)&&specs[data.type]){try{const root=createBuilding(runtime,data,parent);if(root)return root;}catch(_){/* Original visual remains usable. */}}return old(runtime,data,parent);};
- window.mapGameGraphicsPrototype={version:1,specs,lod,enabled,createBuilding,intersection,surface,legacyBuilding:old,diagnostics:scene=>({roots:scenes.get(scene)?.roots.size||0,missingTextures:[...(scenes.get(scene)?.failed||[])]})};
+ window.mapGameGraphicsPrototype={version:1,specs,lod,enabled,createBuilding,intersection,surface,legacyBuilding:old,diagnostics:scene=>({roots:scenes.get(scene)?.roots.size||0,missingTextures:[...(scenes.get(scene)?.failed||[])],surfaceCache:scenes.get(scene)?.surfaces.size||0})};
 })();
