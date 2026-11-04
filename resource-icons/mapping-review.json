@@ -1,0 +1,842 @@
+{
+  "version": 1,
+  "status": "ModernResource_Free.zip absent; source and license unverified; no pack icons imported",
+  "internalCount": 139,
+  "playerFacingCount": 118,
+  "materials": [
+    {
+      "id": "money",
+      "name": "Money",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "iron",
+      "name": "Iron",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "steel",
+      "name": "Steel",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "carbon",
+      "name": "Carbon",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "concrete",
+      "name": "Concrete",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "glass",
+      "name": "Glass",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "ironOre",
+      "name": "Iron Ore",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "coal",
+      "name": "Coal",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "silica",
+      "name": "Silica",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "limestone",
+      "name": "Limestone",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "copperOre",
+      "name": "Copper Ore",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "bauxite",
+      "name": "Bauxite",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "crudeOil",
+      "name": "Crude Oil",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "naturalGas",
+      "name": "Natural Gas",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "sulfur",
+      "name": "Sulfur",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "salt",
+      "name": "Salt",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "phosphate",
+      "name": "Phosphate",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "lithiumOre",
+      "name": "Lithium Ore",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "titaniumOre",
+      "name": "Titanium Ore",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "rareEarthOre",
+      "name": "Rare Earth Ore",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "copper",
+      "name": "Copper",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "aluminum",
+      "name": "Aluminum",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "fuel",
+      "name": "Fuel",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "industrialGas",
+      "name": "Industrial Gas",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "silicon",
+      "name": "Silicon",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "lithium",
+      "name": "Lithium",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "titanium",
+      "name": "Titanium",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "rareEarths",
+      "name": "Rare Earths",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "alloySteel",
+      "name": "Alloy Steel",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "cement",
+      "name": "Cement",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "bricks",
+      "name": "Bricks",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "beams",
+      "name": "Beams",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "steelPlate",
+      "name": "Steel Plate",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "wire",
+      "name": "Wire",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "cable",
+      "name": "Cable",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "pipes",
+      "name": "Pipes",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "insulation",
+      "name": "Insulation",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "ceramics",
+      "name": "Ceramics",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "constructionModules",
+      "name": "Construction Modules",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "plastic",
+      "name": "Plastic",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "rubber",
+      "name": "Rubber",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "industrialAcid",
+      "name": "Industrial Acid",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "fertilizer",
+      "name": "Fertilizer",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "paint",
+      "name": "Paint",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "lubricant",
+      "name": "Lubricant",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "industrialResin",
+      "name": "Industrial Resin",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "compositeFiber",
+      "name": "Composite Fiber",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "polymerFilm",
+      "name": "Polymer Film",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "coolant",
+      "name": "Coolant",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "industrialSolvent",
+      "name": "Industrial Solvent",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "adhesive",
+      "name": "Adhesive",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "syntheticTextiles",
+      "name": "Synthetic Textiles",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "composites",
+      "name": "Composites",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "semiconductors",
+      "name": "Semiconductors",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "circuitBoards",
+      "name": "Circuit Boards",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "processors",
+      "name": "Processors",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "sensors",
+      "name": "Sensors",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "displays",
+      "name": "Displays",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "batteries",
+      "name": "Batteries",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "powerElectronics",
+      "name": "Power Electronics",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "controlSystems",
+      "name": "Control Systems",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "communicationModules",
+      "name": "Communication Modules",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "precisionElectronics",
+      "name": "Precision Electronics",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "quantumModules",
+      "name": "Quantum Modules",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "tools",
+      "name": "Tools",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "gears",
+      "name": "Gears",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "motors",
+      "name": "Motors",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "pumps",
+      "name": "Pumps",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "bearings",
+      "name": "Bearings",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "industrialMachinery",
+      "name": "Industrial Machinery",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "precisionTools",
+      "name": "Precision Tools",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "turbines",
+      "name": "Turbines",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "automationModules",
+      "name": "Automation Modules",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "heavyMachinery",
+      "name": "Heavy Machinery",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "roboticArms",
+      "name": "Robotic Arms",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "industrialRobots",
+      "name": "Industrial Robots",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "chassis",
+      "name": "Chassis",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "engines",
+      "name": "Engines",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "tires",
+      "name": "Tires",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "vehicleParts",
+      "name": "Vehicle Parts",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "utilityVehicles",
+      "name": "Utility Vehicles",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "freightTrucks",
+      "name": "Freight Trucks",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "buses",
+      "name": "Buses",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "passengerCars",
+      "name": "Passenger Cars",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "electricVehicles",
+      "name": "Electric Vehicles",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "railAssemblies",
+      "name": "Rail Assemblies",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "ships",
+      "name": "Ships",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "autonomousVehicles",
+      "name": "Autonomous Vehicles",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "airframes",
+      "name": "Airframes",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "jetEngines",
+      "name": "Jet Engines",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "avionics",
+      "name": "Avionics",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "aerospaceComposites",
+      "name": "Aerospace Composites",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "aircraftParts",
+      "name": "Aircraft Parts",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "civilAircraft",
+      "name": "Civil Aircraft",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "satelliteParts",
+      "name": "Satellite Parts",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "satellites",
+      "name": "Satellites",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "launchAssemblies",
+      "name": "Launch Assemblies",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "orbitalPlatforms",
+      "name": "Orbital Platforms",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "householdGoods",
+      "name": "Household Goods",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "appliances",
+      "name": "Appliances",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "electricalGoods",
+      "name": "Electrical Goods",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "medicalSupplies",
+      "name": "Medical Supplies",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "packaging",
+      "name": "Packaging",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "workwear",
+      "name": "Workwear",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "furniture",
+      "name": "Furniture",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "consumerDevices",
+      "name": "Consumer Devices",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "medicalDevices",
+      "name": "Medical Devices",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "industrialConsumables",
+      "name": "Industrial Consumables",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "advancedAppliances",
+      "name": "Advanced Appliances",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "luxuryGoods",
+      "name": "Luxury Goods",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "protectiveEquipment",
+      "name": "Protective Equipment",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "fieldSupplies",
+      "name": "Field Supplies",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "communicationsEquipment",
+      "name": "Communications Equipment",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "opticalEquipment",
+      "name": "Optical Equipment",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "equipmentParts",
+      "name": "Equipment Parts",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "transportEquipment",
+      "name": "Transport Equipment",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "aircraftEquipment",
+      "name": "Aircraft Equipment",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "navalEquipment",
+      "name": "Naval Equipment",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "precisionEquipment",
+      "name": "Precision Equipment",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "strategicEquipment",
+      "name": "Strategic Equipment",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "chromiteOre",
+      "name": "Chromite Ore",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "chromium",
+      "name": "Chromium",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "stainlessSteel",
+      "name": "Stainless Steel",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "photoresist",
+      "name": "Photoresist",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "siliconWafers",
+      "name": "Silicon Wafers",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "servoDrives",
+      "name": "Servo Drives",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "nickelOre",
+      "name": "Nickel Ore",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "nickel",
+      "name": "Nickel",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "manganeseOre",
+      "name": "Manganese Ore",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "manganese",
+      "name": "Manganese",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "graphiteOre",
+      "name": "Graphite Ore",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "graphite",
+      "name": "Graphite",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "bioResin",
+      "name": "Bio-resin",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "precisionCastings",
+      "name": "Precision Castings",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "machineFrames",
+      "name": "Machine Frames",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "thermalComponents",
+      "name": "Thermal Components",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "opticalGlass",
+      "name": "Optical Glass",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    },
+    {
+      "id": "fiberOpticCable",
+      "name": "Fiber-optic Cable",
+      "packIcon": null,
+      "status": "Retain existing text icon; PNG selection pending archive and license review"
+    }
+  ]
+}
