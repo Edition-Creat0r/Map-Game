@@ -959,3 +959,24 @@ body:has(#mgProgressionPanel:not([hidden]))
   cursor: pointer;
   font-size: 12px;
 }
+
+/* Presentation-only resource artwork; the underlying token is always available. */
+.mg-material-icon { position:relative; overflow:hidden; }
+.mg-resource-art { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:2px; box-sizing:border-box; z-index:1; background:#152b39; }
+#mgResourceStrip .mg-material-icon { width:32px; height:32px; }
+#mgEconomyStats [data-inventory] .mg-material-icon { width:48px; height:48px; margin:4px 8px 4px 0; }
+.mf-shop-inspector > .mg-material-icon { width:64px; height:64px; }
+#mgEasyCraft { position:fixed; z-index:250; left:154px; top:94px; bottom:24px; width:min(360px,calc(100vw - 170px)); overflow:auto; padding:18px; box-sizing:border-box; border:1px solid #6098a766; border-radius:14px; background:#0b1c2af7; color:var(--v-text,#d5e7ed); box-shadow:0 12px 48px #0008; font:13px/1.5 system-ui; }
+#mgEasyCraft[hidden] { display:none; }
+#mgEasyCraft header { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+#mgEasyCraft h2 { margin:0; font-size:21px; }
+#mgEasyCraft small { display:block; color:#91b5c2; }
+#mgEasyCraft select { display:block; width:100%; padding:9px; margin-top:4px; background:#122e40; color:#e1eff3; border:1px solid #496776; border-radius:6px; }
+#mgEasyCraft ul { list-style:none; padding:0; }
+#mgEasyCraft li { display:flex; gap:8px; align-items:center; padding:7px 0; border-bottom:1px solid #8bd7e514; }
+#mgEasyCraft button { margin:4px 5px 4px 0; padding:8px 10px; background:#17384a; color:#dcebf0; border:1px solid #5d99aa66; border-radius:6px; cursor:pointer; }
+#mgEasyCraft button:disabled { opacity:.6; cursor:default; }
+#mgEasyCraft .mg-recipe-hero { display:flex; gap:10px; align-items:center; }
+#mgEasyCraft .mg-recipe-hero .mg-material-icon { width:64px; height:64px; }
+#mgEasyCraft [data-recipe-status] { padding:10px; border-left:2px solid #69cfca; background:#20535c33; }
+@media(max-width:800px) { #mgEasyCraft { left:12px; top:100px; width:calc(100vw - 24px); } #mgResourceStrip .mg-material-icon { width:23px; height:23px; } }

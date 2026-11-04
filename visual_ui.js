@@ -33,10 +33,14 @@
     energy: "ϟ",
     population: "♙",
   };
+  const resourceImages = window.mapGameResourceIcons?.mapping(R, window.mapGameResourceIcons.entries);
+  document.addEventListener("error", event => {
+    if (event.target?.matches?.("img.mg-resource-art")) event.target.remove();
+  }, true);
   function icon(id) {
     const m = R.material(id);
     return `<span class="mg-material-icon" data-material="${esc(id)}" title="${esc(m?.name || id)}" aria-hidden="true">${
-      tokens[id] ||
+      (resourceImages ? window.mapGameResourceIcons.image(resourceImages, id) : "") + `<span class="mg-icon-token">${tokens[id] ||
       esc(
         (m?.name || id)
           .split(" ")
@@ -44,7 +48,8 @@
           .join("")
           .slice(0, 2),
       )
-    }</span>`;
+    }</span>`}
+    </span>`;
   }
   function preview(d) {
     const house = d.category === "Residential",
