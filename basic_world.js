@@ -848,7 +848,7 @@
       constructionPanel = document.createElement("aside");
       constructionPanel.id = "mgConstructionControls";
       constructionPanel.innerHTML =
-        '<b data-name></b><div>Click to build · R rotates · Escape cancels · right-drag to pan</div><div data-reason role="status"></div><button data-rotate>Rotate</button> <button data-cancel>Cancel</button>';
+        '<b data-name></b><div>Click to build · R rotates · Escape cancels · drag to pan · click without dragging to place</div><div data-reason role="status"></div><button data-rotate>Rotate</button> <button data-cancel>Cancel</button>';
       document.body.appendChild(constructionPanel);
       constructionPanel.querySelector("[data-cancel]").onclick =
         cancelConstruction;
@@ -1042,18 +1042,16 @@
   // Input
   // ----------------------------------------------------------
 
+  let gesture = null;
+  const roadToolActive = () => window.mapGameRoadTool?.isOpen?.() === true;
   canvas.addEventListener("pointerdown", (event) => {
-    if (!state.active) return;
-
-    if (construction && event.button === 0) {
-      constructionDown = { x: event.clientX, y: event.clientY };
-      updateConstruction(screenToWorld(event.clientX, event.clientY));
-      return;
-    }
-    state.dragging = true;
-    state.lastX = event.clientX;
-    state.lastY = event.clientY;
-    canvas.setPointerCapture?.(event.pointerId);
+    if (!state.active || gesture || event.isPrimary === false || ![0,1,2].includes(event.button) || roadToolActive()) return;
+    event.preventDefault();
+    gesture={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false,building:construction,place:!!construction&&event.button===0};
+    constructionDown=gesture.place?{x:event.clientX,y:event.clientY}:null;
+    state.lastX=event.clientX;state.lastY=event.clientY;
+    try { canvas.setPointerCapture(event.pointerId); } catch (_) {}
+    if(construction)updateConstruction(screenToWorld(event.clientX,event.clientY));
   });
 
   canvas.addEventListener("pointermove", (event) => {
@@ -1075,7 +1073,11 @@
       updateConstruction(world);
     }
 
-    if (state.dragging) {
+    if(gesture && event.pointerId===gesture.id){
+      if(event.buttons===0 || roadToolActive()){constructionDown=null;stopDrag(event);return;}
+      if(Math.hypot(event.clientX-gesture.x,event.clientY-gesture.y)>=5){gesture.moved=true;constructionDown=null;state.dragging=true;}
+    }
+    if (state.dragging && gesture?.id===event.pointerId) {
       const dx = event.clientX - state.lastX;
       const dy = event.clientY - state.lastY;
 
@@ -1096,10 +1098,10 @@
   });
 
   function stopDrag(event) {
-    state.dragging = false;
-
+    if(gesture && event?.pointerId!==undefined && gesture.id!==event.pointerId)return;
+    const id=gesture?.id;gesture=null;state.dragging=false;constructionDown=null;
     try {
-      canvas.releasePointerCapture?.(event.pointerId);
+      if(id!==undefined && canvas.hasPointerCapture?.(id))canvas.releasePointerCapture(id);
     } catch (_) {}
   }
 
@@ -1107,7 +1109,10 @@
     if (construction) e.preventDefault();
   });
   canvas.addEventListener("pointerup", (event) => {
-    if (construction && constructionDown && event.button === 0) {
+    if(!gesture || gesture.id!==event.pointerId)return;
+    const rect=canvas.getBoundingClientRect();
+    const inside=event.clientX>=rect.left&&event.clientX<rect.right&&event.clientY>=rect.top&&event.clientY<rect.bottom&&document.elementFromPoint(event.clientX,event.clientY)===canvas;
+    if (inside && !roadToolActive() && construction && construction===gesture.building && constructionDown && gesture.place && !gesture.moved && event.button === 0) {
       const down = constructionDown;
       constructionDown = null;
       if (Math.hypot(event.clientX - down.x, event.clientY - down.y) < 5) {
@@ -1138,11 +1143,13 @@
     constructionDown = null;
     stopDrag(event);
   });
-  canvas.addEventListener("pointerleave", (event) => {
-    if (event.buttons === 0) {
-      state.dragging = false;
-    }
-  });
+  canvas.addEventListener("lostpointercapture",stopDrag);
+  window.addEventListener("blur",()=>stopDrag());
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)stopDrag();});
+  // Capture normally retargets outside releases to the canvas. This fallback
+  // clears a gesture on browsers that fail capture, without placing on UI.
+  window.addEventListener("pointerup",event=>{if(event.target!==canvas)stopDrag(event);});
+  canvas.addEventListener("pointerleave",event=>{if(event.buttons===0)stopDrag(event);});
 
   canvas.addEventListener(
     "wheel",
@@ -1242,6 +1249,7 @@
   }
 
   async function enterTerritory(territory) {
+    stopDrag();
     cancelConstruction();
     state.territory = territory;
     refreshBuildings(window.mapGameEconomy.snapshot());
@@ -1299,6 +1307,7 @@
   }
 
   function leave() {
+    stopDrag();
     cancelConstruction();
     placedBuildings=[];
     forestRenderer.pause();waterRenderer.pause();

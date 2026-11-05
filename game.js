@@ -3152,7 +3152,7 @@
   }
 
   function saveLocalPlacedBuildings() {
-    if (state.worldType !== "singleplayer") return;
+    if (state.worldType !== "singleplayer" || !window.mapGameEconomy.getStatus().ownsWriter) return;
     const old = loadLocalState();
     old.buildings =
       window.mapGameEconomy?.listPlacedBuildings?.() || [];
@@ -3542,6 +3542,7 @@
           z: p.z,
           owner_id: "local"
         };
+        if(!window.mapGameEconomy.getStatus().ownsWriter)throw Error("This local world is not writable in this tab.");
         const save = loadLocalState();
         save.capital = capital;
         localStorage.setItem(localSaveKey, JSON.stringify(save));
@@ -3682,7 +3683,7 @@
   }
 
   function saveLocalState() {
-    if (state.worldType !== "singleplayer" || state.mode === "HOME") return;
+    if (state.worldType !== "singleplayer" || state.mode === "HOME" || !window.mapGameEconomy.getStatus().ownsWriter) return;
     const old = loadLocalState();
     old.claims =
       Array.from(state.claimedTerritories.values())
@@ -4322,6 +4323,9 @@
   }
 
   window.addEventListener("mapgame:session-conflict", event => {
+    // Central account/session revocation must not reload an active local world.
+    // Central and Home authentication behavior remains unchanged.
+    if(state.worldType==='singleplayer' && state.mode!=='HOME')return;
     const message =
       event?.detail?.message ||
       "Multiple Central World sessions were detected. You were signed out.";
@@ -4580,7 +4584,17 @@
     );
   }
 
-  function startGame(worldType) {
+  let startingLocal = false;
+  async function startGame(worldType) {
+    if(worldType==='singleplayer'){
+      if(startingLocal)return;
+      startingLocal=true;const start=document.getElementById('mgStartSingle');if(start)start.disabled=true;
+      let acquired=false;
+      try{acquired=await window.mapGameEconomy.startSession();}
+      finally{startingLocal=false;if(start)start.disabled=false;}
+      if(!acquired){window.mapGameLocalSessionUI.show(window.mapGameEconomy.getStatus(),()=>startGame('singleplayer'));return;}
+      window.mapGameLocalSessionUI.hide();
+    }
     state.worldType = worldType;
     window.mapGameEconomy.setEnabled(worldType === "singleplayer");
 
@@ -4844,6 +4858,7 @@
 
   window.addEventListener("resize", () => engine.resize());
   window.addEventListener("beforeunload", saveLocalState);
+  window.addEventListener("mapgame:singleplayer-before-release", saveLocalState);
 
   console.log("Map Game Alpha 0.2.2C1 roads + connectivity build loaded.");
 })();

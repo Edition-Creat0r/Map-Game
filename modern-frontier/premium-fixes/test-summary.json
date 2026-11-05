@@ -1,0 +1,80 @@
+{
+  "base": "f21fb98cbe3c055e2c766733d113cf2e56b5f027",
+  "node": {
+    "passed": 154,
+    "failed": 0,
+    "skipped": 0
+  },
+  "python": {
+    "assetPackPassed": 16,
+    "zipAuditPassed": 15,
+    "failed": 0
+  },
+  "browserSuites": [
+    {
+      "name": "premium-fixes",
+      "exitCode": 0
+    },
+    {
+      "name": "premium-ui",
+      "exitCode": 0
+    },
+    {
+      "name": "modern-frontier",
+      "exitCode": 0
+    },
+    {
+      "name": "visual-ui",
+      "exitCode": 0
+    },
+    {
+      "name": "resource-icons",
+      "exitCode": 0
+    },
+    {
+      "name": "graphics-prototype-sp",
+      "exitCode": 0
+    },
+    {
+      "name": "industrial-042a",
+      "exitCode": 0
+    },
+    {
+      "name": "phase-b",
+      "exitCode": 0
+    },
+    {
+      "name": "phase-c1",
+      "exitCode": 0
+    },
+    {
+      "name": "economy",
+      "exitCode": 0
+    },
+    {
+      "name": "forest",
+      "exitCode": 0
+    },
+    {
+      "name": "environment",
+      "exitCode": 0
+    },
+    {
+      "name": "graphics-prototype",
+      "exitCode": 0
+    }
+  ],
+  "performanceProgramsPassed": [
+    "graphics-city-comparison (f21fb98)",
+    "industrial-042a-benchmark (reference solver and historical comparison)",
+    "premium-ui-performance (f21fb98, isolated rerun)",
+    "graphics-main-performance (0a2e157 historical comparison)"
+  ],
+  "limitations": [
+    "Linux Chromium only; Windows hardware retest pending",
+    "Verified cached browser engine/SDK libraries; no live Supabase or deployment tests",
+    "Full Regular-mode road construction not certified",
+    "Absent downloaded building/icon packs not integrated"
+  ],
+  "initialHarnessFailures": "Four; resolved and rerun: mixed old HTML/new entry modules (2), asynchronous entry readiness (2)."
+}

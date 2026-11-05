@@ -3,7 +3,7 @@ const {chromium}=require('playwright-core'),fs=require('node:fs'),path=require('
 const {state}=require('./helpers/industrial-042a.cjs');
 const url=process.env.MAP_GAME_TEST_URL||'http://127.0.0.1:8017',out=process.argv[2]||'/tmp/premium-ui-browser',now=1800000000000;fs.mkdirSync(out,{recursive:true});
 const fixture=state(['smallHouse','smallHouse','powerPlant','steelMill']);fixture.money=20000;fixture.economy.precision.money=String(20000n*300000000000n);fixture.economy.lastTick=now;fixture.economy.progression.era=1;fixture.economy.progression.completed=[];fixture.premiumUnknown={retained:true};
-const base=new Map(['index.html','visual_ui.js','economy_ui.js','modern-frontier/ui.js'].map(f=>['/'+f,execFileSync('git',['show','e83f92d:'+f])]));
+const base=new Map(['game.js','economy.js','basic_world.js','modern-frontier/ui.js','index.html','visual_ui.js','economy_ui.js','modern-frontier/ui.js'].map(f=>['/'+f,execFileSync('git',['show','e83f92d:'+f])]));
 (async()=>{const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox','--enable-unsafe-swiftshader']});const report={errors:[],http:[],failed:[],checks:[],resolutions:[]};try{
 for(const variant of ['before','after']){
  const p=await browser.newPage({viewport:{width:1440,height:900}});p.on('pageerror',e=>report.errors.push(e.message));p.on('console',m=>{if(m.type()==='error')report.errors.push(m.text())});p.on('response',r=>{if(r.status()>=400)report.http.push([r.url(),r.status()])});p.on('requestfailed',r=>report.failed.push(r.url()));

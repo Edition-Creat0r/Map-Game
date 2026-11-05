@@ -33,6 +33,7 @@ const sites = require("./environment-sites.json");
     () => document.querySelector("#mgStartSingle")?.disabled === false,
   );
   await page.locator("#mgStartSingle").click();
+  await page.waitForFunction(() => document.body.dataset.world === "singleplayer" && mapGameRuntime.getMode() !== "HOME");
   async function enter(name, site) {
     await page.evaluate(async (s) => {
       mapGameStrategicWorld.close();

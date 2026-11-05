@@ -3,7 +3,7 @@ const {chromium}=require('playwright-core'),fs=require('node:fs'),path=require('
 const {state}=require('./helpers/industrial-042a.cjs');
 const origin=process.env.MAP_GAME_TEST_URL||'http://127.0.0.1:8017',out=process.argv[2]||'/tmp/resource-icons-browser';fs.mkdirSync(out,{recursive:true});
 const fixture=state(['smallHouse','powerPlant','steelMill','carbonPlant']);fixture.economy.lastTick=Date.now();fixture.steel=4321.25;fixture.economy.precision.steel=String(432125n*3000000000n); // exact scale 3e11
-const files=['index.html','visual_ui.js','economy_ui.js','industrial/progression-ui.js','visual.css'];
+const files=['game.js','economy.js','basic_world.js','modern-frontier/ui.js','index.html','visual_ui.js','economy_ui.js','industrial/progression-ui.js','visual.css'];
 (async()=>{const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox','--enable-unsafe-swiftshader']});const report={errors:[],http:[],failed:[],checks:[]};try{
 for(const variant of ['baseline','current']){
  const p=await b.newPage({viewport:{width:1440,height:1000}});p.on('pageerror',e=>report.errors.push(e.message));p.on('console',m=>{if(m.type()==='error')report.errors.push(m.text())});p.on('response',r=>{if(r.status()>=400)report.http.push([r.url(),r.status()])});p.on('requestfailed',r=>report.failed.push(r.url()));

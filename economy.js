@@ -17,7 +17,8 @@
     return summaryCache.value;
   }
   let requested = false,
-    releaseWriter = null;
+    releaseWriter = null,
+    sessionRequest = Promise.resolve(false), cancelStart = null, requestEpoch = 0, conflict = false;
   let state,
     stored,
     timer = null,
@@ -273,7 +274,10 @@
   function setEnabled(value) {
     if (requested === !!value) return;
     requested = !!value;
+    const epoch=++requestEpoch;
     if (!requested) {
+      cancelStart?.(false);cancelStart=null;
+      if(enabled&&!error)window.dispatchEvent(new CustomEvent("mapgame:singleplayer-before-release"));
       if (enabled) settle();
       enabled = false;
       clearTimeout(catchupTimer);
@@ -288,14 +292,20 @@
         releaseWriter();
         releaseWriter = null;
       }
+      if(conflict){conflict=false;error="";}
       emit();
       return;
     }
+    let resolveStart;
+    sessionRequest=new Promise(resolve=>resolveStart=resolve);cancelStart=resolveStart;
+    const finish=value=>{resolveStart(value);if(epoch===requestEpoch)cancelStart=null;};
     if (error) {
+      finish(false);
       emit();
       return;
     }
     if (!navigator.locks) {
+      finish(false);
       error =
         "Economy paused: this browser needs Web Locks on a secure origin to protect local saves.";
       emit();
@@ -306,18 +316,20 @@
         "mapgame-singleplayer-economy-writer",
         { ifAvailable: true },
         async (lock) => {
-          if (!requested) return;
+          if (!requested||epoch!==requestEpoch){finish(false);return;}
           if (!lock) {
+            conflict=true;finish(false);
             error =
-              "Economy is open in another tab. Close that tab and reload here.";
+              "This local world is open in another tab. Return to it, or close it and retry here.";
             emit();
+            window.dispatchEvent(new CustomEvent("mapgame:local-session-conflict"));
             return;
           }
           // The tab may have sat on Home while the previous writer finished.
           // Read the latest canonical record only after acquiring the lease.
           readState();
           if (error) {
-            emit();
+            finish(false);emit();
             return;
           }
           enabled = true;
@@ -341,10 +353,12 @@
           emit();
           await new Promise((resolve) => {
             releaseWriter = resolve;
+            finish(true);
           });
         },
       )
       .catch((e) => {
+        finish(false);if(epoch!==requestEpoch)return;
         error = `Economy paused: ${e.message}`;
         enabled = false;
         emit();
@@ -516,6 +530,8 @@
       enabled: enabled && !error && !catchup,
       catchingUp: Boolean(catchup),
       engine: catchupEngine,
+      ownsWriter: enabled && !error,
+      conflict,
       error,
     }),
     setEnabled,
@@ -523,6 +539,7 @@
     utilitySummary: () => snapshot().utilities,
     applyOfflineIncome: () => ({ ...offlineResult }),
     start: () => setEnabled(true),
+    startSession: () => {if(conflict)setEnabled(false);setEnabled(true);return sessionRequest;},
     stop: () => setEnabled(false),
     canAfford: (cost) =>
       enabled && !error && !catchup && Model.canAfford(state, cost),

@@ -1,0 +1,72 @@
+{
+  "mainTerrain": [
+    {
+      "path": "assets/textures/grass/grass_diffuse.jpg",
+      "size": [
+        1024,
+        1024
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "assets/textures/dirt/dirt.jpg",
+      "size": [
+        1024,
+        1024
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "assets/textures/rock/rock_diffuse.jpg",
+      "size": [
+        1024,
+        1024
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "assets/textures/sand/sand_diffuse.jpg",
+      "size": [
+        1024,
+        1024
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "assets/textures/terrain/dry_plains_01/plains.jpg",
+      "size": [
+        1024,
+        1024
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "assets/textures/terrain/rocky_grass_01/thick_grass.jpg",
+      "size": [
+        1024,
+        1024
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "assets/textures/terrain/snow_01/snow.jpg",
+      "size": [
+        1024,
+        1024
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "assets/textures/terrain/wet_ground_01/wet_grass.jpg",
+      "size": [
+        1024,
+        1024
+      ],
+      "format": "JPEG"
+    }
+  ],
+  "repositoryGLBs": [
+    "assets/models/cars/sedan-01.glb"
+  ],
+  "downloadedBuildingPackPresent": false
+}

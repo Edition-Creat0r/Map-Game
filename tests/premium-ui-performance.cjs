@@ -1,8 +1,9 @@
 const {chromium}=require('playwright-core'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{execFileSync}=require('node:child_process');
 const url=process.env.MAP_GAME_TEST_URL||'http://127.0.0.1:8017',out=process.argv[2]||'/tmp/premium-ui-performance';fs.mkdirSync(out,{recursive:true});
-const base=new Map(['index.html','visual_ui.js','economy_ui.js','modern-frontier/ui.js'].map(f=>['/'+f,execFileSync('git',['show','e83f92d:'+f])]));
+const baseline=process.env.MAP_GAME_BASELINE_REF||'e83f92d';
+const base=new Map(['game.js','economy.js','basic_world.js','modern-frontier/ui.js','index.html','visual_ui.js','economy_ui.js','modern-frontier/ui.js'].map(f=>['/'+f,execFileSync('git',['show',baseline+':'+f])]));
 const stats=a=>{const s=[...a].sort((a,b)=>a-b);return{fps:1000*a.length/a.reduce((a,b)=>a+b),p95:s[Math.floor(s.length*.95)],max:s.at(-1)}};
-(async()=>{const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox','--enable-unsafe-swiftshader']});const report={rows:[],errors:[],http:[],failed:[],scope:'Exact e83f92d baseline, alternating order, fresh 1440x900 contexts; same Basic territory/seed/camera'};try{
+(async()=>{const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox','--enable-unsafe-swiftshader']});const report={rows:[],errors:[],http:[],failed:[],scope:`Exact ${baseline} baseline, alternating order, fresh 1440x900 contexts; same Basic territory/seed/camera`};try{
  for(const [variant,run]of [['before',0],['after',0],['after',1],['before',1],['before',2],['after',2]]){
   const p=await b.newPage({viewport:{width:1440,height:900}});p.on('pageerror',e=>report.errors.push(e.message));p.on('console',m=>{if(m.type()==='error')report.errors.push(m.text())});p.on('response',r=>{if(r.status()>=400)report.http.push([r.url(),r.status()])});p.on('requestfailed',r=>report.failed.push(r.url()));
   if(variant==='before')await p.route('**/*',r=>{const u=new URL(r.request().url()),f=u.pathname==='/'?'/index.html':u.pathname;return u.origin===url&&base.has(f)?r.fulfill({body:base.get(f),contentType:f.endsWith('.html')?'text/html':'application/javascript'}):r.fallback();});

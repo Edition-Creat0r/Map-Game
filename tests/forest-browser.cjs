@@ -21,6 +21,7 @@ fs.mkdirSync(output, { recursive: true });
     () => document.querySelector("#mgStartSingle")?.disabled === false,
   );
   await p.locator("#mgStartSingle").click();
+  await p.waitForFunction(() => document.body.dataset.world === "singleplayer" && mapGameRuntime.getMode() !== "HOME");
   await p.evaluate(async () => {
     mapGameStrategicWorld.close();
     await mapGameRuntime.enterTerritory({ x: 140, y: 180, id: "T_140_180" });

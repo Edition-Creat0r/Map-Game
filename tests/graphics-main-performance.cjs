@@ -1,7 +1,7 @@
 // Exact committed baseline via read-only request overrides; same assets/libraries.
 const {chromium}=require('playwright-core'),fs=require('node:fs'),path=require('node:path'),{execFileSync}=require('node:child_process'),assert=require('node:assert/strict');
 const origin=process.env.MAP_GAME_TEST_URL||'http://127.0.0.1:8017',out=process.argv[2]||'/tmp/mapgame-graphics-main-profile';fs.mkdirSync(out,{recursive:true});
-const files=['index.html','modern-frontier/ui.js','road_tool.js'],baseline=new Map(files.map(f=>['/'+f,execFileSync('git',['show','0a2e157:'+f],{cwd:path.resolve(__dirname,'..')})]));
+const files=['game.js','economy.js','basic_world.js','index.html','modern-frontier/ui.js','road_tool.js'],baseline=new Map(files.map(f=>['/'+f,execFileSync('git',['show','0a2e157:'+f],{cwd:path.resolve(__dirname,'..')})]));
 (async()=>{const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox','--enable-unsafe-swiftshader']});const rows=[];try{for(const variant of ['baseline','prototype','prototype','baseline']){
  const p=await b.newPage({viewport:{width:1440,height:1000}}),errors=[],failed=[],http=[],tiles=[];
  p.on('pageerror',e=>errors.push(e.message));p.on('console',m=>{if(m.type()==='error')errors.push(m.text());});p.on('requestfailed',q=>failed.push(q.url()));p.on('response',r=>{if(r.status()>=400)http.push([r.url(),r.status()]);});p.on('request',r=>{if(r.url().includes('/graphics-prototype/assets/'))tiles.push(r.url());});

@@ -224,7 +224,7 @@ async function adapter(saved, options = {}) {
         events[type] = fn;
       },
     },
-    navigator: { locks: { request: async (n, o, fn) => fn(lock ? {} : null) } },
+    navigator: { locks: options.locks || { request: async (n, o, fn) => fn(lock ? {} : null) } },
     Date: { now: () => clock.wall },
     performance: { now: () => clock.mono },
     setInterval: () => 1,
@@ -601,4 +601,27 @@ test("external checkpoint refresh cannot erase the competing-tab read-only warni
   assert.match(a.api.snapshot().error, /another tab/);
   assert.equal(a.api.getStatus().enabled, false);
   assert.equal(a.api.snapshot().money, 12345);
+});
+
+
+test("local session retry acquires the existing lock and rereads canonical data", async () => {
+  let available=false;
+  const a=await adapter({}, {locks:{request:async(n,o,fn)=>fn(available?{}:null)}});
+  assert.equal(a.api.getStatus().conflict,true);
+  assert.equal(await a.api.startSession(),false);
+  a.records.set("mapgame_economy_021e",JSON.stringify({money:12345,economy:{version:4,lastTick:now}}));
+  available=true;
+  assert.equal(await a.api.startSession(),true);
+  assert.equal(a.api.getStatus().ownsWriter,true);
+  assert.equal(a.api.snapshot().money,12345);
+  a.api.stop();assert.equal(a.api.getStatus().ownsWriter,false);
+});
+
+test("cancelled lock callbacks cannot enable a newer session request", async () => {
+  const callbacks=[];
+  const a=await adapter({}, {locks:{request:(n,o,fn)=>{callbacks.push(fn);return new Promise(()=>{});}}});
+  const first=a.api.startSession();a.api.stop();const second=a.api.startSession();
+  await callbacks[0]({});assert.equal(await first,false);assert.equal(a.api.getStatus().ownsWriter,false);
+  const held=callbacks[1]({});assert.equal(await second,true);assert.equal(a.api.getStatus().ownsWriter,true);
+  a.api.stop();await held;assert.equal(a.api.getStatus().ownsWriter,false);
 });
