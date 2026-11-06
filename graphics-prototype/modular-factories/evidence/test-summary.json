@@ -135,5 +135,15 @@
     "nodePassed": 157,
     "evidence": "Final Premium UI suite rerun at all three widths after linking the imported studies; zero console or loading errors."
   },
-  "finalBasicPerformanceEvidence": "basic-performance.json"
+  "finalBasicPerformanceEvidence": "basic-performance.json",
+  "finalVisualIntegrityReview": {
+    "islandPruning": false,
+    "uvWeight": 10,
+    "ghostLOD": "medium",
+    "ghostDepthPrepass": true,
+    "functionalBrowserRerunPassed": true,
+    "nodePassed": 157,
+    "modularPythonPassed": 14,
+    "preservePlacedFixturesOnModelChange": true
+  }
 }

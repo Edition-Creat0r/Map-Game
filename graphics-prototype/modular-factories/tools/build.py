@@ -72,7 +72,7 @@ def build_one(spec):
    mesh=len(doc['meshes']);doc['meshes'].append({'name':label+'-'+str(key),'primitives':[primitive]});node=len(doc['nodes']);doc['nodes'].append({'name':label+'-'+str(key),'mesh':mesh});doc['nodes'][group]['children'].append(node)
   p=np.concatenate(bounds);lo,hi=p.min(0),p.max(0);fp=spec['footprint']
   if abs(lo[0])>fp[0]/2+.001 or abs(hi[0])>fp[0]/2+.001 or abs(lo[2])>fp[1]/2+.001 or abs(hi[2])>fp[1]/2+.001 or lo[1]<-.001:raise ValueError('Assembly outside logical footprint')
-  rows.append({'lod':label,'triangles':triangles,'meshBatches':len(groups),'sourceParts':parts,'simplifier':None if level==2 else {'tool':'meshoptimizer@0.25.0','relativeErrorLimit':.045 if level==0 else .012,'retainsOriginalVertices':True},'bounds':[lo.tolist(),hi.tolist()]})
+  rows.append({'lod':label,'triangles':triangles,'meshBatches':len(groups),'sourceParts':parts,'simplifier':None if level==2 else {'tool':'meshoptimizer@0.25.0','relativeErrorLimit':.045 if level==0 else .012,'retainsOriginalVertices':True,'preserveIslands':True,'uvWeight':10},'bounds':[lo.tolist(),hi.tolist()]})
  doc['buffers'][0]['byteLength']=len(binary)
  while len(binary)%4:binary.append(0)
  js=json.dumps(doc,separators=(',',':'),sort_keys=True).encode();js+=b' '*((-len(js))%4)

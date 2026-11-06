@@ -8,7 +8,7 @@ const fs=require('node:fs'),{MeshoptSimplifier:S}=require('meshoptimizer');
   remap[i]=lookup.get(key);
  }
  const welded=indices.map(i=>remap[i]),target=Math.max(3,Math.floor(Math.min(indices.length*g.ratio,g.maxIndices)/3)*3);
- const [reduced,error]=S.simplifyWithAttributes(welded,new Float32Array(p),3,new Float32Array(attrs),5,[.15,.15,.15,.5,.5],null,target,g.error,['Prune']);
+ const [reduced,error]=S.simplifyWithAttributes(welded,new Float32Array(p),3,new Float32Array(attrs),5,[.15,.15,.15,10,10],null,target,g.error,[]);
  // Return original vertex indices: high/medium/far share original coordinates,
  // normals and UVs. No relaxed vertex positions or projected icon textures.
  const originals=[];for(let i=0;i<remap.length;i++)if(originals[remap[i]]===undefined)originals[remap[i]]=i;

@@ -46,11 +46,23 @@
     const entry=containers.get(id).instantiateModelsToScene(n=>root.name+':'+n,false,{doNotInstantiate:options.ghost===true});for(const n of entry.rootNodes)n.parent=root;
     const groups=levels.map(label=>root.getDescendants().find(n=>n.name===root.name+':'+label));if(groups.some(n=>!n)){entry.dispose();root.dispose();throw Error('Missing factory LOD');}
     const record={root,spec,groups,entry,lod:-1,quality:options.quality||'high',ghost:options.ghost===true,animated:null};roots.add(record);
-    for(const mesh of root.getChildMeshes()){mesh.isPickable=false;mesh.receiveShadows=true;if(record.ghost)mesh.visibility=.38;}
+    const ghostMaterials=new Map();
+    for(const mesh of root.getChildMeshes()){
+     mesh.isPickable=false;mesh.receiveShadows=true;
+     if(record.ghost&&mesh.material){
+      const source=mesh.material;
+      if(!ghostMaterials.has(source.name)){
+       // A depth prepass makes the translucent preview show its front surface,
+       // rather than unsorted interior triangles from a merged factory batch.
+       const mat=new B.StandardMaterial(root.name+':ghost:'+source.name,scene);mat.diffuseTexture=source.diffuseTexture||source.albedoTexture;mat.diffuseColor=(source.diffuseColor||source.albedoColor).clone();mat.specularColor=new B.Color3(.05,.05,.05);mat.alpha=.38;mat.needDepthPrePass=true;mat.backFaceCulling=true;ghostMaterials.set(source.name,mat);
+      }
+      mesh.material=ghostMaterials.get(source.name);
+     }
+    }
     function level(index){index=Math.max(0,Math.min(index,budgets[record.quality]??2));record.lod=index;groups.forEach((n,i)=>n.setEnabled(i===index));if(record.animated)record.animated.root.setEnabled(index===2);}
     record.level=level;level(budgets[record.quality]??2);addAnimation(record);if(record.animated)record.animated.root.setEnabled(false);
     record.dispose=()=>{if(!roots.has(record))return;roots.delete(record);record.animated?.entry.dispose();record.animated?.root.dispose();entry.dispose();root.dispose();};
-    root.onDisposeObservable.add(()=>roots.delete(record));
+    root.onDisposeObservable.add(()=>{roots.delete(record);for(const mat of ghostMaterials.values())mat.dispose(false,false);ghostMaterials.clear();});
     return record;
    }
    function addAnimation(record){

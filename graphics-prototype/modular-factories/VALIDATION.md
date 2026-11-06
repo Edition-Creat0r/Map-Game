@@ -10,12 +10,12 @@ Three supplied Kenney archives were fingerprinted, inspected without executing t
 
 | Model | Canonical ID | Logical footprint | Low / Medium / High triangles (static) |
 |---|---|---|---|
-| Steel Mill | `steelMill` | 118×92 | 754 / 2,172 / 4,590 |
-| Electronics Plant | `precisionElectronicsWorks` | 80×66 | 2,149 / 3,713 / 7,354 |
-| Machinery Works | `machineWorks` | 64×54 | 756 / 1,567 / 3,034 |
-| Optional suburban house | `smallHouse` | 18×22 | 534 / 798 / 1,174 |
+| Steel Mill | `steelMill` | 118×92 | 788 / 2,171 / 4,590 |
+| Electronics Plant | `precisionElectronicsWorks` | 80×66 | 2,291 / 3,713 / 7,354 |
+| Machinery Works | `machineWorks` | 64×54 | 784 / 1,576 / 3,034 |
+| Optional suburban house | `smallHouse` | 18×22 | 594 / 810 / 1,174 |
 
-The machinery piston is an additional separate source asset with three preserved animation clips; it is not included in static triangle totals. Ultra loops only `toggle`, capped at eight nearby active props and disabled under reduced motion. High close-up geometry is unchanged by simplification. Low/Medium can prune small details; simplifier targets may be missed when seams/topology prevent further reduction.
+The machinery piston is an additional separate source asset with three preserved animation clips; it is not included in static triangle totals. Ultra loops only `toggle`, capped at eight nearby active props and disabled under reduced motion. High close-up geometry is unchanged by simplification. Low/Medium reduce fine geometry; island pruning is disabled and UV error has a stronger weight. Targets may be missed when topology/UV constraints prevent further reduction. Visual review also caught transparency sorting artifacts in the placement ghost: the final preview uses Medium geometry and a preview-owned depth-prepass material, disposed on cancellation. The solid fixture also uses Medium detail. These checks go beyond bounding-box tests.
 
 ## Automated and browser checks
 
@@ -24,7 +24,7 @@ The machinery piston is an additional separate source asset with three preserved
 - **157/157 Node tests passed**, no failures/skips: existing numerical solver, exact ledger, migration, progression, catalog, terrain/forest and UI tests plus three new canonical mapping/rotated-bounds/LOD-hysteresis tests.
 - **45/45 Python tests passed:** 14 new archive/GLB/provenance/reproducibility/footprint/animation tests, 16 existing graphics-pack tests, 15 existing resource ZIP-audit tests.
 - **15 browser suites passed:** modular-factories, modular-placement, premium-fixes, premium-ui, Modern Frontier, visual-ui, resource-icons, graphics-prototype-sp, industrial-042a, phase-b, phase-c1, economy, forest and environment, plus graphics-prototype.
-- The new model suite verified real loaded hierarchy bounds, all four high-detail views, quality changes, separate animation, reduced motion, repeated zooms across LOD thresholds, stable coordinates, no additional asset requests/mesh creation during camera movement, repeated rebuild cleanup, valid/collision/water/rotation/cancel/blur placement, three viewports and scene disposal. A null terrain hit clears the preview and analysis rather than reusing a stale valid site.
+- The new model suite verified real loaded hierarchy bounds, all four high-detail views, quality changes, separate animation, reduced motion, repeated zooms across LOD thresholds, stable coordinates, no additional asset requests/mesh creation during camera movement, repeated rebuild cleanup, valid/collision/water/rotation/cancel/blur placement, three viewports and scene disposal. A null terrain hit clears the preview and analysis rather than reusing a stale valid site. A final interaction test also caught and fixed a workshop-only issue where switching model selection hid placed visuals but retained their collision rows. Both now remain visible/consistent; the regression test verifies this. No Singleplayer records were involved.
 - The actual main-game test entered guest Singleplayer, bought/placed one canonical house, verified smooth cursor-follow and green/red outline drawing against real overlap checks, reopened placement after the existing automatic cancellation, then cancelled safely. Existing premium-fixes tests additionally exercised outside releases, drag-without-purchase, actual renderer crash recovery, denied second tabs, lock retry and save preservation.
 - Premium interfaces were tested at **1366×768, 1440×900 and 1920×1080**. New workshop layouts were also checked at those sizes. Forest/environment tests exercised actual terrain and multiple biomes. Saves, materials, research, ownership, authentication and server files were unchanged.
 - The final new showroom and native-placement runs recorded **zero JavaScript/console errors, failed requests or HTTP failures**. The 16-case city benchmark and main-game timing run also recorded zero such errors. Expected deliberate crash tests are identified in their own reports.
@@ -43,7 +43,7 @@ Browser environment: Linux Chromium with SwiftShader and the existing verified n
 - Sampled idle-view long tasks: **two before / one after** across these windows.
 - No new terrain/forest/economy work is added to rendering loops. The Basic change updates a ghost point on input and colors its outline; validation remains throttled at the existing 80 ms budget and is recomputed authoritatively before a purchase. Border color can consequently lag a fast cursor by up to that validation budget.
 
-[Preview timing](evidence/native-placement-results.json): thirteen captured pointer-event-to-first-ghost-draw samples had a **1.5 ms median / 4.9 ms max** in Basic. Six pointer-event-to-next-scene-render samples in the separate 3D workshop had a **3.75 ms median / 38.9 ms max**. These are observed callback/drawing times, not input-to-photon measurements or Lenovo guarantees.
+[Preview timing](evidence/native-placement-results.json): 13 captured pointer-event-to-first-ghost-draw samples had a **1.90 ms median / 5.10 ms max** in Basic. 6 pointer-event-to-next-scene-render samples in the separate 3D workshop had a **3.35 ms median / 93.80 ms max**. These are observed callback/drawing times, not input-to-photon measurements or Lenovo guarantees.
 
 ## City rendering: original versus modular
 
@@ -51,23 +51,23 @@ Browser environment: Linux Chromium with SwiftShader and the existing verified n
 
 | Factories | Original → modular median FPS | Original → modular median p95 (ms) | Original → modular startup (ms) | Original → modular draw calls |
 |---|---|---|---|---|
-| 10 | 12.05 → 9.03 | 100.0 → 125.05 | 2,029 → 2,648 | 85 → 10–12 |
-| 50 | 9.34 → 6.39 | 133.4 → 166.7 | 2,016 → 3,546 | 400–403 → 9 |
-| 100 | 5.75 → 4.09 | 374.95 → 308.3 | 4,498 → 4,705 | 790–799 → 9 |
-| 250 | 6.39 → 2.64 | 166.7 → 391.7 | 4,335 → 7,787 | 1,958–1,988 → 9 |
+| 10 | 11.80 → 6.81 | 100.05 → 224.90 | 1,960 → 3,198 | 85 → 10–12 |
+| 50 | 9.83 → 5.44 | 125.0 → 266.65 | 2,178 → 4,113 | 400–403 → 9 |
+| 100 | 8.25 → 4.25 | 141.65 → 250.05 | 2,775 → 4,825 | 790–799 → 9 |
+| 250 | 6.21 → 2.47 | 175.0 → 424.95 | 4,302 → 7,734 | 1,958–1,988 → 9 |
 
 This is a **3D performance regression versus the much simpler original art** in this software renderer. Neither variant meets 30/60 FPS targets here. Do not use the favorable draw-call or texture numbers to claim smooth city rendering. The new models are not enabled in gameplay.
 
-Representative Babylon active-index triangle estimates were about **2,278 → 16–17K**, **10.8K → 61.6K**, **21.5–21.7K → 121K**, and **53.4–54.2K → 298–302K** for the four sizes. Scene mesh object counts were **96 → 150**, **454 → 736**, **906 → 1,470**, and **2,256 → 3,670**. Modular instancing reduces draws, but the retained LOD instances, transforms, additional geometry and shading still cost time. Babylon's active counters are renderer estimates, not a hardware GPU pipeline query.
+Representative Babylon active-index triangle estimates were about **2,278 → 16.6–18.0K**, **10.8K → 65.0K**, **21.5–21.7K → 127.7–128.1K**, and **53.4–54.2K → 315.0–321.2K** for the four sizes. Scene mesh object counts were **96 → 150**, **454 → 736**, **906 → 1,470**, and **2,256 → 3,670**. Modular instancing reduces draws, but the retained LOD instances, transforms, additional geometry and shading still cost time. Babylon's active counters are renderer estimates, not a hardware GPU pipeline query.
 
 Loaded-texture estimates were about **25.5 MiB original / 11.4 MiB modular**, constant across counts in these fresh contexts. These estimates assume RGBA storage plus mipmaps; exact VRAM, driver allocations and geometry GPU bytes were unavailable. Imported asset-container overhead remains until pool disposal. Main code/palette templates are shared; per-building materials/textures are not rebuilt during camera movements.
 
-Every city path still produced roughly 24–26 >50 ms long tasks in the software renderer. Native five-step camera-gesture wall times (including 100 ms settling and Playwright dispatch) increased from roughly **1.72 → 2.21 s**, **2.58 → 3.23 s**, **2.89 → 4.40 s**, and **3.31 → 7.55 s**. Cameras changed in every test, but these numbers do **not** demonstrate responsive large-city interaction. Full frame arrays, long tasks, counters, gesture times and positions are retained in the JSON.
+Every city path still produced roughly 24–26 >50 ms long tasks in the software renderer. Native five-step camera-gesture wall times (including 100 ms settling and Playwright dispatch) increased from roughly **1.76 → 3.37 s**, **2.10 → 3.31 s**, **2.42 → 4.57 s**, and **3.18 → 7.56 s**. Cameras changed in every test, but these numbers do **not** demonstrate responsive large-city interaction. Full frame arrays, long tasks, counters, gesture times and positions are retained in the JSON.
 
 ### Measured optimization decisions
 
 - Initial batching/caching reduced draw calls but kept full source shells and PBR in distant LODs. The controlled 50-factory [material experiment](evidence/material-profile.json) held geometry/positions constant: median **3.62 FPS full PBR → 4.60 FPS** using shared lower-cost distant lighting, with 9 draws in either case. High-detail close-ups retain PBR.
-- That profile still rendered approximately 120K triangles at 50 factories. Build-time, attribute-aware Meshoptimizer simplification then reduced it to about **61.6K**, while keeping original vertex coordinates/UVs and full High geometry. The final 50-factory median was **6.39 FPS**. [Before-geometry-reduction measurements](evidence/before-geometry-reduction.json) are retained separately; these experiments are small/noisy and not a statistical hardware certification.
+- That profile still rendered approximately 120K triangles at 50 factories. Build-time, attribute-aware Meshoptimizer simplification then reduced it to about **65.0K**, while keeping original vertex coordinates/UVs and full High geometry. The final 50-factory median was **5.44 FPS**. [Before-geometry-reduction measurements](evidence/before-geometry-reduction.json) are retained separately; these experiments are small/noisy and not a statistical hardware certification.
 - No economy, terrain sampling, saved coordinates, number of buildings, camera path or benchmark work was reduced to achieve the comparison. Rendering-only detail reduction is explicit and measured.
 
 ## Remaining gates and limitations

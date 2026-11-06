@@ -12,18 +12,20 @@
         92
       ],
       "url": "generated/steelMill.glb",
-      "sha256": "0693a84c6244802cdeea82b36b45d05b481f596328f3d30ed8e524938a0184e8",
-      "bytes": 491920,
+      "sha256": "b781232a5fab4d4c5b1dae89e48dcbecae424514d73f6734d236a6b5b88eb1a7",
+      "bytes": 494024,
       "lods": [
         {
           "lod": "low",
-          "triangles": 754,
+          "triangles": 788,
           "meshBatches": 2,
           "sourceParts": 4,
           "simplifier": {
             "tool": "meshoptimizer@0.25.0",
             "relativeErrorLimit": 0.045,
-            "retainsOriginalVertices": true
+            "retainsOriginalVertices": true,
+            "preserveIslands": true,
+            "uvWeight": 10
           },
           "bounds": [
             [
@@ -32,21 +34,23 @@
               -30.592419387360952
             ],
             [
-              46.5,
+              46.018518943682,
               58.00000000000001,
-              31.675282496221396
+              32.56704297508247
             ]
           ]
         },
         {
           "lod": "medium",
-          "triangles": 2172,
+          "triangles": 2171,
           "meshBatches": 3,
           "sourceParts": 12,
           "simplifier": {
             "tool": "meshoptimizer@0.25.0",
             "relativeErrorLimit": 0.012,
-            "retainsOriginalVertices": true
+            "retainsOriginalVertices": true,
+            "preserveIslands": true,
+            "uvWeight": 10
           },
           "bounds": [
             [
@@ -91,28 +95,30 @@
         66
       ],
       "url": "generated/precisionElectronicsWorks.glb",
-      "sha256": "6bb81dd3631e4b6ea9ef6cd0ebcc4272eeef0ef44db58ea6866fa01a249c628d",
-      "bytes": 839756,
+      "sha256": "2e4e411640d45e736072e679f69c14427e0437db59b06337a9f6e5ed93700590",
+      "bytes": 849000,
       "lods": [
         {
           "lod": "low",
-          "triangles": 2149,
+          "triangles": 2291,
           "meshBatches": 1,
           "sourceParts": 2,
           "simplifier": {
             "tool": "meshoptimizer@0.25.0",
             "relativeErrorLimit": 0.045,
-            "retainsOriginalVertices": true
+            "retainsOriginalVertices": true,
+            "preserveIslands": true,
+            "uvWeight": 10
           },
           "bounds": [
             [
-              -33.10252786223915,
+              -33.43080672979028,
               0.0,
               -7.4500826474520245
             ],
             [
               29.0,
-              20.578230892008225,
+              22.0,
               26.961578916686896
             ]
           ]
@@ -125,7 +131,9 @@
           "simplifier": {
             "tool": "meshoptimizer@0.25.0",
             "relativeErrorLimit": 0.012,
-            "retainsOriginalVertices": true
+            "retainsOriginalVertices": true,
+            "preserveIslands": true,
+            "uvWeight": 10
           },
           "bounds": [
             [
@@ -170,22 +178,24 @@
         54
       ],
       "url": "generated/machineWorks.glb",
-      "sha256": "68e402ac37b80ef0da5012e575bcf72f944f1fbe4fcefc1463400eff48850037",
-      "bytes": 348372,
+      "sha256": "bdf17bd9d81dfaabfb870430e5a56b4e8fdbd1077b881187e84e86f8e2a36196",
+      "bytes": 350288,
       "lods": [
         {
           "lod": "low",
-          "triangles": 756,
+          "triangles": 784,
           "meshBatches": 2,
           "sourceParts": 2,
           "simplifier": {
             "tool": "meshoptimizer@0.25.0",
             "relativeErrorLimit": 0.045,
-            "retainsOriginalVertices": true
+            "retainsOriginalVertices": true,
+            "preserveIslands": true,
+            "uvWeight": 10
           },
           "bounds": [
             [
-              -27.601171056912648,
+              -27.657608395151456,
               0.0,
               -10.0
             ],
@@ -198,13 +208,15 @@
         },
         {
           "lod": "medium",
-          "triangles": 1567,
+          "triangles": 1576,
           "meshBatches": 3,
           "sourceParts": 6,
           "simplifier": {
             "tool": "meshoptimizer@0.25.0",
             "relativeErrorLimit": 0.012,
-            "retainsOriginalVertices": true
+            "retainsOriginalVertices": true,
+            "preserveIslands": true,
+            "uvWeight": 10
           },
           "bounds": [
             [
@@ -288,24 +300,26 @@
         22
       ],
       "url": "generated/smallHouse.glb",
-      "sha256": "d5a9b81c177274a378ae3f9ff0abd11555d9791ebe8faf910b791d7e4cffacff",
-      "bytes": 155456,
+      "sha256": "90b25e79c62ab0f08a31ebcddff922435502cfc223e0af1292b314c833da7976",
+      "bytes": 158336,
       "lods": [
         {
           "lod": "low",
-          "triangles": 534,
+          "triangles": 594,
           "meshBatches": 1,
           "sourceParts": 1,
           "simplifier": {
             "tool": "meshoptimizer@0.25.0",
             "relativeErrorLimit": 0.045,
-            "retainsOriginalVertices": true
+            "retainsOriginalVertices": true,
+            "preserveIslands": true,
+            "uvWeight": 10
           },
           "bounds": [
             [
               -8.5,
               0.0,
-              -10.200878905740469
+              -10.243205082643982
             ],
             [
               8.5,
@@ -316,13 +330,15 @@
         },
         {
           "lod": "medium",
-          "triangles": 798,
+          "triangles": 810,
           "meshBatches": 1,
           "sourceParts": 1,
           "simplifier": {
             "tool": "meshoptimizer@0.25.0",
             "relativeErrorLimit": 0.012,
-            "retainsOriginalVertices": true
+            "retainsOriginalVertices": true,
+            "preserveIslands": true,
+            "uvWeight": 10
           },
           "bounds": [
             [
