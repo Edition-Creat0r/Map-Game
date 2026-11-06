@@ -1,0 +1,647 @@
+{
+  "version": 1,
+  "lods": [
+    "low",
+    "medium",
+    "high"
+  ],
+  "buildings": [
+    {
+      "id": "steelMill",
+      "label": "Steel Mill",
+      "footprint": [
+        118,
+        92
+      ],
+      "pivot": "base-center",
+      "orientation": "+Y up; local X width, Z depth; quarter turns match existing placement",
+      "parts": [
+        {
+          "pack": "industrial",
+          "model": "building-k",
+          "position": [
+            -12,
+            0,
+            2
+          ],
+          "dimensions": [
+            70,
+            28,
+            48
+          ],
+          "detail": 0,
+          "rotation": 0
+        },
+        {
+          "pack": "industrial",
+          "model": "chimney-large",
+          "position": [
+            40,
+            0,
+            24
+          ],
+          "dimensions": [
+            13,
+            58,
+            13
+          ],
+          "detail": 0,
+          "rotation": 0
+        },
+        {
+          "pack": "industrial",
+          "model": "chimney-medium",
+          "position": [
+            22,
+            0,
+            29
+          ],
+          "dimensions": [
+            8,
+            48,
+            8
+          ],
+          "detail": 0,
+          "rotation": 0
+        },
+        {
+          "pack": "factory",
+          "model": "crane",
+          "position": [
+            -47,
+            0,
+            -16
+          ],
+          "dimensions": [
+            16,
+            39,
+            30
+          ],
+          "detail": 0,
+          "rotation": 0,
+          "preserveAspect": true
+        },
+        {
+          "pack": "industrial",
+          "model": "shipping-container-a",
+          "position": [
+            -20,
+            0,
+            -35
+          ],
+          "dimensions": [
+            20,
+            6,
+            9
+          ],
+          "detail": 1,
+          "rotation": 0
+        },
+        {
+          "pack": "industrial",
+          "model": "shipping-container-b",
+          "position": [
+            3,
+            0,
+            -35
+          ],
+          "dimensions": [
+            20,
+            6,
+            9
+          ],
+          "detail": 1,
+          "rotation": 0
+        },
+        {
+          "pack": "factory",
+          "model": "conveyor-long-sides",
+          "position": [
+            34,
+            1,
+            -18
+          ],
+          "dimensions": [
+            12,
+            5,
+            27
+          ],
+          "detail": 1,
+          "rotation": 0
+        },
+        {
+          "pack": "factory",
+          "model": "machine-fortified",
+          "position": [
+            36,
+            0,
+            4
+          ],
+          "dimensions": [
+            18,
+            14,
+            13
+          ],
+          "detail": 1,
+          "rotation": 0,
+          "preserveAspect": true
+        },
+        {
+          "pack": "factory",
+          "model": "pipe-large-long",
+          "position": [
+            12,
+            9,
+            27
+          ],
+          "dimensions": [
+            16,
+            4,
+            4
+          ],
+          "detail": 1,
+          "rotation": 90
+        },
+        {
+          "pack": "factory",
+          "model": "hopper-high-square",
+          "position": [
+            42,
+            0,
+            -32
+          ],
+          "dimensions": [
+            12,
+            16,
+            13
+          ],
+          "detail": 2,
+          "rotation": 0,
+          "preserveAspect": true
+        },
+        {
+          "pack": "factory",
+          "model": "pipe-large-bend",
+          "position": [
+            19,
+            9,
+            17
+          ],
+          "dimensions": [
+            7,
+            10,
+            8
+          ],
+          "detail": 2,
+          "rotation": 0
+        },
+        {
+          "pack": "factory",
+          "model": "box-wide",
+          "position": [
+            -36,
+            0,
+            -34
+          ],
+          "dimensions": [
+            9,
+            4,
+            9
+          ],
+          "detail": 2,
+          "rotation": 0,
+          "preserveAspect": true
+        },
+        {
+          "pack": "factory",
+          "model": "catwalk-straight",
+          "position": [
+            14,
+            5,
+            -12
+          ],
+          "dimensions": [
+            6,
+            4,
+            27
+          ],
+          "detail": 2,
+          "rotation": 0,
+          "preserveAspect": true
+        }
+      ]
+    },
+    {
+      "id": "precisionElectronicsWorks",
+      "label": "Electronics Plant",
+      "footprint": [
+        80,
+        66
+      ],
+      "pivot": "base-center",
+      "orientation": "+Y up; local X width, Z depth; quarter turns match existing placement",
+      "parts": [
+        {
+          "pack": "industrial",
+          "model": "building-q",
+          "position": [
+            6,
+            0,
+            10
+          ],
+          "dimensions": [
+            46,
+            18,
+            34
+          ],
+          "detail": 0,
+          "rotation": 0
+        },
+        {
+          "pack": "industrial",
+          "model": "building-a",
+          "position": [
+            -24,
+            0,
+            8
+          ],
+          "dimensions": [
+            19,
+            22,
+            31
+          ],
+          "detail": 0,
+          "rotation": 0
+        },
+        {
+          "pack": "factory",
+          "model": "robot-arm-a",
+          "position": [
+            18,
+            0,
+            -17
+          ],
+          "dimensions": [
+            11,
+            13,
+            10
+          ],
+          "detail": 1,
+          "rotation": 0,
+          "preserveAspect": true,
+          "pose": {
+            "element-b": {
+              "axis": "z",
+              "degrees": 55
+            },
+            "element-d": {
+              "axis": "z",
+              "degrees": -100
+            },
+            "element-f": {
+              "axis": "z",
+              "degrees": 25
+            }
+          }
+        },
+        {
+          "pack": "factory",
+          "model": "robot-arm-b",
+          "position": [
+            2,
+            0,
+            -17
+          ],
+          "dimensions": [
+            10,
+            12,
+            10
+          ],
+          "detail": 1,
+          "rotation": 0,
+          "preserveAspect": true,
+          "pose": {
+            "element-b": {
+              "axis": "z",
+              "degrees": 55
+            },
+            "element-d": {
+              "axis": "z",
+              "degrees": -100
+            },
+            "element-f": {
+              "axis": "z",
+              "degrees": 25
+            }
+          }
+        },
+        {
+          "pack": "industrial",
+          "model": "shipping-container-c",
+          "position": [
+            -23,
+            0,
+            -22
+          ],
+          "dimensions": [
+            18,
+            6,
+            9
+          ],
+          "detail": 1,
+          "rotation": 0
+        },
+        {
+          "pack": "factory",
+          "model": "conveyor-long-stripe-sides",
+          "position": [
+            21,
+            0,
+            -29
+          ],
+          "dimensions": [
+            28,
+            3,
+            5
+          ],
+          "detail": 1,
+          "rotation": 90
+        },
+        {
+          "pack": "factory",
+          "model": "scanner-high",
+          "position": [
+            32,
+            0,
+            -16
+          ],
+          "dimensions": [
+            7,
+            11,
+            9
+          ],
+          "detail": 2,
+          "rotation": 0,
+          "preserveAspect": true
+        },
+        {
+          "pack": "factory",
+          "model": "machine-window",
+          "position": [
+            -9,
+            0,
+            -18
+          ],
+          "dimensions": [
+            8,
+            10,
+            9
+          ],
+          "detail": 2,
+          "rotation": 0,
+          "preserveAspect": true
+        },
+        {
+          "pack": "industrial",
+          "model": "detail-tank",
+          "position": [
+            24,
+            18,
+            15
+          ],
+          "dimensions": [
+            7,
+            4,
+            5
+          ],
+          "detail": 2,
+          "rotation": 0
+        },
+        {
+          "pack": "industrial",
+          "model": "solar-panel-flat",
+          "position": [
+            -23,
+            22,
+            6
+          ],
+          "dimensions": [
+            11,
+            1,
+            13
+          ],
+          "detail": 2,
+          "rotation": 0
+        },
+        {
+          "pack": "factory",
+          "model": "screen-panel-wide",
+          "position": [
+            -1,
+            1,
+            -27
+          ],
+          "dimensions": [
+            8,
+            4,
+            2
+          ],
+          "detail": 2,
+          "rotation": 0,
+          "preserveAspect": true
+        }
+      ]
+    },
+    {
+      "id": "machineWorks",
+      "label": "Machinery Works",
+      "footprint": [
+        64,
+        54
+      ],
+      "pivot": "base-center",
+      "orientation": "+Y up; local X width, Z depth; quarter turns match existing placement",
+      "parts": [
+        {
+          "pack": "industrial",
+          "model": "building-i",
+          "position": [
+            -14,
+            0,
+            6
+          ],
+          "dimensions": [
+            28,
+            23,
+            32
+          ],
+          "detail": 0,
+          "rotation": 0
+        },
+        {
+          "pack": "factory",
+          "model": "crane",
+          "position": [
+            15,
+            0,
+            7
+          ],
+          "dimensions": [
+            23,
+            33,
+            25
+          ],
+          "detail": 0,
+          "rotation": 0,
+          "preserveAspect": true
+        },
+        {
+          "pack": "factory",
+          "model": "machine-bed",
+          "position": [
+            13,
+            0,
+            -14
+          ],
+          "dimensions": [
+            16,
+            8,
+            11
+          ],
+          "detail": 1,
+          "rotation": 0,
+          "preserveAspect": true
+        },
+        {
+          "pack": "factory",
+          "model": "conveyor-long",
+          "position": [
+            -6,
+            0,
+            -19
+          ],
+          "dimensions": [
+            18,
+            4,
+            6
+          ],
+          "detail": 1,
+          "rotation": 90
+        },
+        {
+          "pack": "factory",
+          "model": "cog-b",
+          "position": [
+            25,
+            0,
+            -15
+          ],
+          "dimensions": [
+            7,
+            8,
+            6
+          ],
+          "detail": 1,
+          "rotation": 0,
+          "preserveAspect": true
+        },
+        {
+          "pack": "factory",
+          "model": "piston-square",
+          "position": [
+            10,
+            4,
+            -14
+          ],
+          "dimensions": [
+            5,
+            7,
+            4
+          ],
+          "detail": 2,
+          "rotation": 0,
+          "animated": true,
+          "preserveAspect": true
+        },
+        {
+          "pack": "factory",
+          "model": "cog-a",
+          "position": [
+            24,
+            0,
+            -22
+          ],
+          "dimensions": [
+            5,
+            5,
+            4
+          ],
+          "detail": 2,
+          "rotation": 0,
+          "preserveAspect": true
+        },
+        {
+          "pack": "factory",
+          "model": "box-large",
+          "position": [
+            -24,
+            0,
+            -19
+          ],
+          "dimensions": [
+            7,
+            5,
+            8
+          ],
+          "detail": 2,
+          "rotation": 0,
+          "preserveAspect": true
+        },
+        {
+          "pack": "factory",
+          "model": "machine-connection-pipe",
+          "position": [
+            4,
+            0,
+            19
+          ],
+          "dimensions": [
+            8,
+            9,
+            6
+          ],
+          "detail": 2,
+          "rotation": 0
+        }
+      ]
+    },
+    {
+      "id": "smallHouse",
+      "label": "Suburban House \u00b7 optional pack",
+      "footprint": [
+        18,
+        22
+      ],
+      "pivot": "base-center",
+      "orientation": "+Y up; local X width, Z depth; quarter turns match existing placement",
+      "parts": [
+        {
+          "pack": "suburban",
+          "model": "building-type-a",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "dimensions": [
+            17,
+            12,
+            21
+          ],
+          "detail": 0,
+          "rotation": 0
+        }
+      ]
+    }
+  ]
+}

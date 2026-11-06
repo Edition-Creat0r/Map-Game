@@ -1,0 +1,363 @@
+{
+  "version": 1,
+  "sourceSpecSha256": "4dbe151ed54e258cdf9781a5d705fb028cb8b1eb60858d8d7e3d49a35ab1af99",
+  "license": "CC0-1.0",
+  "finish": "industrial-neutral-v1; desaturated Kenney palettes + authored architectural PBR details; original terrain untouched",
+  "buildings": [
+    {
+      "id": "steelMill",
+      "label": "Steel Mill",
+      "footprint": [
+        118,
+        92
+      ],
+      "url": "generated/steelMill.glb",
+      "sha256": "0693a84c6244802cdeea82b36b45d05b481f596328f3d30ed8e524938a0184e8",
+      "bytes": 491920,
+      "lods": [
+        {
+          "lod": "low",
+          "triangles": 754,
+          "meshBatches": 2,
+          "sourceParts": 4,
+          "simplifier": {
+            "tool": "meshoptimizer@0.25.0",
+            "relativeErrorLimit": 0.045,
+            "retainsOriginalVertices": true
+          },
+          "bounds": [
+            [
+              -54.85011405901916,
+              0.0,
+              -30.592419387360952
+            ],
+            [
+              46.5,
+              58.00000000000001,
+              31.675282496221396
+            ]
+          ]
+        },
+        {
+          "lod": "medium",
+          "triangles": 2172,
+          "meshBatches": 3,
+          "sourceParts": 12,
+          "simplifier": {
+            "tool": "meshoptimizer@0.25.0",
+            "relativeErrorLimit": 0.012,
+            "retainsOriginalVertices": true
+          },
+          "bounds": [
+            [
+              -54.85011405901916,
+              0.0,
+              -39.371990673190986
+            ],
+            [
+              46.5,
+              58.00000000000001,
+              33.0
+            ]
+          ]
+        },
+        {
+          "lod": "high",
+          "triangles": 4590,
+          "meshBatches": 6,
+          "sourceParts": 41,
+          "simplifier": null,
+          "bounds": [
+            [
+              -54.85011405901916,
+              0.0,
+              -39.5
+            ],
+            [
+              47.958400090535484,
+              58.00000000000001,
+              33.0
+            ]
+          ]
+        }
+      ],
+      "animatedParts": []
+    },
+    {
+      "id": "precisionElectronicsWorks",
+      "label": "Electronics Plant",
+      "footprint": [
+        80,
+        66
+      ],
+      "url": "generated/precisionElectronicsWorks.glb",
+      "sha256": "6bb81dd3631e4b6ea9ef6cd0ebcc4272eeef0ef44db58ea6866fa01a249c628d",
+      "bytes": 839756,
+      "lods": [
+        {
+          "lod": "low",
+          "triangles": 2149,
+          "meshBatches": 1,
+          "sourceParts": 2,
+          "simplifier": {
+            "tool": "meshoptimizer@0.25.0",
+            "relativeErrorLimit": 0.045,
+            "retainsOriginalVertices": true
+          },
+          "bounds": [
+            [
+              -33.10252786223915,
+              0.0,
+              -7.4500826474520245
+            ],
+            [
+              29.0,
+              20.578230892008225,
+              26.961578916686896
+            ]
+          ]
+        },
+        {
+          "lod": "medium",
+          "triangles": 3713,
+          "meshBatches": 4,
+          "sourceParts": 8,
+          "simplifier": {
+            "tool": "meshoptimizer@0.25.0",
+            "relativeErrorLimit": 0.012,
+            "retainsOriginalVertices": true
+          },
+          "bounds": [
+            [
+              -33.43080672979028,
+              0.0,
+              -31.5
+            ],
+            [
+              35.0,
+              22.0,
+              26.961578916686896
+            ]
+          ]
+        },
+        {
+          "lod": "high",
+          "triangles": 7354,
+          "meshBatches": 7,
+          "sourceParts": 42,
+          "simplifier": null,
+          "bounds": [
+            [
+              -33.5,
+              0.0,
+              -31.5
+            ],
+            [
+              35.0,
+              23.0,
+              27.0
+            ]
+          ]
+        }
+      ],
+      "animatedParts": []
+    },
+    {
+      "id": "machineWorks",
+      "label": "Machinery Works",
+      "footprint": [
+        64,
+        54
+      ],
+      "url": "generated/machineWorks.glb",
+      "sha256": "68e402ac37b80ef0da5012e575bcf72f944f1fbe4fcefc1463400eff48850037",
+      "bytes": 348372,
+      "lods": [
+        {
+          "lod": "low",
+          "triangles": 756,
+          "meshBatches": 2,
+          "sourceParts": 2,
+          "simplifier": {
+            "tool": "meshoptimizer@0.25.0",
+            "relativeErrorLimit": 0.045,
+            "retainsOriginalVertices": true
+          },
+          "bounds": [
+            [
+              -27.601171056912648,
+              0.0,
+              -10.0
+            ],
+            [
+              21.541761715849304,
+              24.13775711542035,
+              22.0
+            ]
+          ]
+        },
+        {
+          "lod": "medium",
+          "triangles": 1567,
+          "meshBatches": 3,
+          "sourceParts": 6,
+          "simplifier": {
+            "tool": "meshoptimizer@0.25.0",
+            "relativeErrorLimit": 0.012,
+            "retainsOriginalVertices": true
+          },
+          "bounds": [
+            [
+              -28.0,
+              0.0,
+              -22.0
+            ],
+            [
+              28.0,
+              24.13775711542035,
+              22.0
+            ]
+          ]
+        },
+        {
+          "lod": "high",
+          "triangles": 3034,
+          "meshBatches": 6,
+          "sourceParts": 20,
+          "simplifier": null,
+          "bounds": [
+            [
+              -28.0,
+              0.0,
+              -24.0
+            ],
+            [
+              28.0,
+              24.13775711542035,
+              22.0
+            ]
+          ]
+        }
+      ],
+      "animatedParts": [
+        {
+          "pack": "factory",
+          "model": "piston-square",
+          "position": [
+            10,
+            4,
+            -14
+          ],
+          "dimensions": [
+            5,
+            7,
+            4
+          ],
+          "detail": 2,
+          "rotation": 0,
+          "animated": true,
+          "preserveAspect": true,
+          "source": "source/factory/piston-square.glb",
+          "matrix": [
+            4.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            4.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            4.0,
+            0.0,
+            10.0,
+            4.0000000000000115,
+            -14.0,
+            1.0
+          ],
+          "animationCount": 3
+        }
+      ]
+    },
+    {
+      "id": "smallHouse",
+      "label": "Suburban House \u00b7 optional pack",
+      "footprint": [
+        18,
+        22
+      ],
+      "url": "generated/smallHouse.glb",
+      "sha256": "d5a9b81c177274a378ae3f9ff0abd11555d9791ebe8faf910b791d7e4cffacff",
+      "bytes": 155456,
+      "lods": [
+        {
+          "lod": "low",
+          "triangles": 534,
+          "meshBatches": 1,
+          "sourceParts": 1,
+          "simplifier": {
+            "tool": "meshoptimizer@0.25.0",
+            "relativeErrorLimit": 0.045,
+            "retainsOriginalVertices": true
+          },
+          "bounds": [
+            [
+              -8.5,
+              0.0,
+              -10.200878905740469
+            ],
+            [
+              8.5,
+              12.0,
+              10.5
+            ]
+          ]
+        },
+        {
+          "lod": "medium",
+          "triangles": 798,
+          "meshBatches": 1,
+          "sourceParts": 1,
+          "simplifier": {
+            "tool": "meshoptimizer@0.25.0",
+            "relativeErrorLimit": 0.012,
+            "retainsOriginalVertices": true
+          },
+          "bounds": [
+            [
+              -8.5,
+              0.0,
+              -10.5
+            ],
+            [
+              8.5,
+              12.0,
+              10.5
+            ]
+          ]
+        },
+        {
+          "lod": "high",
+          "triangles": 1174,
+          "meshBatches": 1,
+          "sourceParts": 1,
+          "simplifier": null,
+          "bounds": [
+            [
+              -8.5,
+              0.0,
+              -10.5
+            ],
+            [
+              8.5,
+              12.0,
+              10.5
+            ]
+          ]
+        }
+      ],
+      "animatedParts": []
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"name":"mapgame-modular-factory-build-tools","version":"1.0.0","private":true,"description":"Offline-only GLB LOD simplification; not loaded by the game","dependencies":{"meshoptimizer":"0.25.0"}}
