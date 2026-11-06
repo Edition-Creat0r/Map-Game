@@ -896,7 +896,7 @@
         }[def.category] || "#acb6ae";
     ctx.fillRect(-w / 2, -d / 2, w, d);
     ctx.strokeStyle = ghost
-      ? "#f2ffff"
+      ? (construction.analysis?.allowed ? "#57df9a" : "#ed7278")
       : operationStatus.get(row.id) === false
         ? "#ffc474"
         : "#d9e6e8";
@@ -1065,6 +1065,8 @@
     };
 
     updateInspector(state.hoverWorld);
+    // Follow the cursor every input event; keep expensive validation throttled.
+    if (construction) construction.point = world;
     if (
       construction &&
       (!construction.updatedAt || performance.now() - construction.updatedAt > 80)
@@ -1092,6 +1094,7 @@
       state.lastY = event.clientY;
 
       clampCamera();
+      if (construction) construction.point = screenToWorld(event.clientX, event.clientY);
     }
 
     state.needsDraw = true;

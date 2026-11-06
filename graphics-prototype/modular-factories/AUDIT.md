@@ -1,6 +1,6 @@
 # Modular factories: Phase A source audit and blocked asset inspection
 
-Status: source audit complete; archive audit blocked. No Kenney assembly, renderer integration or performance claim is made by this checkpoint.
+Historical checkpoint (before the subsequent upload): source audit complete; archive audit was blocked. The three packs have since been supplied and audited; see [README.md](README.md), `asset-audit.json` and `manifest.json`. No Kenney assembly, renderer integration or performance claim is made by this checkpoint.
 
 ## Source and branch safety
 

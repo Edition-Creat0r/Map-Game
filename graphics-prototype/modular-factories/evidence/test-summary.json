@@ -1,0 +1,139 @@
+{
+  "base": "072e07fbebe9830d8c41c74d68cdb5b5e455d347",
+  "node": {
+    "passed": 157,
+    "failed": 0,
+    "skipped": 0
+  },
+  "python": {
+    "modularAssetsPassed": 14,
+    "originalPackPassed": 16,
+    "resourceZipAuditPassed": 15,
+    "failed": 0
+  },
+  "releasePrograms": [
+    {
+      "name": "node",
+      "exitCode": 0,
+      "seconds": 6.27
+    },
+    {
+      "name": "modular-pack",
+      "exitCode": 0,
+      "seconds": 7.71
+    },
+    {
+      "name": "terrain-pack",
+      "exitCode": 0,
+      "seconds": 2.62
+    },
+    {
+      "name": "resource-audit",
+      "exitCode": 0,
+      "seconds": 0.42
+    },
+    {
+      "name": "modular-factories",
+      "exitCode": 0,
+      "seconds": 59.21,
+      "finalEvidence": "browser-results.json"
+    },
+    {
+      "name": "modular-placement",
+      "exitCode": 0,
+      "initialExitCode": 1,
+      "finalEvidence": "native-placement-results.json",
+      "correction": "Test reopened construction after purchase, matching existing auto-cancel behavior.",
+      "initialSeconds": 35.04
+    },
+    {
+      "name": "premium-fixes",
+      "exitCode": 0,
+      "seconds": 26.04
+    },
+    {
+      "name": "premium-ui",
+      "exitCode": 0,
+      "seconds": 40.43
+    },
+    {
+      "name": "modern-frontier",
+      "exitCode": 0,
+      "seconds": 26.08
+    },
+    {
+      "name": "visual-ui",
+      "exitCode": 0,
+      "seconds": 20.16
+    },
+    {
+      "name": "resource-icons",
+      "exitCode": 0,
+      "seconds": 15.02
+    },
+    {
+      "name": "graphics-prototype-sp",
+      "exitCode": 0,
+      "seconds": 7.18
+    },
+    {
+      "name": "industrial-042a",
+      "exitCode": 0,
+      "seconds": 29.7
+    },
+    {
+      "name": "phase-b",
+      "exitCode": 0,
+      "seconds": 21.5
+    },
+    {
+      "name": "phase-c1",
+      "exitCode": 0,
+      "seconds": 17.83
+    },
+    {
+      "name": "economy",
+      "exitCode": 0,
+      "seconds": 22.1
+    },
+    {
+      "name": "forest",
+      "exitCode": 0,
+      "seconds": 34.06
+    },
+    {
+      "name": "environment",
+      "exitCode": 0,
+      "seconds": 19.53
+    },
+    {
+      "name": "graphics-prototype",
+      "exitCode": 0,
+      "seconds": 98.96
+    },
+    {
+      "name": "main-performance",
+      "exitCode": 0,
+      "seconds": 94.51
+    }
+  ],
+  "cityBenchmark": {
+    "cases": 16,
+    "failed": 0,
+    "consoleErrors": 0,
+    "httpFailures": 0,
+    "targetsMetInSoftwareWebGL": false
+  },
+  "materialProfile": {
+    "cases": 4,
+    "failed": 0
+  },
+  "liveMultiplayerTested": false,
+  "windowsHardwareTested": false,
+  "finalInterfaceCopyRerun": {
+    "premiumUIExitCode": 0,
+    "nodePassed": 157,
+    "evidence": "Final Premium UI suite rerun at all three widths after linking the imported studies; zero console or loading errors."
+  },
+  "finalBasicPerformanceEvidence": "basic-performance.json"
+}

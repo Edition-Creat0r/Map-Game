@@ -1,0 +1,40 @@
+{
+  "errors": [],
+  "http": [],
+  "failed": [],
+  "basicPreviewLatency": {
+    "label": "Capture-phase pointer event to first actual ghost outline draw (not input-to-photon)",
+    "samples": [
+      4.9000000059604645,
+      4.300000011920929,
+      1.5,
+      1.4000000059604645,
+      1.4000000059604645,
+      1.2999999821186066,
+      3.699999988079071,
+      1.5,
+      1.2000000178813934,
+      1.300000011920929,
+      1.2999999821186066,
+      4.0999999940395355,
+      1.9000000059604645
+    ]
+  },
+  "checks": [
+    "Real guest Singleplayer native shop and canonical purchase",
+    "Valid green outline, collision red outline",
+    "Cursor-follow transform at input position",
+    "One saved purchase; placement cancellation"
+  ],
+  "workshopPreviewLatency": {
+    "label": "Capture-phase pointer event to following scene onAfterRender (not input-to-photon)",
+    "samples": [
+      38.900000005960464,
+      9.300000011920929,
+      3.7999999821186066,
+      2.800000011920929,
+      2.9000000059604645,
+      3.699999988079071
+    ]
+  }
+}
