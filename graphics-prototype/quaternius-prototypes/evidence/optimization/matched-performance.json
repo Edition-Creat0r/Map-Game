@@ -1,0 +1,3558 @@
+{
+  "scope": "Matched Linux Chromium SwiftShader, 1366x768, native resolution, same camera/layout/source IDs/lighting. 24 warm-up frames, fixed sample counts. Not hardware/Lenovo/deployment verification. Babylon 9.32 cached official distribution in managed tests.",
+  "baselineCommit": "de493cdc95d43d9e03b4e3c077b51b9f25204381",
+  "runs": 2,
+  "samples": 32,
+  "rows": [
+    {
+      "count": 10,
+      "run": 0,
+      "variant": "catalog",
+      "readyMs": 2037.385113,
+      "throughWarmupLongTasks": [
+        155,
+        289,
+        132,
+        80,
+        94,
+        189
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1149.5,
+        "frameSamples": 32,
+        "meanFrameMs": 93.19062499888241,
+        "p95FrameMs": 178,
+        "fps": 10.730693135838422,
+        "longTasks": [],
+        "drawCalls": 85,
+        "sceneMeshes": 85,
+        "activeMeshes": 85,
+        "instancedMeshes": 0,
+        "thinInstances": 10,
+        "activeTriangles": 2278,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 3134,
+        "cpuFrameMs": 3.996969697150317,
+        "cpuActiveMeshesMs": 0.39696969949837885,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1149.5,
+        "frameSamples": 32,
+        "meanFrameMs": 92.68437500111759,
+        "p95FrameMs": 107.19999998807907,
+        "fps": 10.789305101188221,
+        "longTasks": [],
+        "drawCalls": 85,
+        "sceneMeshes": 85,
+        "activeMeshes": 85,
+        "instancedMeshes": 0,
+        "thinInstances": 10,
+        "activeTriangles": 2278,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 3134,
+        "cpuFrameMs": 3.1303030300622035,
+        "cpuActiveMeshesMs": 0.31515151623523596,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 127664,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+      ]
+    },
+    {
+      "count": 10,
+      "run": 0,
+      "variant": "previous",
+      "readyMs": 2358.458765000001,
+      "throughWarmupLongTasks": [
+        147,
+        129,
+        56,
+        96,
+        113,
+        406
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1552.4000000357628,
+        "frameSamples": 32,
+        "meanFrameMs": 147.80312500149012,
+        "p95FrameMs": 183.9000000357628,
+        "fps": 6.76575681326033,
+        "longTasks": [],
+        "drawCalls": 23,
+        "sceneMeshes": 272,
+        "activeMeshes": 80,
+        "instancedMeshes": 268,
+        "totalVertices": 544820,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "lodCounts": [
+            6,
+            4,
+            0
+          ],
+          "configuredTriangles": 62806,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1552.4000000357628,
+        "frameSamples": 32,
+        "meanFrameMs": 143.22187500074506,
+        "p95FrameMs": 265.80000001192093,
+        "fps": 6.982173637894336,
+        "longTasks": [],
+        "drawCalls": 28,
+        "sceneMeshes": 272,
+        "activeMeshes": 75,
+        "instancedMeshes": 268,
+        "totalVertices": 544820,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "lodCounts": [
+            7,
+            3,
+            0
+          ],
+          "configuredTriangles": 48674,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 5992296,
+      "warnings": []
+    },
+    {
+      "count": 10,
+      "run": 0,
+      "variant": "optimized",
+      "readyMs": 2317.770959999998,
+      "throughWarmupLongTasks": [
+        156,
+        116,
+        55,
+        64,
+        62,
+        615
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1490.5,
+        "frameSamples": 32,
+        "meanFrameMs": 93.16874999925494,
+        "p95FrameMs": 182,
+        "fps": 10.733212584777588,
+        "longTasks": [],
+        "drawCalls": 20,
+        "sceneMeshes": 73,
+        "activeMeshes": 20,
+        "instancedMeshes": 0,
+        "thinInstances": 65,
+        "activeTriangles": 3860,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 2.884057967559151,
+        "cpuActiveMeshesMs": 0.40289855348891107,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "lodCounts": [
+            6,
+            4,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 3814,
+          "batchMeshes": 69,
+          "activeBatches": 16,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 16384,
+          "bufferUploads": 16,
+          "cullingPasses": 1,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1490.5,
+        "frameSamples": 32,
+        "meanFrameMs": 102.234375,
+        "p95FrameMs": 266,
+        "fps": 9.781445819960263,
+        "longTasks": [],
+        "drawCalls": 25,
+        "sceneMeshes": 73,
+        "activeMeshes": 25,
+        "instancedMeshes": 0,
+        "thinInstances": 63,
+        "activeTriangles": 3336,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 2.318627448642955,
+        "cpuActiveMeshesMs": 0.312745100142909,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "lodCounts": [
+            7,
+            3,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 3290,
+          "batchMeshes": 69,
+          "activeBatches": 21,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 21504,
+          "bufferUploads": 28,
+          "cullingPasses": 14,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 3993560,
+      "warnings": []
+    },
+    {
+      "count": 10,
+      "run": 1,
+      "variant": "optimized",
+      "readyMs": 2645.132405000004,
+      "throughWarmupLongTasks": [
+        149,
+        118,
+        68,
+        86,
+        108,
+        583
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1678.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 95.15000000037253,
+        "p95FrameMs": 241,
+        "fps": 10.509721492339304,
+        "longTasks": [],
+        "drawCalls": 20,
+        "sceneMeshes": 73,
+        "activeMeshes": 20,
+        "instancedMeshes": 0,
+        "thinInstances": 65,
+        "activeTriangles": 3860,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 3.3291666673289404,
+        "cpuActiveMeshesMs": 0.2916666641831398,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "lodCounts": [
+            6,
+            4,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 3814,
+          "batchMeshes": 69,
+          "activeBatches": 16,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 16384,
+          "bufferUploads": 16,
+          "cullingPasses": 1,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1678.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 93.27812499925494,
+        "p95FrameMs": 173.5,
+        "fps": 10.720627156774297,
+        "longTasks": [],
+        "drawCalls": 25,
+        "sceneMeshes": 73,
+        "activeMeshes": 25,
+        "instancedMeshes": 0,
+        "thinInstances": 63,
+        "activeTriangles": 3336,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 2.6076190477325802,
+        "cpuActiveMeshesMs": 0.24095237936292377,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "lodCounts": [
+            7,
+            3,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 3290,
+          "batchMeshes": 69,
+          "activeBatches": 21,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 21504,
+          "bufferUploads": 28,
+          "cullingPasses": 15,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 3993560,
+      "warnings": []
+    },
+    {
+      "count": 10,
+      "run": 1,
+      "variant": "previous",
+      "readyMs": 2610.9520180000036,
+      "throughWarmupLongTasks": [
+        173,
+        116,
+        50,
+        70,
+        169,
+        374
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1378.9000000357628,
+        "frameSamples": 32,
+        "meanFrameMs": 143.453125,
+        "p95FrameMs": 200.79999995231628,
+        "fps": 6.97091820063174,
+        "longTasks": [],
+        "drawCalls": 23,
+        "sceneMeshes": 272,
+        "activeMeshes": 80,
+        "instancedMeshes": 268,
+        "totalVertices": 544820,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "lodCounts": [
+            6,
+            4,
+            0
+          ],
+          "configuredTriangles": 62806,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1378.9000000357628,
+        "frameSamples": 32,
+        "meanFrameMs": 148.29062500037253,
+        "p95FrameMs": 375.80000001192093,
+        "fps": 6.743514635517167,
+        "longTasks": [],
+        "drawCalls": 28,
+        "sceneMeshes": 272,
+        "activeMeshes": 75,
+        "instancedMeshes": 268,
+        "totalVertices": 544820,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "lodCounts": [
+            7,
+            3,
+            0
+          ],
+          "configuredTriangles": 48674,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 5992296,
+      "warnings": []
+    },
+    {
+      "count": 10,
+      "run": 1,
+      "variant": "catalog",
+      "readyMs": 1862.455534000008,
+      "throughWarmupLongTasks": [
+        199,
+        174,
+        52,
+        59,
+        93,
+        151
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 836.6000000238419,
+        "frameSamples": 32,
+        "meanFrameMs": 95.64375000074506,
+        "p95FrameMs": 247.80000001192093,
+        "fps": 10.45546624836657,
+        "longTasks": [],
+        "drawCalls": 85,
+        "sceneMeshes": 85,
+        "activeMeshes": 85,
+        "instancedMeshes": 0,
+        "thinInstances": 10,
+        "activeTriangles": 2278,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 3134,
+        "cpuFrameMs": 4.007812499068677,
+        "cpuActiveMeshesMs": 0.4921875,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 836.6000000238419,
+        "frameSamples": 32,
+        "meanFrameMs": 91.54374999925494,
+        "p95FrameMs": 251.80000001192093,
+        "fps": 10.923738649641717,
+        "longTasks": [],
+        "drawCalls": 85,
+        "sceneMeshes": 85,
+        "activeMeshes": 85,
+        "instancedMeshes": 0,
+        "thinInstances": 10,
+        "activeTriangles": 2278,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 3134,
+        "cpuFrameMs": 3.0350515449169984,
+        "cpuActiveMeshesMs": 0.3865979356864064,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 127664,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+      ]
+    },
+    {
+      "count": 50,
+      "run": 0,
+      "variant": "catalog",
+      "readyMs": 1761.8539639999944,
+      "throughWarmupLongTasks": [
+        149,
+        112,
+        60,
+        163,
+        59,
+        75
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 907.1999999880791,
+        "frameSamples": 32,
+        "meanFrameMs": 111.58437499962747,
+        "p95FrameMs": 176.39999997615814,
+        "fps": 8.961828212985361,
+        "longTasks": [],
+        "drawCalls": 400,
+        "sceneMeshes": 403,
+        "activeMeshes": 400,
+        "instancedMeshes": 0,
+        "thinInstances": 50,
+        "activeTriangles": 10818,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 14978,
+        "cpuFrameMs": 8.309375003911555,
+        "cpuActiveMeshesMs": 1.3921875040978193,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 907.1999999880791,
+        "frameSamples": 32,
+        "meanFrameMs": 106.90625,
+        "p95FrameMs": 301.69999998807907,
+        "fps": 9.35399006138556,
+        "longTasks": [],
+        "drawCalls": 400,
+        "sceneMeshes": 403,
+        "activeMeshes": 400,
+        "instancedMeshes": 0,
+        "thinInstances": 50,
+        "activeTriangles": 10818,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 14978,
+        "cpuFrameMs": 6.640206190114169,
+        "cpuActiveMeshesMs": 1.1494845397693594,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 608624,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event"
+      ]
+    },
+    {
+      "count": 50,
+      "run": 0,
+      "variant": "previous",
+      "readyMs": 2903.2625310000003,
+      "throughWarmupLongTasks": [
+        165,
+        149,
+        52,
+        50,
+        70,
+        102,
+        81,
+        78,
+        369,
+        168,
+        67
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1830.5,
+        "frameSamples": 32,
+        "meanFrameMs": 130.45625000074506,
+        "p95FrameMs": 316.69999998807907,
+        "fps": 7.665405068705323,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 1336,
+        "activeMeshes": 286,
+        "instancedMeshes": 1332,
+        "totalVertices": 2573112,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "configuredTriangles": 32104,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1830.5,
+        "frameSamples": 32,
+        "meanFrameMs": 138.31874999962747,
+        "p95FrameMs": 374.89999997615814,
+        "fps": 7.229677827501284,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 1336,
+        "activeMeshes": 286,
+        "instancedMeshes": 1332,
+        "totalVertices": 2573112,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "configuredTriangles": 32104,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 5992296,
+      "warnings": []
+    },
+    {
+      "count": 50,
+      "run": 0,
+      "variant": "optimized",
+      "readyMs": 3283.019177000009,
+      "throughWarmupLongTasks": [
+        152,
+        127,
+        50,
+        54,
+        81,
+        115,
+        193,
+        324,
+        579
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2319,
+        "frameSamples": 32,
+        "meanFrameMs": 106.86249999888241,
+        "p95FrameMs": 269.30000001192093,
+        "fps": 9.357819628124535,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 8484,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 6.709459460264927,
+        "cpuActiveMeshesMs": 0.3864864884196101,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 8358,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 23552,
+          "bufferUploads": 65,
+          "cullingPasses": 5,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2319,
+        "frameSamples": 32,
+        "meanFrameMs": 120.87187499925494,
+        "p95FrameMs": 283.9000000357628,
+        "fps": 8.273223196100533,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 8484,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 5.1327102847188435,
+        "cpuActiveMeshesMs": 0.2999999991087156,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 8358,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 23552,
+          "bufferUploads": 65,
+          "cullingPasses": 20,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 3993560,
+      "warnings": []
+    },
+    {
+      "count": 50,
+      "run": 1,
+      "variant": "optimized",
+      "readyMs": 2763.2636619999976,
+      "throughWarmupLongTasks": [
+        164,
+        104,
+        54,
+        59,
+        107,
+        156,
+        169,
+        410
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1837.300000011921,
+        "frameSamples": 32,
+        "meanFrameMs": 93.61874999850988,
+        "p95FrameMs": 239.89999997615814,
+        "fps": 10.681620936147052,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 8484,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 4.192957746310973,
+        "cpuActiveMeshesMs": 0.3056338009699969,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 8358,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 23552,
+          "bufferUploads": 65,
+          "cullingPasses": 5,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1837.300000011921,
+        "frameSamples": 32,
+        "meanFrameMs": 100.78125,
+        "p95FrameMs": 199.0999999642372,
+        "fps": 9.922480620155039,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 8484,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 3.143269231113104,
+        "cpuActiveMeshesMs": 0.24230769047370324,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 8358,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 23552,
+          "bufferUploads": 65,
+          "cullingPasses": 19,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 3993560,
+      "warnings": []
+    },
+    {
+      "count": 50,
+      "run": 1,
+      "variant": "previous",
+      "readyMs": 2670.0071959999914,
+      "throughWarmupLongTasks": [
+        147,
+        121,
+        55,
+        74,
+        140,
+        64,
+        378,
+        220
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1804.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 131.7312500011176,
+        "p95FrameMs": 286.69999998807907,
+        "fps": 7.591213170690448,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 1336,
+        "activeMeshes": 286,
+        "instancedMeshes": 1332,
+        "totalVertices": 2573112,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "configuredTriangles": 32104,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1804.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 133.04062500037253,
+        "p95FrameMs": 187.10000002384186,
+        "fps": 7.516501068731449,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 1336,
+        "activeMeshes": 286,
+        "instancedMeshes": 1332,
+        "totalVertices": 2573112,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "configuredTriangles": 32104,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 5992296,
+      "warnings": []
+    },
+    {
+      "count": 50,
+      "run": 1,
+      "variant": "catalog",
+      "readyMs": 1756.034749000013,
+      "throughWarmupLongTasks": [
+        153,
+        116,
+        60,
+        53,
+        51,
+        130,
+        61
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 924.2000000476837,
+        "frameSamples": 32,
+        "meanFrameMs": 111.703125,
+        "p95FrameMs": 275.80000001192093,
+        "fps": 8.952301021121835,
+        "longTasks": [],
+        "drawCalls": 400,
+        "sceneMeshes": 403,
+        "activeMeshes": 400,
+        "instancedMeshes": 0,
+        "thinInstances": 50,
+        "activeTriangles": 10818,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 14978,
+        "cpuFrameMs": 9.406250001862645,
+        "cpuActiveMeshesMs": 1.1500000031664968,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 924.2000000476837,
+        "frameSamples": 32,
+        "meanFrameMs": 107.11874999850988,
+        "p95FrameMs": 194.4000000357628,
+        "fps": 9.335433806069533,
+        "longTasks": [],
+        "drawCalls": 400,
+        "sceneMeshes": 403,
+        "activeMeshes": 400,
+        "instancedMeshes": 0,
+        "thinInstances": 50,
+        "activeTriangles": 10818,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 14978,
+        "cpuFrameMs": 7.476288657827475,
+        "cpuActiveMeshesMs": 0.9567010304362503,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 608624,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+      ]
+    },
+    {
+      "count": 100,
+      "run": 0,
+      "variant": "catalog",
+      "readyMs": 2356.959275000001,
+      "throughWarmupLongTasks": [
+        164,
+        107,
+        63,
+        62,
+        323,
+        72,
+        70
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1521.3999999761581,
+        "frameSamples": 32,
+        "meanFrameMs": 127.390625,
+        "p95FrameMs": 142.10000002384186,
+        "fps": 7.8498712130504105,
+        "longTasks": [],
+        "drawCalls": 790,
+        "sceneMeshes": 805,
+        "activeMeshes": 790,
+        "instancedMeshes": 0,
+        "thinInstances": 100,
+        "activeTriangles": 21538,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 30134,
+        "cpuFrameMs": 12.649275362491608,
+        "cpuActiveMeshesMs": 2.1072463712830474,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1521.3999999761581,
+        "frameSamples": 32,
+        "meanFrameMs": 129.03437500074506,
+        "p95FrameMs": 145,
+        "fps": 7.749872853603747,
+        "longTasks": [],
+        "drawCalls": 791,
+        "sceneMeshes": 805,
+        "activeMeshes": 791,
+        "instancedMeshes": 0,
+        "thinInstances": 100,
+        "activeTriangles": 21550,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 30134,
+        "cpuFrameMs": 10.760784314543594,
+        "cpuActiveMeshesMs": 1.8539215636019613,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 1224944,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+      ]
+    },
+    {
+      "count": 100,
+      "run": 0,
+      "variant": "previous",
+      "readyMs": 4373.510216999974,
+      "throughWarmupLongTasks": [
+        143,
+        112,
+        55,
+        93,
+        123,
+        90,
+        131,
+        302,
+        167,
+        50
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3109.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 168.06874999962747,
+        "p95FrameMs": 422.30000001192093,
+        "fps": 5.9499460786268505,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 2672,
+        "activeMeshes": 563,
+        "instancedMeshes": 2668,
+        "totalVertices": 5162660,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "lodCounts": [
+            100,
+            0,
+            0
+          ],
+          "configuredTriangles": 63458,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3109.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 160.06874999962747,
+        "p95FrameMs": 327.89999997615814,
+        "fps": 6.247315606589839,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 2672,
+        "activeMeshes": 563,
+        "instancedMeshes": 2668,
+        "totalVertices": 5162660,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "lodCounts": [
+            100,
+            0,
+            0
+          ],
+          "configuredTriangles": 63458,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 5992296,
+      "warnings": []
+    },
+    {
+      "count": 100,
+      "run": 0,
+      "variant": "optimized",
+      "readyMs": 3601.459719000006,
+      "throughWarmupLongTasks": [
+        165,
+        205,
+        69,
+        85,
+        93,
+        52,
+        82,
+        127,
+        386,
+        435
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2643,
+        "frameSamples": 32,
+        "meanFrameMs": 113.34062499925494,
+        "p95FrameMs": 242.30000001192093,
+        "fps": 8.822961758033129,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 16726,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 102956,
+        "cpuFrameMs": 7.770886074893082,
+        "cpuActiveMeshesMs": 0.3569620266745362,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 16500,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 57344,
+          "bufferUploads": 126,
+          "cullingPasses": 9,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2643,
+        "frameSamples": 32,
+        "meanFrameMs": 124.58437499962747,
+        "p95FrameMs": 323,
+        "fps": 8.026688740084703,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 16726,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 102956,
+        "cpuFrameMs": 5.898214286459344,
+        "cpuActiveMeshesMs": 0.28839285724929403,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 16500,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 57344,
+          "bufferUploads": 136,
+          "cullingPasses": 23,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 3993560,
+      "warnings": []
+    },
+    {
+      "count": 100,
+      "run": 1,
+      "variant": "optimized",
+      "readyMs": 3838.3429710000055,
+      "throughWarmupLongTasks": [
+        187,
+        127,
+        74,
+        98,
+        56,
+        146,
+        406,
+        112,
+        438
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2800.900000035763,
+        "frameSamples": 32,
+        "meanFrameMs": 124.72812500037253,
+        "p95FrameMs": 408.2000000476837,
+        "fps": 8.01743792746835,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 16726,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 102956,
+        "cpuFrameMs": 4.359493669075302,
+        "cpuActiveMeshesMs": 0.2607594947271709,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 16500,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 57344,
+          "bufferUploads": 126,
+          "cullingPasses": 9,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2800.900000035763,
+        "frameSamples": 32,
+        "meanFrameMs": 114.23124999925494,
+        "p95FrameMs": 218.0999999642372,
+        "fps": 8.754171910107981,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 16726,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 102956,
+        "cpuFrameMs": 3.4874999996806895,
+        "cpuActiveMeshesMs": 0.2267857146050249,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 16500,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 57344,
+          "bufferUploads": 136,
+          "cullingPasses": 23,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 3993560,
+      "warnings": []
+    },
+    {
+      "count": 100,
+      "run": 1,
+      "variant": "previous",
+      "readyMs": 3837.2143360000046,
+      "throughWarmupLongTasks": [
+        162,
+        136,
+        62,
+        54,
+        69,
+        126,
+        77,
+        69,
+        336
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2478.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 165.375,
+        "p95FrameMs": 375.80000001192093,
+        "fps": 6.046863189720333,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 2672,
+        "activeMeshes": 563,
+        "instancedMeshes": 2668,
+        "totalVertices": 5162660,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "lodCounts": [
+            100,
+            0,
+            0
+          ],
+          "configuredTriangles": 63458,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2478.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 164.51875000074506,
+        "p95FrameMs": 316.19999998807907,
+        "fps": 6.078334536309517,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 2672,
+        "activeMeshes": 563,
+        "instancedMeshes": 2668,
+        "totalVertices": 5162660,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "lodCounts": [
+            100,
+            0,
+            0
+          ],
+          "configuredTriangles": 63458,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 5992296,
+      "warnings": []
+    },
+    {
+      "count": 100,
+      "run": 1,
+      "variant": "catalog",
+      "readyMs": 2156.145917000016,
+      "throughWarmupLongTasks": [
+        153,
+        113,
+        55,
+        53,
+        86,
+        123,
+        70,
+        66
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1354,
+        "frameSamples": 32,
+        "meanFrameMs": 127.19999999925494,
+        "p95FrameMs": 220.30000001192093,
+        "fps": 7.861635220171835,
+        "longTasks": [],
+        "drawCalls": 790,
+        "sceneMeshes": 805,
+        "activeMeshes": 790,
+        "instancedMeshes": 0,
+        "thinInstances": 100,
+        "activeTriangles": 21538,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 30134,
+        "cpuFrameMs": 12.461764706408276,
+        "cpuActiveMeshesMs": 1.7352941123878254,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1354,
+        "frameSamples": 32,
+        "meanFrameMs": 137.03437500074506,
+        "p95FrameMs": 197.60000002384186,
+        "fps": 7.297439054941966,
+        "longTasks": [],
+        "drawCalls": 791,
+        "sceneMeshes": 805,
+        "activeMeshes": 791,
+        "instancedMeshes": 0,
+        "thinInstances": 100,
+        "activeTriangles": 21550,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 30134,
+        "cpuFrameMs": 10.225742575555746,
+        "cpuActiveMeshesMs": 1.4841584108843662,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 1224944,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event"
+      ]
+    },
+    {
+      "count": 250,
+      "run": 0,
+      "variant": "catalog",
+      "readyMs": 4054.976182000013,
+      "throughWarmupLongTasks": [
+        165,
+        104,
+        59,
+        59,
+        55,
+        145,
+        65,
+        69,
+        75,
+        61,
+        69,
+        53,
+        58,
+        110,
+        54,
+        61,
+        69,
+        59,
+        65,
+        53,
+        90,
+        99,
+        76
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3129,
+        "frameSamples": 32,
+        "meanFrameMs": 170.0656249988824,
+        "p95FrameMs": 216.70000004768372,
+        "fps": 5.880083056211809,
+        "longTasks": [],
+        "drawCalls": 1958,
+        "sceneMeshes": 2005,
+        "activeMeshes": 1958,
+        "instancedMeshes": 0,
+        "thinInstances": 250,
+        "activeTriangles": 53434,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 75134,
+        "cpuFrameMs": 24.913750007003546,
+        "cpuActiveMeshesMs": 3.82875000461936,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3129,
+        "frameSamples": 32,
+        "meanFrameMs": 173.48750000074506,
+        "p95FrameMs": 209.60000002384186,
+        "fps": 5.764104042053205,
+        "longTasks": [
+          58
+        ],
+        "drawCalls": 1958,
+        "sceneMeshes": 2005,
+        "activeMeshes": 1958,
+        "instancedMeshes": 0,
+        "thinInstances": 250,
+        "activeTriangles": 53434,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 75134,
+        "cpuFrameMs": 24.494690270023007,
+        "cpuActiveMeshesMs": 4.229203543304342,
+        "pool": null,
+        "segmentLongTasks": [
+          58
+        ]
+      },
+      "geometryEstimateBytes": 3053744,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+      ]
+    },
+    {
+      "count": 250,
+      "run": 0,
+      "variant": "previous",
+      "readyMs": 6950.002729,
+      "throughWarmupLongTasks": [
+        145,
+        114,
+        65,
+        55,
+        74,
+        99,
+        204,
+        189,
+        170,
+        55,
+        50,
+        60,
+        82
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 5609.799999952316,
+        "frameSamples": 32,
+        "meanFrameMs": 263.078125,
+        "p95FrameMs": 547.1999999880791,
+        "fps": 3.801152224267981,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 6672,
+        "activeMeshes": 1392,
+        "instancedMeshes": 6668,
+        "totalVertices": 12859060,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "lodCounts": [
+            250,
+            0,
+            0
+          ],
+          "configuredTriangles": 158758,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 5609.799999952316,
+        "frameSamples": 32,
+        "meanFrameMs": 243.49687499925494,
+        "p95FrameMs": 469.9000000357628,
+        "fps": 4.106828886420246,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 6672,
+        "activeMeshes": 1393,
+        "instancedMeshes": 6668,
+        "totalVertices": 12859060,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "lodCounts": [
+            250,
+            0,
+            0
+          ],
+          "configuredTriangles": 158758,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 5992296,
+      "warnings": []
+    },
+    {
+      "count": 250,
+      "run": 0,
+      "variant": "optimized",
+      "readyMs": 4740.2736079999595,
+      "throughWarmupLongTasks": [
+        150,
+        119,
+        105,
+        98,
+        77,
+        132,
+        293,
+        486
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3857.300000011921,
+        "frameSamples": 32,
+        "meanFrameMs": 144.734375,
+        "p95FrameMs": 245.4000000357628,
+        "fps": 6.909208679693404,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 41604,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 6.634408599586897,
+        "cpuActiveMeshesMs": 0.26236558857784475,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 41078,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 114688,
+          "bufferUploads": 294,
+          "cullingPasses": 21,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3857.300000011921,
+        "frameSamples": 32,
+        "meanFrameMs": 161.08750000037253,
+        "p95FrameMs": 485.69999998807907,
+        "fps": 6.207806316428571,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 41604,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 5.177777777115504,
+        "cpuActiveMeshesMs": 0.2214285707662976,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 41078,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 114688,
+          "bufferUploads": 314,
+          "cullingPasses": 39,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 3993560,
+      "warnings": []
+    },
+    {
+      "count": 250,
+      "run": 1,
+      "variant": "optimized",
+      "readyMs": 4727.893561000004,
+      "throughWarmupLongTasks": [
+        135,
+        108,
+        61,
+        88,
+        93,
+        79,
+        220,
+        124,
+        491
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3836.600000023842,
+        "frameSamples": 32,
+        "meanFrameMs": 136.8250000011176,
+        "p95FrameMs": 281,
+        "fps": 7.308605883368039,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 41604,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 5.3645161294168044,
+        "cpuActiveMeshesMs": 0.3451612912198549,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 41078,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 114688,
+          "bufferUploads": 294,
+          "cullingPasses": 21,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3836.600000023842,
+        "frameSamples": 32,
+        "meanFrameMs": 153.59687500074506,
+        "p95FrameMs": 391.60000002384186,
+        "fps": 6.510549124096107,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 41604,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 4.343650793745404,
+        "cpuActiveMeshesMs": 0.29206349121199715,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 41078,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 114688,
+          "bufferUploads": 314,
+          "cullingPasses": 37,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 3993560,
+      "warnings": []
+    },
+    {
+      "count": 250,
+      "run": 1,
+      "variant": "previous",
+      "readyMs": 7506.001612000051,
+      "throughWarmupLongTasks": [
+        136,
+        112,
+        50,
+        54,
+        81,
+        95,
+        183,
+        321,
+        206,
+        52,
+        60,
+        97,
+        64
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 6214.5,
+        "frameSamples": 32,
+        "meanFrameMs": 240.5593750011176,
+        "p95FrameMs": 384.69999998807907,
+        "fps": 4.1569778770640475,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 6672,
+        "activeMeshes": 1392,
+        "instancedMeshes": 6668,
+        "totalVertices": 12859060,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "lodCounts": [
+            250,
+            0,
+            0
+          ],
+          "configuredTriangles": 158758,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 6214.5,
+        "frameSamples": 32,
+        "meanFrameMs": 264.1124999988824,
+        "p95FrameMs": 518.1999999880791,
+        "fps": 3.786265322558499,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 6672,
+        "activeMeshes": 1393,
+        "instancedMeshes": 6668,
+        "totalVertices": 12859060,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "lodCounts": [
+            250,
+            0,
+            0
+          ],
+          "configuredTriangles": 158758,
+          "sharedMaterials": 27,
+          "sharedTextureFiles": 15,
+          "estimatedTextureRgbaMipBytes": 41943035
+        },
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 5992296,
+      "warnings": []
+    },
+    {
+      "count": 250,
+      "run": 1,
+      "variant": "catalog",
+      "readyMs": 3910.0890279999585,
+      "throughWarmupLongTasks": [
+        144,
+        120,
+        83,
+        61,
+        179,
+        51,
+        71,
+        83,
+        84,
+        59,
+        68,
+        57,
+        52,
+        61,
+        61,
+        100,
+        138,
+        86
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3031.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 168.63749999925494,
+        "p95FrameMs": 179.89999997615814,
+        "fps": 5.929879178737933,
+        "longTasks": [],
+        "drawCalls": 1958,
+        "sceneMeshes": 2005,
+        "activeMeshes": 1958,
+        "instancedMeshes": 0,
+        "thinInstances": 250,
+        "activeTriangles": 53434,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 75134,
+        "cpuFrameMs": 24.22499999627471,
+        "cpuActiveMeshesMs": 2.9899999983608723,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3031.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 168.64375000074506,
+        "p95FrameMs": 195.70000004768372,
+        "fps": 5.929659415161144,
+        "longTasks": [],
+        "drawCalls": 1958,
+        "sceneMeshes": 2005,
+        "activeMeshes": 1958,
+        "instancedMeshes": 0,
+        "thinInstances": 250,
+        "activeTriangles": 53434,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 75134,
+        "cpuFrameMs": 22.137168137373123,
+        "cpuActiveMeshesMs": 2.992920354404281,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryEstimateBytes": 3053744,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+      ]
+    }
+  ],
+  "summary": [
+    {
+      "count": 10,
+      "variant": "catalog",
+      "runs": 2,
+      "readyMs": {
+        "median": 1949.920323500004,
+        "min": 1862.455534000008,
+        "max": 2037.385113
+      },
+      "fps": {
+        "median": 10.593079692102496,
+        "min": 10.45546624836657,
+        "max": 10.730693135838422
+      },
+      "p95Ms": {
+        "median": 212.90000000596046,
+        "min": 178,
+        "max": 247.80000001192093
+      },
+      "orbitFPS": {
+        "median": 10.85652187541497,
+        "min": 10.789305101188221,
+        "max": 10.923738649641717
+      },
+      "orbitP95Ms": {
+        "median": 179.5,
+        "min": 107.19999998807907,
+        "max": 251.80000001192093
+      },
+      "drawCalls": [
+        85,
+        85
+      ],
+      "triangles": [
+        2278,
+        2278
+      ],
+      "meshes": [
+        85,
+        85
+      ],
+      "geometryEstimateBytes": [
+        127664,
+        127664
+      ],
+      "textureEstimateBytes": [
+        26716842.666666664,
+        26716842.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "count": 10,
+      "variant": "previous",
+      "runs": 2,
+      "readyMs": {
+        "median": 2484.7053915000024,
+        "min": 2358.458765000001,
+        "max": 2610.9520180000036
+      },
+      "fps": {
+        "median": 6.868337506946035,
+        "min": 6.76575681326033,
+        "max": 6.97091820063174
+      },
+      "p95Ms": {
+        "median": 192.34999999403954,
+        "min": 183.9000000357628,
+        "max": 200.79999995231628
+      },
+      "orbitFPS": {
+        "median": 6.8628441367057516,
+        "min": 6.743514635517167,
+        "max": 6.982173637894336
+      },
+      "orbitP95Ms": {
+        "median": 320.80000001192093,
+        "min": 265.80000001192093,
+        "max": 375.80000001192093
+      },
+      "drawCalls": [
+        23,
+        23
+      ],
+      "triangles": [
+        62806,
+        62806
+      ],
+      "meshes": [
+        272,
+        272
+      ],
+      "geometryEstimateBytes": [
+        5992296,
+        5992296
+      ],
+      "textureEstimateBytes": [
+        null,
+        null
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "count": 10,
+      "variant": "optimized",
+      "runs": 2,
+      "readyMs": {
+        "median": 2481.451682500001,
+        "min": 2317.770959999998,
+        "max": 2645.132405000004
+      },
+      "fps": {
+        "median": 10.621467038558446,
+        "min": 10.509721492339304,
+        "max": 10.733212584777588
+      },
+      "p95Ms": {
+        "median": 211.5,
+        "min": 182,
+        "max": 241
+      },
+      "orbitFPS": {
+        "median": 10.25103648836728,
+        "min": 9.781445819960263,
+        "max": 10.720627156774297
+      },
+      "orbitP95Ms": {
+        "median": 219.75,
+        "min": 173.5,
+        "max": 266
+      },
+      "drawCalls": [
+        20,
+        20
+      ],
+      "triangles": [
+        3814,
+        3814
+      ],
+      "meshes": [
+        73,
+        73
+      ],
+      "geometryEstimateBytes": [
+        3993560,
+        3993560
+      ],
+      "textureEstimateBytes": [
+        43231914.66666667,
+        43231914.66666667
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "count": 50,
+      "variant": "catalog",
+      "runs": 2,
+      "readyMs": {
+        "median": 1758.9443565000038,
+        "min": 1756.034749000013,
+        "max": 1761.8539639999944
+      },
+      "fps": {
+        "median": 8.957064617053598,
+        "min": 8.952301021121835,
+        "max": 8.961828212985361
+      },
+      "p95Ms": {
+        "median": 226.09999999403954,
+        "min": 176.39999997615814,
+        "max": 275.80000001192093
+      },
+      "orbitFPS": {
+        "median": 9.344711933727545,
+        "min": 9.335433806069533,
+        "max": 9.35399006138556
+      },
+      "orbitP95Ms": {
+        "median": 248.05000001192093,
+        "min": 194.4000000357628,
+        "max": 301.69999998807907
+      },
+      "drawCalls": [
+        400,
+        400
+      ],
+      "triangles": [
+        10818,
+        10818
+      ],
+      "meshes": [
+        403,
+        403
+      ],
+      "geometryEstimateBytes": [
+        608624,
+        608624
+      ],
+      "textureEstimateBytes": [
+        26716842.666666664,
+        26716842.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "count": 50,
+      "variant": "previous",
+      "runs": 2,
+      "readyMs": {
+        "median": 2786.634863499996,
+        "min": 2670.0071959999914,
+        "max": 2903.2625310000003
+      },
+      "fps": {
+        "median": 7.628309119697885,
+        "min": 7.591213170690448,
+        "max": 7.665405068705323
+      },
+      "p95Ms": {
+        "median": 301.69999998807907,
+        "min": 286.69999998807907,
+        "max": 316.69999998807907
+      },
+      "orbitFPS": {
+        "median": 7.3730894481163665,
+        "min": 7.229677827501284,
+        "max": 7.516501068731449
+      },
+      "orbitP95Ms": {
+        "median": 281,
+        "min": 187.10000002384186,
+        "max": 374.89999997615814
+      },
+      "drawCalls": [
+        18,
+        18
+      ],
+      "triangles": [
+        32104,
+        32104
+      ],
+      "meshes": [
+        1336,
+        1336
+      ],
+      "geometryEstimateBytes": [
+        5992296,
+        5992296
+      ],
+      "textureEstimateBytes": [
+        null,
+        null
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "count": 50,
+      "variant": "optimized",
+      "runs": 2,
+      "readyMs": {
+        "median": 3023.1414195000034,
+        "min": 2763.2636619999976,
+        "max": 3283.019177000009
+      },
+      "fps": {
+        "median": 10.019720282135793,
+        "min": 9.357819628124535,
+        "max": 10.681620936147052
+      },
+      "p95Ms": {
+        "median": 254.59999999403954,
+        "min": 239.89999997615814,
+        "max": 269.30000001192093
+      },
+      "orbitFPS": {
+        "median": 9.097851908127787,
+        "min": 8.273223196100533,
+        "max": 9.922480620155039
+      },
+      "orbitP95Ms": {
+        "median": 241.5,
+        "min": 199.0999999642372,
+        "max": 283.9000000357628
+      },
+      "drawCalls": [
+        18,
+        18
+      ],
+      "triangles": [
+        8358,
+        8358
+      ],
+      "meshes": [
+        73,
+        73
+      ],
+      "geometryEstimateBytes": [
+        3993560,
+        3993560
+      ],
+      "textureEstimateBytes": [
+        43231914.66666667,
+        43231914.66666667
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "count": 100,
+      "variant": "catalog",
+      "runs": 2,
+      "readyMs": {
+        "median": 2256.5525960000086,
+        "min": 2156.145917000016,
+        "max": 2356.959275000001
+      },
+      "fps": {
+        "median": 7.855753216611123,
+        "min": 7.8498712130504105,
+        "max": 7.861635220171835
+      },
+      "p95Ms": {
+        "median": 181.2000000178814,
+        "min": 142.10000002384186,
+        "max": 220.30000001192093
+      },
+      "orbitFPS": {
+        "median": 7.523655954272856,
+        "min": 7.297439054941966,
+        "max": 7.749872853603747
+      },
+      "orbitP95Ms": {
+        "median": 171.30000001192093,
+        "min": 145,
+        "max": 197.60000002384186
+      },
+      "drawCalls": [
+        790,
+        790
+      ],
+      "triangles": [
+        21538,
+        21538
+      ],
+      "meshes": [
+        805,
+        805
+      ],
+      "geometryEstimateBytes": [
+        1224944,
+        1224944
+      ],
+      "textureEstimateBytes": [
+        26716842.666666664,
+        26716842.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "count": 100,
+      "variant": "previous",
+      "runs": 2,
+      "readyMs": {
+        "median": 4105.362276499989,
+        "min": 3837.2143360000046,
+        "max": 4373.510216999974
+      },
+      "fps": {
+        "median": 5.998404634173592,
+        "min": 5.9499460786268505,
+        "max": 6.046863189720333
+      },
+      "p95Ms": {
+        "median": 399.05000001192093,
+        "min": 375.80000001192093,
+        "max": 422.30000001192093
+      },
+      "orbitFPS": {
+        "median": 6.162825071449678,
+        "min": 6.078334536309517,
+        "max": 6.247315606589839
+      },
+      "orbitP95Ms": {
+        "median": 322.0499999821186,
+        "min": 316.19999998807907,
+        "max": 327.89999997615814
+      },
+      "drawCalls": [
+        18,
+        18
+      ],
+      "triangles": [
+        63458,
+        63458
+      ],
+      "meshes": [
+        2672,
+        2672
+      ],
+      "geometryEstimateBytes": [
+        5992296,
+        5992296
+      ],
+      "textureEstimateBytes": [
+        null,
+        null
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "count": 100,
+      "variant": "optimized",
+      "runs": 2,
+      "readyMs": {
+        "median": 3719.9013450000057,
+        "min": 3601.459719000006,
+        "max": 3838.3429710000055
+      },
+      "fps": {
+        "median": 8.42019984275074,
+        "min": 8.01743792746835,
+        "max": 8.822961758033129
+      },
+      "p95Ms": {
+        "median": 325.2500000298023,
+        "min": 242.30000001192093,
+        "max": 408.2000000476837
+      },
+      "orbitFPS": {
+        "median": 8.390430325096343,
+        "min": 8.026688740084703,
+        "max": 8.754171910107981
+      },
+      "orbitP95Ms": {
+        "median": 270.5499999821186,
+        "min": 218.0999999642372,
+        "max": 323
+      },
+      "drawCalls": [
+        18,
+        18
+      ],
+      "triangles": [
+        16500,
+        16500
+      ],
+      "meshes": [
+        73,
+        73
+      ],
+      "geometryEstimateBytes": [
+        3993560,
+        3993560
+      ],
+      "textureEstimateBytes": [
+        43231914.666666664,
+        43231914.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "count": 250,
+      "variant": "catalog",
+      "runs": 2,
+      "readyMs": {
+        "median": 3982.532604999986,
+        "min": 3910.0890279999585,
+        "max": 4054.976182000013
+      },
+      "fps": {
+        "median": 5.904981117474871,
+        "min": 5.880083056211809,
+        "max": 5.929879178737933
+      },
+      "p95Ms": {
+        "median": 198.30000001192093,
+        "min": 179.89999997615814,
+        "max": 216.70000004768372
+      },
+      "orbitFPS": {
+        "median": 5.846881728607174,
+        "min": 5.764104042053205,
+        "max": 5.929659415161144
+      },
+      "orbitP95Ms": {
+        "median": 202.6500000357628,
+        "min": 195.70000004768372,
+        "max": 209.60000002384186
+      },
+      "drawCalls": [
+        1958,
+        1958
+      ],
+      "triangles": [
+        53434,
+        53434
+      ],
+      "meshes": [
+        2005,
+        2005
+      ],
+      "geometryEstimateBytes": [
+        3053744,
+        3053744
+      ],
+      "textureEstimateBytes": [
+        26716842.666666664,
+        26716842.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [
+          58
+        ],
+        []
+      ]
+    },
+    {
+      "count": 250,
+      "variant": "previous",
+      "runs": 2,
+      "readyMs": {
+        "median": 7228.002170500025,
+        "min": 6950.002729,
+        "max": 7506.001612000051
+      },
+      "fps": {
+        "median": 3.9790650506660143,
+        "min": 3.801152224267981,
+        "max": 4.1569778770640475
+      },
+      "p95Ms": {
+        "median": 465.94999998807907,
+        "min": 384.69999998807907,
+        "max": 547.1999999880791
+      },
+      "orbitFPS": {
+        "median": 3.9465471044893725,
+        "min": 3.786265322558499,
+        "max": 4.106828886420246
+      },
+      "orbitP95Ms": {
+        "median": 494.05000001192093,
+        "min": 469.9000000357628,
+        "max": 518.1999999880791
+      },
+      "drawCalls": [
+        18,
+        18
+      ],
+      "triangles": [
+        158758,
+        158758
+      ],
+      "meshes": [
+        6672,
+        6672
+      ],
+      "geometryEstimateBytes": [
+        5992296,
+        5992296
+      ],
+      "textureEstimateBytes": [
+        null,
+        null
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "count": 250,
+      "variant": "optimized",
+      "runs": 2,
+      "readyMs": {
+        "median": 4734.083584499982,
+        "min": 4727.893561000004,
+        "max": 4740.2736079999595
+      },
+      "fps": {
+        "median": 7.108907281530722,
+        "min": 6.909208679693404,
+        "max": 7.308605883368039
+      },
+      "p95Ms": {
+        "median": 263.2000000178814,
+        "min": 245.4000000357628,
+        "max": 281
+      },
+      "orbitFPS": {
+        "median": 6.359177720262339,
+        "min": 6.207806316428571,
+        "max": 6.510549124096107
+      },
+      "orbitP95Ms": {
+        "median": 438.65000000596046,
+        "min": 391.60000002384186,
+        "max": 485.69999998807907
+      },
+      "drawCalls": [
+        18,
+        18
+      ],
+      "triangles": [
+        41078,
+        41078
+      ],
+      "meshes": [
+        73,
+        73
+      ],
+      "geometryEstimateBytes": [
+        3993560,
+        3993560
+      ],
+      "textureEstimateBytes": [
+        43231914.66666667,
+        43231914.66666667
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+> Historical `de493cd` checkpoint. See [OPTIMIZATION.md](OPTIMIZATION.md) for the subsequent thin-instance/cache optimization and fresh matched benchmarks.
+
 # Validation — Quaternius review prototypes
 
 **Checkpoint complete: source audit, three isolated pilots, screenshots and tests. Performance release gate NOT passed. Gameplay integration is disabled. This is not a final 24-building release.**

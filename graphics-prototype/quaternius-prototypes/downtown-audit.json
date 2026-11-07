@@ -7005,7 +7005,7 @@
       "lods": [
         {
           "name": "low",
-          "triangles": 560,
+          "triangles": 218,
           "meshBatches": 5,
           "bounds": [
             [
@@ -7019,12 +7019,12 @@
               45.6
             ]
           ],
-          "parts": 190
+          "parts": 19
         },
         {
           "name": "medium",
-          "triangles": 14692,
-          "meshBatches": 10,
+          "triangles": 742,
+          "meshBatches": 7,
           "bounds": [
             [
               -58.6,
@@ -7037,7 +7037,7 @@
               45.6
             ]
           ],
-          "parts": 437
+          "parts": 102
         },
         {
           "name": "high",
@@ -7085,12 +7085,12 @@
       "lods": [
         {
           "name": "low",
-          "triangles": 1048,
+          "triangles": 140,
           "meshBatches": 4,
           "bounds": [
             [
               -39.6,
-              -7.152557373046875e-07,
+              0.0,
               -32.6
             ],
             [
@@ -7099,16 +7099,16 @@
               32.6
             ]
           ],
-          "parts": 134
+          "parts": 20
         },
         {
           "name": "medium",
-          "triangles": 7736,
-          "meshBatches": 9,
+          "triangles": 876,
+          "meshBatches": 7,
           "bounds": [
             [
               -39.6,
-              -7.152557373046875e-07,
+              0.0,
               -32.6
             ],
             [
@@ -7117,7 +7117,7 @@
               32.6
             ]
           ],
-          "parts": 276
+          "parts": 90
         },
         {
           "name": "high",
@@ -7163,7 +7163,7 @@
       "lods": [
         {
           "name": "low",
-          "triangles": 298,
+          "triangles": 142,
           "meshBatches": 5,
           "bounds": [
             [
@@ -7177,12 +7177,12 @@
               26.6
             ]
           ],
-          "parts": 94
+          "parts": 16
         },
         {
           "name": "medium",
-          "triangles": 8874,
-          "meshBatches": 10,
+          "triangles": 550,
+          "meshBatches": 7,
           "bounds": [
             [
               -31.6,
@@ -7195,7 +7195,7 @@
               26.6
             ]
           ],
-          "parts": 244
+          "parts": 66
         },
         {
           "name": "high",

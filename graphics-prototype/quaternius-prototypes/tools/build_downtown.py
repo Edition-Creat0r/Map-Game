@@ -5,6 +5,7 @@ import argparse,copy,hashlib,io,json,math,struct
 from pathlib import Path
 import numpy as np
 from PIL import Image
+from far_lod import bake_wall,wall,roof
 from downtown import read_parts,model,inventory,PREFIX,dependency
 ROOT=Path(__file__).resolve().parents[1]
 IDS=[('steelMill','Steel Mill',[118,92]),('precisionElectronicsWorks','Electronics Plant',[80,66]),('machineWorks','Machinery Works',[64,54])]
@@ -38,7 +39,7 @@ def build(paths):
  files,owners,archives=read_parts(paths);audit=inventory(files,owners,archives)
  out=ROOT/'generated';out.mkdir(exist_ok=True);textures=out/'textures';textures.mkdir(exist_ok=True)
  d={'asset':{'version':'2.0','generator':'Map Game Quaternius pilot v1'},'scene':0,'scenes':[{'nodes':[]}],'nodes':[],'meshes':[],'materials':[],'images':[],'textures':[],'samplers':[{'magFilter':9729,'minFilter':9987,'wrapS':10497,'wrapT':10497}],'accessors':[],'bufferViews':[],'buffers':[{'byteLength':0}]}
- binary=bytearray();materialCache={};textureCache={};sourceCache={};sources={};imageReport=[]
+ binary=bytearray();materialCache={};textureCache={};sourceCache={};sources={};imageReport=[];farMaterials={}
  def put(a,kind):
   a=np.asarray(a,dtype='<u4'if kind=='SCALAR'else'<f4')
   if not np.isfinite(a).all():raise ValueError('Nonfinite output')
@@ -76,15 +77,26 @@ def build(paths):
    def add(g,mat,pos=(0,0,0),scale=1,angle=0):
     nonlocal partCount
     r=rotation(angle);p=g['pos']*scale@r.T+np.array(pos);n=g['norm']@r.T;groups.setdefault(mat,[]).append((p,n,g['uv'],g['idx']));partCount+=1
-   def source(name,pos=(0,0,0),scale=3,angle=0):
+   def native(name):
     usedSource.add(name)
     if name not in sourceCache:sourceCache[name]=model(files,name)
     doc,geometry=sourceCache[name]
     sources[name]={'path':PREFIX+name+'.gltf','sha256':hashlib.sha256(files[PREFIX+name+'.gltf']).hexdigest()}
+    return doc,geometry
+   def source(name,pos=(0,0,0),scale=3,angle=0):
+    doc,geometry=native(name)
     for g in geometry:
      mat=doc['materials'][g['material']]
      if mat.get('name')=='MI_InteriorWall':continue
      add(g,material(mat,doc),pos,scale,angle)
+   def far_material(name):
+    doc,geoms=native(name)
+    if name not in farMaterials:
+     raw=bake_wall(doc,geoms,files);filename='Far-'+name+'.png';(textures/filename).write_bytes(raw)
+     textureIndex=len(d['textures']);d['images'].append({'uri':'textures/'+filename});d['textures'].append({'source':len(d['images'])-1,'sampler':0})
+     imageReport.append({'source':PREFIX+name+'.gltf','sourceSha256':hashlib.sha256(files[PREFIX+name+'.gltf']).hexdigest(),'url':'generated/textures/'+filename,'sha256':hashlib.sha256(raw).hexdigest(),'sourceSize':[128,192],'size':[128,192],'role':'far-wall-bake','projection':'native 2x3 source-unit front face; source UV/color only','estimatedRgbaMipBytes':128*192*4*4//3})
+     farMaterials[name]=len(d['materials']);d['materials'].append({'name':'Far-'+name,'pbrMetallicRoughness':{'baseColorTexture':{'index':textureIndex},'metallicFactor':0,'roughnessFactor':.8},'doubleSided':False})
+    return farMaterials[name]
    def cube(name,size,pos,detail=0):
     if detail>level:return
     originalParts.add(name);add(box(np.array(size)),authored(name),pos)
@@ -92,6 +104,12 @@ def build(paths):
     if detail>level:return
     originalParts.add(name);add(cylinder(r,h,16 if level==2 else 8),authored(name),pos)
    def shell(cx,cz,w,depth,floors,metal=False):
+    if level==0:
+     mat=far_material('Metal_Plain_3'if metal else'Brick_Plain_3')
+     for width,pos,angle in [(w,(cx,0,cz-depth/2),math.pi),(w,(cx,0,cz+depth/2),0),(depth,(cx-w/2,0,cz),-math.pi/2),(depth,(cx+w/2,0,cz),math.pi/2)]:add(wall(width,floors*9),mat,pos,angle=angle)
+     doc,geoms=native('Roof_2x2');add(roof(w,depth),material(doc['materials'][geoms[0]['material']],doc),(cx,floors*9,cz))
+     for x,z,ww,dd in [(cx,cz-depth/2,w,.5),(cx,cz+depth/2,w,.5),(cx-w/2,cz,.5,depth),(cx+w/2,cz,.5,depth)]:cube('concrete',(ww,1,dd),(x,floors*9,z))
+     return
     # Uniform 3x native modules. No stretching brick/window UVs.
     for floor in range(floors):
      for along,count,angle,edge in [('x',w//6,math.pi,cz-depth/2),('x',w//6,0,cz+depth/2),('z',depth//6,-math.pi/2,cx-w/2),('z',depth//6,math.pi/2,cx+w/2)]:
@@ -106,10 +124,15 @@ def build(paths):
         else:offset=6
        else:offset=3
        coord=(cx-w/2+j*6+offset if along=='x'else cz-depth/2+j*6+offset)
-       source(name,(coord if along=='x'else edge,floor*9,edge if along=='x'else coord),angle=angle)
+       pos=(coord if along=='x'else edge,floor*9,edge if along=='x'else coord)
+       if level==1:add(wall(6,9),far_material(name),pos,angle=angle)
+       else:source(name,pos,angle=angle)
     # Roof tiles retain native asphalt UV density.
-    for x in np.arange(cx-w/2+3,cx+w/2,6):
-     for z in np.arange(cz-depth/2+3,cz+depth/2,6):source('Roof_2x2',(x,floors*9+.6,z))
+    if level==1:
+     doc,geoms=native('Roof_2x2');add(roof(w,depth),material(doc['materials'][geoms[0]['material']],doc),(cx,floors*9,cz))
+    else:
+     for x in np.arange(cx-w/2+3,cx+w/2,6):
+      for z in np.arange(cz-depth/2+3,cz+depth/2,6):source('Roof_2x2',(x,floors*9+.6,z))
     for x,z,ww,dd in [(cx,cz-depth/2,w,.5),(cx,cz+depth/2,w,.5),(cx-w/2,cz,.5,depth),(cx+w/2,cz,.5,depth)]:cube('concrete',(ww,1,dd),(x,floors*9,z))
     if level>0:
      for x in [cx-w/4,cx+w/4]:source('Prop_ACUnit',(x,floors*9+.05,cz),scale=5)

@@ -1,0 +1,30 @@
+{
+  "rebuilds": 2,
+  "identical": true,
+  "comparedFiles": 23,
+  "sha256": {
+    "generated/pilots.glb": "f18762bf0bc1378712e592cfcf624a1ef339b947288f6f42880c3c801ce80f53",
+    "generated/textures/T_Ornaments_ORM.png": "d70d382761b21c4de1f3a3dfe47b319f78073f98a52e49f19daccf6dd9a168b1",
+    "generated/textures/T_Trim_BaseColor.png": "18a3a3b18ed7f7a6086fa3b25db11b903f80b86176d84fce8fbc4784864b845b",
+    "generated/textures/T_MetalConcrete_BaseColor.png": "4b1768888a2d2a2e466dacc65783d6c54d97781622fb48c9f80c4a3b7abeb989",
+    "generated/textures/T_Ornaments_Normal-normal.png": "774e56cd3506010e92a17bc10b92315825eb0583344f4779c166c1612bcf4b3d",
+    "generated/textures/Far-Brick_Window_Square_Single.png": "9a0e6996d122fb9f821bee15f8cbe45a9983a52bfe5ed0698816d7cc0d91f026",
+    "generated/textures/T_RedBrick_BaseColor.png": "91e242b1d6c4f83ca092c9d3e5add30a066b446cd1e39857121fae3ae35c013b",
+    "generated/textures/T_RedBrick_Normal-normal.png": "c16e0a59bbee285e59461d8f256684710588e4cb980c9cb38a159289cf14abd3",
+    "generated/textures/T_Concrete_ORM.png": "d14e3e961a259a83f98bef48607284224d1534df4abe9fab6f666227c21fbb29",
+    "generated/textures/Far-Metal_FirstFloor_Window.png": "f5f0df316b49e883a6e2b7886378dcd5ce8bcdc1f6e096e4b7fc3bb8630d327a",
+    "generated/textures/T_Concrete_Normal-normal.png": "2dccb9951002d03c7b0d828edc345e85c0002db4af3d69a723b09dba86481b4c",
+    "generated/textures/T_Trim_ORM.png": "61dd09306e984854e5dabe5b62c4406280ef08097c590796e5cfe066839e2d76",
+    "generated/textures/T_MetalConcrete_ORM.png": "44a54c7fed570988d5acf01e94428e6fd2c950c012d2c3b54e12cd007bdd8a0c",
+    "generated/textures/Far-Metal_Plain_3.png": "e9573c03ae8cfecdb5444645adb4c9b819abc031123a4ebe5f65c1b886341ca9",
+    "generated/textures/T_Concrete_Asphalt_BaseColor.png": "2e011a71153b6b951db97a9cfa08d5044d25f1000a6e29fe0773b2ac56919799",
+    "generated/textures/Far-Brick_Plain_3.png": "b004135f4201e3b5d119a184a40c966de992a52c18e0529ae5f2e363f2b71f1d",
+    "generated/textures/T_Ornaments_BaseColor.png": "c84658956ef28fd2f8e4fa4533b07499e5d93630f3b8b72011ebfd67fb197338",
+    "generated/textures/T_Trim_Normal-normal.png": "3b27354e1348039c911141c5dd41f0540c3ed9768a2e28c6eeed2a3391c4e2e3",
+    "generated/textures/T_MetalConcrete_Normal-normal.png": "7eae1484490980f113e3e0a175b6ee57cd34c828e06558519f35d8324899c7c9",
+    "generated/textures/T_RedBrick_ORM.png": "002eba6fea372f5c559f4c1c80c8a54ac41b03b94dcc20586c21af9f254dfd0c",
+    "manifest.json": "4562acd8bd9119f208a15f518adcaf6d20d32d26e52a995b12b8b13c5aabf231",
+    "downtown-audit.json": "e69cfee5fb327c198a471d4966aaa0d08ed6278c0ddc34df30b02e518c8f3d36",
+    "License_Standard.txt": "40e0a81bfbb91f1305fd1c052ce590956a9dbac07572612d8552ef75bd970435"
+  }
+}

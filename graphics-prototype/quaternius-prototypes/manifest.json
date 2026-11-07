@@ -2,8 +2,8 @@
   "version": 1,
   "license": "CC0-1.0",
   "url": "generated/pilots.glb",
-  "sha256": "641a2515066597cb47a00be00c3e8c99812c7846a320afe0935f8d3d09b951a8",
-  "bytes": 6059912,
+  "sha256": "f18762bf0bc1378712e592cfcf624a1ef339b947288f6f42880c3c801ce80f53",
+  "bytes": 4053756,
   "buildings": [
     {
       "id": "steelMill",
@@ -15,7 +15,7 @@
       "lods": [
         {
           "name": "low",
-          "triangles": 560,
+          "triangles": 218,
           "meshBatches": 5,
           "bounds": [
             [
@@ -29,12 +29,12 @@
               45.6
             ]
           ],
-          "parts": 190
+          "parts": 19
         },
         {
           "name": "medium",
-          "triangles": 14692,
-          "meshBatches": 10,
+          "triangles": 742,
+          "meshBatches": 7,
           "bounds": [
             [
               -58.6,
@@ -47,7 +47,7 @@
               45.6
             ]
           ],
-          "parts": 437
+          "parts": 102
         },
         {
           "name": "high",
@@ -95,12 +95,12 @@
       "lods": [
         {
           "name": "low",
-          "triangles": 1048,
+          "triangles": 140,
           "meshBatches": 4,
           "bounds": [
             [
               -39.6,
-              -7.152557373046875e-07,
+              0.0,
               -32.6
             ],
             [
@@ -109,16 +109,16 @@
               32.6
             ]
           ],
-          "parts": 134
+          "parts": 20
         },
         {
           "name": "medium",
-          "triangles": 7736,
-          "meshBatches": 9,
+          "triangles": 876,
+          "meshBatches": 7,
           "bounds": [
             [
               -39.6,
-              -7.152557373046875e-07,
+              0.0,
               -32.6
             ],
             [
@@ -127,7 +127,7 @@
               32.6
             ]
           ],
-          "parts": 276
+          "parts": 90
         },
         {
           "name": "high",
@@ -173,7 +173,7 @@
       "lods": [
         {
           "name": "low",
-          "triangles": 298,
+          "triangles": 142,
           "meshBatches": 5,
           "bounds": [
             [
@@ -187,12 +187,12 @@
               26.6
             ]
           ],
-          "parts": 94
+          "parts": 16
         },
         {
           "name": "medium",
-          "triangles": 8874,
-          "meshBatches": 10,
+          "triangles": 550,
+          "meshBatches": 7,
           "bounds": [
             [
               -31.6,
@@ -205,7 +205,7 @@
               26.6
             ]
           ],
-          "parts": 244
+          "parts": 66
         },
         {
           "name": "high",
@@ -302,52 +302,21 @@
   ],
   "textures": [
     {
-      "source": "Exports/glTF (Godot)/T_RedBrick_Normal.png",
-      "sourceSha256": "147f14d7f665d2598d0d796bd02a227f6b8b0fbc790c3e0737b1b90128101c93",
-      "url": "generated/textures/T_RedBrick_Normal-normal.png",
-      "sha256": "c16e0a59bbee285e59461d8f256684710588e4cb980c9cb38a159289cf14abd3",
+      "source": "Exports/glTF (Godot)/Brick_Plain_3.gltf",
+      "sourceSha256": "bc86dfb9e5bb4d6fa4e7c38fd541a5b82ce8d9eb99557ce6228b480c68552bba",
+      "url": "generated/textures/Far-Brick_Plain_3.png",
+      "sha256": "b004135f4201e3b5d119a184a40c966de992a52c18e0529ae5f2e363f2b71f1d",
       "sourceSize": [
-        2048,
-        2048
+        128,
+        192
       ],
       "size": [
-        512,
-        512
+        128,
+        192
       ],
-      "role": "normal-renormalized",
-      "estimatedRgbaMipBytes": 1398101
-    },
-    {
-      "source": "Exports/glTF (Godot)/T_RedBrick_BaseColor.png",
-      "sourceSha256": "ea85bfc02c4c807265a85f7ab50656f7eaa19f6567301d362d78c1d06da161ab",
-      "url": "generated/textures/T_RedBrick_BaseColor.png",
-      "sha256": "91e242b1d6c4f83ca092c9d3e5add30a066b446cd1e39857121fae3ae35c013b",
-      "sourceSize": [
-        2048,
-        2048
-      ],
-      "size": [
-        1024,
-        1024
-      ],
-      "role": "color-or-ORM",
-      "estimatedRgbaMipBytes": 5592405
-    },
-    {
-      "source": "Exports/glTF (Godot)/T_RedBrick_ORM.png",
-      "sourceSha256": "dfba8a1da5ca7dcff1b707a051e82717e93013c2ad36c93b7a41b0f331414b70",
-      "url": "generated/textures/T_RedBrick_ORM.png",
-      "sha256": "002eba6fea372f5c559f4c1c80c8a54ac41b03b94dcc20586c21af9f254dfd0c",
-      "sourceSize": [
-        2048,
-        2048
-      ],
-      "size": [
-        512,
-        512
-      ],
-      "role": "color-or-ORM",
-      "estimatedRgbaMipBytes": 1398101
+      "role": "far-wall-bake",
+      "projection": "native 2x3 source-unit front face; source UV/color only",
+      "estimatedRgbaMipBytes": 131072
     },
     {
       "source": "Exports/glTF (Godot)/T_Concrete_Normal.png",
@@ -386,6 +355,71 @@
       "sourceSha256": "be17636c061a7c6c4f4bf23c3887a3f894da0e88394e233926e816c735a49244",
       "url": "generated/textures/T_Concrete_ORM.png",
       "sha256": "d14e3e961a259a83f98bef48607284224d1534df4abe9fab6f666227c21fbb29",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "role": "color-or-ORM",
+      "estimatedRgbaMipBytes": 1398101
+    },
+    {
+      "source": "Exports/glTF (Godot)/Brick_Window_Square_Single.gltf",
+      "sourceSha256": "64b21d1bbe6a320095c69bd521d2e2c0f7f7586fe86c73765ff89607664625b4",
+      "url": "generated/textures/Far-Brick_Window_Square_Single.png",
+      "sha256": "9a0e6996d122fb9f821bee15f8cbe45a9983a52bfe5ed0698816d7cc0d91f026",
+      "sourceSize": [
+        128,
+        192
+      ],
+      "size": [
+        128,
+        192
+      ],
+      "role": "far-wall-bake",
+      "projection": "native 2x3 source-unit front face; source UV/color only",
+      "estimatedRgbaMipBytes": 131072
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_Ornaments_Normal.png",
+      "sourceSha256": "c1aa6b307d47386b63e775ba88d82992dd0aaf34f1e4c2b7824002e3cc0a795a",
+      "url": "generated/textures/T_Ornaments_Normal-normal.png",
+      "sha256": "774e56cd3506010e92a17bc10b92315825eb0583344f4779c166c1612bcf4b3d",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "role": "normal-renormalized",
+      "estimatedRgbaMipBytes": 1398101
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_Ornaments_BaseColor.png",
+      "sourceSha256": "528cbe672c62384aa3bac703f574b60509bd69b4d492291cb2915022a12a449c",
+      "url": "generated/textures/T_Ornaments_BaseColor.png",
+      "sha256": "c84658956ef28fd2f8e4fa4533b07499e5d93630f3b8b72011ebfd67fb197338",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        1024,
+        1024
+      ],
+      "role": "color-or-ORM",
+      "estimatedRgbaMipBytes": 5592405
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_Ornaments_ORM.png",
+      "sourceSha256": "c65b673f871e6b4b2fa61fd110286a096d05d9a311e71ca71804cea46811885d",
+      "url": "generated/textures/T_Ornaments_ORM.png",
+      "sha256": "d70d382761b21c4de1f3a3dfe47b319f78073f98a52e49f19daccf6dd9a168b1",
       "sourceSize": [
         2048,
         2048
@@ -446,10 +480,10 @@
       "estimatedRgbaMipBytes": 1398101
     },
     {
-      "source": "Exports/glTF (Godot)/T_Ornaments_Normal.png",
-      "sourceSha256": "c1aa6b307d47386b63e775ba88d82992dd0aaf34f1e4c2b7824002e3cc0a795a",
-      "url": "generated/textures/T_Ornaments_Normal-normal.png",
-      "sha256": "774e56cd3506010e92a17bc10b92315825eb0583344f4779c166c1612bcf4b3d",
+      "source": "Exports/glTF (Godot)/T_RedBrick_Normal.png",
+      "sourceSha256": "147f14d7f665d2598d0d796bd02a227f6b8b0fbc790c3e0737b1b90128101c93",
+      "url": "generated/textures/T_RedBrick_Normal-normal.png",
+      "sha256": "c16e0a59bbee285e59461d8f256684710588e4cb980c9cb38a159289cf14abd3",
       "sourceSize": [
         2048,
         2048
@@ -462,10 +496,10 @@
       "estimatedRgbaMipBytes": 1398101
     },
     {
-      "source": "Exports/glTF (Godot)/T_Ornaments_BaseColor.png",
-      "sourceSha256": "528cbe672c62384aa3bac703f574b60509bd69b4d492291cb2915022a12a449c",
-      "url": "generated/textures/T_Ornaments_BaseColor.png",
-      "sha256": "c84658956ef28fd2f8e4fa4533b07499e5d93630f3b8b72011ebfd67fb197338",
+      "source": "Exports/glTF (Godot)/T_RedBrick_BaseColor.png",
+      "sourceSha256": "ea85bfc02c4c807265a85f7ab50656f7eaa19f6567301d362d78c1d06da161ab",
+      "url": "generated/textures/T_RedBrick_BaseColor.png",
+      "sha256": "91e242b1d6c4f83ca092c9d3e5add30a066b446cd1e39857121fae3ae35c013b",
       "sourceSize": [
         2048,
         2048
@@ -478,10 +512,10 @@
       "estimatedRgbaMipBytes": 5592405
     },
     {
-      "source": "Exports/glTF (Godot)/T_Ornaments_ORM.png",
-      "sourceSha256": "c65b673f871e6b4b2fa61fd110286a096d05d9a311e71ca71804cea46811885d",
-      "url": "generated/textures/T_Ornaments_ORM.png",
-      "sha256": "d70d382761b21c4de1f3a3dfe47b319f78073f98a52e49f19daccf6dd9a168b1",
+      "source": "Exports/glTF (Godot)/T_RedBrick_ORM.png",
+      "sourceSha256": "dfba8a1da5ca7dcff1b707a051e82717e93013c2ad36c93b7a41b0f331414b70",
+      "url": "generated/textures/T_RedBrick_ORM.png",
+      "sha256": "002eba6fea372f5c559f4c1c80c8a54ac41b03b94dcc20586c21af9f254dfd0c",
       "sourceSize": [
         2048,
         2048
@@ -540,6 +574,40 @@
       ],
       "role": "color-or-ORM",
       "estimatedRgbaMipBytes": 1398101
+    },
+    {
+      "source": "Exports/glTF (Godot)/Metal_Plain_3.gltf",
+      "sourceSha256": "1311b5c4bffda0beefa95d90590f4fbb0c6f07fca1371c1aa6a1b829e5bb7f11",
+      "url": "generated/textures/Far-Metal_Plain_3.png",
+      "sha256": "e9573c03ae8cfecdb5444645adb4c9b819abc031123a4ebe5f65c1b886341ca9",
+      "sourceSize": [
+        128,
+        192
+      ],
+      "size": [
+        128,
+        192
+      ],
+      "role": "far-wall-bake",
+      "projection": "native 2x3 source-unit front face; source UV/color only",
+      "estimatedRgbaMipBytes": 131072
+    },
+    {
+      "source": "Exports/glTF (Godot)/Metal_FirstFloor_Window.gltf",
+      "sourceSha256": "4e9029f004d6e0031222be220b3494241a88e837b40fe3b6bb1d96b1a55f43e7",
+      "url": "generated/textures/Far-Metal_FirstFloor_Window.png",
+      "sha256": "f5f0df316b49e883a6e2b7886378dcd5ce8bcdc1f6e096e4b7fc3bb8630d327a",
+      "sourceSize": [
+        128,
+        192
+      ],
+      "size": [
+        128,
+        192
+      ],
+      "role": "far-wall-bake",
+      "projection": "native 2x3 source-unit front face; source UV/color only",
+      "estimatedRgbaMipBytes": 131072
     }
   ],
   "sourceArchivesAltered": false,

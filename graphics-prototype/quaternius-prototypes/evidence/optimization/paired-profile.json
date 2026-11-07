@@ -1,0 +1,326 @@
+{
+  "scope": "250 buildings; 1366x768; native resolution; same layout, camera and lighting; 24 warm-up frames, 36 measured frame callbacks. GPU timers are SwiftShader query results, not Lenovo hardware. GPU/CPU work overlaps, so durations must not be added.",
+  "rows": [
+    {
+      "variant": "previous",
+      "shadows": false,
+      "count": 250,
+      "type": "steelMill",
+      "quality": "high",
+      "viewport": [
+        1366,
+        768
+      ],
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 2880,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "startupMs": 6412.600000023842,
+      "frameSamples": 36,
+      "meanFrameMs": 242.33888888855776,
+      "p95FrameMs": 375.5,
+      "fps": 4.126452855281767,
+      "longTasks": [],
+      "drawCalls": 18,
+      "sceneMeshes": 6672,
+      "activeMeshes": 1392,
+      "instancedMeshes": 6668,
+      "totalVertices": 12859060,
+      "pool": {
+        "instances": 250,
+        "templates": 3,
+        "lodCounts": [
+          250,
+          0,
+          0
+        ],
+        "configuredTriangles": 158758,
+        "sharedMaterials": 27,
+        "sharedTextureFiles": 15,
+        "estimatedTextureRgbaMipBytes": 41943035
+      },
+      "activeTriangles": 155988,
+      "cpuFrameMs": 19.10540540476103,
+      "cpuActiveMs": 14.76216216828372,
+      "cpuRenderMs": 4.029729720708486,
+      "gpuQuerySupported": true,
+      "gpuFrameMs": 234.3629583,
+      "gpuSamples": 10,
+      "cpuExclusiveTop": [
+        {
+          "fn": "(idle) @ ",
+          "ms": 7948.168
+        },
+        {
+          "fn": "(program) @ ",
+          "ms": 1125.742
+        },
+        {
+          "fn": "_evaluateActiveMeshes @ babylon.js",
+          "ms": 316.015
+        },
+        {
+          "fn": "isEnabled @ babylon.js",
+          "ms": 39.434
+        },
+        {
+          "fn": "_isSynchronized @ babylon.js",
+          "ms": 32.618
+        },
+        {
+          "fn": "getWorldMatrix @ babylon.js",
+          "ms": 27.982
+        },
+        {
+          "fn": "isSynchronized @ babylon.js",
+          "ms": 25.67
+        },
+        {
+          "fn": "isSynchronizedWithParent @ babylon.js",
+          "ms": 24.623
+        },
+        {
+          "fn": " @ babylon.js",
+          "ms": 23.459
+        },
+        {
+          "fn": "_activate @ babylon.js",
+          "ms": 23.178
+        },
+        {
+          "fn": "K @ babylon.js",
+          "ms": 22.168
+        },
+        {
+          "fn": "isInFrustum @ babylon.js",
+          "ms": 21.818
+        },
+        {
+          "fn": "render @ babylon.js",
+          "ms": 20.868
+        },
+        {
+          "fn": "requestAnimationFrame @ ",
+          "ms": 14.744
+        },
+        {
+          "fn": "isReady @ babylon.js",
+          "ms": 14.109
+        },
+        {
+          "fn": "bufferSubData @ ",
+          "ms": 12.478
+        },
+        {
+          "fn": "_boundRenderFunction @ babylon.js",
+          "ms": 11.864
+        },
+        {
+          "fn": "_renderForCamera @ babylon.js",
+          "ms": 10.908
+        },
+        {
+          "fn": "get layerMask @ babylon.js",
+          "ms": 8.415
+        },
+        {
+          "fn": "get x @ babylon.js",
+          "ms": 7.666
+        },
+        {
+          "fn": "dotCoordinate @ babylon.js",
+          "ms": 7.602
+        },
+        {
+          "fn": "get hasAZeroComponent @ babylon.js",
+          "ms": 6.489
+        },
+        {
+          "fn": "bindEyePosition @ babylon.js",
+          "ms": 5.916
+        },
+        {
+          "fn": "getHostWindow @ babylon.js",
+          "ms": 5.813
+        },
+        {
+          "fn": "bindBuffer @ ",
+          "ms": 5.112
+        }
+      ],
+      "renderVariant": "quaternius"
+    },
+    {
+      "variant": "optimized",
+      "shadows": false,
+      "count": 250,
+      "type": "steelMill",
+      "quality": "high",
+      "viewport": [
+        1366,
+        768
+      ],
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 2880,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "startupMs": 3882.300000011921,
+      "frameSamples": 36,
+      "meanFrameMs": 141.09722222222223,
+      "p95FrameMs": 279.7999999523163,
+      "fps": 7.087311743281819,
+      "longTasks": [],
+      "drawCalls": 18,
+      "sceneMeshes": 73,
+      "activeMeshes": 18,
+      "instancedMeshes": 0,
+      "thinInstances": 1399,
+      "activeTriangles": 41604,
+      "textureEstimateBytes": 43231914.66666667,
+      "totalVertices": 102956,
+      "cpuFrameMs": 1.435135132557637,
+      "cpuActiveMeshesMs": 0.27634408717514364,
+      "pool": {
+        "instances": 250,
+        "templates": 3,
+        "lodCounts": [
+          246,
+          0,
+          0
+        ],
+        "visibleRecords": 246,
+        "culledRecords": 4,
+        "configuredTriangles": 41078,
+        "batchMeshes": 69,
+        "activeBatches": 14,
+        "sharedMaterials": 28,
+        "sharedTextureFiles": 19,
+        "estimatedTextureRgbaMipBytes": 42467323,
+        "instanceBufferCapacityBytes": 114688,
+        "bufferUploads": 294,
+        "cullingPasses": 21,
+        "poseRevision": 250
+      },
+      "cpuActiveMs": 0.21891892278516614,
+      "cpuRenderMs": 1.0540540459993724,
+      "gpuQuerySupported": true,
+      "gpuFrameMs": 134.32673772727273,
+      "gpuSamples": 11,
+      "cpuExclusiveTop": [
+        {
+          "fn": "(idle) @ ",
+          "ms": 4967.834
+        },
+        {
+          "fn": "(program) @ ",
+          "ms": 960.696
+        },
+        {
+          "fn": "render @ babylon.js",
+          "ms": 12.474
+        },
+        {
+          "fn": "_boundRenderFunction @ babylon.js",
+          "ms": 6.033
+        },
+        {
+          "fn": "innerSerialize @ ",
+          "ms": 4.516
+        },
+        {
+          "fn": "_evaluateActiveMeshes @ babylon.js",
+          "ms": 3.212
+        },
+        {
+          "fn": "transferToEffect @ babylon.js",
+          "ms": 2.621
+        },
+        {
+          "fn": "_isSynchronizedViewMatrix @ babylon.js",
+          "ms": 2.229
+        },
+        {
+          "fn": "_getInstancesRenderList @ babylon.js",
+          "ms": 2.228
+        },
+        {
+          "fn": "_setTexture @ babylon.js",
+          "ms": 2.203
+        },
+        {
+          "fn": "_bindTextureDirectly @ babylon.js",
+          "ms": 1.947
+        },
+        {
+          "fn": "stats @ renderer.js",
+          "ms": 1.515
+        },
+        {
+          "fn": "_renderLoop @ babylon.js",
+          "ms": 1.376
+        },
+        {
+          "fn": " @ showroom.js",
+          "ms": 1.284
+        },
+        {
+          "fn": "_cacheMatrix @ babylon.js",
+          "ms": 1.26
+        },
+        {
+          "fn": "get Now @ babylon.js",
+          "ms": 1.181
+        },
+        {
+          "fn": "_bindLight @ babylon.js",
+          "ms": 1.164
+        },
+        {
+          "fn": "get _drawWrapper @ babylon.js",
+          "ms": 1.163
+        },
+        {
+          "fn": "setMatrices @ babylon.js",
+          "ms": 1.128
+        },
+        {
+          "fn": "get x @ babylon.js",
+          "ms": 1.118
+        },
+        {
+          "fn": "_evaluateSubMesh @ babylon.js",
+          "ms": 1.113
+        },
+        {
+          "fn": "get _eyePosition @ babylon.js",
+          "ms": 1.112
+        },
+        {
+          "fn": "White @ babylon.js",
+          "ms": 1.111
+        },
+        {
+          "fn": "getTotalVertices @ babylon.js",
+          "ms": 1.11
+        },
+        {
+          "fn": "OM.ks.endTimeQuery @ babylon.js",
+          "ms": 1.108
+        }
+      ],
+      "renderVariant": "quaternius"
+    }
+  ]
+}

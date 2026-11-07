@@ -1,0 +1,383 @@
+{
+  "scope": "Disposable diagnostic probes only; no source/asset changes",
+  "rows": [
+    {
+      "name": "baseline",
+      "shadows": false,
+      "variant": "quaternius",
+      "count": 250,
+      "type": "steelMill",
+      "quality": "high",
+      "viewport": [
+        1366,
+        768
+      ],
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 2880,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "startupMs": 4157.800000011921,
+      "frameSamples": 33,
+      "meanFrameMs": 136.61818181745934,
+      "p95FrameMs": 261.0999999642372,
+      "fps": 7.3196699494664434,
+      "longTasks": [],
+      "drawCalls": 18,
+      "sceneMeshes": 73,
+      "activeMeshes": 18,
+      "instancedMeshes": 0,
+      "thinInstances": 1399,
+      "activeTriangles": 41604,
+      "textureEstimateBytes": 43231914.666666664,
+      "totalVertices": 102956,
+      "cpuFrameMs": 6.588311690788765,
+      "cpuActiveMeshesMs": 0.6051948008599219,
+      "pool": {
+        "instances": 250,
+        "templates": 3,
+        "lodCounts": [
+          246,
+          0,
+          0
+        ],
+        "visibleRecords": 246,
+        "culledRecords": 4,
+        "configuredTriangles": 41078,
+        "batchMeshes": 69,
+        "activeBatches": 14,
+        "sharedMaterials": 28,
+        "sharedTextureFiles": 19,
+        "estimatedTextureRgbaMipBytes": 42467323,
+        "instanceBufferCapacityBytes": 114688,
+        "bufferUploads": 294,
+        "cullingPasses": 21,
+        "poseRevision": 250
+      },
+      "gpuTimerSupported": true,
+      "gpuFrameTimeNsAverage": 134091332.6,
+      "cpuFrame": 2.6521739143392313,
+      "cpuRender": 1.6717391286207282,
+      "cpuActive": 0.7804347794988881
+    },
+    {
+      "name": "half-resolution-diagnostic",
+      "shadows": false,
+      "variant": "quaternius",
+      "count": 250,
+      "type": "steelMill",
+      "quality": "high",
+      "viewport": [
+        1366,
+        768
+      ],
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 2880,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "startupMs": 4157.800000011921,
+      "frameSamples": 31,
+      "meanFrameMs": 83.24838709638965,
+      "p95FrameMs": 116.69999998807907,
+      "fps": 12.012244739854767,
+      "longTasks": [],
+      "drawCalls": 18,
+      "sceneMeshes": 73,
+      "activeMeshes": 18,
+      "instancedMeshes": 0,
+      "thinInstances": 1399,
+      "activeTriangles": 41604,
+      "textureEstimateBytes": 43231914.666666664,
+      "totalVertices": 102956,
+      "cpuFrameMs": 4.629508198284712,
+      "cpuActiveMeshesMs": 0.42622950721959596,
+      "pool": {
+        "instances": 250,
+        "templates": 3,
+        "lodCounts": [
+          246,
+          0,
+          0
+        ],
+        "visibleRecords": 246,
+        "culledRecords": 4,
+        "configuredTriangles": 41078,
+        "batchMeshes": 69,
+        "activeBatches": 14,
+        "sharedMaterials": 28,
+        "sharedTextureFiles": 19,
+        "estimatedTextureRgbaMipBytes": 42467323,
+        "instanceBufferCapacityBytes": 114688,
+        "bufferUploads": 294,
+        "cullingPasses": 21,
+        "poseRevision": 250
+      },
+      "gpuTimerSupported": true,
+      "gpuFrameTimeNsAverage": 105253376.30434783,
+      "cpuFrame": 1.9824175834655762,
+      "cpuRender": 1.3868131860271915,
+      "cpuActive": 0.45604395604395603
+    },
+    {
+      "name": "frozen-world-matrices",
+      "shadows": false,
+      "variant": "quaternius",
+      "count": 250,
+      "type": "steelMill",
+      "quality": "high",
+      "viewport": [
+        1366,
+        768
+      ],
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 2880,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "startupMs": 4157.800000011921,
+      "frameSamples": 31,
+      "meanFrameMs": 137.7354838713523,
+      "p95FrameMs": 260.10000002384186,
+      "fps": 7.260293222144702,
+      "longTasks": [],
+      "drawCalls": 18,
+      "sceneMeshes": 73,
+      "activeMeshes": 18,
+      "instancedMeshes": 0,
+      "thinInstances": 1399,
+      "activeTriangles": 41604,
+      "textureEstimateBytes": 43231914.666666664,
+      "totalVertices": 102956,
+      "cpuFrameMs": 3.61257485179844,
+      "cpuActiveMeshesMs": 0.354491017535775,
+      "pool": {
+        "instances": 250,
+        "templates": 3,
+        "lodCounts": [
+          246,
+          0,
+          0
+        ],
+        "visibleRecords": 246,
+        "culledRecords": 4,
+        "configuredTriangles": 41078,
+        "batchMeshes": 69,
+        "activeBatches": 14,
+        "sharedMaterials": 28,
+        "sharedTextureFiles": 19,
+        "estimatedTextureRgbaMipBytes": 42467323,
+        "instanceBufferCapacityBytes": 114688,
+        "bufferUploads": 294,
+        "cullingPasses": 21,
+        "poseRevision": 250
+      },
+      "gpuTimerSupported": true,
+      "gpuFrameTimeNsAverage": 115595560.68571429,
+      "cpuFrame": 1.6117647071095074,
+      "cpuRender": 1.1154411772594732,
+      "cpuActive": 0.35588235320413814
+    },
+    {
+      "name": "distant-basecolor-removed-diagnostic",
+      "shadows": false,
+      "variant": "quaternius",
+      "count": 250,
+      "type": "steelMill",
+      "quality": "high",
+      "viewport": [
+        1366,
+        768
+      ],
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 2880,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "startupMs": 4157.800000011921,
+      "frameSamples": 31,
+      "meanFrameMs": 134.4612903229652,
+      "p95FrameMs": 265.19999998807907,
+      "fps": 7.437084662790908,
+      "longTasks": [],
+      "drawCalls": 18,
+      "sceneMeshes": 73,
+      "activeMeshes": 18,
+      "instancedMeshes": 0,
+      "thinInstances": 1399,
+      "activeTriangles": 41604,
+      "textureEstimateBytes": 43231914.666666664,
+      "totalVertices": 102956,
+      "cpuFrameMs": 3.0094786743982143,
+      "cpuActiveMeshesMs": 0.30331753498005076,
+      "pool": {
+        "instances": 250,
+        "templates": 3,
+        "lodCounts": [
+          246,
+          0,
+          0
+        ],
+        "visibleRecords": 246,
+        "culledRecords": 4,
+        "configuredTriangles": 41078,
+        "batchMeshes": 69,
+        "activeBatches": 14,
+        "sharedMaterials": 28,
+        "sharedTextureFiles": 19,
+        "estimatedTextureRgbaMipBytes": 42467323,
+        "instanceBufferCapacityBytes": 114688,
+        "bufferUploads": 294,
+        "cullingPasses": 21,
+        "poseRevision": 250
+      },
+      "gpuTimerSupported": true,
+      "gpuFrameTimeNsAverage": 117700651.34042554,
+      "cpuFrame": 1.3955555568138758,
+      "cpuRender": 0.9583333336644703,
+      "cpuActive": 0.29555555548932816
+    }
+  ],
+  "cpuTop": [
+    {
+      "fn": "(idle) @ ",
+      "ms": 4360.451
+    },
+    {
+      "fn": "(program) @ ",
+      "ms": 1022.601
+    },
+    {
+      "fn": "isSynchronized @ babylon.js",
+      "ms": 22.601
+    },
+    {
+      "fn": "(garbage collector) @ ",
+      "ms": 10.851
+    },
+    {
+      "fn": "_boundRenderFunction @ babylon.js",
+      "ms": 10.009
+    },
+    {
+      "fn": " @ showroom.js",
+      "ms": 8.897
+    },
+    {
+      "fn": "bindVertexArray @ ",
+      "ms": 5.786
+    },
+    {
+      "fn": "requestAnimationFrame @ ",
+      "ms": 3.379
+    },
+    {
+      "fn": "bindTexture @ ",
+      "ms": 3.362
+    },
+    {
+      "fn": " @ ",
+      "ms": 2.987
+    },
+    {
+      "fn": "finalizeSceneUbo @ babylon.js",
+      "ms": 2.841
+    },
+    {
+      "fn": "bindEyePosition @ babylon.js",
+      "ms": 2.361
+    },
+    {
+      "fn": "bindForSubMesh @ babylon.js",
+      "ms": 2.226
+    },
+    {
+      "fn": "_processFrame @ babylon.js",
+      "ms": 2.216
+    },
+    {
+      "fn": "render @ babylon.js",
+      "ms": 2.186
+    },
+    {
+      "fn": "getEngine @ babylon.js",
+      "ms": 1.873
+    },
+    {
+      "fn": "td @ babylon.js",
+      "ms": 1.547
+    },
+    {
+      "fn": "get Now @ babylon.js",
+      "ms": 1.44
+    },
+    {
+      "fn": "_evaluateActiveMeshes @ babylon.js",
+      "ms": 1.323
+    },
+    {
+      "fn": "serialize @ ",
+      "ms": 1.165
+    },
+    {
+      "fn": "_afterBind @ babylon.js",
+      "ms": 1.164
+    },
+    {
+      "fn": "get contrast @ babylon.js",
+      "ms": 1.144
+    },
+    {
+      "fn": "get EmissiveTextureEnabled @ babylon.js",
+      "ms": 1.133
+    },
+    {
+      "fn": "isDate @ ",
+      "ms": 1.13
+    },
+    {
+      "fn": "setTexture @ babylon.js",
+      "ms": 1.122
+    },
+    {
+      "fn": "clear @ ",
+      "ms": 1.115
+    },
+    {
+      "fn": "load @ babylon.js",
+      "ms": 1.113
+    },
+    {
+      "fn": "isReady @ babylon.js",
+      "ms": 1.104
+    },
+    {
+      "fn": "getQueryParameter @ ",
+      "ms": 1.104
+    },
+    {
+      "fn": "get activeCamera @ babylon.js",
+      "ms": 1.1
+    }
+  ]
+}

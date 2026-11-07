@@ -1,0 +1,117 @@
+{
+  "errors": [],
+  "warnings": [],
+  "http": [],
+  "failed": [],
+  "captures": [
+    {
+      "id": "steelMill",
+      "file": "steelMill-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 171.1,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "viewport": [
+        1600,
+        1100
+      ],
+      "triangles": 31716
+    },
+    {
+      "id": "precisionElectronicsWorks",
+      "file": "precisionElectronicsWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 116,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "viewport": [
+        1600,
+        1100
+      ],
+      "triangles": 7964
+    },
+    {
+      "id": "machineWorks",
+      "file": "machineWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 92.8,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "viewport": [
+        1600,
+        1100
+      ],
+      "triangles": 15850
+    }
+  ],
+  "comparison": {
+    "cameras": [
+      {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 200.6,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 200.6,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 200.6,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      }
+    ],
+    "dimensions": [
+      [
+        770,
+        660
+      ],
+      [
+        770,
+        660
+      ],
+      [
+        770,
+        660
+      ]
+    ],
+    "viewport": [
+      2400,
+      960
+    ]
+  }
+}

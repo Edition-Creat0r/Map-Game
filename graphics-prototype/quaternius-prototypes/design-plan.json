@@ -60,7 +60,7 @@
         92
       ],
       "group": "industrial",
-      "status": "showroom-pilot-awaiting-visual-and-performance-review",
+      "status": "optimized-showroom-pilot-awaiting-visual-and-hardware-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -81,7 +81,7 @@
         66
       ],
       "group": "industrial",
-      "status": "showroom-pilot-awaiting-visual-and-performance-review",
+      "status": "optimized-showroom-pilot-awaiting-visual-and-hardware-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -102,7 +102,7 @@
         54
       ],
       "group": "industrial",
-      "status": "showroom-pilot-awaiting-visual-and-performance-review",
+      "status": "optimized-showroom-pilot-awaiting-visual-and-hardware-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",

@@ -1,6 +1,6 @@
-# Quaternius factory showroom — checkpoint 2
+# Quaternius factory showroom — optimization checkpoint
 
-Three **review prototypes**, isolated from gameplay. The 24-design allocation remains provisional; only Steel Mill, Electronics Plant and Machinery Works have a Quaternius build. Residential work waits for the additional house pack. No replacement is enabled in the game. Nothing has been pushed, merged or deployed.
+Three **review prototypes**, isolated from gameplay. **Current performance, profiles, images and tests: [OPTIMIZATION.md](OPTIMIZATION.md).** The 24-design allocation remains provisional; only Steel Mill, Electronics Plant and Machinery Works have a Quaternius build. Residential work waits for the additional house pack. No replacement is enabled in the game. Nothing has been pushed, merged or deployed.
 
 Branch: `feature/0.4.2-quaternius-replacements`, based on `9b8e5526ff3335d1fac14254542ed1c9cfe7762d`. The previous Kenney showroom is preserved byte-for-byte for comparison, and is **not** an approved source for these pilots. No Kenney exception is approved or used.
 
@@ -38,17 +38,17 @@ These are visual-only mappings, **not new buildings**. Every LOD is checked agai
 
 `tools/build_downtown.py` reads the five fingerprint-pinned ZIPs in memory. It does not extract an arbitrary tree, open binary scenes, download dependencies or run supplied code. Archive links, special files, unsafe paths, ambiguous duplicates, missing dependencies, unsupported animated/skinned geometry, invalid numeric data and footprint overflow fail the build. Outputs are restricted to this folder's `generated/`, audit/license and manifest files.
 
-`generated/pilots.glb` is one shared library: three roots × Low/Medium/High groups, merged by material. High retains native architectural geometry and PBR normal/roughness maps; Medium uses simpler native modules with real base-color maps and diffuse/specular shading; Low preserves the shell, major equipment and color maps while dropping window detail. No destructive texture-island mesh simplification is used. Medium and High brick shells both use brick modules. Distance thresholds have hysteresis; quality is a maximum LOD budget. No physics, animated machinery or Ultra setting is claimed.
+`generated/pilots.glb` is one shared library: three roots × Low/Medium/High groups, merged by material. High retains the exact native architectural geometry and PBR material/texture data from `de493cd`. Medium caches native window modules into four shared 128×192 façade tiles while retaining 3D equipment; Low merges whole walls/roofs, uses plain-wall caches and drops window detail. Source UVs and geometry determine the bakes; no resource icons or Kenney data are used. No destructive texture-island mesh simplification is used. Medium and High brick shells both use brick modules. Distance thresholds have hysteresis; quality is a maximum LOD budget. No physics, animated machinery or Ultra setting is claimed.
 
-`renderer.js` loads one container and instances its meshes; it does not import or rebuild geometry during orbit/zoom. Shared textures/materials and the container are disposed with the scene. The count fixture builds incrementally, yielding every 12 records. No code is added to terrain or world-map frame loops.
+`renderer.js` loads one container and batches thin instances by catalog ID, LOD and material; it does not import or rebuild geometry during orbit/zoom. Logical record anchors retain coordinates; `record.update()` invalidates cached matrices. Conservative frustum/subpixel-distance culling and LOD updates run only when dirty or the sampled camera matrix changes. GPU buffers upload only when batch membership or poses change. Shared textures/materials and the container are disposed with the scene. The count fixture builds incrementally, yielding every 12 records. No code is added to terrain or world-map frame loops.
 
-15 derived PNG maps are included. Base color is at most 1024px; normals/ORM at most 512px. Normal vectors are renormalized after resizing. Source hashes, derived hashes, dimensions, byte estimates and explicit provenance are in `manifest.json`. Source archives are untouched. Estimated decoded RGBA+mipmap storage is approximately **40 MiB**, not a GPU measurement; driver/shader/mesh memory is additional. Originals remain in the supplied ZIPs and are not bulk-committed.
+19 derived PNG maps are included: the 15 original maps remain byte-identical, plus four small façade caches. Base color is at most 1024px; normals/ORM at most 512px. Normal vectors are renormalized after resizing. Source hashes, derived hashes, dimensions, byte estimates and explicit provenance are in `manifest.json`. Source archives are untouched. Estimated decoded RGBA+mipmap storage is approximately **40.5 MiB**, not a GPU measurement; driver/shader/mesh memory is additional. Originals remain in the supplied ZIPs and are not bulk-committed.
 
 | Factory | Low triangles | Medium triangles | High triangles |
 |---|---:|---:|---:|
-| Steel Mill | 560 | 14,692 | 31,716 |
-| Electronics Plant | 1,048 | 7,736 | 7,964 |
-| Machinery Works | 298 | 8,874 | 15,850 |
+| Steel Mill | 218 | 742 | 31,716 |
+| Electronics Plant | 140 | 876 | 7,964 |
+| Machinery Works | 142 | 550 | 15,850 |
 
 ## Offline rebuild and tests
 
@@ -58,6 +58,7 @@ Dependencies: Python 3 + NumPy + Pillow (`tools/requirements.txt` pins the teste
 python graphics-prototype/quaternius-prototypes/tools/build_downtown.py --parts "C:\private-assets\mapgame_downtown_gltf_part_1_of_5.zip" "C:\private-assets\mapgame_downtown_gltf_part_2_of_5.zip" "C:\private-assets\mapgame_downtown_gltf_part_3_of_5.zip" "C:\private-assets\mapgame_downtown_gltf_part_4_of_5.zip" "C:\private-assets\mapgame_downtown_gltf_part_5_of_5.zip"
 python graphics-prototype/quaternius-prototypes/tools/test_audit.py
 python graphics-prototype/quaternius-prototypes/tools/test_downtown.py
+python graphics-prototype/quaternius-prototypes/tools/test_far_lod.py
 node --test tests/*.test.cjs
 ```
 
@@ -70,7 +71,7 @@ node tests/quaternius-browser.cjs
 node tests/quaternius-performance.cjs
 ```
 
-The supplied browser scripts request SwiftShader for a repeatable software-rendering comparison. They do **not** certify Lenovo hardware acceleration. Screenshots and raw benchmark data are in `evidence/`; final measured results and remaining gates are in `VALIDATION.md`.
+The supplied browser scripts request SwiftShader for a repeatable software-rendering comparison. They do **not** certify Lenovo hardware acceleration. Screenshots and raw benchmark data are in `evidence/`; historical baseline results are in `VALIDATION.md`; current results and remaining gates are in `OPTIMIZATION.md`. The shared-camera review page is `comparison.html`.
 
 ## Remaining quality and release gates
 
