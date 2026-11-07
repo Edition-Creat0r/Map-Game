@@ -1,0 +1,552 @@
+{
+  "version": 1,
+  "license": "CC0-1.0",
+  "url": "generated/pilots.glb",
+  "sha256": "641a2515066597cb47a00be00c3e8c99812c7846a320afe0935f8d3d09b951a8",
+  "bytes": 6059912,
+  "buildings": [
+    {
+      "id": "steelMill",
+      "label": "Steel Mill",
+      "footprint": [
+        118,
+        92
+      ],
+      "lods": [
+        {
+          "name": "low",
+          "triangles": 560,
+          "meshBatches": 5,
+          "bounds": [
+            [
+              -58.6,
+              0.0,
+              -45.6
+            ],
+            [
+              58.6,
+              44.0,
+              45.6
+            ]
+          ],
+          "parts": 190
+        },
+        {
+          "name": "medium",
+          "triangles": 14692,
+          "meshBatches": 10,
+          "bounds": [
+            [
+              -58.6,
+              0.0,
+              -45.6
+            ],
+            [
+              58.6,
+              44.0,
+              45.6
+            ]
+          ],
+          "parts": 437
+        },
+        {
+          "name": "high",
+          "triangles": 31716,
+          "meshBatches": 12,
+          "bounds": [
+            [
+              -58.6,
+              0.0,
+              -45.6
+            ],
+            [
+              58.6,
+              44.0,
+              45.6
+            ]
+          ],
+          "parts": 345
+        }
+      ],
+      "sourceModules": [
+        "Brick_Plain_3",
+        "Brick_RedWhite_DoubleWindow",
+        "Brick_Window_Square_Single",
+        "Prop_ACUnit",
+        "Roof_2x2"
+      ],
+      "originalFinishRoles": [
+        "concrete",
+        "paint",
+        "rubber",
+        "steel",
+        "yellow"
+      ],
+      "pivot": "base-center",
+      "gameplayEnabled": false
+    },
+    {
+      "id": "precisionElectronicsWorks",
+      "label": "Electronics Plant",
+      "footprint": [
+        80,
+        66
+      ],
+      "lods": [
+        {
+          "name": "low",
+          "triangles": 1048,
+          "meshBatches": 4,
+          "bounds": [
+            [
+              -39.6,
+              -7.152557373046875e-07,
+              -32.6
+            ],
+            [
+              39.6,
+              18.5,
+              32.6
+            ]
+          ],
+          "parts": 134
+        },
+        {
+          "name": "medium",
+          "triangles": 7736,
+          "meshBatches": 9,
+          "bounds": [
+            [
+              -39.6,
+              -7.152557373046875e-07,
+              -32.6
+            ],
+            [
+              39.6,
+              21.04869030714035,
+              32.6
+            ]
+          ],
+          "parts": 276
+        },
+        {
+          "name": "high",
+          "triangles": 7964,
+          "meshBatches": 10,
+          "bounds": [
+            [
+              -39.6,
+              -7.152557373046875e-07,
+              -32.6
+            ],
+            [
+              39.6,
+              21.04869030714035,
+              32.6
+            ]
+          ],
+          "parts": 282
+        }
+      ],
+      "sourceModules": [
+        "Metal_FirstFloor_Window",
+        "Metal_Plain_3",
+        "Prop_ACUnit",
+        "Roof_2x2"
+      ],
+      "originalFinishRoles": [
+        "concrete",
+        "paint",
+        "steel",
+        "yellow"
+      ],
+      "pivot": "base-center",
+      "gameplayEnabled": false
+    },
+    {
+      "id": "machineWorks",
+      "label": "Machinery Works",
+      "footprint": [
+        64,
+        54
+      ],
+      "lods": [
+        {
+          "name": "low",
+          "triangles": 298,
+          "meshBatches": 5,
+          "bounds": [
+            [
+              -31.6,
+              0.0,
+              -26.6
+            ],
+            [
+              31.6,
+              18.5,
+              26.6
+            ]
+          ],
+          "parts": 94
+        },
+        {
+          "name": "medium",
+          "triangles": 8874,
+          "meshBatches": 10,
+          "bounds": [
+            [
+              -31.6,
+              0.0,
+              -26.6
+            ],
+            [
+              31.6,
+              21.04869030714035,
+              26.6
+            ]
+          ],
+          "parts": 244
+        },
+        {
+          "name": "high",
+          "triangles": 15850,
+          "meshBatches": 12,
+          "bounds": [
+            [
+              -31.6,
+              0.0,
+              -26.6
+            ],
+            [
+              31.6,
+              21.04869030714035,
+              26.6
+            ]
+          ],
+          "parts": 166
+        }
+      ],
+      "sourceModules": [
+        "Brick_Plain_3",
+        "Brick_RedWhite_DoubleWindow",
+        "Brick_Window_Square_Single",
+        "Prop_ACUnit",
+        "Roof_2x2"
+      ],
+      "originalFinishRoles": [
+        "concrete",
+        "paint",
+        "steel",
+        "yellow"
+      ],
+      "pivot": "base-center",
+      "gameplayEnabled": false
+    }
+  ],
+  "sources": {
+    "Brick_Plain_3": {
+      "path": "Exports/glTF (Godot)/Brick_Plain_3.gltf",
+      "sha256": "bc86dfb9e5bb4d6fa4e7c38fd541a5b82ce8d9eb99557ce6228b480c68552bba"
+    },
+    "Roof_2x2": {
+      "path": "Exports/glTF (Godot)/Roof_2x2.gltf",
+      "sha256": "fb9686ae868cad0a566767f4777c7dfc3ebb7917296eac8528c2d2ebb225159f"
+    },
+    "Brick_Window_Square_Single": {
+      "path": "Exports/glTF (Godot)/Brick_Window_Square_Single.gltf",
+      "sha256": "64b21d1bbe6a320095c69bd521d2e2c0f7f7586fe86c73765ff89607664625b4"
+    },
+    "Prop_ACUnit": {
+      "path": "Exports/glTF (Godot)/Prop_ACUnit.gltf",
+      "sha256": "f81fae2b49804312d23cc5c56fdf36f6bec89f342df9d135c1565ed31a7e968d"
+    },
+    "Brick_RedWhite_DoubleWindow": {
+      "path": "Exports/glTF (Godot)/Brick_RedWhite_DoubleWindow.gltf",
+      "sha256": "f4d537874274a1a49b13c5dd9d8409f8441d5a375c77f8fa0a17fb09822117cc"
+    },
+    "Metal_Plain_3": {
+      "path": "Exports/glTF (Godot)/Metal_Plain_3.gltf",
+      "sha256": "1311b5c4bffda0beefa95d90590f4fbb0c6f07fca1371c1aa6a1b829e5bb7f11"
+    },
+    "Metal_FirstFloor_Window": {
+      "path": "Exports/glTF (Godot)/Metal_FirstFloor_Window.gltf",
+      "sha256": "4e9029f004d6e0031222be220b3494241a88e837b40fe3b6bb1d96b1a55f43e7"
+    }
+  },
+  "archives": [
+    {
+      "part": 1,
+      "file": "mapgame_downtown_gltf_part_1_of_5.zip",
+      "sha256": "27f633d851807d8bb5014ffe18842ea8f6ac4ecb8bbc2bca32965aef5f5ce9e1"
+    },
+    {
+      "part": 2,
+      "file": "mapgame_downtown_gltf_part_2_of_5.zip",
+      "sha256": "3770a41f64500c4cb33afe4bd4cb400c990b68bd5df99c572e7d981b7163173b"
+    },
+    {
+      "part": 3,
+      "file": "mapgame_downtown_gltf_part_3_of_5.zip",
+      "sha256": "4802542fa8d7709cc2163200f558ee66c83fbada850f11b66b967ca20e77ef6e"
+    },
+    {
+      "part": 4,
+      "file": "mapgame_downtown_gltf_part_4_of_5.zip",
+      "sha256": "a4805653781895f127ddac408cefcf26c6fd3633f0b382134d7e15c9357bae4a"
+    },
+    {
+      "part": 5,
+      "file": "mapgame_downtown_gltf_part_5_of_5.zip",
+      "sha256": "e373cca2e259658a11e951c153bf28352087e62b0704914687a328016e1c091f"
+    }
+  ],
+  "textures": [
+    {
+      "source": "Exports/glTF (Godot)/T_RedBrick_Normal.png",
+      "sourceSha256": "147f14d7f665d2598d0d796bd02a227f6b8b0fbc790c3e0737b1b90128101c93",
+      "url": "generated/textures/T_RedBrick_Normal-normal.png",
+      "sha256": "c16e0a59bbee285e59461d8f256684710588e4cb980c9cb38a159289cf14abd3",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "role": "normal-renormalized",
+      "estimatedRgbaMipBytes": 1398101
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_RedBrick_BaseColor.png",
+      "sourceSha256": "ea85bfc02c4c807265a85f7ab50656f7eaa19f6567301d362d78c1d06da161ab",
+      "url": "generated/textures/T_RedBrick_BaseColor.png",
+      "sha256": "91e242b1d6c4f83ca092c9d3e5add30a066b446cd1e39857121fae3ae35c013b",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        1024,
+        1024
+      ],
+      "role": "color-or-ORM",
+      "estimatedRgbaMipBytes": 5592405
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_RedBrick_ORM.png",
+      "sourceSha256": "dfba8a1da5ca7dcff1b707a051e82717e93013c2ad36c93b7a41b0f331414b70",
+      "url": "generated/textures/T_RedBrick_ORM.png",
+      "sha256": "002eba6fea372f5c559f4c1c80c8a54ac41b03b94dcc20586c21af9f254dfd0c",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "role": "color-or-ORM",
+      "estimatedRgbaMipBytes": 1398101
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_Concrete_Normal.png",
+      "sourceSha256": "e4de917d2506bff4b17d44380a136336cf16e5ea828edfdb8981f4f27e30a86a",
+      "url": "generated/textures/T_Concrete_Normal-normal.png",
+      "sha256": "2dccb9951002d03c7b0d828edc345e85c0002db4af3d69a723b09dba86481b4c",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "role": "normal-renormalized",
+      "estimatedRgbaMipBytes": 1398101
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_Concrete_Asphalt_BaseColor.png",
+      "sourceSha256": "a37ca932c4287a67d9cf7f78997b5cc4b026ca7319a4c8454132d076307ca5cf",
+      "url": "generated/textures/T_Concrete_Asphalt_BaseColor.png",
+      "sha256": "2e011a71153b6b951db97a9cfa08d5044d25f1000a6e29fe0773b2ac56919799",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        1024,
+        1024
+      ],
+      "role": "color-or-ORM",
+      "estimatedRgbaMipBytes": 5592405
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_Concrete_ORM.png",
+      "sourceSha256": "be17636c061a7c6c4f4bf23c3887a3f894da0e88394e233926e816c735a49244",
+      "url": "generated/textures/T_Concrete_ORM.png",
+      "sha256": "d14e3e961a259a83f98bef48607284224d1534df4abe9fab6f666227c21fbb29",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "role": "color-or-ORM",
+      "estimatedRgbaMipBytes": 1398101
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_Trim_Normal.png",
+      "sourceSha256": "95fa43093067956fa6e206408f3e2f2302c18c7453b75a02f6e29fe57e2cd041",
+      "url": "generated/textures/T_Trim_Normal-normal.png",
+      "sha256": "3b27354e1348039c911141c5dd41f0540c3ed9768a2e28c6eeed2a3391c4e2e3",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "role": "normal-renormalized",
+      "estimatedRgbaMipBytes": 1398101
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_Trim_BaseColor.png",
+      "sourceSha256": "c3334902f8315783477eec63e2d462f8cefedf9c55b41ef452d8374b5603f08e",
+      "url": "generated/textures/T_Trim_BaseColor.png",
+      "sha256": "18a3a3b18ed7f7a6086fa3b25db11b903f80b86176d84fce8fbc4784864b845b",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        1024,
+        1024
+      ],
+      "role": "color-or-ORM",
+      "estimatedRgbaMipBytes": 5592405
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_Trim_ORM.png",
+      "sourceSha256": "52449f201ad3cf606a2eb2972702b10051c369cdc67b6fadd109502b4735d7fb",
+      "url": "generated/textures/T_Trim_ORM.png",
+      "sha256": "61dd09306e984854e5dabe5b62c4406280ef08097c590796e5cfe066839e2d76",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "role": "color-or-ORM",
+      "estimatedRgbaMipBytes": 1398101
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_Ornaments_Normal.png",
+      "sourceSha256": "c1aa6b307d47386b63e775ba88d82992dd0aaf34f1e4c2b7824002e3cc0a795a",
+      "url": "generated/textures/T_Ornaments_Normal-normal.png",
+      "sha256": "774e56cd3506010e92a17bc10b92315825eb0583344f4779c166c1612bcf4b3d",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "role": "normal-renormalized",
+      "estimatedRgbaMipBytes": 1398101
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_Ornaments_BaseColor.png",
+      "sourceSha256": "528cbe672c62384aa3bac703f574b60509bd69b4d492291cb2915022a12a449c",
+      "url": "generated/textures/T_Ornaments_BaseColor.png",
+      "sha256": "c84658956ef28fd2f8e4fa4533b07499e5d93630f3b8b72011ebfd67fb197338",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        1024,
+        1024
+      ],
+      "role": "color-or-ORM",
+      "estimatedRgbaMipBytes": 5592405
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_Ornaments_ORM.png",
+      "sourceSha256": "c65b673f871e6b4b2fa61fd110286a096d05d9a311e71ca71804cea46811885d",
+      "url": "generated/textures/T_Ornaments_ORM.png",
+      "sha256": "d70d382761b21c4de1f3a3dfe47b319f78073f98a52e49f19daccf6dd9a168b1",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "role": "color-or-ORM",
+      "estimatedRgbaMipBytes": 1398101
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_MetalConcrete_Normal.png",
+      "sourceSha256": "93f95a96c32b27820c590301f00f5ba1d23d4054046d92bf6d58adbf23007419",
+      "url": "generated/textures/T_MetalConcrete_Normal-normal.png",
+      "sha256": "7eae1484490980f113e3e0a175b6ee57cd34c828e06558519f35d8324899c7c9",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "role": "normal-renormalized",
+      "estimatedRgbaMipBytes": 1398101
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_MetalConcrete_BaseColor.png",
+      "sourceSha256": "adae656323f15cd2c3f1a6453685cb1ca104b700dc114076137cb3a4c253d3d0",
+      "url": "generated/textures/T_MetalConcrete_BaseColor.png",
+      "sha256": "4b1768888a2d2a2e466dacc65783d6c54d97781622fb48c9f80c4a3b7abeb989",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        1024,
+        1024
+      ],
+      "role": "color-or-ORM",
+      "estimatedRgbaMipBytes": 5592405
+    },
+    {
+      "source": "Exports/glTF (Godot)/T_MetalConcrete_ORM.png",
+      "sourceSha256": "c4d35f684d20c47f199bea2fbe098d60a000fa7d1489df0f00a4c3c1ace4fcb7",
+      "url": "generated/textures/T_MetalConcrete_ORM.png",
+      "sha256": "44a54c7fed570988d5acf01e94428e6fd2c950c012d2c3b54e12cd007bdd8a0c",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "role": "color-or-ORM",
+      "estimatedRgbaMipBytes": 1398101
+    }
+  ],
+  "sourceArchivesAltered": false,
+  "geometrySource": "Quaternius Downtown Standard; original industrial primitives",
+  "kenneyUsed": false,
+  "liveRendererEnabled": false,
+  "paidShadersUsed": false,
+  "staticProps": true,
+  "texturePolicy": "Color <=1024; normal/ORM <=512; renormalized normal maps. Original source archive untouched. No synthetic AO."
+}

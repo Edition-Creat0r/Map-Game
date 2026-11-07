@@ -1,0 +1,121 @@
+{
+  "errors": [],
+  "http": [],
+  "failed": [],
+  "checks": [
+    "Signed-out guest start with no auth modal",
+    "Drag/zoom and construction drag/cancel/release outside at three widths",
+    "Native single click charged exactly once",
+    "Duplicate tab stays Home; spending and unload metadata writes blocked",
+    "User-requested existing-session hint; refresh/close/retry preserve saved building and balance",
+    "Real renderer crash releases Web Lock; no permanent app lease",
+    "Main-game terrain paths loaded; Basic/laboratory distinction retained"
+  ],
+  "resolutions": [
+    {
+      "width": 1366,
+      "height": 768,
+      "pan": true,
+      "placementDragSafe": true,
+      "zoom": true,
+      "cancel": true,
+      "ui": true
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "pan": true,
+      "placementDragSafe": true,
+      "zoom": true,
+      "cancel": true,
+      "ui": true
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "pan": true,
+      "placementDragSafe": true,
+      "zoom": true,
+      "cancel": true,
+      "ui": true
+    }
+  ],
+  "expectedCrash": true,
+  "terrainAssets": [
+    "/assets/textures/grass/grass_diffuse.jpg",
+    "/assets/textures/grass/grass_normal.jpg",
+    "/assets/textures/rock/rock_diffuse.jpg",
+    "/assets/textures/rock/rock_normal.jpg",
+    "/assets/textures/sand/sand_diffuse.jpg",
+    "/assets/textures/sand/sand.normal.jpg",
+    "/assets/textures/grass/grass_diffuse.jpg",
+    "/assets/textures/dirt/dirt.jpg",
+    "/assets/textures/rock/rock_diffuse.jpg",
+    "/assets/textures/sand/sand_diffuse.jpg",
+    "/assets/textures/terrain/dry_plains_01/plains.jpg",
+    "/assets/textures/terrain/rocky_grass_01/thick_grass.jpg",
+    "/assets/textures/terrain/snow_01/snow.jpg",
+    "/assets/textures/terrain/wet_ground_01/wet_grass.jpg"
+  ],
+  "textureStats": [
+    {
+      "id": "grass",
+      "path": "assets/textures/grass/grass_diffuse.jpg",
+      "loaded": true,
+      "sampleSide": 64
+    },
+    {
+      "id": "dirt",
+      "path": "assets/textures/dirt/dirt.jpg",
+      "loaded": true,
+      "sampleSide": 64
+    },
+    {
+      "id": "rock",
+      "path": "assets/textures/rock/rock_diffuse.jpg",
+      "loaded": true,
+      "sampleSide": 64
+    },
+    {
+      "id": "sand",
+      "path": "assets/textures/sand/sand_diffuse.jpg",
+      "loaded": true,
+      "sampleSide": 64
+    },
+    {
+      "id": "dryPlains",
+      "path": "assets/textures/terrain/dry_plains_01/plains.jpg",
+      "loaded": true,
+      "sampleSide": 64
+    },
+    {
+      "id": "rockyGrass",
+      "path": "assets/textures/terrain/rocky_grass_01/thick_grass.jpg",
+      "loaded": true,
+      "sampleSide": 64
+    },
+    {
+      "id": "snow",
+      "path": "assets/textures/terrain/snow_01/snow.jpg",
+      "loaded": true,
+      "sampleSide": 64
+    },
+    {
+      "id": "wetGround",
+      "path": "assets/textures/terrain/wet_ground_01/wet_grass.jpg",
+      "loaded": true,
+      "sampleSide": 64
+    }
+  ],
+  "race": [
+    {
+      "owns": true,
+      "mode": "MAP"
+    },
+    {
+      "owns": false,
+      "mode": "HOME"
+    }
+  ],
+  "restoredPageReadOnly": true
+}

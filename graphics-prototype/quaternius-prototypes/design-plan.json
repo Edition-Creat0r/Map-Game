@@ -16,11 +16,6 @@
   },
   "blockers": [
     {
-      "source": "quaternius-downtown",
-      "status": "uninspected-transfer-blocked",
-      "reason": "Uploaded ZIP exceeds the 32 MiB executor transfer limit"
-    },
-    {
       "source": "additional-quaternius-house-pack",
       "status": "not-yet-attached"
     },
@@ -65,14 +60,18 @@
         92
       ],
       "group": "industrial",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "showroom-pilot-awaiting-visual-and-performance-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
         "quaternius-buildings-2019",
         "original-industrial-components"
       ],
-      "sourceSelectionFinal": false
+      "sourceSelectionFinal": false,
+      "prototypeSources": [
+        "quaternius-downtown",
+        "original-industrial-components"
+      ]
     },
     {
       "id": "precisionElectronicsWorks",
@@ -82,14 +81,18 @@
         66
       ],
       "group": "industrial",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "showroom-pilot-awaiting-visual-and-performance-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
         "quaternius-buildings-2019",
         "original-industrial-components"
       ],
-      "sourceSelectionFinal": false
+      "sourceSelectionFinal": false,
+      "prototypeSources": [
+        "quaternius-downtown",
+        "original-industrial-components"
+      ]
     },
     {
       "id": "machineWorks",
@@ -99,14 +102,18 @@
         54
       ],
       "group": "industrial",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "showroom-pilot-awaiting-visual-and-performance-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
         "quaternius-buildings-2019",
         "original-industrial-components"
       ],
-      "sourceSelectionFinal": false
+      "sourceSelectionFinal": false,
+      "prototypeSources": [
+        "quaternius-downtown",
+        "original-industrial-components"
+      ]
     },
     {
       "id": "carbonPlant",
@@ -116,7 +123,7 @@
         96
       ],
       "group": "industrial",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -133,7 +140,7 @@
         104
       ],
       "group": "industrial",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -150,7 +157,7 @@
         62
       ],
       "group": "industrial",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -167,7 +174,7 @@
         48
       ],
       "group": "industrial",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -184,7 +191,7 @@
         42
       ],
       "group": "industrial",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -201,7 +208,7 @@
         72
       ],
       "group": "officeHospitality",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -218,7 +225,7 @@
         50
       ],
       "group": "officeHospitality",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -235,7 +242,7 @@
         62
       ],
       "group": "officeHospitality",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -252,7 +259,7 @@
         20
       ],
       "group": "retail",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -269,7 +276,7 @@
         22
       ],
       "group": "retail",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -286,7 +293,7 @@
         30
       ],
       "group": "retail",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -303,7 +310,7 @@
         58
       ],
       "group": "retail",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -320,7 +327,7 @@
         110
       ],
       "group": "retail",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -385,7 +392,7 @@
         48
       ],
       "group": "industrial",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -402,7 +409,7 @@
         42
       ],
       "group": "industrial",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -419,7 +426,7 @@
         48
       ],
       "group": "industrial",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -436,7 +443,7 @@
         54
       ],
       "group": "industrial",
-      "status": "design-only-awaiting-primary-assets",
+      "status": "planned-after-pilot-review",
       "approvedSources": [
         "quaternius-downtown",
         "quaternius-textured-2019",
@@ -444,6 +451,16 @@
         "original-industrial-components"
       ],
       "sourceSelectionFinal": false
+    }
+  ],
+  "resolvedInputs": [
+    {
+      "source": "quaternius-downtown",
+      "status": "audited-five-pinned-zips",
+      "models": 153,
+      "images": 29,
+      "license": "CC0-1.0",
+      "note": "Missing original giant ZIP transfer resolved with five complete ordinary ZIPs."
     }
   ]
 }

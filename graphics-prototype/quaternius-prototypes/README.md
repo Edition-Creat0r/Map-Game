@@ -1,67 +1,81 @@
-# Quaternius direction — asset-readiness checkpoint
+# Quaternius factory showroom — checkpoint 2
 
-**Status: audit and provisional planning only. No Quaternius replacement has been built, rendered, enabled or approved yet.** The Downtown source could not transfer and the additional house pack has not arrived. This checkpoint deliberately does not finalize designs using incomplete primary assets or claim that old palette artwork is detailed PBR.
+Three **review prototypes**, isolated from gameplay. The 24-design allocation remains provisional; only Steel Mill, Electronics Plant and Machinery Works have a Quaternius build. Residential work waits for the additional house pack. No replacement is enabled in the game. Nothing has been pushed, merged or deployed.
 
-## Branch and safety
+Branch: `feature/0.4.2-quaternius-replacements`, based on `9b8e5526ff3335d1fac14254542ed1c9cfe7762d`. The previous Kenney showroom is preserved byte-for-byte for comparison, and is **not** an approved source for these pilots. No Kenney exception is approved or used.
 
-`feature/0.4.2-quaternius-replacements`, isolated worktree, starts at `9b8e5526ff3335d1fac14254542ed1c9cfe7762d`. The existing Kenney showcase is preserved byte-for-byte as a **legacy comparison**, not as an approved source for the final designs. No Kenney exception is approved, and none is silently substituted. Generic rendering/build algorithms may eventually be reused; geometry, textures and accessories in the replacement assets must have explicit approved provenance.
+## Inspect the studies
 
-No gameplay, economy, recipes, IDs, footprints, save formats, authentication, multiplayer, Supabase, approved terrain or icon files were changed. No push, merge or deployment is authorized or performed.
-
-## Actual archive findings
-
-`asset-audit.json` records SHA-256 provenance, dimensions in source coordinates, polygon counts, triangulated-count estimates, materials, UV ranges, dependencies and image metadata.
-
-| Supplied source | Readiness | Findings |
-|---|---|---|
-| Buildings Pack — Jan 2019 | Audited, CC0 notice present | 9 OBJ / FBX / BLEND exports. Two houses are present, but are **not** a substitute for reviewing the forthcoming house pack. OBJ triangle estimates range 5,160–41,788. Color-material definitions; no image map bindings. |
-| Ultimate Textured Building Pack — Dec 2019 | Audited, CC0 notice present; textured associations need review | 102 OBJ / FBX / BLEND exports. Includes 26 material-only finished variants, 26 textured finished variants, 18 base modular buildings and 32 modular parts. These are **not 102 distinct finished designs**. OBJ triangle estimates range 10–13,564, including small accessories. |
-| Downtown City MegaKit [Standard] | **Not inspected** | The supported attachment download failed because the ZIP exceeds the executor's **32 MiB per-file transfer limit**. License, geometry, textures and formats remain unverified. |
-| Additional Quaternius house pack | **Pending attachment** | Residential designs remain explicitly provisional. |
-| ModernResource artwork | No new pack/license supplied | Inventory/production icons only after license review; never building-surface textures. Existing icon fallbacks and Credits artwork remain intact. |
-
-The 2019 Textured pack's 12 texture variants are **32×32 palette images**. They are not high-resolution brick, metal or window PBR maps, and no normal/roughness/AO files were found in these available packs. Its 76 OBJ exports under `Textured Models` declare a `Texture` material but omit image bindings in their MTL files. All OBJ MTL libraries and named materials resolve; **missing image association is a source-export issue, not an inferred missing file or scanner bypass**. The audit flags those conversions for explicit mapping review rather than assigning an arbitrary texture.
-
-The Textured pack's `Preview.png` is actually a JPEG (1,920×1,080). It is reported as an extension mismatch, excluded from texture approval and never renamed into an approved material. Required PNG texture files still fail closed if their contents do not match their declared type.
-
-OBJ does not declare real-world units or a universal up axis. Source-coordinate bounds are measured; conversion must verify orientation, normalize the base-center pivot, and fit the exact canonical game footprint. Triangle estimates assume valid polygon triangulation; final GPU triangle counts must come from the converted meshes. BLEND/FBX files were inventoried but **not opened or executed**. No archive HTML, scripts, drivers or instructions were executed, and the audit extracts no files.
-
-## Provisional 24-design allocation
-
-`design-plan.json` reserves **24 distinct existing catalog IDs**, with their exact current footprints:
-
-- 12 industrial / industrial infrastructure: `steelMill`, `precisionElectronicsWorks`, `machineWorks`, `carbonPlant`, `powerPlant`, `warehouse`, `glassWorks`, `concreteBatchPlant`, `steelFoundry`, `cokeWorks`, `beamMill`, `moduleWorks`.
-- 3 office / hospitality: `officeLow`, `officeTower`, `hotel`.
-- 5 retail: `cornerStore`, `cafe`, `retailStrip`, `grocery`, `mall`.
-- 4 residential: `smallHouse`, `townhomes`, `apartmentLow`, `apartmentTower` — **awaiting house-pack inspection**.
-
-No existing named 24-design manifest was found in the available source. This is therefore a **provisional canonical-ID allocation**, preserving the requested count rather than claiming to reproduce an unavailable historical mapping. It creates no buildings, unlocks, prices or economic definitions. All source selections remain `sourceSelectionFinal: false`; residential slots have no approved asset assignment yet. If an earlier exact 24-ID list is supplied, reconcile it before finalizing the assemblies.
-
-Final-source policy is Quaternius shells/modules plus clearly identified original industrial components. The available modular parts include windows, doors, stairs, balconies, pipes, bricks, signage and AC units. Dedicated steel-processing machinery, heavy cranes, furnaces and robotic work cells were **not found in these two available packs**. They require original modeling or additional approved assets; the inaccessible Downtown pack's contents must not be invented. No Kenney geometry may fill those gaps without explicit user approval.
-
-## Implementation and performance gates
-
-1. Obtain inspectable Downtown files and the additional house pack; verify licenses and hashes before importing. Review authoritative texture associations, UVs, axis conventions and dimensions.
-2. Build a **separate Quaternius-only showroom**, leaving the old Kenney scene available for explicit comparison. Start with non-residential proof assemblies, shared finishes and reusable original industrial props. Do not finalize residential designs early.
-3. Keep a stable versioned visual manifest mapping only genuine catalog IDs. Define per-part provenance, base-center transforms, tight bounds, material roles and reusable geometry. Preserve logical collision/placement footprints and all economic contracts.
-4. Test close-up fidelity and texture correctness before broad expansion. Do not infer that the older packs provide photorealistic detail or that the unread Downtown kit solves every gap. Additional licensed PBR maps or detailed industrial components may still be needed.
-5. Benchmark original, Kenney comparison and Quaternius replacements with identical maps, cameras, viewports, placements and building counts. Profile 10/50/100/250, startup, FPS/p95, long tasks, draw calls, triangles, mesh objects, approximate texture memory, drag and preview response. Use shared templates/materials, LODs, culling and instances; do not distort palette charts or remove important silhouette details just to hit triangle targets.
-6. Keep gameplay integration disabled until visual review, actual target-hardware testing and all regression/performance gates pass. The previous software-WebGL prototype already missed targets; a new publisher is **not evidence of better performance**. The older pack's 41K-triangle models make profiling especially important.
-
-## Offline audit and tests
-
-Run the read-only inspector against the private local copies of the two reviewed ZIPs:
+From this branch's repository folder in Windows PowerShell 7:
 
 ```powershell
-python graphics-prototype/quaternius-prototypes/tools/audit_assets.py --buildings "C:\private-assets\Buildings Pack - Jan 2019-20261107T035815Z-1-001.zip" --textured "C:\private-assets\Ultimate Textured Building Pack - Dec 2019-20261107T022502Z-1-001.zip" --output graphics-prototype/quaternius-prototypes/asset-audit.json
+npx --yes http-server . -a 127.0.0.1 -p 8021 -c-1
+```
+
+Open `http://127.0.0.1:8021/graphics-prototype/quaternius-prototypes/?shadows=1` for close inspection. Drag to orbit, wheel to zoom; select a factory, count and detail budget. Presentation can switch to the original catalog renderer. `?shadows=1` enables optional 1024px real-time shadows for this showroom only; omit it for the matched performance fixture. Lighting/controls do not change game preferences. The header links to the preserved Kenney comparison.
+
+The main game does not reference this folder. Economy, research, placement, footprints, saves, approved terrain, ModernResource icons, authentication, multiplayer and Supabase remain untouched. No settings system or player data is added. Showroom components do not call economy or purchase methods.
+
+## Verified source and license
+
+The five newly supplied normal ZIPs resolve the original Downtown transfer blocker. `downtown-audit.json` records all five SHA-256 fingerprints, **153 glTF + matching BIN models**, **29 PNGs**, per-file dependencies, source-coordinate bounds and triangle counts. All dependencies resolve within the virtual combined archive. Identical duplicate license/readme files are allowed; conflicting or case-ambiguous duplicates fail. `License_Standard.txt` is the supplied CC0-1.0 notice.
+
+This Standard pack contains genuine 1K–2K base-color, normal and ORM maps. Its paid SOURCE edition's custom fake-interior and wear shaders are **not included or implemented**. Actual glTF texture semantics are preserved; the ORM is used as the source metallic/roughness texture. No synthetic AO or paid shader is inferred from the file name. The source's gray `MI_FakeInterior` color is explicitly replaced with an original dark interior finish, not a simulated parallax interior. Exterior shells omit internal wall faces and use single-sided rendering.
+
+The earlier 2019 packs remain audited in `asset-audit.json`: 9 color-material OBJ exports, plus 102 material/textured/modular OBJ exports (not 102 unique finished buildings). Their texture variants are only 32×32 palettes. 76 textured OBJ files lack MTL image bindings and remain blocked from conversion. Their mislabeled JPEG `Preview.png` is excluded as a surface texture. Neither pack is used in these pilots. BLEND, FBX, archive scripts, URLs and readme instructions are never executed.
+
+## Exact visual mapping
+
+| Existing catalog ID | Canonical footprint | Quaternius structure | Original static components |
+|---|---:|---|---|
+| `steelMill` | 118 × 92 | Red-brick modular shell, double/single windows, asphalt roof, AC | Stacks, furnace block, loading shutters, gantry, roller bed, plinth |
+| `precisionElectronicsWorks` | 80 × 66 | Metal/window modules, two wings, roof, AC | Clean plant covers, conveyor/work cells, simple robot-arm shapes, plinth |
+| `machineWorks` | 64 × 54 | Red-brick workshop, windows, roof, AC | Gantry, loading doors, fabrication beds, plinth |
+
+These are visual-only mappings, **not new buildings**. Every LOD is checked against the unchanged footprint, with Y-up source geometry and a base-center pivot. Native wall/window/roof tiles scale uniformly by 3; brick UVs are not stretched to fit whole walls. GLB loader coordinate conversion is retained by the instance wrapper. Original machinery consists of authored simple boxes/cylinders, not hidden Kenney imports or finished detailed industrial models. No 2D resource icons are placed on surfaces.
+
+## Pipeline and budgets
+
+`tools/build_downtown.py` reads the five fingerprint-pinned ZIPs in memory. It does not extract an arbitrary tree, open binary scenes, download dependencies or run supplied code. Archive links, special files, unsafe paths, ambiguous duplicates, missing dependencies, unsupported animated/skinned geometry, invalid numeric data and footprint overflow fail the build. Outputs are restricted to this folder's `generated/`, audit/license and manifest files.
+
+`generated/pilots.glb` is one shared library: three roots × Low/Medium/High groups, merged by material. High retains native architectural geometry and PBR normal/roughness maps; Medium uses simpler native modules with real base-color maps and diffuse/specular shading; Low preserves the shell, major equipment and color maps while dropping window detail. No destructive texture-island mesh simplification is used. Medium and High brick shells both use brick modules. Distance thresholds have hysteresis; quality is a maximum LOD budget. No physics, animated machinery or Ultra setting is claimed.
+
+`renderer.js` loads one container and instances its meshes; it does not import or rebuild geometry during orbit/zoom. Shared textures/materials and the container are disposed with the scene. The count fixture builds incrementally, yielding every 12 records. No code is added to terrain or world-map frame loops.
+
+15 derived PNG maps are included. Base color is at most 1024px; normals/ORM at most 512px. Normal vectors are renormalized after resizing. Source hashes, derived hashes, dimensions, byte estimates and explicit provenance are in `manifest.json`. Source archives are untouched. Estimated decoded RGBA+mipmap storage is approximately **40 MiB**, not a GPU measurement; driver/shader/mesh memory is additional. Originals remain in the supplied ZIPs and are not bulk-committed.
+
+| Factory | Low triangles | Medium triangles | High triangles |
+|---|---:|---:|---:|
+| Steel Mill | 560 | 14,692 | 31,716 |
+| Electronics Plant | 1,048 | 7,736 | 7,964 |
+| Machinery Works | 298 | 8,874 | 15,850 |
+
+## Offline rebuild and tests
+
+Dependencies: Python 3 + NumPy + Pillow (`tools/requirements.txt` pins the tested versions); Node.js; Playwright Core + Chromium for browser tests. Use your own private asset folder. The five arguments must be the exact reviewed parts in numerical order.
+
+```powershell
+python graphics-prototype/quaternius-prototypes/tools/build_downtown.py --parts "C:\private-assets\mapgame_downtown_gltf_part_1_of_5.zip" "C:\private-assets\mapgame_downtown_gltf_part_2_of_5.zip" "C:\private-assets\mapgame_downtown_gltf_part_3_of_5.zip" "C:\private-assets\mapgame_downtown_gltf_part_4_of_5.zip" "C:\private-assets\mapgame_downtown_gltf_part_5_of_5.zip"
 python graphics-prototype/quaternius-prototypes/tools/test_audit.py
+python graphics-prototype/quaternius-prototypes/tools/test_downtown.py
 node --test tests/*.test.cjs
 ```
 
-The scanner is standard-library based except Pillow header inspection for the known mislabeled preview. It checks reviewed archive fingerprints, canonical/case-safe paths, links, size/count limits, finite numeric data, valid OBJ indices, material references and archive-contained dependencies. Unsupported OBJ directives are flagged and block conversion. Missing texture associations stay blocked rather than guessed. It never runs material instructions or imports binary scenes.
+With the HTTP server still running, set browser paths for your machine (the repository browser scripts otherwise default to Linux Chromium):
 
-Checkpoint verification: **160 Node tests passed** (157 inherited plus 3 plan/policy/frozen-comparison tests); **19 inspector tests passed**. No new renderer exists in this checkpoint, so no new browser screenshots, appearance comparisons, GLBs or performance results are claimed. Existing renderer files are unchanged.
+```powershell
+$env:BASE_URL = 'http://127.0.0.1:8021'
+$env:CHROMIUM = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+node tests/quaternius-browser.cjs
+node tests/quaternius-performance.cjs
+```
 
-## Exact next inputs
+The supplied browser scripts request SwiftShader for a repeatable software-rendering comparison. They do **not** certify Lenovo hardware acceleration. Screenshots and raw benchmark data are in `evidence/`; final measured results and remaining gates are in `VALIDATION.md`.
 
-Please supply the forthcoming Quaternius house pack. For Downtown, upload a smaller normal ZIP containing the needed models, matching textures and license. If it remains above 32 MiB, use separate normal ZIPs under that limit (for example models and texture groups), preserving their relative folder names. Do not omit the license or needed texture files. No passwords, database exports or Supabase access are needed.
+## Remaining quality and release gates
+
+Only 3 of 24 prototypes exist. 17 non-residential slots remain planned; 4 residential slots await the additional house pack. Source/design selections are not final. The older 2019 palette packs are not substitutes for missing detailed industrial equipment.
+
+These modules provide much clearer architectural surface detail, but the original equipment is intentionally low detail. Detailed furnace/rolling-mill assets, industrial pipe joints/valves, realistic robot arms/conveyors, loading/loading-dock accessories and licensed worn-metal/concrete PBR sets would improve close-up fidelity. The paid custom shaders are not silently substituted. No final semi-realistic or photorealistic quality claim is made.
+
+Visual approval of the three close-ups, target-hardware performance, LOD transition review, additional house-pack inspection and separate gameplay-integration permission remain required before live replacement. The supplied source changes are isolated; user approval is not inferred from file upload.

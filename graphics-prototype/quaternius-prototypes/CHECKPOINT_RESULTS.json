@@ -1,26 +1,69 @@
 {
-  "checkpoint": "Quaternius asset audit and provisional 24-design planning",
+  "checkpoint": "Quaternius Downtown audit and three review-only factory pilots",
   "baseCommit": "9b8e5526ff3335d1fac14254542ed1c9cfe7762d",
+  "branch": "feature/0.4.2-quaternius-replacements",
   "node": {
-    "passed": 160,
+    "passed": 163,
     "failed": 0,
     "skipped": 0
   },
-  "assetInspector": {
-    "passed": 19,
+  "python": {
+    "archiveInspectorPassed": 19,
+    "downtownPassed": 20,
     "failed": 0
   },
-  "reviewedPacks": 2,
+  "browser": {
+    "showroomCheckGroups": 11,
+    "premiumGameplayCheckGroups": 7,
+    "singleplayerCheckGroups": 5,
+    "failed": 0,
+    "uncaughtErrors": 0,
+    "newPilotWarnings": 0,
+    "knownOriginalRendererTextureWarnings": 9,
+    "sizes": [
+      [
+        1366,
+        768
+      ],
+      [
+        1440,
+        900
+      ],
+      [
+        1920,
+        1080
+      ]
+    ],
+    "liveCDNVerified": false,
+    "libraries": "Verified cached official Babylon 9.32 + SDK test-only interception",
+    "liveSupabaseTested": false
+  },
+  "assetRebuild": {
+    "runs": 2,
+    "identicalFiles": 19
+  },
+  "reviewedLogicalPacks": 3,
+  "reviewedZipFiles": 7,
   "auditedOBJExports": 111,
-  "renderedQuaterniusDesigns": 0,
-  "newBrowserBenchmarksRun": false,
+  "auditedDowntownGLTFModels": 153,
+  "auditedDowntownImages": 29,
+  "renderedQuaterniusDesigns": 3,
+  "targetDesigns": 24,
+  "benchmarkRows": 24,
+  "benchmarkRunsPerCase": 2,
+  "performanceGate": "NOT PASSED; slower than actual game baseline on software WebGL",
+  "kenneyUsedInNewModels": false,
   "kenneyFilesUnchanged": true,
   "gameplayFilesUnchanged": true,
+  "liveRendererEnabled": false,
   "blockers": [
-    "Downtown ZIP exceeds 32 MiB executor transfer limit; source and license uninspected",
-    "Additional Quaternius house pack not yet attached",
-    "76 textured OBJ exports lack image associations in their MTL files; explicit review needed before textured conversion"
+    "Performance regression and startup variability; target-hardware tests pending",
+    "Three factory close-ups need visual review; original industrial equipment remains low detail",
+    "17 further non-residential designs pending pilot review",
+    "Four residential designs require the additional Quaternius house pack",
+    "Older 2019 textured OBJ bindings remain unresolved; not used by these pilots"
   ],
   "pushed": false,
+  "merged": false,
   "deployed": false
 }
