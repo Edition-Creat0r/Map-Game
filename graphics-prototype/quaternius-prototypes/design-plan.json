@@ -1,0 +1,449 @@
+{
+  "version": 1,
+  "targetDesignCount": 24,
+  "scope": "Provisional visual allocation, not new gameplay definitions; original 24-ID manifest not found in available source",
+  "policy": {
+    "kenneyAllowed": false,
+    "kenneyApprovedExceptions": [],
+    "resourceArtworkAllowedOnBuildings": false,
+    "resourceArtworkUsage": [
+      "inventory",
+      "production-icons"
+    ],
+    "resourceArtworkRequiresLicenseReview": true,
+    "residentialRequiresAdditionalHousePack": true,
+    "liveRendererEnabled": false
+  },
+  "blockers": [
+    {
+      "source": "quaternius-downtown",
+      "status": "uninspected-transfer-blocked",
+      "reason": "Uploaded ZIP exceeds the 32 MiB executor transfer limit"
+    },
+    {
+      "source": "additional-quaternius-house-pack",
+      "status": "not-yet-attached"
+    },
+    {
+      "source": "textured-2019-obj",
+      "status": "texture-association-review",
+      "reason": "OBJ MTL files omit image bindings; do not guess approved texture variants"
+    }
+  ],
+  "legacyComparison": {
+    "role": "Frozen comparison only; not approved final designs",
+    "baseCommit": "9b8e5526ff3335d1fac14254542ed1c9cfe7762d",
+    "assets": [
+      {
+        "id": "steelMill",
+        "path": "../modular-factories/generated/steelMill.glb",
+        "sha256": "b781232a5fab4d4c5b1dae89e48dcbecae424514d73f6734d236a6b5b88eb1a7"
+      },
+      {
+        "id": "precisionElectronicsWorks",
+        "path": "../modular-factories/generated/precisionElectronicsWorks.glb",
+        "sha256": "2e4e411640d45e736072e679f69c14427e0437db59b06337a9f6e5ed93700590"
+      },
+      {
+        "id": "machineWorks",
+        "path": "../modular-factories/generated/machineWorks.glb",
+        "sha256": "bdf17bd9d81dfaabfb870430e5a56b4e8fdbd1077b881187e84e86f8e2a36196"
+      },
+      {
+        "id": "smallHouse",
+        "path": "../modular-factories/generated/smallHouse.glb",
+        "sha256": "90b25e79c62ab0f08a31ebcddff922435502cfc223e0af1292b314c833da7976"
+      }
+    ]
+  },
+  "designs": [
+    {
+      "id": "steelMill",
+      "label": "Steel Factory",
+      "footprint": [
+        118,
+        92
+      ],
+      "group": "industrial",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "precisionElectronicsWorks",
+      "label": "Precision Electronics Works",
+      "footprint": [
+        80,
+        66
+      ],
+      "group": "industrial",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "machineWorks",
+      "label": "Industrial Machine Works",
+      "footprint": [
+        64,
+        54
+      ],
+      "group": "industrial",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "carbonPlant",
+      "label": "Carbon Facility",
+      "footprint": [
+        126,
+        96
+      ],
+      "group": "industrial",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "powerPlant",
+      "label": "Small Power Plant",
+      "footprint": [
+        122,
+        104
+      ],
+      "group": "industrial",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "warehouse",
+      "label": "Warehouse",
+      "footprint": [
+        92,
+        62
+      ],
+      "group": "industrial",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "glassWorks",
+      "label": "Glass Works",
+      "footprint": [
+        56,
+        48
+      ],
+      "group": "industrial",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "concreteBatchPlant",
+      "label": "Concrete Batch Plant",
+      "footprint": [
+        48,
+        42
+      ],
+      "group": "industrial",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "officeLow",
+      "label": "Office Campus",
+      "footprint": [
+        86,
+        72
+      ],
+      "group": "officeHospitality",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "officeTower",
+      "label": "Office Tower",
+      "footprint": [
+        50,
+        50
+      ],
+      "group": "officeHospitality",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "hotel",
+      "label": "Hotel",
+      "footprint": [
+        60,
+        62
+      ],
+      "group": "officeHospitality",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "cornerStore",
+      "label": "Commercial Store",
+      "footprint": [
+        24,
+        20
+      ],
+      "group": "retail",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "cafe",
+      "label": "Cafe",
+      "footprint": [
+        26,
+        22
+      ],
+      "group": "retail",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "retailStrip",
+      "label": "Retail Row",
+      "footprint": [
+        74,
+        30
+      ],
+      "group": "retail",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "grocery",
+      "label": "Neighborhood Market",
+      "footprint": [
+        82,
+        58
+      ],
+      "group": "retail",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "mall",
+      "label": "Lifestyle Center",
+      "footprint": [
+        132,
+        110
+      ],
+      "group": "retail",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "smallHouse",
+      "label": "Residential Home",
+      "footprint": [
+        18,
+        22
+      ],
+      "group": "residential",
+      "status": "awaiting-house-pack",
+      "approvedSources": [],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "townhomes",
+      "label": "Townhome Row",
+      "footprint": [
+        46,
+        24
+      ],
+      "group": "residential",
+      "status": "awaiting-house-pack",
+      "approvedSources": [],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "apartmentLow",
+      "label": "Courtyard Apartments",
+      "footprint": [
+        66,
+        58
+      ],
+      "group": "residential",
+      "status": "awaiting-house-pack",
+      "approvedSources": [],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "apartmentTower",
+      "label": "Apartment Tower",
+      "footprint": [
+        46,
+        46
+      ],
+      "group": "residential",
+      "status": "awaiting-house-pack",
+      "approvedSources": [],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "steelFoundry",
+      "label": "Steel Foundry",
+      "footprint": [
+        56,
+        48
+      ],
+      "group": "industrial",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "cokeWorks",
+      "label": "Carbon Coke Works",
+      "footprint": [
+        48,
+        42
+      ],
+      "group": "industrial",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "beamMill",
+      "label": "Structural Beam Mill",
+      "footprint": [
+        56,
+        48
+      ],
+      "group": "industrial",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    },
+    {
+      "id": "moduleWorks",
+      "label": "Construction Module Works",
+      "footprint": [
+        64,
+        54
+      ],
+      "group": "industrial",
+      "status": "design-only-awaiting-primary-assets",
+      "approvedSources": [
+        "quaternius-downtown",
+        "quaternius-textured-2019",
+        "quaternius-buildings-2019",
+        "original-industrial-components"
+      ],
+      "sourceSelectionFinal": false
+    }
+  ]
+}
