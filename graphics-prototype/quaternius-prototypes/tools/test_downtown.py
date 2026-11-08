@@ -64,7 +64,7 @@ class ArtifactTests(unittest.TestCase):
  def test_only_approved_sources(self):
   self.assertFalse(self.m['kenneyUsed']);self.assertFalse(self.m['liveRendererEnabled']);self.assertFalse(self.m['paidShadersUsed']);self.assertTrue(all(s['path'].startswith(PREFIX)for s in self.m['sources'].values()));self.assertEqual(len(self.m['archives']),5)
  def test_lod_and_bounds(self):
-  self.assertEqual(len(self.m['buildings']),3)
+  self.assertEqual(len(self.m['buildings']),9)
   for b in self.m['buildings']:
    self.assertEqual([l['name']for l in b['lods']],['low','medium','high']);tri=[l['triangles']for l in b['lods']];self.assertLess(tri[0],tri[1]);self.assertLessEqual(tri[1],tri[2]);self.assertEqual(b['pivot'],'base-center')
    for l in b['lods']:

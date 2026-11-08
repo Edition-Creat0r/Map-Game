@@ -1,7 +1,8 @@
 // Isolated showroom only: shared source geometry, pooled thin-instance LOD batches.
 (() => {
  'use strict';
- const B=window.BABYLON,base=new URL('.',document.currentScript.src),levels=['low','medium','high'];
+ const B=window.BABYLON,base=new URL('.',document.currentScript.src),levels=['low','medium','high'],qualities=[...levels,'ultra'];
+ const cap=q=>q==='ultra'?2:levels.indexOf(q),lodRatio=(q,r)=>q==='ultra'?r/1.5:r;
  function nextLOD(previous,ratio){if(previous===0)return ratio<6?1:0;if(previous===2)return ratio>3.5?1:2;return ratio<2.7?2:ratio>7?0:1;}
  function initialLOD(ratio){return ratio>7?0:ratio>3.5?1:2;}
  async function load(scene){
@@ -21,7 +22,9 @@
     }mesh.material=distant.get(src);
    }
    for(const m of container.materials)m.freeze();
-   for(const spec of manifest.buildings){
+   const initialized=new Set();
+   function ensureSpec(spec){
+    if(initialized.has(spec.id))return;
     const template=container.transformNodes.find(n=>n.name===spec.id);if(!template)throw Error('Missing pilot template');
     for(let lod=0;lod<3;lod++){
      const group=template.getDescendants().find(n=>n.name===levels[lod]);if(!group)throw Error('Missing pilot LOD');
@@ -34,17 +37,19 @@
       const batch={mesh,sourceWorld,inverse,buffer:null,capacity:0};bucket.batches.push(batch);batches.push(batch);
      }
     }
+    initialized.add(spec.id);
    }
    function invalidate(){dirty=true;poseRevision++;}
    function create(id,row={},quality='high'){
-    if(disposed)throw Error('Disposed pool');const spec=manifest.buildings.find(b=>b.id===id);if(!spec||!levels.includes(quality))throw Error('Unsupported pilot or quality');
+    if(disposed)throw Error('Disposed pool');const spec=manifest.buildings.find(b=>b.id===id);if(!spec||!qualities.includes(quality))throw Error('Unsupported pilot or quality');
+    ensureSpec(spec);
     const root=new B.TransformNode('quaternius-'+(row.id??records.size),scene);root.position.set(row.x||0,row.y||0,row.z||0);root.rotation.y=row.rotation||0;
     const height=spec.lods[2].bounds[1][1],record={root,spec,quality,lod:0,culled:false,center:new B.Vector3(root.position.x,root.position.y+height/2,root.position.z),radius:Math.hypot(spec.footprint[0]/2,spec.footprint[1]/2,height/2),world:B.Matrix.Identity(),revision:0,uid:nextId++};
-    record.level=index=>{record.lod=Math.max(0,Math.min(index,levels.indexOf(record.quality)));invalidate();};
+    record.level=index=>{record.lod=Math.max(0,Math.min(index,cap(record.quality)));invalidate();};
     record.update=(next={})=>{for(const key of ['x','y','z'])if(next[key]!==undefined){if(!Number.isFinite(next[key]))throw Error('Invalid position');root.position[key]=next[key];}if(next.rotation!==undefined){if(!Number.isFinite(next.rotation))throw Error('Invalid rotation');root.rotation.y=next.rotation;}record.center.copyFrom(root.position);record.center.y+=height/2;record.revision++;invalidate();};
     root.onDisposeObservable.add(()=>{if(records.delete(record))invalidate();});
     record.dispose=()=>{if(!records.delete(record))return;root.dispose();invalidate();};
-    record.lod=Math.min(initialLOD(B.Vector3.Distance(scene.activeCamera?.globalPosition||B.Vector3.Zero(),root.position)/Math.max(...spec.footprint)),levels.indexOf(quality));records.add(record);invalidate();return record;
+    record.lod=Math.min(initialLOD(lodRatio(quality,B.Vector3.Distance(scene.activeCamera?.globalPosition||B.Vector3.Zero(),root.position)/Math.max(...spec.footprint))),cap(quality));records.add(record);invalidate();return record;
    }
    function sync(force=false){
     if(disposed)return;const camera=scene.activeCamera;if(!camera)return;
@@ -55,8 +60,8 @@
     for(const bucket of buckets.values())bucket.records.length=0;
     let settling=false;
     for(const r of records){
-     const ratio=B.Vector3.Distance(camera.globalPosition,r.root.position)/Math.max(...r.spec.footprint);r.lod=Math.min(nextLOD(r.lod,ratio),levels.indexOf(r.quality));
-     if(Math.min(nextLOD(r.lod,ratio),levels.indexOf(r.quality))!==r.lod)settling=true;
+     const ratio=B.Vector3.Distance(camera.globalPosition,r.root.position)/Math.max(...r.spec.footprint);r.lod=Math.min(nextLOD(r.lod,lodRatio(r.quality,ratio)),cap(r.quality));
+     if(Math.min(nextLOD(r.lod,lodRatio(r.quality,ratio)),cap(r.quality))!==r.lod)settling=true;
      const pixels=Math.max(...r.spec.footprint)*scene.getEngine().getRenderHeight()/(2*Math.tan(camera.fov/2)*Math.max(1,B.Vector3.Distance(camera.globalPosition,r.root.position)));
      r.culledReason=pixels<(r.culledReason==='distance'?1.5:1)?'distance':planes.some(p=>p.dotCoordinate(r.center)<-r.radius*1.15)?'frustum':null;r.culled=!!r.culledReason;
      if(!r.culled){r.root.computeWorldMatrix(true);r.world.copyFrom(r.root.getWorldMatrix());buckets.get(r.spec.id+':'+r.lod).records.push(r);}
@@ -74,7 +79,7 @@
     dirty=settling;
    }
    const observer=scene.onBeforeRenderObservable.add(()=>{elapsed+=scene.getEngine().getDeltaTime();if(!dirty&&elapsed<150)return;elapsed=0;sync();});
-   const api={manifest,create,sync,batchMeshes:()=>batches.map(b=>b.mesh),setQuality(q){if(!levels.includes(q))throw Error('Unsupported detail');for(const r of records){r.quality=q;r.lod=Math.min(r.lod,levels.indexOf(q));}invalidate();},stats(){const lodCounts=[0,0,0];let triangles=0,culled=0,visible=0;for(const r of records){if(r.culled){culled++;continue;}visible++;lodCounts[r.lod]++;triangles+=r.spec.lods[r.lod].triangles;}return{instances:records.size,templates:manifest.buildings.length,lodCounts,visibleRecords:visible,culledRecords:culled,configuredTriangles:triangles,batchMeshes:batches.length,activeBatches:batches.filter(b=>b.mesh.isEnabled()).length,sharedMaterials:container.materials.length+distant.size,sharedTextureFiles:manifest.textures.length,estimatedTextureRgbaMipBytes:manifest.textures.reduce((n,t)=>n+t.estimatedRgbaMipBytes,0),instanceBufferCapacityBytes:batches.reduce((n,b)=>n+b.capacity*16*4,0),bufferUploads,cullingPasses,poseRevision};},dispose(){if(disposed)return;disposed=true;scene.onBeforeRenderObservable.remove(observer);for(const r of [...records])r.dispose();for(const b of batches)b.mesh.dispose(false,false);for(const m of distant.values())m.dispose(false,false);container.dispose();buckets.clear();batches.length=0;}};
+   const api={manifest,create,sync,batchMeshes:()=>batches.map(b=>b.mesh),setQuality(q){if(!qualities.includes(q))throw Error('Unsupported detail');for(const r of records){r.quality=q;r.lod=Math.min(r.lod,cap(q));}invalidate();},stats(){const lodCounts=[0,0,0];let triangles=0,culled=0,visible=0;for(const r of records){if(r.culled){culled++;continue;}visible++;lodCounts[r.lod]++;triangles+=r.spec.lods[r.lod].triangles;}return{instances:records.size,templates:initialized.size,availableTemplates:manifest.buildings.length,lodCounts,visibleRecords:visible,culledRecords:culled,configuredTriangles:triangles,batchMeshes:batches.length,activeBatches:batches.filter(b=>b.mesh.isEnabled()).length,sharedMaterials:container.materials.length+distant.size,sharedTextureFiles:manifest.textures.length,estimatedTextureRgbaMipBytes:manifest.textures.reduce((n,t)=>n+t.estimatedRgbaMipBytes,0),instanceBufferCapacityBytes:batches.reduce((n,b)=>n+b.capacity*16*4,0),bufferUploads,cullingPasses,poseRevision};},dispose(){if(disposed)return;disposed=true;scene.onBeforeRenderObservable.remove(observer);for(const r of [...records])r.dispose();for(const b of batches)b.mesh.dispose(false,false);for(const m of distant.values())m.dispose(false,false);container.dispose();buckets.clear();batches.length=0;}};
    scene.onDisposeObservable.add(()=>api.dispose());return api;
   }catch(error){for(const b of batches)b.mesh.dispose(false,false);for(const m of distant.values())m.dispose(false,false);container.dispose();throw error;}
  }

@@ -1,0 +1,318 @@
+{
+  "errors": [],
+  "warnings": [],
+  "failed": [],
+  "http": [],
+  "captures": [
+    {
+      "id": "steelMill",
+      "view": "close",
+      "file": "steelMill-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 171.1,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "triangles": 63140,
+      "modelTriangles": 31716
+    },
+    {
+      "id": "steelMill",
+      "view": "overhead",
+      "file": "steelMill-overhead.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.0003226283037137,
+        "radius": 173.22699937963844,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "triangles": 63140,
+      "modelTriangles": 31716
+    },
+    {
+      "id": "precisionElectronicsWorks",
+      "view": "close",
+      "file": "precisionElectronicsWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 116,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "triangles": 16620,
+      "modelTriangles": 8384
+    },
+    {
+      "id": "precisionElectronicsWorks",
+      "view": "overhead",
+      "file": "precisionElectronicsWorks-overhead.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 0.9911458533317098,
+        "radius": 118.14264091665436,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "triangles": 16620,
+      "modelTriangles": 8384
+    },
+    {
+      "id": "machineWorks",
+      "view": "close",
+      "file": "machineWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 92.8,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "triangles": 32852,
+      "modelTriangles": 16498
+    },
+    {
+      "id": "machineWorks",
+      "view": "overhead",
+      "file": "machineWorks-overhead.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 0.9840969219540856,
+        "radius": 94.95465698010406,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "triangles": 32852,
+      "modelTriangles": 16498
+    },
+    {
+      "id": "acidWorks",
+      "view": "close",
+      "file": "acidWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 81.2,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "triangles": 4692,
+      "modelTriangles": 2344
+    },
+    {
+      "id": "acidWorks",
+      "view": "overhead",
+      "file": "acidWorks-overhead.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 0.9791020548538736,
+        "radius": 83.36317245602564,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "triangles": 4692,
+      "modelTriangles": 2344
+    },
+    {
+      "id": "glassWorks",
+      "view": "close",
+      "file": "glassWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 81.2,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "triangles": 13624,
+      "modelTriangles": 6848
+    },
+    {
+      "id": "glassWorks",
+      "view": "overhead",
+      "file": "glassWorks-overhead.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 0.9791020548538736,
+        "radius": 83.36317245602564,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "triangles": 13624,
+      "modelTriangles": 6848
+    },
+    {
+      "id": "semiconductorFab",
+      "view": "close",
+      "file": "semiconductorFab-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 81.2,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "triangles": 5672,
+      "modelTriangles": 2852
+    },
+    {
+      "id": "semiconductorFab",
+      "view": "overhead",
+      "file": "semiconductorFab-overhead.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 0.9791020548538736,
+        "radius": 83.36317245602564,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "triangles": 5672,
+      "modelTriangles": 2852
+    },
+    {
+      "id": "batteryWorks",
+      "view": "close",
+      "file": "batteryWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 92.8,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "triangles": 8028,
+      "modelTriangles": 4028
+    },
+    {
+      "id": "batteryWorks",
+      "view": "overhead",
+      "file": "batteryWorks-overhead.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 0.9840969219540856,
+        "radius": 94.95465698010406,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "triangles": 8028,
+      "modelTriangles": 4028
+    },
+    {
+      "id": "utilityVehicleWorks",
+      "view": "close",
+      "file": "utilityVehicleWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 92.8,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "triangles": 12220,
+      "modelTriangles": 6166
+    },
+    {
+      "id": "utilityVehicleWorks",
+      "view": "overhead",
+      "file": "utilityVehicleWorks-overhead.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 0.9840969219540856,
+        "radius": 94.95465698010406,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "triangles": 12220,
+      "modelTriangles": 6166
+    },
+    {
+      "id": "warehouse",
+      "view": "close",
+      "file": "warehouse-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 133.4,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "triangles": 9476,
+      "modelTriangles": 4772
+    },
+    {
+      "id": "warehouse",
+      "view": "overhead",
+      "file": "warehouse-overhead.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 0.9948496104323572,
+        "radius": 135.53632776188,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "triangles": 9476,
+      "modelTriangles": 4772
+    }
+  ],
+  "recaptured": [
+    "utilityVehicleWorks",
+    "warehouse"
+  ]
+}

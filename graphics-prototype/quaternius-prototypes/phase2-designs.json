@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "baseCommit": "5b51d3e07b1779e964040179ac797234fef77d25",
+  "newEconomyDefinitions": false,
+  "liveRendererEnabled": false,
+  "designs": [
+    {
+      "requested": "Chemical Refinery",
+      "id": "acidWorks",
+      "canonicalName": "Industrial Reagent Works",
+      "footprint": [
+        56,
+        48
+      ],
+      "availability": "playable",
+      "reason": "Closest existing chemical processing plant; exact requested name does not exist"
+    },
+    {
+      "requested": "Glassworks",
+      "id": "glassWorks",
+      "canonicalName": "Glass Works",
+      "footprint": [
+        56,
+        48
+      ],
+      "availability": "playable",
+      "reason": "Exact functional match"
+    },
+    {
+      "requested": "Semiconductor Factory",
+      "id": "semiconductorFab",
+      "canonicalName": "Semiconductor Fab",
+      "footprint": [
+        56,
+        48
+      ],
+      "availability": "playable",
+      "reason": "Exact functional match"
+    },
+    {
+      "requested": "Vehicle Assembly Plant",
+      "id": "utilityVehicleWorks",
+      "canonicalName": "Utility Vehicle Works",
+      "footprint": [
+        64,
+        54
+      ],
+      "availability": "futureLocked",
+      "reason": "Existing general utility-vehicle assembly contract"
+    },
+    {
+      "requested": "Warehouse",
+      "id": "warehouse",
+      "canonicalName": "Warehouse",
+      "footprint": [
+        92,
+        62
+      ],
+      "availability": "existing starter/infrastructure",
+      "reason": "Existing infrastructure contract"
+    },
+    {
+      "requested": "Battery Factory",
+      "id": "batteryWorks",
+      "canonicalName": "Battery Works",
+      "footprint": [
+        64,
+        54
+      ],
+      "availability": "futureLocked",
+      "reason": "Exact functional match"
+    }
+  ]
+}

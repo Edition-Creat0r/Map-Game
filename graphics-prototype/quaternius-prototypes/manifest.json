@@ -1,9 +1,10 @@
 {
   "version": 1,
+  "assemblyRevision": "phase2-1",
   "license": "CC0-1.0",
   "url": "generated/pilots.glb",
-  "sha256": "f18762bf0bc1378712e592cfcf624a1ef339b947288f6f42880c3c801ce80f53",
-  "bytes": 4053756,
+  "sha256": "5499abf38b47eed257b62432331394dab8f9fdf492cbbceb77aa76f941ad0fda",
+  "bytes": 6466384,
   "buildings": [
     {
       "id": "steelMill",
@@ -131,7 +132,7 @@
         },
         {
           "name": "high",
-          "triangles": 7964,
+          "triangles": 8384,
           "meshBatches": 10,
           "bounds": [
             [
@@ -145,7 +146,7 @@
               32.6
             ]
           ],
-          "parts": 282
+          "parts": 291
         }
       ],
       "sourceModules": [
@@ -191,8 +192,8 @@
         },
         {
           "name": "medium",
-          "triangles": 550,
-          "meshBatches": 7,
+          "triangles": 714,
+          "meshBatches": 8,
           "bounds": [
             [
               -31.6,
@@ -205,12 +206,12 @@
               26.6
             ]
           ],
-          "parts": 66
+          "parts": 77
         },
         {
           "name": "high",
-          "triangles": 15850,
-          "meshBatches": 12,
+          "triangles": 16498,
+          "meshBatches": 14,
           "bounds": [
             [
               -31.6,
@@ -223,18 +224,493 @@
               26.6
             ]
           ],
-          "parts": 166
+          "parts": 194
         }
       ],
       "sourceModules": [
         "Brick_Plain_3",
         "Brick_RedWhite_DoubleWindow",
         "Brick_Window_Square_Single",
+        "Metal_FirstFloor_Window",
         "Prop_ACUnit",
         "Roof_2x2"
       ],
       "originalFinishRoles": [
         "concrete",
+        "green",
+        "paint",
+        "steel",
+        "yellow"
+      ],
+      "pivot": "base-center",
+      "gameplayEnabled": false
+    },
+    {
+      "id": "acidWorks",
+      "label": "Industrial Reagent Works",
+      "footprint": [
+        56,
+        48
+      ],
+      "lods": [
+        {
+          "name": "low",
+          "triangles": 142,
+          "meshBatches": 4,
+          "bounds": [
+            [
+              -27.6,
+              0.0,
+              -23.6
+            ],
+            [
+              27.6,
+              23.0,
+              23.6
+            ]
+          ],
+          "parts": 13
+        },
+        {
+          "name": "medium",
+          "triangles": 702,
+          "meshBatches": 8,
+          "bounds": [
+            [
+              -27.6,
+              0.0,
+              -23.6
+            ],
+            [
+              27.6,
+              24.0,
+              23.6
+            ]
+          ],
+          "parts": 33
+        },
+        {
+          "name": "high",
+          "triangles": 2344,
+          "meshBatches": 10,
+          "bounds": [
+            [
+              -27.6,
+              -7.152557373046875e-07,
+              -23.6
+            ],
+            [
+              27.6,
+              24.0,
+              23.6
+            ]
+          ],
+          "parts": 68
+        }
+      ],
+      "sourceModules": [
+        "Metal_FirstFloor_Window",
+        "Metal_Plain_3",
+        "Prop_ACUnit",
+        "Roof_2x2"
+      ],
+      "originalFinishRoles": [
+        "concrete",
+        "paint",
+        "steel",
+        "yellow"
+      ],
+      "pivot": "base-center",
+      "gameplayEnabled": false
+    },
+    {
+      "id": "glassWorks",
+      "label": "Glass Works",
+      "footprint": [
+        56,
+        48
+      ],
+      "lods": [
+        {
+          "name": "low",
+          "triangles": 106,
+          "meshBatches": 5,
+          "bounds": [
+            [
+              -27.6,
+              0.0,
+              -23.6
+            ],
+            [
+              27.6,
+              21.0,
+              23.6
+            ]
+          ],
+          "parts": 12
+        },
+        {
+          "name": "medium",
+          "triangles": 562,
+          "meshBatches": 7,
+          "bounds": [
+            [
+              -27.6,
+              0.0,
+              -23.6
+            ],
+            [
+              27.6,
+              21.0,
+              23.6
+            ]
+          ],
+          "parts": 41
+        },
+        {
+          "name": "high",
+          "triangles": 6848,
+          "meshBatches": 13,
+          "bounds": [
+            [
+              -27.6,
+              0.0,
+              -23.6
+            ],
+            [
+              27.6,
+              21.0,
+              23.6
+            ]
+          ],
+          "parts": 96
+        }
+      ],
+      "sourceModules": [
+        "Brick_Plain_3",
+        "Brick_RedWhite_DoubleWindow",
+        "Brick_Window_Square_Single",
+        "Metal_FirstFloor_Window",
+        "Prop_ACUnit",
+        "Roof_2x2"
+      ],
+      "originalFinishRoles": [
+        "concrete",
+        "oxide",
+        "steel",
+        "yellow"
+      ],
+      "pivot": "base-center",
+      "gameplayEnabled": false
+    },
+    {
+      "id": "semiconductorFab",
+      "label": "Semiconductor Fab",
+      "footprint": [
+        56,
+        48
+      ],
+      "lods": [
+        {
+          "name": "low",
+          "triangles": 94,
+          "meshBatches": 4,
+          "bounds": [
+            [
+              -27.6,
+              0.0,
+              -23.6
+            ],
+            [
+              27.6,
+              10.2,
+              23.6
+            ]
+          ],
+          "parts": 12
+        },
+        {
+          "name": "medium",
+          "triangles": 518,
+          "meshBatches": 8,
+          "bounds": [
+            [
+              -27.6,
+              0.0,
+              -23.6
+            ],
+            [
+              27.6,
+              14.5,
+              23.6
+            ]
+          ],
+          "parts": 40
+        },
+        {
+          "name": "high",
+          "triangles": 2852,
+          "meshBatches": 11,
+          "bounds": [
+            [
+              -27.6,
+              -7.152557373046875e-07,
+              -23.6
+            ],
+            [
+              27.6,
+              17.0,
+              23.6
+            ]
+          ],
+          "parts": 122
+        }
+      ],
+      "sourceModules": [
+        "Metal_FirstFloor_Window",
+        "Metal_Plain_3",
+        "Prop_ACUnit",
+        "Roof_2x2"
+      ],
+      "originalFinishRoles": [
+        "ceramic",
+        "concrete",
+        "paint",
+        "steel"
+      ],
+      "pivot": "base-center",
+      "gameplayEnabled": false
+    },
+    {
+      "id": "utilityVehicleWorks",
+      "label": "Utility Vehicle Works",
+      "footprint": [
+        64,
+        54
+      ],
+      "lods": [
+        {
+          "name": "low",
+          "triangles": 130,
+          "meshBatches": 6,
+          "bounds": [
+            [
+              -31.6,
+              0.0,
+              -26.6
+            ],
+            [
+              31.6,
+              18.5,
+              26.6
+            ]
+          ],
+          "parts": 15
+        },
+        {
+          "name": "medium",
+          "triangles": 802,
+          "meshBatches": 11,
+          "bounds": [
+            [
+              -31.6,
+              0.0,
+              -26.6
+            ],
+            [
+              31.6,
+              21.04869030714035,
+              26.6
+            ]
+          ],
+          "parts": 77
+        },
+        {
+          "name": "high",
+          "triangles": 6166,
+          "meshBatches": 13,
+          "bounds": [
+            [
+              -31.6,
+              -7.152557373046875e-07,
+              -26.6
+            ],
+            [
+              31.6,
+              21.04869030714035,
+              26.6
+            ]
+          ],
+          "parts": 207
+        }
+      ],
+      "sourceModules": [
+        "Metal_FirstFloor_Window",
+        "Metal_Plain_3",
+        "Prop_ACUnit",
+        "Roof_2x2"
+      ],
+      "originalFinishRoles": [
+        "ceramic",
+        "concrete",
+        "paint",
+        "rubber",
+        "steel",
+        "yellow"
+      ],
+      "pivot": "base-center",
+      "gameplayEnabled": false
+    },
+    {
+      "id": "warehouse",
+      "label": "Warehouse",
+      "footprint": [
+        92,
+        62
+      ],
+      "lods": [
+        {
+          "name": "low",
+          "triangles": 166,
+          "meshBatches": 4,
+          "bounds": [
+            [
+              -45.6,
+              0.0,
+              -30.6
+            ],
+            [
+              45.6,
+              9.5,
+              30.6
+            ]
+          ],
+          "parts": 18
+        },
+        {
+          "name": "medium",
+          "triangles": 622,
+          "meshBatches": 8,
+          "bounds": [
+            [
+              -45.6,
+              0.0,
+              -30.6
+            ],
+            [
+              45.6,
+              12.048690307140351,
+              30.6
+            ]
+          ],
+          "parts": 62
+        },
+        {
+          "name": "high",
+          "triangles": 4772,
+          "meshBatches": 10,
+          "bounds": [
+            [
+              -45.6,
+              -7.152557373046875e-07,
+              -30.6
+            ],
+            [
+              45.6,
+              12.048690307140351,
+              30.6
+            ]
+          ],
+          "parts": 233
+        }
+      ],
+      "sourceModules": [
+        "Metal_FirstFloor_Window",
+        "Metal_Plain_3",
+        "Prop_ACUnit",
+        "Roof_2x2"
+      ],
+      "originalFinishRoles": [
+        "concrete",
+        "paint",
+        "steel",
+        "yellow"
+      ],
+      "pivot": "base-center",
+      "gameplayEnabled": false
+    },
+    {
+      "id": "batteryWorks",
+      "label": "Battery Works",
+      "footprint": [
+        64,
+        54
+      ],
+      "lods": [
+        {
+          "name": "low",
+          "triangles": 94,
+          "meshBatches": 5,
+          "bounds": [
+            [
+              -31.6,
+              0.0,
+              -26.6
+            ],
+            [
+              31.6,
+              9.5,
+              26.6
+            ]
+          ],
+          "parts": 12
+        },
+        {
+          "name": "medium",
+          "triangles": 918,
+          "meshBatches": 8,
+          "bounds": [
+            [
+              -31.6,
+              0.0,
+              -26.6
+            ],
+            [
+              31.6,
+              12.048690307140351,
+              26.6
+            ]
+          ],
+          "parts": 55
+        },
+        {
+          "name": "high",
+          "triangles": 4028,
+          "meshBatches": 11,
+          "bounds": [
+            [
+              -31.6,
+              -7.152557373046875e-07,
+              -26.6
+            ],
+            [
+              31.6,
+              12.048690307140351,
+              26.6
+            ]
+          ],
+          "parts": 130
+        }
+      ],
+      "sourceModules": [
+        "Metal_FirstFloor_Window",
+        "Metal_Plain_3",
+        "Prop_ACUnit",
+        "Roof_2x2"
+      ],
+      "originalFinishRoles": [
+        "concrete",
+        "green",
         "paint",
         "steel",
         "yellow"

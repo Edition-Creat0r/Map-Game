@@ -1,3 +1,5 @@
+> Historical three-design optimization at 5b51d3e. Current nine-design results: [PHASE2.md](PHASE2.md).
+
 # Quaternius optimization and visual review
 
 2026-11-07. Base `de493cdc95d43d9e03b4e3c077b51b9f25204381`; branch `feature/0.4.2-quaternius-replacements`. **Three review prototypes only. Gameplay integration stays OFF. No remaining designs, 0.4.3 changes, push, merge, deployment or Supabase activity.**

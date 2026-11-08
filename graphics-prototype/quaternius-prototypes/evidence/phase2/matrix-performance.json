@@ -1,0 +1,5726 @@
+{
+  "mode": "matrix",
+  "baseCommit": "5b51d3e07b1779e964040179ac797234fef77d25",
+  "scope": "1366x768 Chromium SwiftShader; same grid/spacing/camera/lighting; High cap; 24 warm-up frames; fixed frame samples. Not Lenovo testing.",
+  "gatePolicy": "Stop a candidate if median combined static/orbit FPS is more than 20% below the same-renderer original-three reference; repeat any failed first screen with paired full samples before rejecting. Frame tails recorded separately.",
+  "rows": [
+    {
+      "label": "catalog9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 10,
+      "readyMs": 2341.051257,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        234
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1196.199999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 88.74062500149012,
+        "p95FrameMs": 166.89999997615814,
+        "fps": 11.268795999388196,
+        "longTasks": [],
+        "drawCalls": 76,
+        "sceneMeshes": 76,
+        "activeMeshes": 76,
+        "instancedMeshes": 0,
+        "thinInstances": 10,
+        "activeTriangles": 1630,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 2432,
+        "cpuFrameMs": 4.368181817459337,
+        "cpuActiveMeshesMs": 0.5106060667471453,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1196.199999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 91.27812499925494,
+        "p95FrameMs": 107.39999997615814,
+        "fps": 10.95552740602595,
+        "longTasks": [],
+        "drawCalls": 76,
+        "sceneMeshes": 76,
+        "activeMeshes": 76,
+        "instancedMeshes": 0,
+        "thinInstances": 10,
+        "activeTriangles": 1630,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 2432,
+        "cpuFrameMs": 3.5575757550470755,
+        "cpuActiveMeshesMs": 0.4161616214598068,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 97424,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+      ],
+      "combinedFPS": 11.109953824208436,
+      "run": 0
+    },
+    {
+      "label": "baseline3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 10,
+      "readyMs": 2595.28384,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        149,
+        137,
+        51,
+        80,
+        73,
+        74,
+        153,
+        608
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1717.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 93.75937499850988,
+        "p95FrameMs": 201.79999995231628,
+        "fps": 10.66560010682551,
+        "longTasks": [],
+        "drawCalls": 20,
+        "sceneMeshes": 73,
+        "activeMeshes": 20,
+        "instancedMeshes": 0,
+        "thinInstances": 65,
+        "activeTriangles": 3860,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 2.939130429772363,
+        "cpuActiveMeshesMs": 0.2608695652173913,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "lodCounts": [
+            6,
+            4,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 3814,
+          "batchMeshes": 69,
+          "activeBatches": 16,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 16384,
+          "bufferUploads": 16,
+          "cullingPasses": 1,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1717.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 101.046875,
+        "p95FrameMs": 170.10000002384186,
+        "fps": 9.896397092933354,
+        "longTasks": [],
+        "drawCalls": 25,
+        "sceneMeshes": 73,
+        "activeMeshes": 25,
+        "instancedMeshes": 0,
+        "thinInstances": 63,
+        "activeTriangles": 3336,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 2.429411762485317,
+        "cpuActiveMeshesMs": 0.22941176447213865,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "lodCounts": [
+            7,
+            3,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 3290,
+          "batchMeshes": 69,
+          "activeBatches": 21,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 21504,
+          "bufferUploads": 28,
+          "cullingPasses": 15,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 3993560,
+      "warnings": [],
+      "combinedFPS": 10.266611055935313,
+      "run": 0
+    },
+    {
+      "label": "refined3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 10,
+      "readyMs": 2862.190966000002,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        508
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1778,
+        "frameSamples": 32,
+        "meanFrameMs": 107.00937500037253,
+        "p95FrameMs": 338.39999997615814,
+        "fps": 9.34497561542172,
+        "longTasks": [],
+        "drawCalls": 20,
+        "sceneMeshes": 76,
+        "activeMeshes": 20,
+        "instancedMeshes": 0,
+        "thinInstances": 65,
+        "activeTriangles": 3860,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 105832,
+        "cpuFrameMs": 2.2178082213009875,
+        "cpuActiveMeshesMs": 0.305479448952087,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            6,
+            4,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 3814,
+          "batchMeshes": 72,
+          "activeBatches": 16,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 16384,
+          "bufferUploads": 16,
+          "cullingPasses": 1,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1778,
+        "frameSamples": 32,
+        "meanFrameMs": 93.42499999888241,
+        "p95FrameMs": 254.5,
+        "fps": 10.703773080138747,
+        "longTasks": [],
+        "drawCalls": 25,
+        "sceneMeshes": 76,
+        "activeMeshes": 25,
+        "instancedMeshes": 0,
+        "thinInstances": 63,
+        "activeTriangles": 3336,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 105832,
+        "cpuFrameMs": 1.8509433978008774,
+        "cpuActiveMeshesMs": 0.2499999983130761,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            7,
+            3,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 3290,
+          "batchMeshes": 72,
+          "activeBatches": 21,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 21504,
+          "bufferUploads": 28,
+          "cullingPasses": 13,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 4100376,
+      "warnings": [],
+      "combinedFPS": 9.978328318221036,
+      "run": 0
+    },
+    {
+      "label": "expanded9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 10,
+      "readyMs": 2727.395475999998,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        595
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1814.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 92.36874999850988,
+        "p95FrameMs": 186.5,
+        "fps": 10.826172271640921,
+        "longTasks": [],
+        "drawCalls": 48,
+        "sceneMeshes": 222,
+        "activeMeshes": 48,
+        "instancedMeshes": 0,
+        "thinInstances": 61,
+        "activeTriangles": 2544,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 161976,
+        "cpuFrameMs": 2.942253525827972,
+        "cpuActiveMeshesMs": 0.44788732663006847,
+        "pool": {
+          "instances": 10,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            8,
+            2,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 2498,
+          "batchMeshes": 218,
+          "activeBatches": 44,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 45056,
+          "bufferUploads": 44,
+          "cullingPasses": 1,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1814.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 83.80312499962747,
+        "p95FrameMs": 171.0999999642372,
+        "fps": 11.932729238968658,
+        "longTasks": [],
+        "drawCalls": 53,
+        "sceneMeshes": 222,
+        "activeMeshes": 53,
+        "instancedMeshes": 0,
+        "thinInstances": 59,
+        "activeTriangles": 2020,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 161976,
+        "cpuFrameMs": 2.3634615425880137,
+        "cpuActiveMeshesMs": 0.37115384752933794,
+        "pool": {
+          "instances": 10,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            9,
+            1,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 1974,
+          "batchMeshes": 218,
+          "activeBatches": 49,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 50176,
+          "bufferUploads": 56,
+          "cullingPasses": 14,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 6279376,
+      "warnings": [],
+      "combinedFPS": 11.352549889255284,
+      "run": 0
+    },
+    {
+      "label": "expanded9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 10,
+      "readyMs": 3195.1042709999965,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        584
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2149.300000011921,
+        "frameSamples": 32,
+        "meanFrameMs": 87.19999999925494,
+        "p95FrameMs": 222.80000001192093,
+        "fps": 11.467889908354865,
+        "longTasks": [],
+        "drawCalls": 48,
+        "sceneMeshes": 222,
+        "activeMeshes": 48,
+        "instancedMeshes": 0,
+        "thinInstances": 61,
+        "activeTriangles": 2544,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 161976,
+        "cpuFrameMs": 4.311428574153355,
+        "cpuActiveMeshesMs": 0.45857142806053164,
+        "pool": {
+          "instances": 10,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            8,
+            2,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 2498,
+          "batchMeshes": 218,
+          "activeBatches": 44,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 45056,
+          "bufferUploads": 44,
+          "cullingPasses": 1,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2149.300000011921,
+        "frameSamples": 32,
+        "meanFrameMs": 88.69062499888241,
+        "p95FrameMs": 224.5999999642372,
+        "fps": 11.275148867341965,
+        "longTasks": [],
+        "drawCalls": 53,
+        "sceneMeshes": 222,
+        "activeMeshes": 53,
+        "instancedMeshes": 0,
+        "thinInstances": 59,
+        "activeTriangles": 2020,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 161976,
+        "cpuFrameMs": 3.395145634424339,
+        "cpuActiveMeshesMs": 0.3815533981739896,
+        "pool": {
+          "instances": 10,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            9,
+            1,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 1974,
+          "batchMeshes": 218,
+          "activeBatches": 49,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 50176,
+          "bufferUploads": 56,
+          "cullingPasses": 13,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 6279376,
+      "warnings": [],
+      "combinedFPS": 11.370702674012215,
+      "run": 1
+    },
+    {
+      "label": "refined3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 10,
+      "readyMs": 2462.1840569999986,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        517
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1448.1000000238419,
+        "frameSamples": 32,
+        "meanFrameMs": 100.31874999962747,
+        "p95FrameMs": 407.30000001192093,
+        "fps": 9.968226278773544,
+        "longTasks": [],
+        "drawCalls": 20,
+        "sceneMeshes": 76,
+        "activeMeshes": 20,
+        "instancedMeshes": 0,
+        "thinInstances": 65,
+        "activeTriangles": 3860,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 105832,
+        "cpuFrameMs": 2.007246380266936,
+        "cpuActiveMeshesMs": 0.24202898360680844,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            6,
+            4,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 3814,
+          "batchMeshes": 72,
+          "activeBatches": 16,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 16384,
+          "bufferUploads": 16,
+          "cullingPasses": 1,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1448.1000000238419,
+        "frameSamples": 32,
+        "meanFrameMs": 96.17812499962747,
+        "p95FrameMs": 126.40000003576279,
+        "fps": 10.39737466293789,
+        "longTasks": [],
+        "drawCalls": 25,
+        "sceneMeshes": 76,
+        "activeMeshes": 25,
+        "instancedMeshes": 0,
+        "thinInstances": 63,
+        "activeTriangles": 3336,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 105832,
+        "cpuFrameMs": 1.9715686306065203,
+        "cpuActiveMeshesMs": 0.3245098047396716,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            7,
+            3,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 3290,
+          "batchMeshes": 72,
+          "activeBatches": 21,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 21504,
+          "bufferUploads": 28,
+          "cullingPasses": 17,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 4100376,
+      "warnings": [],
+      "combinedFPS": 10.178278916688031,
+      "run": 1
+    },
+    {
+      "label": "baseline3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 10,
+      "readyMs": 2574.4899370000057,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        163,
+        135,
+        50,
+        51,
+        60,
+        94,
+        133,
+        494
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1563.6000000238419,
+        "frameSamples": 32,
+        "meanFrameMs": 92.24375000037253,
+        "p95FrameMs": 234.89999997615814,
+        "fps": 10.840842875489791,
+        "longTasks": [],
+        "drawCalls": 20,
+        "sceneMeshes": 73,
+        "activeMeshes": 20,
+        "instancedMeshes": 0,
+        "thinInstances": 65,
+        "activeTriangles": 3860,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 102956,
+        "cpuFrameMs": 2.497142858164651,
+        "cpuActiveMeshesMs": 0.20571428367069788,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "lodCounts": [
+            6,
+            4,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 3814,
+          "batchMeshes": 69,
+          "activeBatches": 16,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 16384,
+          "bufferUploads": 16,
+          "cullingPasses": 1,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1563.6000000238419,
+        "frameSamples": 32,
+        "meanFrameMs": 90.50624999962747,
+        "p95FrameMs": 203.30000001192093,
+        "fps": 11.048960707178964,
+        "longTasks": [],
+        "drawCalls": 25,
+        "sceneMeshes": 73,
+        "activeMeshes": 25,
+        "instancedMeshes": 0,
+        "thinInstances": 63,
+        "activeTriangles": 3336,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 102956,
+        "cpuFrameMs": 2.0660194175914652,
+        "cpuActiveMeshesMs": 0.22815533749108174,
+        "pool": {
+          "instances": 10,
+          "templates": 3,
+          "lodCounts": [
+            7,
+            3,
+            0
+          ],
+          "visibleRecords": 10,
+          "culledRecords": 0,
+          "configuredTriangles": 3290,
+          "batchMeshes": 69,
+          "activeBatches": 21,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 21504,
+          "bufferUploads": 28,
+          "cullingPasses": 14,
+          "poseRevision": 10
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 3993560,
+      "warnings": [],
+      "combinedFPS": 10.943912448700411,
+      "run": 1
+    },
+    {
+      "label": "catalog9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 10,
+      "readyMs": 1794.028960999989,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        147
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 957.0999999642372,
+        "frameSamples": 32,
+        "meanFrameMs": 91.578125,
+        "p95FrameMs": 171.19999998807907,
+        "fps": 10.919638286981744,
+        "longTasks": [],
+        "drawCalls": 76,
+        "sceneMeshes": 76,
+        "activeMeshes": 76,
+        "instancedMeshes": 0,
+        "thinInstances": 10,
+        "activeTriangles": 1630,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 2432,
+        "cpuFrameMs": 3.6925373121873655,
+        "cpuActiveMeshesMs": 0.30149253980437324,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 10,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 720,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 957.0999999642372,
+        "frameSamples": 32,
+        "meanFrameMs": 91.77812500111759,
+        "p95FrameMs": 178.10000002384186,
+        "fps": 10.8958425549424,
+        "longTasks": [],
+        "drawCalls": 76,
+        "sceneMeshes": 76,
+        "activeMeshes": 76,
+        "instancedMeshes": 0,
+        "thinInstances": 10,
+        "activeTriangles": 1630,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 2432,
+        "cpuFrameMs": 2.7220000010728835,
+        "cpuActiveMeshesMs": 0.24600000262260438,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 97424,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+      ],
+      "combinedFPS": 10.90772744309403,
+      "run": 1
+    },
+    {
+      "label": "catalog9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 50,
+      "readyMs": 1778.2458399999887,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        51
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 908.1999999880791,
+        "frameSamples": 32,
+        "meanFrameMs": 102.40625,
+        "p95FrameMs": 132.79999995231628,
+        "fps": 9.765028989929814,
+        "longTasks": [],
+        "drawCalls": 355,
+        "sceneMeshes": 358,
+        "activeMeshes": 355,
+        "instancedMeshes": 0,
+        "thinInstances": 50,
+        "activeTriangles": 7578,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 11468,
+        "cpuFrameMs": 7.640625,
+        "cpuActiveMeshesMs": 1.1281249970197678,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 908.1999999880791,
+        "frameSamples": 32,
+        "meanFrameMs": 100.38437500037253,
+        "p95FrameMs": 116.60000002384186,
+        "fps": 9.961709678386592,
+        "longTasks": [],
+        "drawCalls": 355,
+        "sceneMeshes": 358,
+        "activeMeshes": 355,
+        "instancedMeshes": 0,
+        "thinInstances": 50,
+        "activeTriangles": 7578,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 11468,
+        "cpuFrameMs": 5.948453609476385,
+        "cpuActiveMeshesMs": 0.9422680379189167,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 457424,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event"
+      ],
+      "combinedFPS": 9.862388855482475,
+      "run": 0
+    },
+    {
+      "label": "baseline3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 50,
+      "readyMs": 3127.298240999997,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        164,
+        105,
+        51,
+        95,
+        76,
+        113,
+        116,
+        103,
+        306,
+        367
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2239.199999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 112.80625000037253,
+        "p95FrameMs": 272,
+        "fps": 8.864757050222817,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 8484,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 6.3782051259126415,
+        "cpuActiveMeshesMs": 0.2192307649514614,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 8358,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 23552,
+          "bufferUploads": 65,
+          "cullingPasses": 5,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2239.199999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 116.05625000037253,
+        "p95FrameMs": 172.80000001192093,
+        "fps": 8.616511389923335,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 8484,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 4.845945944657197,
+        "cpuActiveMeshesMs": 0.18918918757825284,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 8358,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 23552,
+          "bufferUploads": 65,
+          "cullingPasses": 22,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 3993560,
+      "warnings": [],
+      "combinedFPS": 8.738871593177079,
+      "run": 0
+    },
+    {
+      "label": "refined3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 50,
+      "readyMs": 3028.3707770000037,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        490
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2135.599999964237,
+        "frameSamples": 32,
+        "meanFrameMs": 122.80937500111759,
+        "p95FrameMs": 387.19999998807907,
+        "fps": 8.142700832008142,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 76,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 8484,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 105832,
+        "cpuFrameMs": 4.295945943207355,
+        "cpuActiveMeshesMs": 0.37162162001068527,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 8358,
+          "batchMeshes": 72,
+          "activeBatches": 14,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 23552,
+          "bufferUploads": 65,
+          "cullingPasses": 5,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2135.599999964237,
+        "frameSamples": 32,
+        "meanFrameMs": 107.64687500149012,
+        "p95FrameMs": 244.80000001192093,
+        "fps": 9.289633349655134,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 76,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 8484,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 105832,
+        "cpuFrameMs": 3.371028035043556,
+        "cpuActiveMeshesMs": 0.4252336459739186,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 8358,
+          "batchMeshes": 72,
+          "activeBatches": 14,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 23552,
+          "bufferUploads": 65,
+          "cullingPasses": 19,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 4100376,
+      "warnings": [],
+      "combinedFPS": 8.678436796473818,
+      "run": 0
+    },
+    {
+      "label": "expanded9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 50,
+      "readyMs": 2973.8388549999945,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        362
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2073.099999964237,
+        "frameSamples": 32,
+        "meanFrameMs": 93.40312500111759,
+        "p95FrameMs": 183.9000000357628,
+        "fps": 10.706279902177092,
+        "longTasks": [],
+        "drawCalls": 46,
+        "sceneMeshes": 222,
+        "activeMeshes": 46,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 7034,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 161976,
+        "cpuFrameMs": 4.774324325290886,
+        "cpuActiveMeshesMs": 0.431081086397171,
+        "pool": {
+          "instances": 50,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 6908,
+          "batchMeshes": 218,
+          "activeBatches": 42,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 43008,
+          "bufferUploads": 177,
+          "cullingPasses": 5,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2073.099999964237,
+        "frameSamples": 32,
+        "meanFrameMs": 99.14687499962747,
+        "p95FrameMs": 276,
+        "fps": 10.08604658496556,
+        "longTasks": [],
+        "drawCalls": 46,
+        "sceneMeshes": 222,
+        "activeMeshes": 46,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 7034,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 161976,
+        "cpuFrameMs": 3.7971962623507065,
+        "cpuActiveMeshesMs": 0.4158878532525535,
+        "pool": {
+          "instances": 50,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 6908,
+          "batchMeshes": 218,
+          "activeBatches": 42,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 43008,
+          "bufferUploads": 177,
+          "cullingPasses": 18,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 6279376,
+      "warnings": [],
+      "combinedFPS": 10.386912490222079,
+      "run": 0
+    },
+    {
+      "label": "expanded9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 50,
+      "readyMs": 2894.822282999987,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        364
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2037,
+        "frameSamples": 32,
+        "meanFrameMs": 105.11874999850988,
+        "p95FrameMs": 191.4000000357628,
+        "fps": 9.513050716586484,
+        "longTasks": [],
+        "drawCalls": 46,
+        "sceneMeshes": 222,
+        "activeMeshes": 46,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 7034,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 161976,
+        "cpuFrameMs": 3.955405409271653,
+        "cpuActiveMeshesMs": 0.46216216602840937,
+        "pool": {
+          "instances": 50,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 6908,
+          "batchMeshes": 218,
+          "activeBatches": 42,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 43008,
+          "bufferUploads": 177,
+          "cullingPasses": 5,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2037,
+        "frameSamples": 32,
+        "meanFrameMs": 87.49687499925494,
+        "p95FrameMs": 163.69999998807907,
+        "fps": 11.428979606511836,
+        "longTasks": [],
+        "drawCalls": 46,
+        "sceneMeshes": 222,
+        "activeMeshes": 46,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 7034,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 161976,
+        "cpuFrameMs": 3.172897199603999,
+        "cpuActiveMeshesMs": 0.4196261719008472,
+        "pool": {
+          "instances": 50,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 6908,
+          "batchMeshes": 218,
+          "activeBatches": 42,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 43008,
+          "bufferUploads": 177,
+          "cullingPasses": 18,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 6279376,
+      "warnings": [],
+      "combinedFPS": 10.383373623106685,
+      "run": 1
+    },
+    {
+      "label": "refined3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 50,
+      "readyMs": 3140.0724710000213,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        376
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2192.199999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 112.640625,
+        "p95FrameMs": 282.5,
+        "fps": 8.87779164932723,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 76,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 8484,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 105832,
+        "cpuFrameMs": 7.790540538124136,
+        "cpuActiveMeshesMs": 0.2121621603901322,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 8358,
+          "batchMeshes": 72,
+          "activeBatches": 14,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 23552,
+          "bufferUploads": 65,
+          "cullingPasses": 5,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2192.199999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 99.55937499925494,
+        "p95FrameMs": 259.39999997615814,
+        "fps": 10.044257509727071,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 76,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 8484,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 105832,
+        "cpuFrameMs": 6.128037380280896,
+        "cpuActiveMeshesMs": 0.20467289641638783,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 8358,
+          "batchMeshes": 72,
+          "activeBatches": 14,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 23552,
+          "bufferUploads": 65,
+          "cullingPasses": 18,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 4100376,
+      "warnings": [],
+      "combinedFPS": 9.425070688063252,
+      "run": 1
+    },
+    {
+      "label": "baseline3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 50,
+      "readyMs": 2917.8344379999908,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        160,
+        153,
+        54,
+        80,
+        122,
+        72,
+        108,
+        127,
+        383
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2009.199999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 109.17812499962747,
+        "p95FrameMs": 223.29999995231628,
+        "fps": 9.159343962019975,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 8484,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 102956,
+        "cpuFrameMs": 3.504054055020616,
+        "cpuActiveMeshesMs": 0.22702702557718432,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 8358,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 23552,
+          "bufferUploads": 65,
+          "cullingPasses": 5,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2009.199999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 95.13437500037253,
+        "p95FrameMs": 212.9000000357628,
+        "fps": 10.511447623386228,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 283,
+        "activeTriangles": 8484,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 102956,
+        "cpuFrameMs": 2.8252336449712234,
+        "cpuActiveMeshesMs": 0.19439252013358,
+        "pool": {
+          "instances": 50,
+          "templates": 3,
+          "lodCounts": [
+            50,
+            0,
+            0
+          ],
+          "visibleRecords": 50,
+          "culledRecords": 0,
+          "configuredTriangles": 8358,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 23552,
+          "bufferUploads": 65,
+          "cullingPasses": 19,
+          "poseRevision": 50
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 3993560,
+      "warnings": [],
+      "combinedFPS": 9.788926277148976,
+      "run": 1
+    },
+    {
+      "label": "catalog9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 50,
+      "readyMs": 1787.8372030000028,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        81
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 922.9000000357628,
+        "frameSamples": 32,
+        "meanFrameMs": 101.50937500037253,
+        "p95FrameMs": 256.9000000357628,
+        "fps": 9.851306837386499,
+        "longTasks": [],
+        "drawCalls": 355,
+        "sceneMeshes": 358,
+        "activeMeshes": 355,
+        "instancedMeshes": 0,
+        "thinInstances": 50,
+        "activeTriangles": 7578,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 11468,
+        "cpuFrameMs": 7.545312504284084,
+        "cpuActiveMeshesMs": 1.3671874972060323,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 50,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1440,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 922.9000000357628,
+        "frameSamples": 32,
+        "meanFrameMs": 99.34687499888241,
+        "p95FrameMs": 133,
+        "fps": 10.065741876744983,
+        "longTasks": [],
+        "drawCalls": 355,
+        "sceneMeshes": 358,
+        "activeMeshes": 355,
+        "instancedMeshes": 0,
+        "thinInstances": 50,
+        "activeTriangles": 7578,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 11468,
+        "cpuFrameMs": 5.820618560019228,
+        "cpuActiveMeshesMs": 1.085567007974251,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 457424,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+      ],
+      "combinedFPS": 9.957370009683139,
+      "run": 1
+    },
+    {
+      "label": "catalog9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 100,
+      "readyMs": 2195.7133310000063,
+      "samples": 32,
+      "throughWarmupLongTasks": [],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1349.800000011921,
+        "frameSamples": 32,
+        "meanFrameMs": 116.76875000074506,
+        "p95FrameMs": 176.69999998807907,
+        "fps": 8.56393512813676,
+        "longTasks": [],
+        "drawCalls": 691,
+        "sceneMeshes": 706,
+        "activeMeshes": 691,
+        "instancedMeshes": 0,
+        "thinInstances": 100,
+        "activeTriangles": 14410,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 22412,
+        "cpuFrameMs": 9.87794116928297,
+        "cpuActiveMeshesMs": 1.3676470588235294,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1349.800000011921,
+        "frameSamples": 32,
+        "meanFrameMs": 115.13749999925494,
+        "p95FrameMs": 127.79999995231628,
+        "fps": 8.685267614864584,
+        "longTasks": [],
+        "drawCalls": 692,
+        "sceneMeshes": 706,
+        "activeMeshes": 692,
+        "instancedMeshes": 0,
+        "thinInstances": 100,
+        "activeTriangles": 14422,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 22412,
+        "cpuFrameMs": 8.437623758127193,
+        "cpuActiveMeshesMs": 1.2405940583436796,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 892304,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+      ],
+      "combinedFPS": 8.62417463953645,
+      "run": 0
+    },
+    {
+      "label": "baseline3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 100,
+      "readyMs": 4099.397105000011,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        182,
+        213,
+        121,
+        82,
+        113,
+        124,
+        117,
+        130,
+        130,
+        371,
+        580
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3236.599999964237,
+        "frameSamples": 32,
+        "meanFrameMs": 109.75937500037253,
+        "p95FrameMs": 298.39999997615814,
+        "fps": 9.11083905130296,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 16726,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 8.675949366786812,
+        "cpuActiveMeshesMs": 0.3367088655882244,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 16500,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 57344,
+          "bufferUploads": 126,
+          "cullingPasses": 9,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3236.599999964237,
+        "frameSamples": 32,
+        "meanFrameMs": 118.671875,
+        "p95FrameMs": 239.39999997615814,
+        "fps": 8.426596445029626,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 16726,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 6.550000001809427,
+        "cpuActiveMeshesMs": 0.28928571939468384,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 16500,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 57344,
+          "bufferUploads": 136,
+          "cullingPasses": 23,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 3993560,
+      "warnings": [],
+      "combinedFPS": 8.755369503939319,
+      "run": 0
+    },
+    {
+      "label": "refined3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 100,
+      "readyMs": 3390.500479999988,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        423
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2492,
+        "frameSamples": 32,
+        "meanFrameMs": 117.47812500037253,
+        "p95FrameMs": 243.89999997615814,
+        "fps": 8.512223020216137,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 76,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 16726,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 105832,
+        "cpuFrameMs": 4.7784810126582276,
+        "cpuActiveMeshesMs": 0.2746835426439213,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 16500,
+          "batchMeshes": 72,
+          "activeBatches": 14,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 57344,
+          "bufferUploads": 126,
+          "cullingPasses": 9,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2492,
+        "frameSamples": 32,
+        "meanFrameMs": 131.45625000074506,
+        "p95FrameMs": 358.69999998807907,
+        "fps": 7.607093614752682,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 76,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 16726,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 105832,
+        "cpuFrameMs": 3.8178571441343854,
+        "cpuActiveMeshesMs": 0.24196428379842214,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 16500,
+          "batchMeshes": 72,
+          "activeBatches": 14,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 57344,
+          "bufferUploads": 136,
+          "cullingPasses": 25,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 4100376,
+      "warnings": [],
+      "combinedFPS": 8.034245973425811,
+      "run": 0
+    },
+    {
+      "label": "expanded9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 100,
+      "readyMs": 3610.9656660000037,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        444
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2758.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 107.45937499962747,
+        "p95FrameMs": 196.60000002384186,
+        "fps": 9.305842324166381,
+        "longTasks": [],
+        "drawCalls": 46,
+        "sceneMeshes": 222,
+        "activeMeshes": 46,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 13778,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 161976,
+        "cpuFrameMs": 4.881249999254942,
+        "cpuActiveMeshesMs": 0.5037500016391278,
+        "pool": {
+          "instances": 100,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 13552,
+          "batchMeshes": 218,
+          "activeBatches": 42,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 43008,
+          "bufferUploads": 356,
+          "cullingPasses": 9,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2758.699999988079,
+        "frameSamples": 32,
+        "meanFrameMs": 109.13749999925494,
+        "p95FrameMs": 206.30000001192093,
+        "fps": 9.162753407461475,
+        "longTasks": [],
+        "drawCalls": 46,
+        "sceneMeshes": 222,
+        "activeMeshes": 46,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 13778,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 161976,
+        "cpuFrameMs": 3.9230088501904916,
+        "cpuActiveMeshesMs": 0.43893805541823394,
+        "pool": {
+          "instances": 100,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 13552,
+          "batchMeshes": 218,
+          "activeBatches": 42,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 43008,
+          "bufferUploads": 366,
+          "cullingPasses": 23,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 6279376,
+      "warnings": [],
+      "combinedFPS": 9.233743561675668,
+      "run": 0
+    },
+    {
+      "label": "expanded9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 100,
+      "readyMs": 3451.699381000013,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        414
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2512.100000023842,
+        "frameSamples": 32,
+        "meanFrameMs": 105.25624999962747,
+        "p95FrameMs": 120.09999996423721,
+        "fps": 9.500623478449397,
+        "longTasks": [],
+        "drawCalls": 46,
+        "sceneMeshes": 222,
+        "activeMeshes": 46,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 13778,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 161976,
+        "cpuFrameMs": 3.9658227864700026,
+        "cpuActiveMeshesMs": 0.42531645448901984,
+        "pool": {
+          "instances": 100,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 13552,
+          "batchMeshes": 218,
+          "activeBatches": 42,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 43008,
+          "bufferUploads": 356,
+          "cullingPasses": 9,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2512.100000023842,
+        "frameSamples": 32,
+        "meanFrameMs": 106.97499999962747,
+        "p95FrameMs": 223.5999999642372,
+        "fps": 9.347978499682004,
+        "longTasks": [],
+        "drawCalls": 46,
+        "sceneMeshes": 222,
+        "activeMeshes": 46,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 13778,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 161976,
+        "cpuFrameMs": 3.3723214316580976,
+        "cpuActiveMeshesMs": 0.3732142858207226,
+        "pool": {
+          "instances": 100,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 13552,
+          "batchMeshes": 218,
+          "activeBatches": 42,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 43008,
+          "bufferUploads": 366,
+          "cullingPasses": 24,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 6279376,
+      "warnings": [],
+      "combinedFPS": 9.42368289310373,
+      "run": 1
+    },
+    {
+      "label": "refined3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 100,
+      "readyMs": 3428.952903999976,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        439
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2505.100000023842,
+        "frameSamples": 32,
+        "meanFrameMs": 120.09999999962747,
+        "p95FrameMs": 140.39999997615814,
+        "fps": 8.326394671133237,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 76,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 16726,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 105832,
+        "cpuFrameMs": 5.303846149872511,
+        "cpuActiveMeshesMs": 0.22179486659856942,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 16500,
+          "batchMeshes": 72,
+          "activeBatches": 14,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 57344,
+          "bufferUploads": 126,
+          "cullingPasses": 9,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2505.100000023842,
+        "frameSamples": 32,
+        "meanFrameMs": 120.79062500037253,
+        "p95FrameMs": 399.69999998807907,
+        "fps": 8.278788192352808,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 76,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 16726,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 105832,
+        "cpuFrameMs": 4.08378377905837,
+        "cpuActiveMeshesMs": 0.24144143832696452,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 16500,
+          "batchMeshes": 72,
+          "activeBatches": 14,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 57344,
+          "bufferUploads": 136,
+          "cullingPasses": 24,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 4100376,
+      "warnings": [],
+      "combinedFPS": 8.302523188687813,
+      "run": 1
+    },
+    {
+      "label": "baseline3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 100,
+      "readyMs": 3405.9853019999573,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        155,
+        130,
+        62,
+        81,
+        132,
+        118,
+        111,
+        320,
+        443
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2550.5,
+        "frameSamples": 32,
+        "meanFrameMs": 123.98750000074506,
+        "p95FrameMs": 340.39999997615814,
+        "fps": 8.065329166198131,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 16726,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 5.868354428418075,
+        "cpuActiveMeshesMs": 0.22151898734177214,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 16500,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 57344,
+          "bufferUploads": 126,
+          "cullingPasses": 9,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2550.5,
+        "frameSamples": 32,
+        "meanFrameMs": 124.70000000111759,
+        "p95FrameMs": 278.19999998807907,
+        "fps": 8.01924619078619,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 562,
+        "activeTriangles": 16726,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 4.486607142324958,
+        "cpuActiveMeshesMs": 0.19732142931648664,
+        "pool": {
+          "instances": 100,
+          "templates": 3,
+          "lodCounts": [
+            99,
+            0,
+            0
+          ],
+          "visibleRecords": 99,
+          "culledRecords": 1,
+          "configuredTriangles": 16500,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 57344,
+          "bufferUploads": 136,
+          "cullingPasses": 23,
+          "poseRevision": 100
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 3993560,
+      "warnings": [],
+      "combinedFPS": 8.042221663674372,
+      "run": 1
+    },
+    {
+      "label": "catalog9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 100,
+      "readyMs": 2209.639900000009,
+      "samples": 32,
+      "throughWarmupLongTasks": [],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1296.5999999642372,
+        "frameSamples": 32,
+        "meanFrameMs": 115.91250000149012,
+        "p95FrameMs": 139.80000001192093,
+        "fps": 8.627197239185977,
+        "longTasks": [],
+        "drawCalls": 691,
+        "sceneMeshes": 706,
+        "activeMeshes": 691,
+        "instancedMeshes": 0,
+        "thinInstances": 100,
+        "activeTriangles": 14410,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 22412,
+        "cpuFrameMs": 10.00294117541874,
+        "cpuActiveMeshesMs": 1.1161764719906975,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 100,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 1800,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 1296.5999999642372,
+        "frameSamples": 32,
+        "meanFrameMs": 117.99062500149012,
+        "p95FrameMs": 147.5,
+        "fps": 8.475249622479506,
+        "longTasks": [
+          50
+        ],
+        "drawCalls": 692,
+        "sceneMeshes": 706,
+        "activeMeshes": 692,
+        "instancedMeshes": 0,
+        "thinInstances": 100,
+        "activeTriangles": 14422,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 22412,
+        "cpuFrameMs": 8.193069305750402,
+        "cpuActiveMeshesMs": 1.0702970305291732,
+        "pool": null,
+        "segmentLongTasks": [
+          50
+        ]
+      },
+      "geometryBytes": 892304,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+      ],
+      "combinedFPS": 8.55054843741193,
+      "run": 1
+    },
+    {
+      "label": "catalog9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 250,
+      "readyMs": 6130.773822000017,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        87
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 4868,
+        "frameSamples": 32,
+        "meanFrameMs": 142.94687500037253,
+        "p95FrameMs": 157.19999998807907,
+        "fps": 6.99560588503522,
+        "longTasks": [],
+        "drawCalls": 1713,
+        "sceneMeshes": 1756,
+        "activeMeshes": 1713,
+        "instancedMeshes": 0,
+        "thinInstances": 250,
+        "activeTriangles": 35794,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 55712,
+        "cpuFrameMs": 21.60749999731779,
+        "cpuActiveMeshesMs": 2.850000001490116,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 4868,
+        "frameSamples": 32,
+        "meanFrameMs": 148.91249999962747,
+        "p95FrameMs": 176.69999998807907,
+        "fps": 6.715352975757587,
+        "longTasks": [],
+        "drawCalls": 1713,
+        "sceneMeshes": 1756,
+        "activeMeshes": 1713,
+        "instancedMeshes": 0,
+        "thinInstances": 250,
+        "activeTriangles": 35794,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 55712,
+        "cpuFrameMs": 18.077876104190285,
+        "cpuActiveMeshesMs": 2.677876108515579,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 2217104,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+      ],
+      "combinedFPS": 6.8526152363616895,
+      "run": 0
+    },
+    {
+      "label": "baseline3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 250,
+      "readyMs": 4834.093689000001,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        178,
+        129,
+        57,
+        104,
+        111,
+        130,
+        305,
+        536
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3930,
+        "frameSamples": 32,
+        "meanFrameMs": 164.77187499962747,
+        "p95FrameMs": 362.19999998807907,
+        "fps": 6.068996908618421,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 41604,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 6.651648354399335,
+        "cpuActiveMeshesMs": 0.36593406999504174,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 41078,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 114688,
+          "bufferUploads": 294,
+          "cullingPasses": 21,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3930,
+        "frameSamples": 32,
+        "meanFrameMs": 169.33437500149012,
+        "p95FrameMs": 386.0999999642372,
+        "fps": 5.905475482997472,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 41604,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 102956,
+        "cpuFrameMs": 5.404838712465379,
+        "cpuActiveMeshesMs": 0.3104838728904724,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 41078,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 114688,
+          "bufferUploads": 314,
+          "cullingPasses": 42,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 3993560,
+      "warnings": [],
+      "combinedFPS": 5.986119684960428,
+      "run": 0
+    },
+    {
+      "label": "refined3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 250,
+      "readyMs": 5024.267929000023,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        420
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3988.300000011921,
+        "frameSamples": 32,
+        "meanFrameMs": 149.95625000074506,
+        "p95FrameMs": 430.89999997615814,
+        "fps": 6.668611678373069,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 76,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 41604,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 105832,
+        "cpuFrameMs": 5.7855555534362795,
+        "cpuActiveMeshesMs": 0.5300000018543667,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 41078,
+          "batchMeshes": 72,
+          "activeBatches": 14,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 114688,
+          "bufferUploads": 294,
+          "cullingPasses": 21,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3988.300000011921,
+        "frameSamples": 32,
+        "meanFrameMs": 147.56562500074506,
+        "p95FrameMs": 262.80000001192093,
+        "fps": 6.776645983744189,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 76,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 1394,
+        "activeTriangles": 41462,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 105832,
+        "cpuFrameMs": 4.590243899240726,
+        "cpuActiveMeshesMs": 0.42113821196362256,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            245,
+            0,
+            0
+          ],
+          "visibleRecords": 245,
+          "culledRecords": 5,
+          "configuredTriangles": 40936,
+          "batchMeshes": 72,
+          "activeBatches": 14,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 114688,
+          "bufferUploads": 299,
+          "cullingPasses": 37,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 4100376,
+      "warnings": [],
+      "combinedFPS": 6.722194796567423,
+      "run": 0
+    },
+    {
+      "label": "expanded9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 250,
+      "readyMs": 4609.36837500002,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        364
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3723,
+        "frameSamples": 32,
+        "meanFrameMs": 149.30312499962747,
+        "p95FrameMs": 274.69999998807907,
+        "fps": 6.69778345230547,
+        "longTasks": [],
+        "drawCalls": 46,
+        "sceneMeshes": 222,
+        "activeMeshes": 46,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 34096,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 161976,
+        "cpuFrameMs": 5.4224719083711,
+        "cpuActiveMeshesMs": 0.5629213452339172,
+        "pool": {
+          "instances": 250,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 33570,
+          "batchMeshes": 218,
+          "activeBatches": 42,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 86016,
+          "bufferUploads": 878,
+          "cullingPasses": 21,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3723,
+        "frameSamples": 32,
+        "meanFrameMs": 131.33750000037253,
+        "p95FrameMs": 309.5,
+        "fps": 7.6139716379340525,
+        "longTasks": [],
+        "drawCalls": 46,
+        "sceneMeshes": 222,
+        "activeMeshes": 46,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 34096,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 161976,
+        "cpuFrameMs": 4.598360654272017,
+        "cpuActiveMeshesMs": 0.5524590132666416,
+        "pool": {
+          "instances": 250,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 33570,
+          "batchMeshes": 218,
+          "activeBatches": 42,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 86016,
+          "bufferUploads": 896,
+          "cullingPasses": 39,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 6279376,
+      "warnings": [],
+      "combinedFPS": 7.12655197372084,
+      "run": 0
+    },
+    {
+      "label": "expanded9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 250,
+      "readyMs": 5089.155043000006,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        480
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3901.600000023842,
+        "frameSamples": 32,
+        "meanFrameMs": 143.74062499962747,
+        "p95FrameMs": 297.80000001192093,
+        "fps": 6.956975454939004,
+        "longTasks": [],
+        "drawCalls": 46,
+        "sceneMeshes": 222,
+        "activeMeshes": 46,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 34096,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 161976,
+        "cpuFrameMs": 5.531868132261129,
+        "cpuActiveMeshesMs": 0.6428571395821624,
+        "pool": {
+          "instances": 250,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 33570,
+          "batchMeshes": 218,
+          "activeBatches": 42,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 86016,
+          "bufferUploads": 878,
+          "cullingPasses": 21,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3901.600000023842,
+        "frameSamples": 32,
+        "meanFrameMs": 124.60312500037253,
+        "p95FrameMs": 204.10000002384186,
+        "fps": 8.025480901839423,
+        "longTasks": [],
+        "drawCalls": 46,
+        "sceneMeshes": 222,
+        "activeMeshes": 46,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 34096,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 161976,
+        "cpuFrameMs": 4.528225806932295,
+        "cpuActiveMeshesMs": 0.5669354820443738,
+        "pool": {
+          "instances": 250,
+          "templates": 9,
+          "availableTemplates": 9,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 33570,
+          "batchMeshes": 218,
+          "activeBatches": 42,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 86016,
+          "bufferUploads": 896,
+          "cullingPasses": 36,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 6279376,
+      "warnings": [],
+      "combinedFPS": 7.45312681961104,
+      "run": 1
+    },
+    {
+      "label": "refined3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 250,
+      "readyMs": 4981.805900999985,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        398
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 4002,
+        "frameSamples": 32,
+        "meanFrameMs": 145.07499999925494,
+        "p95FrameMs": 402.60000002384186,
+        "fps": 6.892986386387287,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 76,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 41604,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 105832,
+        "cpuFrameMs": 5.973626371923384,
+        "cpuActiveMeshesMs": 0.32637362493263494,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 41078,
+          "batchMeshes": 72,
+          "activeBatches": 14,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 114688,
+          "bufferUploads": 294,
+          "cullingPasses": 21,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 4002,
+        "frameSamples": 32,
+        "meanFrameMs": 161.8093750011176,
+        "p95FrameMs": 433.10000002384186,
+        "fps": 6.1801116282236,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 76,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 41604,
+        "textureEstimateBytes": 43231914.66666667,
+        "totalVertices": 105832,
+        "cpuFrameMs": 4.6479999995231625,
+        "cpuActiveMeshesMs": 0.26879999780654906,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "availableTemplates": 9,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 41078,
+          "batchMeshes": 72,
+          "activeBatches": 14,
+          "sharedMaterials": 37,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 114688,
+          "bufferUploads": 304,
+          "cullingPasses": 37,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 4100376,
+      "warnings": [],
+      "combinedFPS": 6.517112511829812,
+      "run": 1
+    },
+    {
+      "label": "baseline3",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks"
+      ],
+      "count": 250,
+      "readyMs": 5009.476549000014,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        170,
+        135,
+        55,
+        58,
+        90,
+        86,
+        127,
+        105,
+        332,
+        510
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3943,
+        "frameSamples": 32,
+        "meanFrameMs": 176.4812500011176,
+        "p95FrameMs": 420.0999999642372,
+        "fps": 5.666324326202741,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 1399,
+        "activeTriangles": 41604,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 102956,
+        "cpuFrameMs": 6.779120880168873,
+        "cpuActiveMeshesMs": 0.25934066091264996,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "lodCounts": [
+            246,
+            0,
+            0
+          ],
+          "visibleRecords": 246,
+          "culledRecords": 4,
+          "configuredTriangles": 41078,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 114688,
+          "bufferUploads": 294,
+          "cullingPasses": 21,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "quaternius",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 3943,
+        "frameSamples": 32,
+        "meanFrameMs": 163.671875,
+        "p95FrameMs": 471,
+        "fps": 6.109785202863962,
+        "longTasks": [],
+        "drawCalls": 18,
+        "sceneMeshes": 73,
+        "activeMeshes": 18,
+        "instancedMeshes": 0,
+        "thinInstances": 1394,
+        "activeTriangles": 41462,
+        "textureEstimateBytes": 43231914.666666664,
+        "totalVertices": 102956,
+        "cpuFrameMs": 5.462903228017591,
+        "cpuActiveMeshesMs": 0.2258064530549511,
+        "pool": {
+          "instances": 250,
+          "templates": 3,
+          "lodCounts": [
+            245,
+            0,
+            0
+          ],
+          "visibleRecords": 245,
+          "culledRecords": 5,
+          "configuredTriangles": 40936,
+          "batchMeshes": 69,
+          "activeBatches": 14,
+          "sharedMaterials": 28,
+          "sharedTextureFiles": 19,
+          "estimatedTextureRgbaMipBytes": 42467323,
+          "instanceBufferCapacityBytes": 114688,
+          "bufferUploads": 309,
+          "cullingPasses": 38,
+          "poseRevision": 250
+        },
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 3993560,
+      "warnings": [],
+      "combinedFPS": 5.8797049122903955,
+      "run": 1
+    },
+    {
+      "label": "catalog9",
+      "ids": [
+        "steelMill",
+        "precisionElectronicsWorks",
+        "machineWorks",
+        "acidWorks",
+        "glassWorks",
+        "semiconductorFab",
+        "utilityVehicleWorks",
+        "warehouse",
+        "batteryWorks"
+      ],
+      "count": 250,
+      "readyMs": 3698.717980000016,
+      "samples": 32,
+      "throughWarmupLongTasks": [
+        97
+      ],
+      "static": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1362830044410597,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2832.099999964237,
+        "frameSamples": 32,
+        "meanFrameMs": 144.96875,
+        "p95FrameMs": 169.5,
+        "fps": 6.898038370338435,
+        "longTasks": [],
+        "drawCalls": 1713,
+        "sceneMeshes": 1756,
+        "activeMeshes": 1713,
+        "instancedMeshes": 0,
+        "thinInstances": 250,
+        "activeTriangles": 35794,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 55712,
+        "cpuFrameMs": 20.324691356700143,
+        "cpuActiveMeshesMs": 2.804938269250187,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "orbit": {
+        "shadows": false,
+        "variant": "baseline",
+        "count": 250,
+        "type": "steelMill",
+        "quality": "high",
+        "viewport": [
+          1366,
+          768
+        ],
+        "modelIds": [
+          "steelMill",
+          "precisionElectronicsWorks",
+          "machineWorks",
+          "acidWorks",
+          "glassWorks",
+          "semiconductorFab",
+          "utilityVehicleWorks",
+          "warehouse",
+          "batteryWorks"
+        ],
+        "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "camera": {
+          "alpha": -2.1121271820304206,
+          "beta": 1.02,
+          "radius": 2880,
+          "target": [
+            0,
+            8,
+            0
+          ]
+        },
+        "startupMs": 2832.099999964237,
+        "frameSamples": 32,
+        "meanFrameMs": 142.4187500011176,
+        "p95FrameMs": 154.89999997615814,
+        "fps": 7.021547373447336,
+        "longTasks": [],
+        "drawCalls": 1713,
+        "sceneMeshes": 1756,
+        "activeMeshes": 1713,
+        "instancedMeshes": 0,
+        "thinInstances": 250,
+        "activeTriangles": 35794,
+        "textureEstimateBytes": 26716842.666666664,
+        "totalVertices": 55712,
+        "cpuFrameMs": 19.878947367793636,
+        "cpuActiveMeshesMs": 2.706140348785802,
+        "pool": null,
+        "segmentLongTasks": []
+      },
+      "geometryBytes": 2217104,
+      "warnings": [
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event",
+        "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+      ],
+      "combinedFPS": 6.959244921898908,
+      "run": 1
+    }
+  ],
+  "gates": [],
+  "summary": [
+    {
+      "label": "catalog9",
+      "count": 10,
+      "runs": 2,
+      "fps": {
+        "median": 11.09421714318497,
+        "min": 10.919638286981744,
+        "max": 11.268795999388196
+      },
+      "p95Ms": {
+        "median": 169.0499999821186,
+        "min": 166.89999997615814,
+        "max": 171.19999998807907
+      },
+      "orbitFPS": {
+        "median": 10.925684980484174,
+        "min": 10.8958425549424,
+        "max": 10.95552740602595
+      },
+      "orbitP95Ms": {
+        "median": 142.75,
+        "min": 107.39999997615814,
+        "max": 178.10000002384186
+      },
+      "readyMs": {
+        "median": 2067.5401089999946,
+        "min": 1794.028960999989,
+        "max": 2341.051257
+      },
+      "draws": [
+        76,
+        76
+      ],
+      "meshes": [
+        76,
+        76
+      ],
+      "triangles": [
+        1630,
+        1630
+      ],
+      "geometryBytes": [
+        97424,
+        97424
+      ],
+      "textureBytes": [
+        26716842.666666664,
+        26716842.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "catalog9",
+      "count": 50,
+      "runs": 2,
+      "fps": {
+        "median": 9.808167913658156,
+        "min": 9.765028989929814,
+        "max": 9.851306837386499
+      },
+      "p95Ms": {
+        "median": 194.84999999403954,
+        "min": 132.79999995231628,
+        "max": 256.9000000357628
+      },
+      "orbitFPS": {
+        "median": 10.013725777565789,
+        "min": 9.961709678386592,
+        "max": 10.065741876744983
+      },
+      "orbitP95Ms": {
+        "median": 124.80000001192093,
+        "min": 116.60000002384186,
+        "max": 133
+      },
+      "readyMs": {
+        "median": 1783.0415214999957,
+        "min": 1778.2458399999887,
+        "max": 1787.8372030000028
+      },
+      "draws": [
+        355,
+        355
+      ],
+      "meshes": [
+        358,
+        358
+      ],
+      "triangles": [
+        7578,
+        7578
+      ],
+      "geometryBytes": [
+        457424,
+        457424
+      ],
+      "textureBytes": [
+        26716842.666666664,
+        26716842.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "catalog9",
+      "count": 100,
+      "runs": 2,
+      "fps": {
+        "median": 8.595566183661369,
+        "min": 8.56393512813676,
+        "max": 8.627197239185977
+      },
+      "p95Ms": {
+        "median": 158.25,
+        "min": 139.80000001192093,
+        "max": 176.69999998807907
+      },
+      "orbitFPS": {
+        "median": 8.580258618672044,
+        "min": 8.475249622479506,
+        "max": 8.685267614864584
+      },
+      "orbitP95Ms": {
+        "median": 137.64999997615814,
+        "min": 127.79999995231628,
+        "max": 147.5
+      },
+      "readyMs": {
+        "median": 2202.6766155000078,
+        "min": 2195.7133310000063,
+        "max": 2209.639900000009
+      },
+      "draws": [
+        691,
+        691
+      ],
+      "meshes": [
+        706,
+        706
+      ],
+      "triangles": [
+        14410,
+        14410
+      ],
+      "geometryBytes": [
+        892304,
+        892304
+      ],
+      "textureBytes": [
+        26716842.666666664,
+        26716842.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        [
+          50
+        ]
+      ]
+    },
+    {
+      "label": "catalog9",
+      "count": 250,
+      "runs": 2,
+      "fps": {
+        "median": 6.946822127686827,
+        "min": 6.898038370338435,
+        "max": 6.99560588503522
+      },
+      "p95Ms": {
+        "median": 163.34999999403954,
+        "min": 157.19999998807907,
+        "max": 169.5
+      },
+      "orbitFPS": {
+        "median": 6.8684501746024615,
+        "min": 6.715352975757587,
+        "max": 7.021547373447336
+      },
+      "orbitP95Ms": {
+        "median": 165.7999999821186,
+        "min": 154.89999997615814,
+        "max": 176.69999998807907
+      },
+      "readyMs": {
+        "median": 4914.745901000017,
+        "min": 3698.717980000016,
+        "max": 6130.773822000017
+      },
+      "draws": [
+        1713,
+        1713
+      ],
+      "meshes": [
+        1756,
+        1756
+      ],
+      "triangles": [
+        35794,
+        35794
+      ],
+      "geometryBytes": [
+        2217104,
+        2217104
+      ],
+      "textureBytes": [
+        26716842.666666664,
+        26716842.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "baseline3",
+      "count": 10,
+      "runs": 2,
+      "fps": {
+        "median": 10.75322149115765,
+        "min": 10.66560010682551,
+        "max": 10.840842875489791
+      },
+      "p95Ms": {
+        "median": 218.3499999642372,
+        "min": 201.79999995231628,
+        "max": 234.89999997615814
+      },
+      "orbitFPS": {
+        "median": 10.47267890005616,
+        "min": 9.896397092933354,
+        "max": 11.048960707178964
+      },
+      "orbitP95Ms": {
+        "median": 186.7000000178814,
+        "min": 170.10000002384186,
+        "max": 203.30000001192093
+      },
+      "readyMs": {
+        "median": 2584.886888500003,
+        "min": 2574.4899370000057,
+        "max": 2595.28384
+      },
+      "draws": [
+        20,
+        20
+      ],
+      "meshes": [
+        73,
+        73
+      ],
+      "triangles": [
+        3860,
+        3860
+      ],
+      "geometryBytes": [
+        3993560,
+        3993560
+      ],
+      "textureBytes": [
+        43231914.66666667,
+        43231914.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "baseline3",
+      "count": 50,
+      "runs": 2,
+      "fps": {
+        "median": 9.012050506121396,
+        "min": 8.864757050222817,
+        "max": 9.159343962019975
+      },
+      "p95Ms": {
+        "median": 247.64999997615814,
+        "min": 223.29999995231628,
+        "max": 272
+      },
+      "orbitFPS": {
+        "median": 9.563979506654782,
+        "min": 8.616511389923335,
+        "max": 10.511447623386228
+      },
+      "orbitP95Ms": {
+        "median": 192.85000002384186,
+        "min": 172.80000001192093,
+        "max": 212.9000000357628
+      },
+      "readyMs": {
+        "median": 3022.566339499994,
+        "min": 2917.8344379999908,
+        "max": 3127.298240999997
+      },
+      "draws": [
+        18,
+        18
+      ],
+      "meshes": [
+        73,
+        73
+      ],
+      "triangles": [
+        8484,
+        8484
+      ],
+      "geometryBytes": [
+        3993560,
+        3993560
+      ],
+      "textureBytes": [
+        43231914.66666667,
+        43231914.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "baseline3",
+      "count": 100,
+      "runs": 2,
+      "fps": {
+        "median": 8.588084108750547,
+        "min": 8.065329166198131,
+        "max": 9.11083905130296
+      },
+      "p95Ms": {
+        "median": 319.39999997615814,
+        "min": 298.39999997615814,
+        "max": 340.39999997615814
+      },
+      "orbitFPS": {
+        "median": 8.222921317907907,
+        "min": 8.01924619078619,
+        "max": 8.426596445029626
+      },
+      "orbitP95Ms": {
+        "median": 258.7999999821186,
+        "min": 239.39999997615814,
+        "max": 278.19999998807907
+      },
+      "readyMs": {
+        "median": 3752.691203499984,
+        "min": 3405.9853019999573,
+        "max": 4099.397105000011
+      },
+      "draws": [
+        18,
+        18
+      ],
+      "meshes": [
+        73,
+        73
+      ],
+      "triangles": [
+        16726,
+        16726
+      ],
+      "geometryBytes": [
+        3993560,
+        3993560
+      ],
+      "textureBytes": [
+        43231914.66666667,
+        43231914.66666667
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "baseline3",
+      "count": 250,
+      "runs": 2,
+      "fps": {
+        "median": 5.86766061741058,
+        "min": 5.666324326202741,
+        "max": 6.068996908618421
+      },
+      "p95Ms": {
+        "median": 391.14999997615814,
+        "min": 362.19999998807907,
+        "max": 420.0999999642372
+      },
+      "orbitFPS": {
+        "median": 6.007630342930717,
+        "min": 5.905475482997472,
+        "max": 6.109785202863962
+      },
+      "orbitP95Ms": {
+        "median": 428.5499999821186,
+        "min": 386.0999999642372,
+        "max": 471
+      },
+      "readyMs": {
+        "median": 4921.785119000007,
+        "min": 4834.093689000001,
+        "max": 5009.476549000014
+      },
+      "draws": [
+        18,
+        18
+      ],
+      "meshes": [
+        73,
+        73
+      ],
+      "triangles": [
+        41604,
+        41604
+      ],
+      "geometryBytes": [
+        3993560,
+        3993560
+      ],
+      "textureBytes": [
+        43231914.66666667,
+        43231914.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "refined3",
+      "count": 10,
+      "runs": 2,
+      "fps": {
+        "median": 9.656600947097633,
+        "min": 9.34497561542172,
+        "max": 9.968226278773544
+      },
+      "p95Ms": {
+        "median": 372.84999999403954,
+        "min": 338.39999997615814,
+        "max": 407.30000001192093
+      },
+      "orbitFPS": {
+        "median": 10.550573871538319,
+        "min": 10.39737466293789,
+        "max": 10.703773080138747
+      },
+      "orbitP95Ms": {
+        "median": 190.4500000178814,
+        "min": 126.40000003576279,
+        "max": 254.5
+      },
+      "readyMs": {
+        "median": 2662.1875115000003,
+        "min": 2462.1840569999986,
+        "max": 2862.190966000002
+      },
+      "draws": [
+        20,
+        20
+      ],
+      "meshes": [
+        76,
+        76
+      ],
+      "triangles": [
+        3860,
+        3860
+      ],
+      "geometryBytes": [
+        4100376,
+        4100376
+      ],
+      "textureBytes": [
+        43231914.666666664,
+        43231914.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "refined3",
+      "count": 50,
+      "runs": 2,
+      "fps": {
+        "median": 8.510246240667687,
+        "min": 8.142700832008142,
+        "max": 8.87779164932723
+      },
+      "p95Ms": {
+        "median": 334.84999999403954,
+        "min": 282.5,
+        "max": 387.19999998807907
+      },
+      "orbitFPS": {
+        "median": 9.666945429691102,
+        "min": 9.289633349655134,
+        "max": 10.044257509727071
+      },
+      "orbitP95Ms": {
+        "median": 252.09999999403954,
+        "min": 244.80000001192093,
+        "max": 259.39999997615814
+      },
+      "readyMs": {
+        "median": 3084.2216240000125,
+        "min": 3028.3707770000037,
+        "max": 3140.0724710000213
+      },
+      "draws": [
+        18,
+        18
+      ],
+      "meshes": [
+        76,
+        76
+      ],
+      "triangles": [
+        8484,
+        8484
+      ],
+      "geometryBytes": [
+        4100376,
+        4100376
+      ],
+      "textureBytes": [
+        43231914.66666667,
+        43231914.66666667
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "refined3",
+      "count": 100,
+      "runs": 2,
+      "fps": {
+        "median": 8.419308845674687,
+        "min": 8.326394671133237,
+        "max": 8.512223020216137
+      },
+      "p95Ms": {
+        "median": 192.14999997615814,
+        "min": 140.39999997615814,
+        "max": 243.89999997615814
+      },
+      "orbitFPS": {
+        "median": 7.942940903552746,
+        "min": 7.607093614752682,
+        "max": 8.278788192352808
+      },
+      "orbitP95Ms": {
+        "median": 379.19999998807907,
+        "min": 358.69999998807907,
+        "max": 399.69999998807907
+      },
+      "readyMs": {
+        "median": 3409.726691999982,
+        "min": 3390.500479999988,
+        "max": 3428.952903999976
+      },
+      "draws": [
+        18,
+        18
+      ],
+      "meshes": [
+        76,
+        76
+      ],
+      "triangles": [
+        16726,
+        16726
+      ],
+      "geometryBytes": [
+        4100376,
+        4100376
+      ],
+      "textureBytes": [
+        43231914.66666667,
+        43231914.66666667
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "refined3",
+      "count": 250,
+      "runs": 2,
+      "fps": {
+        "median": 6.780799032380179,
+        "min": 6.668611678373069,
+        "max": 6.892986386387287
+      },
+      "p95Ms": {
+        "median": 416.75,
+        "min": 402.60000002384186,
+        "max": 430.89999997615814
+      },
+      "orbitFPS": {
+        "median": 6.478378805983894,
+        "min": 6.1801116282236,
+        "max": 6.776645983744189
+      },
+      "orbitP95Ms": {
+        "median": 347.9500000178814,
+        "min": 262.80000001192093,
+        "max": 433.10000002384186
+      },
+      "readyMs": {
+        "median": 5003.036915000004,
+        "min": 4981.805900999985,
+        "max": 5024.267929000023
+      },
+      "draws": [
+        18,
+        18
+      ],
+      "meshes": [
+        76,
+        76
+      ],
+      "triangles": [
+        41604,
+        41604
+      ],
+      "geometryBytes": [
+        4100376,
+        4100376
+      ],
+      "textureBytes": [
+        43231914.66666667,
+        43231914.66666667
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "expanded9",
+      "count": 10,
+      "runs": 2,
+      "fps": {
+        "median": 11.147031089997892,
+        "min": 10.826172271640921,
+        "max": 11.467889908354865
+      },
+      "p95Ms": {
+        "median": 204.65000000596046,
+        "min": 186.5,
+        "max": 222.80000001192093
+      },
+      "orbitFPS": {
+        "median": 11.603939053155312,
+        "min": 11.275148867341965,
+        "max": 11.932729238968658
+      },
+      "orbitP95Ms": {
+        "median": 197.8499999642372,
+        "min": 171.0999999642372,
+        "max": 224.5999999642372
+      },
+      "readyMs": {
+        "median": 2961.249873499997,
+        "min": 2727.395475999998,
+        "max": 3195.1042709999965
+      },
+      "draws": [
+        48,
+        48
+      ],
+      "meshes": [
+        222,
+        222
+      ],
+      "triangles": [
+        2544,
+        2544
+      ],
+      "geometryBytes": [
+        6279376,
+        6279376
+      ],
+      "textureBytes": [
+        43231914.66666667,
+        43231914.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "expanded9",
+      "count": 50,
+      "runs": 2,
+      "fps": {
+        "median": 10.10966530938179,
+        "min": 9.513050716586484,
+        "max": 10.706279902177092
+      },
+      "p95Ms": {
+        "median": 187.6500000357628,
+        "min": 183.9000000357628,
+        "max": 191.4000000357628
+      },
+      "orbitFPS": {
+        "median": 10.757513095738698,
+        "min": 10.08604658496556,
+        "max": 11.428979606511836
+      },
+      "orbitP95Ms": {
+        "median": 219.84999999403954,
+        "min": 163.69999998807907,
+        "max": 276
+      },
+      "readyMs": {
+        "median": 2934.3305689999906,
+        "min": 2894.822282999987,
+        "max": 2973.8388549999945
+      },
+      "draws": [
+        46,
+        46
+      ],
+      "meshes": [
+        222,
+        222
+      ],
+      "triangles": [
+        7034,
+        7034
+      ],
+      "geometryBytes": [
+        6279376,
+        6279376
+      ],
+      "textureBytes": [
+        43231914.66666667,
+        43231914.66666667
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "expanded9",
+      "count": 100,
+      "runs": 2,
+      "fps": {
+        "median": 9.403232901307888,
+        "min": 9.305842324166381,
+        "max": 9.500623478449397
+      },
+      "p95Ms": {
+        "median": 158.34999999403954,
+        "min": 120.09999996423721,
+        "max": 196.60000002384186
+      },
+      "orbitFPS": {
+        "median": 9.25536595357174,
+        "min": 9.162753407461475,
+        "max": 9.347978499682004
+      },
+      "orbitP95Ms": {
+        "median": 214.94999998807907,
+        "min": 206.30000001192093,
+        "max": 223.5999999642372
+      },
+      "readyMs": {
+        "median": 3531.3325235000084,
+        "min": 3451.699381000013,
+        "max": 3610.9656660000037
+      },
+      "draws": [
+        46,
+        46
+      ],
+      "meshes": [
+        222,
+        222
+      ],
+      "triangles": [
+        13778,
+        13778
+      ],
+      "geometryBytes": [
+        6279376,
+        6279376
+      ],
+      "textureBytes": [
+        43231914.666666664,
+        43231914.666666664
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "expanded9",
+      "count": 250,
+      "runs": 2,
+      "fps": {
+        "median": 6.827379453622237,
+        "min": 6.69778345230547,
+        "max": 6.956975454939004
+      },
+      "p95Ms": {
+        "median": 286.25,
+        "min": 274.69999998807907,
+        "max": 297.80000001192093
+      },
+      "orbitFPS": {
+        "median": 7.819726269886738,
+        "min": 7.6139716379340525,
+        "max": 8.025480901839423
+      },
+      "orbitP95Ms": {
+        "median": 256.80000001192093,
+        "min": 204.10000002384186,
+        "max": 309.5
+      },
+      "readyMs": {
+        "median": 4849.261709000013,
+        "min": 4609.36837500002,
+        "max": 5089.155043000006
+      },
+      "draws": [
+        46,
+        46
+      ],
+      "meshes": [
+        222,
+        222
+      ],
+      "triangles": [
+        34096,
+        34096
+      ],
+      "geometryBytes": [
+        6279376,
+        6279376
+      ],
+      "textureBytes": [
+        43231914.666666664,
+        43231914.66666667
+      ],
+      "staticLongTasks": [
+        [],
+        []
+      ],
+      "orbitLongTasks": [
+        [],
+        []
+      ]
+    }
+  ]
+}

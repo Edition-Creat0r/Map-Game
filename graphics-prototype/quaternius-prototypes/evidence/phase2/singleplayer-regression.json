@@ -1,0 +1,14 @@
+{
+  "errors": [],
+  "failed": [],
+  "http": [],
+  "textureRequests": [],
+  "checks": [
+    "Singleplayer and local territory launch",
+    "Existing preference key and unknown fields preserved",
+    "Opt-in setting survives reload without changing balances",
+    "Basic never allocates prototype materials or meshes",
+    "Local navigation, pan/zoom and World Map return"
+  ],
+  "bootMs": 1405
+}

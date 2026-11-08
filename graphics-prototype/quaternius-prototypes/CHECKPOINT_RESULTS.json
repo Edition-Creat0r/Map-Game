@@ -1,46 +1,44 @@
 {
-  "checkpoint": "Three Quaternius prototypes \u2014 pooled thin instances and cached distant fa\u00e7ades",
+  "checkpoint": "Quaternius Expansion Phase 2 \u2014 nine isolated factory studies",
   "branch": "feature/0.4.2-quaternius-replacements",
-  "baseCommit": "de493cdc95d43d9e03b4e3c077b51b9f25204381",
-  "node": {
-    "passed": 166,
+  "baseCommit": "5b51d3e07b1779e964040179ac797234fef77d25",
+  "modelIds": [
+    "steelMill",
+    "precisionElectronicsWorks",
+    "machineWorks",
+    "acidWorks",
+    "glassWorks",
+    "semiconductorFab",
+    "utilityVehicleWorks",
+    "warehouse",
+    "batteryWorks"
+  ],
+  "newEconomyDefinitions": false,
+  "tests": {
+    "nodePassed": 172,
+    "pythonPassed": 43,
     "failed": 0,
-    "skipped": 0
+    "showroomBrowserGroups": 14,
+    "singleplayerBrowserGroups": 12,
+    "verifiedPngCaptures": 18,
+    "rebuilds": 2,
+    "identicalGeneratedFiles": 23
   },
-  "python": {
-    "passed": 43,
-    "failed": 0
+  "performance": {
+    "candidateScreensPassed": 6,
+    "matrixCases": 32,
+    "runsPerCohortAndCount": 2,
+    "gate": "No >20% combined static/orbit FPS regression in candidate screens; hardware/frame-tail review remains required"
   },
-  "browser": {
-    "showroomCheckGroups": 13,
-    "singleplayerGameplayGroups": 7,
-    "singleplayerGraphicsGroups": 5,
-    "reviewImages": 4,
-    "uncaughtErrors": 0,
-    "newPrototypeLoadingFailures": 0,
-    "knownOriginalRendererWarnings": 9,
-    "liveCDNVerified": false,
-    "liveSupabaseTested": false
+  "textures": {
+    "count": 19,
+    "allApprovedBytesPreserved": true
   },
-  "rebuilds": {
-    "runs": 2,
-    "byteIdenticalFiles": 23
-  },
-  "renderedDesigns": 3,
-  "remainingNonResidentialDesignsAdded": 0,
-  "benchmarkCases": 24,
-  "benchmarkRunsPerCase": 2,
-  "preservation": {
-    "highGeometryAndPbrExact": true,
-    "original15TexturesByteIdentical": true,
-    "kenneyFilesUnchanged": true,
-    "gameplayFilesUnchanged": true,
-    "supabaseAndMultiplayerUnchanged": true,
-    "otherBranchesUntouched": true
-  },
-  "performanceStatus": "Improved at all tested counts versus de493cd; native-resolution software WebGL remains GPU-limited; hardware and final visual approval pending",
   "liveRendererEnabled": false,
+  "lenovoPerformanceValidated": false,
   "pushed": false,
   "merged": false,
-  "deployed": false
+  "deployed": false,
+  "supabaseChanged": false,
+  "upgradesBranchChanged": false
 }

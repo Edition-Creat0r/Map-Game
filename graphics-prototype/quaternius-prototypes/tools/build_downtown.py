@@ -6,10 +6,11 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 from far_lod import bake_wall,wall,roof
+from industrial_studies import assemble
 from downtown import read_parts,model,inventory,PREFIX,dependency
 ROOT=Path(__file__).resolve().parents[1]
-IDS=[('steelMill','Steel Mill',[118,92]),('precisionElectronicsWorks','Electronics Plant',[80,66]),('machineWorks','Machinery Works',[64,54])]
-COLORS={'steel':[.26,.29,.31,1],'paint':[.13,.23,.28,1],'yellow':[.61,.39,.10,1],'rubber':[.055,.065,.07,1],'concrete':[.36,.37,.35,1]}
+IDS=[('steelMill','Steel Mill',[118,92]),('precisionElectronicsWorks','Electronics Plant',[80,66]),('machineWorks','Machinery Works',[64,54])]+[(x['id'],x['canonicalName'],x['footprint'])for x in json.loads((ROOT/'phase2-designs.json').read_text())['designs']]
+COLORS={'steel':[.26,.29,.31,1],'paint':[.13,.23,.28,1],'yellow':[.61,.39,.10,1],'rubber':[.055,.065,.07,1],'concrete':[.36,.37,.35,1],'oxide':[.42,.17,.07,1],'ceramic':[.72,.76,.75,1],'green':[.12,.32,.23,1]}
 
 def rotation(angle):
  c,s=math.cos(angle),math.sin(angle);return np.array([[c,0,s],[0,1,0],[-s,0,c]])
@@ -102,7 +103,28 @@ def build(paths):
     originalParts.add(name);add(box(np.array(size)),authored(name),pos)
    def pipe(name,r,h,pos,detail=0):
     if detail>level:return
-    originalParts.add(name);add(cylinder(r,h,16 if level==2 else 8),authored(name),pos)
+    originalParts.add(name);add(cylinder(r,h,16 if level==2 else 8 if id in ['steelMill','precisionElectronicsWorks','machineWorks']else 6),authored(name),pos)
+   def axis(name,r,h,pos,direction,detail=0):
+    if detail>level:return
+    g=cylinder(r,h,16 if level==2 else 6);a=np.pi/2
+    rot=np.array([[0,-1,0],[1,0,0],[0,0,1]])if direction=='x'else np.array([[1,0,0],[0,0,-1],[0,1,0]])
+    if direction=='x':rot=rot.T
+    g['pos']=g['pos']@rot.T;g['norm']=g['norm']@rot.T;originalParts.add(name);add(g,authored(name),pos)
+   def beam(name,a,b,thickness,detail=0):
+    if detail>level:return
+    a,b=np.array(a),np.array(b);v=b-a;length=np.linalg.norm(v)
+    if length<1e-6:raise ValueError('Empty authored beam')
+    y=v/length;x=np.cross(y,[0,0,1])
+    if np.linalg.norm(x)<1e-6:x=np.cross(y,[1,0,0])
+    x/=np.linalg.norm(x);z=np.cross(x,y);rot=np.c_[x,y,z];g=box(np.array([thickness,length,thickness]));g['pos']=g['pos']@rot.T;g['norm']=g['norm']@rot.T;originalParts.add(name);add(g,authored(name),(a+b)/2)
+   def robot(x,z,size=1,detail=1):
+    if detail>level:return
+    pipe('steel',size,size*2,(x,1,z),detail)
+    a=(x,1+size*2,z);b=(x+size*1.8,1+size*5,z);end=(x+size*3,1+size*3,z-size)
+    beam('yellow',a,b,size*.7,detail);beam('yellow',b,end,size*.6,detail);axis('steel',size*.65,size,b,'z',detail);pipe('steel',size*.45,size,end,detail)
+   def glass(size,pos,detail=1):
+    if detail>level:return
+    doc,_=native('Metal_FirstFloor_Window');m=copy.deepcopy(next(m for m in doc['materials']if m.get('name')=='MI_Glass'));m['name']='Original-process-glazing';add(box(np.array(size)),material(m,doc),pos)
    def shell(cx,cz,w,depth,floors,metal=False):
     if level==0:
      mat=far_material('Metal_Plain_3'if metal else'Brick_Plain_3')
@@ -154,14 +176,24 @@ def build(paths):
     for x in [-20,-2,16]:cube('paint',(9,1,5),(x,19,-4),1)
     cube('steel',(44,1,8),(-7,.6,-22))
     for x in [-20,-6,8]:
-     cube('paint',(6,3,5),(x,2,-22),1);pipe('yellow',.65,5,(x,3,-22),2);cube('yellow',(5,.7,.7),(x+1.5,7.5,-22),2)
-   else:
+     cube('paint',(6,3,5),(x,2,-22),1);robot(x,-22,.7,2)
+   elif id=='machineWorks':
     shell(-5,4,42,30,2)
     for x in [-24,20]:cube('yellow',(1.1,15,1.1),(x,7.5,-18))
     cube('yellow',(46,1.8,1.8),(-2,15,-18));cube('steel',(3,3,3),(2,12,-18),1)
-    for x in [-16,0,16]:
+    for x in [-20,-6,8]:
      cube('steel',(8,7,.6),(x,3.5,-11.4));cube('paint',(7,2,5),(x,1,-20),1)
-     for z in [-21,-19]:cube('steel',(6,.6,.6),(x,2.4,z),2)
+     for y in [1,2,3,4,5,6]:cube('paint',(7.6,.1,.1),(x,y,-11.8),2)
+    # CNC enclosure, a horizontal lathe and a portal press, all original geometry.
+    if level>0:
+     cube('paint',(6,5,4.5),(-20,4.5,-20),1);glass((4,3,.1),(-20,4.5,-22.3),1)
+     cube('steel',(1,4,1),(-16,3,-22),1);cube('green',(1.05,1,.12),(-16,4,-22.6),2)
+     axis('steel',.7,5.2,(-8.6,3.2,-20),'x',1);cube('steel',(1.5,3,3),(-9,3,-20),1);cube('steel',(1,2,2),(-3,2.5,-20),1)
+     for x in [5.7,10.3]:cube('yellow',(.7,6,.8),(x,4,-20),1)
+     cube('yellow',(6,1,2),(8,7,-20),1);pipe('steel',.6,2.5,(8,4,-20),1);cube('steel',(4,.5,3),(8,3,-20),1)
+     for x in [-23.7,-15.8,-2,12]:pipe('yellow',.16,2.5,(x,0,-23),2)
+   else:
+    assemble(id,dict(shell=shell,cube=cube,pipe=pipe,axis=axis,beam=beam,robot=robot,glass=glass,level=level))
    # Footprint plinth, no terrain texture replacement.
    cube('concrete',(fp[0]-.8,.25,fp[1]-.8),(0,.125,0))
    group=len(d['nodes']);d['nodes'].append({'name':lod,'children':[]});d['nodes'][root]['children'].append(group);tri=0;allp=[]
@@ -178,7 +210,7 @@ def build(paths):
  while len(binary)%4:binary.append(0)
  js=json.dumps(d,sort_keys=True,separators=(',',':')).encode();js+=b' '*((-len(js))%4)
  raw=struct.pack('<4sII',b'glTF',2,28+len(js)+len(binary))+struct.pack('<II',len(js),0x4e4f534a)+js+struct.pack('<II',len(binary),0x004e4942)+binary;(out/'pilots.glb').write_bytes(raw)
- manifest={'version':1,'license':'CC0-1.0','url':'generated/pilots.glb','sha256':hashlib.sha256(raw).hexdigest(),'bytes':len(raw),'buildings':audit['pilots'],'sources':sources,'archives':archives,'textures':imageReport,'sourceArchivesAltered':False,'geometrySource':'Quaternius Downtown Standard; original industrial primitives','kenneyUsed':False,'liveRendererEnabled':False,'paidShadersUsed':False,'staticProps':True,'texturePolicy':'Color <=1024; normal/ORM <=512; renormalized normal maps. Original source archive untouched. No synthetic AO.'}
+ manifest={'version':1,'assemblyRevision':'phase2-1','license':'CC0-1.0','url':'generated/pilots.glb','sha256':hashlib.sha256(raw).hexdigest(),'bytes':len(raw),'buildings':audit['pilots'],'sources':sources,'archives':archives,'textures':imageReport,'sourceArchivesAltered':False,'geometrySource':'Quaternius Downtown Standard; original industrial primitives','kenneyUsed':False,'liveRendererEnabled':False,'paidShadersUsed':False,'staticProps':True,'texturePolicy':'Color <=1024; normal/ORM <=512; renormalized normal maps. Original source archive untouched. No synthetic AO.'}
  (ROOT/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n');(ROOT/'downtown-audit.json').write_text(json.dumps(audit,indent=2)+'\n')
  (ROOT/'License_Standard.txt').write_text('\n'.join(l.rstrip()for l in files['License_Standard.txt'].decode().splitlines())+'\n')
  print(json.dumps({'models':len(audit['models']),'textures':len(imageReport),'bytes':len(raw),'pilots':[{x['id']:[l['triangles']for l in x['lods']]}for x in audit['pilots']]}))

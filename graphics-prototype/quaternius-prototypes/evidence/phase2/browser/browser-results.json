@@ -1,0 +1,109 @@
+{
+  "checks": [
+    "Actual GLB, PBR textures and thin-instance batches load",
+    "Close-up screenshots of all three Quaternius-only factories",
+    "Repeated distance LOD changes: stable positions, no requests or mesh creation",
+    "LOD hysteresis prevents immediate threshold reversal",
+    "Quality and count changes retain only the nine bounded lazy templates",
+    "Overlapping selections leave only the latest requested instance",
+    "Canvas, scrollable controls and keyboard reset at three target viewports",
+    "Actual pointer orbit and wheel zoom remain responsive",
+    "No save, preferences or economy persistence",
+    "Original/Quaternius screenshots at identical camera and lighting settings",
+    "Ultra retains real High geometry farther than High without adding a fake fourth LOD",
+    "Stationary camera performs no matrix-buffer uploads",
+    "Distance/frustum culling retains records and restores the same positions",
+    "Pool, instance, texture and scene disposal"
+  ],
+  "errors": [],
+  "warnings": [
+    {
+      "variant": "baseline",
+      "text": "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event"
+    },
+    {
+      "variant": "baseline",
+      "text": "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event"
+    },
+    {
+      "variant": "baseline",
+      "text": "Map Game texture failed to load: assets/textures/buildings/concrete_01/albedo.webp Error while trying to load image: assets/textures/buildings/concrete_01/albedo.webp - Fallback texture was used Event"
+    },
+    {
+      "variant": "baseline",
+      "text": "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+    },
+    {
+      "variant": "baseline",
+      "text": "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+    },
+    {
+      "variant": "baseline",
+      "text": "Map Game texture failed to load: assets/textures/buildings/concrete_01/roughness.webp Error while trying to load image: assets/textures/buildings/concrete_01/roughness.webp - Fallback texture was used Event"
+    },
+    {
+      "variant": "baseline",
+      "text": "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event"
+    },
+    {
+      "variant": "baseline",
+      "text": "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event"
+    },
+    {
+      "variant": "baseline",
+      "text": "Map Game texture failed to load: assets/textures/buildings/concrete_01/normal.webp Error while trying to load image: assets/textures/buildings/concrete_01/normal.webp - Fallback texture was used Event"
+    }
+  ],
+  "failed": [],
+  "http": [],
+  "screenshots": [
+    "steelMill-close.png",
+    "precisionElectronicsWorks-close.png",
+    "machineWorks-close.png",
+    "acidWorks-close.png",
+    "glassWorks-close.png",
+    "semiconductorFab-close.png",
+    "utilityVehicleWorks-close.png",
+    "warehouse-close.png",
+    "batteryWorks-close.png",
+    "steelMill-before.png",
+    "steelMill-after.png",
+    "precisionElectronicsWorks-before.png",
+    "precisionElectronicsWorks-after.png",
+    "machineWorks-before.png",
+    "machineWorks-after.png"
+  ],
+  "sizes": [
+    {
+      "width": 1366,
+      "height": 768,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1366,
+        "height": 768
+      }
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      }
+    }
+  ],
+  "knownBaselineWarnings": 9
+}
