@@ -1,0 +1,2235 @@
+{
+  "startingCommit": "0533adfe03225cbf9d3eeb4dc57b29a86d343d10",
+  "branch": "phase2/graphics-stability-0533adf",
+  "rendererChanged": false,
+  "optimizationRetained": false,
+  "lenovoValidated": false,
+  "runtime": {
+    "node": "24.22.1",
+    "chromium": "156.0.8078.79",
+    "renderer": "SwiftShader",
+    "babylon": "9.32.0"
+  },
+  "tests": {
+    "nodePassed": 15,
+    "pythonPassed": 43,
+    "browserGroupsPassed": 14,
+    "captureCount": 18,
+    "overheadPositiveChecks": 9,
+    "obliqueNegativeChecks": 9,
+    "pixelIdenticalCloseups": 9,
+    "browserErrors": [],
+    "knownCatalogWarnings": 9
+  },
+  "benchmark": {
+    "cases": 16,
+    "runsPerCohortAndCount": 2,
+    "warmupFrames": 24,
+    "frameSamplesPerSegment": 32,
+    "viewport": [
+      1366,
+      768
+    ],
+    "realTimeShadows": false,
+    "interpretation": "Unchanged renderer; before/after timing differences are run variability, not an optimization effect.",
+    "comparison": [
+      {
+        "count": 10,
+        "before": {
+          "label": "expanded9",
+          "count": 10,
+          "runs": 2,
+          "fps": {
+            "median": 14.704800208679856,
+            "min": 13.153567905294688,
+            "max": 16.256032512065023
+          },
+          "p95Ms": {
+            "median": 136.75,
+            "min": 128.90000000002328,
+            "max": 144.59999999997672
+          },
+          "orbitFPS": {
+            "median": 15.06410755354798,
+            "min": 14.574603752959849,
+            "max": 15.553611354136113
+          },
+          "orbitP95Ms": {
+            "median": 127.64999999996508,
+            "min": 87.69999999995343,
+            "max": 167.59999999997672
+          },
+          "readyMs": {
+            "median": 2014.5855870000005,
+            "min": 1905.7868020000005,
+            "max": 2123.3843720000004
+          },
+          "draws": [
+            48,
+            48
+          ],
+          "meshes": [
+            222,
+            222
+          ],
+          "triangles": [
+            2544,
+            2544
+          ],
+          "geometryBytes": [
+            6279376,
+            6279376
+          ],
+          "textureBytes": [
+            43231914.666666664,
+            43231914.666666664
+          ],
+          "staticLongTasks": [
+            [],
+            []
+          ],
+          "orbitLongTasks": [
+            [],
+            []
+          ]
+        },
+        "after": {
+          "label": "expanded9",
+          "count": 10,
+          "runs": 2,
+          "fps": {
+            "median": 14.714224727496845,
+            "min": 13.890697573469048,
+            "max": 15.537751881524642
+          },
+          "p95Ms": {
+            "median": 101.25,
+            "min": 83,
+            "max": 119.5
+          },
+          "orbitFPS": {
+            "median": 15.388941193058834,
+            "min": 15.071590052750896,
+            "max": 15.706292333366772
+          },
+          "orbitP95Ms": {
+            "median": 132.75,
+            "min": 87.30000000004657,
+            "max": 178.19999999995343
+          },
+          "readyMs": {
+            "median": 2019.9941220000019,
+            "min": 2009.035447000002,
+            "max": 2030.9527970000017
+          },
+          "draws": [
+            48,
+            48
+          ],
+          "meshes": [
+            222,
+            222
+          ],
+          "triangles": [
+            2544,
+            2544
+          ],
+          "geometryBytes": [
+            6279376,
+            6279376
+          ],
+          "textureBytes": [
+            43231914.666666664,
+            43231914.66666667
+          ],
+          "staticLongTasks": [
+            [],
+            []
+          ],
+          "orbitLongTasks": [
+            [],
+            []
+          ]
+        }
+      },
+      {
+        "count": 50,
+        "before": {
+          "label": "expanded9",
+          "count": 50,
+          "runs": 2,
+          "fps": {
+            "median": 14.034040992777985,
+            "min": 13.430142275569994,
+            "max": 14.637939709985975
+          },
+          "p95Ms": {
+            "median": 203.45000000001164,
+            "min": 170.59999999997672,
+            "max": 236.30000000004657
+          },
+          "orbitFPS": {
+            "median": 13.534046781447838,
+            "min": 12.638729807654215,
+            "max": 14.429363755241463
+          },
+          "orbitP95Ms": {
+            "median": 160.95000000001164,
+            "min": 93.69999999995343,
+            "max": 228.20000000006985
+          },
+          "readyMs": {
+            "median": 2481.724581999999,
+            "min": 2193.814219,
+            "max": 2769.634944999998
+          },
+          "draws": [
+            46,
+            46
+          ],
+          "meshes": [
+            222,
+            222
+          ],
+          "triangles": [
+            7034,
+            7034
+          ],
+          "geometryBytes": [
+            6279376,
+            6279376
+          ],
+          "textureBytes": [
+            43231914.66666667,
+            43231914.66666667
+          ],
+          "staticLongTasks": [
+            [],
+            []
+          ],
+          "orbitLongTasks": [
+            [],
+            []
+          ]
+        },
+        "after": {
+          "label": "expanded9",
+          "count": 50,
+          "runs": 2,
+          "fps": {
+            "median": 14.493671663045488,
+            "min": 13.749248087995738,
+            "max": 15.238095238095237
+          },
+          "p95Ms": {
+            "median": 118.90000000002328,
+            "min": 109.5999999998603,
+            "max": 128.20000000018626
+          },
+          "orbitFPS": {
+            "median": 14.329317120646085,
+            "min": 14.290818149339346,
+            "max": 14.367816091952822
+          },
+          "orbitP95Ms": {
+            "median": 128.74999999988358,
+            "min": 80.5999999998603,
+            "max": 176.89999999990687
+          },
+          "readyMs": {
+            "median": 2458.113622500001,
+            "min": 2317.736680000002,
+            "max": 2598.490565
+          },
+          "draws": [
+            46,
+            46
+          ],
+          "meshes": [
+            222,
+            222
+          ],
+          "triangles": [
+            7034,
+            7034
+          ],
+          "geometryBytes": [
+            6279376,
+            6279376
+          ],
+          "textureBytes": [
+            43231914.666666664,
+            43231914.666666664
+          ],
+          "staticLongTasks": [
+            [],
+            []
+          ],
+          "orbitLongTasks": [
+            [],
+            []
+          ]
+        }
+      },
+      {
+        "count": 100,
+        "before": {
+          "label": "expanded9",
+          "count": 100,
+          "runs": 2,
+          "fps": {
+            "median": 12.683353733987705,
+            "min": 12.478552487911289,
+            "max": 12.888154980064119
+          },
+          "p95Ms": {
+            "median": 212.84999999997672,
+            "min": 129.79999999993015,
+            "max": 295.9000000000233
+          },
+          "orbitFPS": {
+            "median": 12.200887962036806,
+            "min": 11.925169561004592,
+            "max": 12.476606363069019
+          },
+          "orbitP95Ms": {
+            "median": 121.75,
+            "min": 100.80000000004657,
+            "max": 142.69999999995343
+          },
+          "readyMs": {
+            "median": 2551.2355604999975,
+            "min": 2526.117612999995,
+            "max": 2576.353508
+          },
+          "draws": [
+            46,
+            46
+          ],
+          "meshes": [
+            222,
+            222
+          ],
+          "triangles": [
+            13778,
+            13778
+          ],
+          "geometryBytes": [
+            6279376,
+            6279376
+          ],
+          "textureBytes": [
+            43231914.666666664,
+            43231914.66666667
+          ],
+          "staticLongTasks": [
+            [],
+            []
+          ],
+          "orbitLongTasks": [
+            [],
+            []
+          ]
+        },
+        "after": {
+          "label": "expanded9",
+          "count": 100,
+          "runs": 2,
+          "fps": {
+            "median": 11.913464839038223,
+            "min": 11.439193536856033,
+            "max": 12.387736141220415
+          },
+          "p95Ms": {
+            "median": 230.64999999990687,
+            "min": 182.69999999995343,
+            "max": 278.5999999998603
+          },
+          "orbitFPS": {
+            "median": 12.459266009619789,
+            "min": 11.417561636993089,
+            "max": 13.50097038224649
+          },
+          "orbitP95Ms": {
+            "median": 125.35000000009313,
+            "min": 88.30000000004657,
+            "max": 162.4000000001397
+          },
+          "readyMs": {
+            "median": 2822.564365500002,
+            "min": 2695.669857000001,
+            "max": 2949.4588740000036
+          },
+          "draws": [
+            46,
+            46
+          ],
+          "meshes": [
+            222,
+            222
+          ],
+          "triangles": [
+            13778,
+            13778
+          ],
+          "geometryBytes": [
+            6279376,
+            6279376
+          ],
+          "textureBytes": [
+            43231914.666666664,
+            43231914.66666667
+          ],
+          "staticLongTasks": [
+            [],
+            []
+          ],
+          "orbitLongTasks": [
+            [],
+            []
+          ]
+        }
+      },
+      {
+        "count": 250,
+        "before": {
+          "label": "expanded9",
+          "count": 250,
+          "runs": 2,
+          "fps": {
+            "median": 9.67431262784283,
+            "min": 9.389395851060772,
+            "max": 9.959229404624889
+          },
+          "p95Ms": {
+            "median": 287.20000000001164,
+            "min": 168.90000000002328,
+            "max": 405.5
+          },
+          "orbitFPS": {
+            "median": 9.913107926439803,
+            "min": 9.13424485485102,
+            "max": 10.691970998028586
+          },
+          "orbitP95Ms": {
+            "median": 300.8499999999767,
+            "min": 201.5,
+            "max": 400.19999999995343
+          },
+          "readyMs": {
+            "median": 3891.6009245000023,
+            "min": 3671.26460200001,
+            "max": 4111.937246999994
+          },
+          "draws": [
+            46,
+            46
+          ],
+          "meshes": [
+            222,
+            222
+          ],
+          "triangles": [
+            34096,
+            34096
+          ],
+          "geometryBytes": [
+            6279376,
+            6279376
+          ],
+          "textureBytes": [
+            43231914.666666664,
+            43231914.66666667
+          ],
+          "staticLongTasks": [
+            [],
+            []
+          ],
+          "orbitLongTasks": [
+            [],
+            []
+          ]
+        },
+        "after": {
+          "label": "expanded9",
+          "count": 250,
+          "runs": 2,
+          "fps": {
+            "median": 10.61394466841939,
+            "min": 9.958299620339394,
+            "max": 11.269589716499384
+          },
+          "p95Ms": {
+            "median": 143.04999999993015,
+            "min": 123,
+            "max": 163.0999999998603
+          },
+          "orbitFPS": {
+            "median": 9.870970517658499,
+            "min": 9.671764492534335,
+            "max": 10.070176542782663
+          },
+          "orbitP95Ms": {
+            "median": 133.40000000002328,
+            "min": 114.80000000004657,
+            "max": 152
+          },
+          "readyMs": {
+            "median": 3519.9985279999964,
+            "min": 3485.4425390000106,
+            "max": 3554.5545169999823
+          },
+          "draws": [
+            46,
+            46
+          ],
+          "meshes": [
+            222,
+            222
+          ],
+          "triangles": [
+            34096,
+            34096
+          ],
+          "geometryBytes": [
+            6279376,
+            6279376
+          ],
+          "textureBytes": [
+            43231914.666666664,
+            43231914.666666664
+          ],
+          "staticLongTasks": [
+            [],
+            []
+          ],
+          "orbitLongTasks": [
+            [],
+            []
+          ]
+        }
+      }
+    ]
+  },
+  "profile": {
+    "scope": "Chromium SwiftShader diagnostics with CPU/heap sampling overhead; not the matched FPS benchmark or Lenovo validation.",
+    "samples": 48,
+    "rows": [
+      {
+        "count": 10,
+        "readyMs": 2784.702245,
+        "readyHeap": {
+          "usedSize": 54212332,
+          "totalSize": 91521024,
+          "embedderHeapUsedSize": 1692624,
+          "backingStorageSize": 23287357
+        },
+        "startupLongTasks": [
+          590
+        ],
+        "beforeHeap": {
+          "usedSize": 56051700,
+          "totalSize": 91521024,
+          "embedderHeapUsedSize": 1734504,
+          "backingStorageSize": 23287357
+        },
+        "afterHeap": {
+          "usedSize": 59487512,
+          "totalSize": 94142464,
+          "embedderHeapUsedSize": 1773392,
+          "backingStorageSize": 23292477
+        },
+        "static": {
+          "shadows": false,
+          "variant": "quaternius",
+          "count": 10,
+          "type": "steelMill",
+          "quality": "high",
+          "viewport": [
+            1366,
+            768
+          ],
+          "modelIds": [
+            "steelMill",
+            "precisionElectronicsWorks",
+            "machineWorks",
+            "acidWorks",
+            "glassWorks",
+            "semiconductorFab",
+            "utilityVehicleWorks",
+            "warehouse",
+            "batteryWorks"
+          ],
+          "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+          "camera": {
+            "alpha": -2.1362830044410597,
+            "beta": 1.02,
+            "radius": 720,
+            "target": [
+              0,
+              8,
+              0
+            ]
+          },
+          "startupMs": 1420.8999999999069,
+          "frameSamples": 48,
+          "meanFrameMs": 71.77916666666958,
+          "p95FrameMs": 135.5,
+          "fps": 13.9316189702206,
+          "longTasks": [],
+          "drawCalls": 48,
+          "sceneMeshes": 222,
+          "activeMeshes": 48,
+          "instancedMeshes": 0,
+          "thinInstances": 61,
+          "activeTriangles": 2544,
+          "textureEstimateBytes": 43231914.666666664,
+          "totalVertices": 161976,
+          "cpuFrameMs": 1.5979591836601648,
+          "cpuActiveMeshesMs": 0.5593023255933076,
+          "pool": {
+            "instances": 10,
+            "templates": 9,
+            "availableTemplates": 9,
+            "lodCounts": [
+              8,
+              2,
+              0
+            ],
+            "visibleRecords": 10,
+            "culledRecords": 0,
+            "configuredTriangles": 2498,
+            "batchMeshes": 218,
+            "activeBatches": 44,
+            "sharedMaterials": 37,
+            "sharedTextureFiles": 19,
+            "estimatedTextureRgbaMipBytes": 42467323,
+            "instanceBufferCapacityBytes": 45056,
+            "bufferUploads": 44,
+            "cullingPasses": 1,
+            "poseRevision": 10
+          },
+          "cpuRenderMs": 0.975510204068328,
+          "cpuActiveMs": 0.4857142857199877,
+          "gpuQuerySupported": true,
+          "gpuFrameMs": 60.309071461538466,
+          "gpuSamples": 13,
+          "bufferUploads": 0,
+          "cullingPasses": 0
+        },
+        "orbit": {
+          "shadows": false,
+          "variant": "quaternius",
+          "count": 10,
+          "type": "steelMill",
+          "quality": "high",
+          "viewport": [
+            1366,
+            768
+          ],
+          "modelIds": [
+            "steelMill",
+            "precisionElectronicsWorks",
+            "machineWorks",
+            "acidWorks",
+            "glassWorks",
+            "semiconductorFab",
+            "utilityVehicleWorks",
+            "warehouse",
+            "batteryWorks"
+          ],
+          "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+          "camera": {
+            "alpha": -2.120288569796206,
+            "beta": 1.02,
+            "radius": 720,
+            "target": [
+              0,
+              8,
+              0
+            ]
+          },
+          "startupMs": 1420.8999999999069,
+          "frameSamples": 48,
+          "meanFrameMs": 66.90625,
+          "p95FrameMs": 124.5,
+          "fps": 14.946286781877628,
+          "longTasks": [],
+          "drawCalls": 53,
+          "sceneMeshes": 222,
+          "activeMeshes": 53,
+          "instancedMeshes": 0,
+          "thinInstances": 59,
+          "activeTriangles": 2020,
+          "textureEstimateBytes": 43231914.666666664,
+          "totalVertices": 161976,
+          "cpuFrameMs": 1.661224489803521,
+          "cpuActiveMeshesMs": 0.5066666666711508,
+          "pool": {
+            "instances": 10,
+            "templates": 9,
+            "availableTemplates": 9,
+            "lodCounts": [
+              9,
+              1,
+              0
+            ],
+            "visibleRecords": 10,
+            "culledRecords": 0,
+            "configuredTriangles": 1974,
+            "batchMeshes": 218,
+            "activeBatches": 49,
+            "sharedMaterials": 37,
+            "sharedTextureFiles": 19,
+            "estimatedTextureRgbaMipBytes": 42467323,
+            "instanceBufferCapacityBytes": 50176,
+            "bufferUploads": 56,
+            "cullingPasses": 18,
+            "poseRevision": 10
+          },
+          "cpuRenderMs": 0.9326530612330428,
+          "cpuActiveMs": 0.4122448979534817,
+          "gpuQuerySupported": true,
+          "gpuFrameMs": 60.75681365384615,
+          "gpuSamples": 26,
+          "bufferUploads": 12,
+          "cullingPasses": 17
+        },
+        "cpuExclusiveTop": [
+          [
+            "(idle) @ ",
+            6402170
+          ],
+          [
+            "(program) @ ",
+            961718
+          ],
+          [
+            "_evaluateActiveMeshes @ babylon.js",
+            17493
+          ],
+          [
+            "render @ babylon.js",
+            8286
+          ],
+          [
+            "_getWorldMatrixDeterminant @ babylon.js",
+            7552
+          ],
+          [
+            "get Now @ babylon.js",
+            7044
+          ],
+          [
+            "isReadyForSubMesh @ babylon.js",
+            6141
+          ],
+          [
+            "bindVertexArray @ ",
+            6054
+          ],
+          [
+            "_getInstancesRenderList @ babylon.js",
+            5600
+          ],
+          [
+            "_renderForCamera @ babylon.js",
+            5480
+          ],
+          [
+            "notifyObservers @ babylon.js",
+            5201
+          ],
+          [
+            "_boundRenderFunction @ babylon.js",
+            4792
+          ],
+          [
+            "_cacheMatrix @ babylon.js",
+            4619
+          ],
+          [
+            "bindForSubMesh @ babylon.js",
+            4350
+          ],
+          [
+            "_renderFrame @ babylon.js",
+            3252
+          ],
+          [
+            " @ babylon.js",
+            3024
+          ],
+          [
+            "_updateFloat4ForUniform @ babylon.js",
+            2875
+          ],
+          [
+            "deleteQuery @ ",
+            2483
+          ],
+          [
+            "updateUniform @ babylon.js",
+            2318
+          ],
+          [
+            "metrics @ showroom.js",
+            2287
+          ]
+        ],
+        "sampledSurvivingAllocationSites": [
+          {
+            "fn": "_boundRenderFunction",
+            "url": "babylon.js",
+            "sampledBytes": 98848
+          },
+          {
+            "fn": "(PARSER)",
+            "url": "",
+            "sampledBytes": 32832
+          },
+          {
+            "fn": "_measureFps",
+            "url": "babylon.js",
+            "sampledBytes": 32800
+          },
+          {
+            "fn": "render",
+            "url": "babylon.js",
+            "sampledBytes": 32784
+          }
+        ]
+      },
+      {
+        "count": 50,
+        "readyMs": 2348.306224,
+        "readyHeap": {
+          "usedSize": 55827668,
+          "totalSize": 91783168,
+          "embedderHeapUsedSize": 1715992,
+          "backingStorageSize": 23295612
+        },
+        "startupLongTasks": [
+          270
+        ],
+        "beforeHeap": {
+          "usedSize": 57954932,
+          "totalSize": 92307456,
+          "embedderHeapUsedSize": 1728616,
+          "backingStorageSize": 23295612
+        },
+        "afterHeap": {
+          "usedSize": 60975280,
+          "totalSize": 95715328,
+          "embedderHeapUsedSize": 1796856,
+          "backingStorageSize": 23295612
+        },
+        "static": {
+          "shadows": false,
+          "variant": "quaternius",
+          "count": 50,
+          "type": "steelMill",
+          "quality": "high",
+          "viewport": [
+            1366,
+            768
+          ],
+          "modelIds": [
+            "steelMill",
+            "precisionElectronicsWorks",
+            "machineWorks",
+            "acidWorks",
+            "glassWorks",
+            "semiconductorFab",
+            "utilityVehicleWorks",
+            "warehouse",
+            "batteryWorks"
+          ],
+          "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+          "camera": {
+            "alpha": -2.1362830044410597,
+            "beta": 1.02,
+            "radius": 1440,
+            "target": [
+              0,
+              8,
+              0
+            ]
+          },
+          "startupMs": 1630,
+          "frameSamples": 48,
+          "meanFrameMs": 81.36249999999806,
+          "p95FrameMs": 130.69999999995343,
+          "fps": 12.290674450760777,
+          "longTasks": [],
+          "drawCalls": 46,
+          "sceneMeshes": 222,
+          "activeMeshes": 46,
+          "instancedMeshes": 0,
+          "thinInstances": 283,
+          "activeTriangles": 7034,
+          "textureEstimateBytes": 43231914.666666664,
+          "totalVertices": 161976,
+          "cpuFrameMs": 1.912244897962985,
+          "cpuActiveMeshesMs": 0.5285714285571005,
+          "pool": {
+            "instances": 50,
+            "templates": 9,
+            "availableTemplates": 9,
+            "lodCounts": [
+              50,
+              0,
+              0
+            ],
+            "visibleRecords": 50,
+            "culledRecords": 0,
+            "configuredTriangles": 6908,
+            "batchMeshes": 218,
+            "activeBatches": 42,
+            "sharedMaterials": 37,
+            "sharedTextureFiles": 19,
+            "estimatedTextureRgbaMipBytes": 42467323,
+            "instanceBufferCapacityBytes": 43008,
+            "bufferUploads": 177,
+            "cullingPasses": 5,
+            "poseRevision": 50
+          },
+          "cpuRenderMs": 1.0346938775548218,
+          "cpuActiveMs": 0.5816326530517212,
+          "gpuQuerySupported": true,
+          "gpuFrameMs": 70.5160073076923,
+          "gpuSamples": 13,
+          "bufferUploads": 0,
+          "cullingPasses": 0
+        },
+        "orbit": {
+          "shadows": false,
+          "variant": "quaternius",
+          "count": 50,
+          "type": "steelMill",
+          "quality": "high",
+          "viewport": [
+            1366,
+            768
+          ],
+          "modelIds": [
+            "steelMill",
+            "precisionElectronicsWorks",
+            "machineWorks",
+            "acidWorks",
+            "glassWorks",
+            "semiconductorFab",
+            "utilityVehicleWorks",
+            "warehouse",
+            "batteryWorks"
+          ],
+          "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+          "camera": {
+            "alpha": -2.120288569796206,
+            "beta": 1.02,
+            "radius": 1440,
+            "target": [
+              0,
+              8,
+              0
+            ]
+          },
+          "startupMs": 1630,
+          "frameSamples": 48,
+          "meanFrameMs": 73.55208333333333,
+          "p95FrameMs": 116.70000000018626,
+          "fps": 13.595807959212577,
+          "longTasks": [],
+          "drawCalls": 46,
+          "sceneMeshes": 222,
+          "activeMeshes": 46,
+          "instancedMeshes": 0,
+          "thinInstances": 283,
+          "activeTriangles": 7034,
+          "textureEstimateBytes": 43231914.666666664,
+          "totalVertices": 161976,
+          "cpuFrameMs": 1.7775510204195673,
+          "cpuActiveMeshesMs": 0.483571428549476,
+          "pool": {
+            "instances": 50,
+            "templates": 9,
+            "availableTemplates": 9,
+            "lodCounts": [
+              50,
+              0,
+              0
+            ],
+            "visibleRecords": 50,
+            "culledRecords": 0,
+            "configuredTriangles": 6908,
+            "batchMeshes": 218,
+            "activeBatches": 42,
+            "sharedMaterials": 37,
+            "sharedTextureFiles": 19,
+            "estimatedTextureRgbaMipBytes": 42467323,
+            "instanceBufferCapacityBytes": 43008,
+            "bufferUploads": 177,
+            "cullingPasses": 22,
+            "poseRevision": 50
+          },
+          "cpuRenderMs": 0.9163265306341025,
+          "cpuActiveMs": 0.39999999996388746,
+          "gpuQuerySupported": true,
+          "gpuFrameMs": 70.0833211153846,
+          "gpuSamples": 26,
+          "bufferUploads": 0,
+          "cullingPasses": 17
+        },
+        "cpuExclusiveTop": [
+          [
+            "(idle) @ ",
+            7125010
+          ],
+          [
+            "(program) @ ",
+            972979
+          ],
+          [
+            "_evaluateActiveMeshes @ babylon.js",
+            27571
+          ],
+          [
+            "isReadyForSubMesh @ babylon.js",
+            14631
+          ],
+          [
+            "_boundRenderFunction @ babylon.js",
+            10372
+          ],
+          [
+            "render @ babylon.js",
+            9074
+          ],
+          [
+            "update @ babylon.js",
+            8312
+          ],
+          [
+            "(garbage collector) @ ",
+            7686
+          ],
+          [
+            "sync @ renderer.js",
+            6039
+          ],
+          [
+            "bindVertexArray @ ",
+            5159
+          ],
+          [
+            "metrics @ showroom.js",
+            4720
+          ],
+          [
+            "_renderFrame @ babylon.js",
+            4665
+          ],
+          [
+            "_RenderSorted @ babylon.js",
+            4432
+          ],
+          [
+            "_renderForCamera @ babylon.js",
+            4388
+          ],
+          [
+            "transferToEffect @ babylon.js",
+            4385
+          ],
+          [
+            "uniformMatrix4fv @ ",
+            4379
+          ],
+          [
+            " @ babylon.js",
+            3880
+          ],
+          [
+            "bindBufferBase @ ",
+            3817
+          ],
+          [
+            "get Now @ babylon.js",
+            3276
+          ],
+          [
+            "_bindSamplerUniformToChannel @ babylon.js",
+            3271
+          ]
+        ],
+        "sampledSurvivingAllocationSites": [
+          {
+            "fn": "get _drawWrapper",
+            "url": "babylon.js",
+            "sampledBytes": 32832
+          },
+          {
+            "fn": "OM.ks.captureGPUFrameTime",
+            "url": "babylon.js",
+            "sampledBytes": 32800
+          },
+          {
+            "fn": "getRenderWidth",
+            "url": "babylon.js",
+            "sampledBytes": 32784
+          }
+        ]
+      },
+      {
+        "count": 100,
+        "readyMs": 2740.2360259999987,
+        "readyHeap": {
+          "usedSize": 58533908,
+          "totalSize": 94142464,
+          "embedderHeapUsedSize": 1737128,
+          "backingStorageSize": 23318907
+        },
+        "startupLongTasks": [
+          249
+        ],
+        "beforeHeap": {
+          "usedSize": 60192052,
+          "totalSize": 95191040,
+          "embedderHeapUsedSize": 1763720,
+          "backingStorageSize": 23318907
+        },
+        "afterHeap": {
+          "usedSize": 64028876,
+          "totalSize": 98598912,
+          "embedderHeapUsedSize": 1818016,
+          "backingStorageSize": 23318907
+        },
+        "static": {
+          "shadows": false,
+          "variant": "quaternius",
+          "count": 100,
+          "type": "steelMill",
+          "quality": "high",
+          "viewport": [
+            1366,
+            768
+          ],
+          "modelIds": [
+            "steelMill",
+            "precisionElectronicsWorks",
+            "machineWorks",
+            "acidWorks",
+            "glassWorks",
+            "semiconductorFab",
+            "utilityVehicleWorks",
+            "warehouse",
+            "batteryWorks"
+          ],
+          "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+          "camera": {
+            "alpha": -2.1362830044410597,
+            "beta": 1.02,
+            "radius": 1800,
+            "target": [
+              0,
+              8,
+              0
+            ]
+          },
+          "startupMs": 1932.7000000001863,
+          "frameSamples": 48,
+          "meanFrameMs": 81.08749999999903,
+          "p95FrameMs": 147.5,
+          "fps": 12.332357021735927,
+          "longTasks": [],
+          "drawCalls": 46,
+          "sceneMeshes": 222,
+          "activeMeshes": 46,
+          "instancedMeshes": 0,
+          "thinInstances": 562,
+          "activeTriangles": 13778,
+          "textureEstimateBytes": 43231914.666666664,
+          "totalVertices": 161976,
+          "cpuFrameMs": 1.9265306122382457,
+          "cpuActiveMeshesMs": 0.5322916666603609,
+          "pool": {
+            "instances": 100,
+            "templates": 9,
+            "availableTemplates": 9,
+            "lodCounts": [
+              99,
+              0,
+              0
+            ],
+            "visibleRecords": 99,
+            "culledRecords": 1,
+            "configuredTriangles": 13552,
+            "batchMeshes": 218,
+            "activeBatches": 42,
+            "sharedMaterials": 37,
+            "sharedTextureFiles": 19,
+            "estimatedTextureRgbaMipBytes": 42467323,
+            "instanceBufferCapacityBytes": 43008,
+            "bufferUploads": 356,
+            "cullingPasses": 9,
+            "poseRevision": 100
+          },
+          "cpuRenderMs": 1.2510204081357057,
+          "cpuActiveMs": 0.48571428570098113,
+          "gpuQuerySupported": true,
+          "gpuFrameMs": 68.832588,
+          "gpuSamples": 13,
+          "bufferUploads": 0,
+          "cullingPasses": 0
+        },
+        "orbit": {
+          "shadows": false,
+          "variant": "quaternius",
+          "count": 100,
+          "type": "steelMill",
+          "quality": "high",
+          "viewport": [
+            1366,
+            768
+          ],
+          "modelIds": [
+            "steelMill",
+            "precisionElectronicsWorks",
+            "machineWorks",
+            "acidWorks",
+            "glassWorks",
+            "semiconductorFab",
+            "utilityVehicleWorks",
+            "warehouse",
+            "batteryWorks"
+          ],
+          "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+          "camera": {
+            "alpha": -2.120288569796206,
+            "beta": 1.02,
+            "radius": 1800,
+            "target": [
+              0,
+              8,
+              0
+            ]
+          },
+          "startupMs": 1932.7000000001863,
+          "frameSamples": 48,
+          "meanFrameMs": 79.33333333333333,
+          "p95FrameMs": 154,
+          "fps": 12.605042016806724,
+          "longTasks": [],
+          "drawCalls": 46,
+          "sceneMeshes": 222,
+          "activeMeshes": 46,
+          "instancedMeshes": 0,
+          "thinInstances": 562,
+          "activeTriangles": 13778,
+          "textureEstimateBytes": 43231914.666666664,
+          "totalVertices": 161976,
+          "cpuFrameMs": 2.8387755102012306,
+          "cpuActiveMeshesMs": 0.49793103447601456,
+          "pool": {
+            "instances": 100,
+            "templates": 9,
+            "availableTemplates": 9,
+            "lodCounts": [
+              99,
+              0,
+              0
+            ],
+            "visibleRecords": 99,
+            "culledRecords": 1,
+            "configuredTriangles": 13552,
+            "batchMeshes": 218,
+            "activeBatches": 42,
+            "sharedMaterials": 37,
+            "sharedTextureFiles": 19,
+            "estimatedTextureRgbaMipBytes": 42467323,
+            "instanceBufferCapacityBytes": 43008,
+            "bufferUploads": 366,
+            "cullingPasses": 29,
+            "poseRevision": 100
+          },
+          "cpuRenderMs": 1.8244897959164668,
+          "cpuActiveMs": 0.43061224489035654,
+          "gpuQuerySupported": true,
+          "gpuFrameMs": 69.35756514285715,
+          "gpuSamples": 28,
+          "bufferUploads": 10,
+          "cullingPasses": 20
+        },
+        "cpuExclusiveTop": [
+          [
+            "(idle) @ ",
+            7408750
+          ],
+          [
+            "(program) @ ",
+            782554
+          ],
+          [
+            "uniformMatrix4fv @ ",
+            23914
+          ],
+          [
+            "_evaluateActiveMeshes @ babylon.js",
+            11108
+          ],
+          [
+            "render @ babylon.js",
+            10947
+          ],
+          [
+            "_boundRenderFunction @ babylon.js",
+            9323
+          ],
+          [
+            "bindForSubMesh @ babylon.js",
+            8359
+          ],
+          [
+            "_renderForCamera @ babylon.js",
+            7398
+          ],
+          [
+            "_renderFrame @ babylon.js",
+            7006
+          ],
+          [
+            "isArrayBuffer @ ",
+            6874
+          ],
+          [
+            "drawElementsInstanced @ ",
+            6777
+          ],
+          [
+            "bindSamplers @ babylon.js",
+            6417
+          ],
+          [
+            "getTextureMatrix @ babylon.js",
+            6295
+          ],
+          [
+            "Uu @ babylon.js",
+            6152
+          ],
+          [
+            "_processRendering @ babylon.js",
+            5770
+          ],
+          [
+            "_getDrawWrapper @ babylon.js",
+            5196
+          ],
+          [
+            "_measureFps @ babylon.js",
+            5113
+          ],
+          [
+            "metrics @ showroom.js",
+            4800
+          ],
+          [
+            "_checkInputs @ babylon.js",
+            4296
+          ],
+          [
+            "_processSubCameras @ babylon.js",
+            4212
+          ]
+        ],
+        "sampledSurvivingAllocationSites": [
+          {
+            "fn": "OM.ks._getTimeQueryResult",
+            "url": "babylon.js",
+            "sampledBytes": 32844
+          },
+          {
+            "fn": "_boundRenderFunction",
+            "url": "babylon.js",
+            "sampledBytes": 32832
+          },
+          {
+            "fn": "OM.ks.captureGPUFrameTime",
+            "url": "babylon.js",
+            "sampledBytes": 32832
+          },
+          {
+            "fn": "(PARSER)",
+            "url": "",
+            "sampledBytes": 32832
+          }
+        ]
+      },
+      {
+        "count": 250,
+        "readyMs": 3496.667881000001,
+        "readyHeap": {
+          "usedSize": 45145052,
+          "totalSize": 103194624,
+          "embedderHeapUsedSize": 1805296,
+          "backingStorageSize": 23547966
+        },
+        "startupLongTasks": [
+          262
+        ],
+        "beforeHeap": {
+          "usedSize": 46779576,
+          "totalSize": 103718912,
+          "embedderHeapUsedSize": 1834536,
+          "backingStorageSize": 23547966
+        },
+        "afterHeap": {
+          "usedSize": 51369904,
+          "totalSize": 104243200,
+          "embedderHeapUsedSize": 2082144,
+          "backingStorageSize": 23547966
+        },
+        "static": {
+          "shadows": false,
+          "variant": "quaternius",
+          "count": 250,
+          "type": "steelMill",
+          "quality": "high",
+          "viewport": [
+            1366,
+            768
+          ],
+          "modelIds": [
+            "steelMill",
+            "precisionElectronicsWorks",
+            "machineWorks",
+            "acidWorks",
+            "glassWorks",
+            "semiconductorFab",
+            "utilityVehicleWorks",
+            "warehouse",
+            "batteryWorks"
+          ],
+          "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+          "camera": {
+            "alpha": -2.1362830044410597,
+            "beta": 1.02,
+            "radius": 2880,
+            "target": [
+              0,
+              8,
+              0
+            ]
+          },
+          "startupMs": 2833.3000000000466,
+          "frameSamples": 48,
+          "meanFrameMs": 96.79374999999709,
+          "p95FrameMs": 124.4000000001397,
+          "fps": 10.331245560793233,
+          "longTasks": [],
+          "drawCalls": 46,
+          "sceneMeshes": 222,
+          "activeMeshes": 46,
+          "instancedMeshes": 0,
+          "thinInstances": 1399,
+          "activeTriangles": 34096,
+          "textureEstimateBytes": 43231914.666666664,
+          "totalVertices": 161976,
+          "cpuFrameMs": 2.6448979591903257,
+          "cpuActiveMeshesMs": 0.462962962975898,
+          "pool": {
+            "instances": 250,
+            "templates": 9,
+            "availableTemplates": 9,
+            "lodCounts": [
+              246,
+              0,
+              0
+            ],
+            "visibleRecords": 246,
+            "culledRecords": 4,
+            "configuredTriangles": 33570,
+            "batchMeshes": 218,
+            "activeBatches": 42,
+            "sharedMaterials": 37,
+            "sharedTextureFiles": 19,
+            "estimatedTextureRgbaMipBytes": 42467323,
+            "instanceBufferCapacityBytes": 86016,
+            "bufferUploads": 878,
+            "cullingPasses": 21,
+            "poseRevision": 250
+          },
+          "cpuRenderMs": 2.0714285714380747,
+          "cpuActiveMs": 0.4387755102040816,
+          "gpuQuerySupported": true,
+          "gpuFrameMs": 90.2659725,
+          "gpuSamples": 12,
+          "bufferUploads": 0,
+          "cullingPasses": 0
+        },
+        "orbit": {
+          "shadows": false,
+          "variant": "quaternius",
+          "count": 250,
+          "type": "steelMill",
+          "quality": "high",
+          "viewport": [
+            1366,
+            768
+          ],
+          "modelIds": [
+            "steelMill",
+            "precisionElectronicsWorks",
+            "machineWorks",
+            "acidWorks",
+            "glassWorks",
+            "semiconductorFab",
+            "utilityVehicleWorks",
+            "warehouse",
+            "batteryWorks"
+          ],
+          "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+          "camera": {
+            "alpha": -2.120288569796206,
+            "beta": 1.02,
+            "radius": 2880,
+            "target": [
+              0,
+              8,
+              0
+            ]
+          },
+          "startupMs": 2833.3000000000466,
+          "frameSamples": 48,
+          "meanFrameMs": 100.90833333333528,
+          "p95FrameMs": 184.30000000004657,
+          "fps": 9.90998430919132,
+          "longTasks": [],
+          "drawCalls": 46,
+          "sceneMeshes": 222,
+          "activeMeshes": 46,
+          "instancedMeshes": 0,
+          "thinInstances": 1394,
+          "activeTriangles": 34002,
+          "textureEstimateBytes": 43231914.666666664,
+          "totalVertices": 161976,
+          "cpuFrameMs": 2.251020408173719,
+          "cpuActiveMeshesMs": 0.46178343950824186,
+          "pool": {
+            "instances": 250,
+            "templates": 9,
+            "availableTemplates": 9,
+            "lodCounts": [
+              245,
+              0,
+              0
+            ],
+            "visibleRecords": 245,
+            "culledRecords": 5,
+            "configuredTriangles": 33476,
+            "batchMeshes": 218,
+            "activeBatches": 42,
+            "sharedMaterials": 37,
+            "sharedTextureFiles": 19,
+            "estimatedTextureRgbaMipBytes": 42467323,
+            "instanceBufferCapacityBytes": 86016,
+            "bufferUploads": 891,
+            "cullingPasses": 42,
+            "poseRevision": 250
+          },
+          "cpuRenderMs": 1.114285714287615,
+          "cpuActiveMs": 0.4591836734978976,
+          "gpuQuerySupported": true,
+          "gpuFrameMs": 91.5980844,
+          "gpuSamples": 25,
+          "bufferUploads": 13,
+          "cullingPasses": 21
+        },
+        "cpuExclusiveTop": [
+          [
+            "(idle) @ ",
+            9280335
+          ],
+          [
+            "(program) @ ",
+            763431
+          ],
+          [
+            "drawElementsInstanced @ ",
+            65936
+          ],
+          [
+            "_evaluateActiveMeshes @ babylon.js",
+            24281
+          ],
+          [
+            "requestAnimationFrame @ ",
+            13498
+          ],
+          [
+            "_boundRenderFunction @ babylon.js",
+            10299
+          ],
+          [
+            "render @ babylon.js",
+            9557
+          ],
+          [
+            "uniformMatrix4fv @ ",
+            7779
+          ],
+          [
+            "bindVertexArray @ ",
+            7740
+          ],
+          [
+            "isReadyForSubMesh @ babylon.js",
+            7424
+          ],
+          [
+            "_getWorldMatrixDeterminant @ babylon.js",
+            7070
+          ],
+          [
+            "get _drawWrapper @ babylon.js",
+            6379
+          ],
+          [
+            "sync @ renderer.js",
+            6183
+          ],
+          [
+            "_RestoreAttachments @ babylon.js",
+            4524
+          ],
+          [
+            "isInFrustum @ babylon.js",
+            4409
+          ],
+          [
+            " @ renderer.js",
+            4246
+          ],
+          [
+            "bindForSubMesh @ babylon.js",
+            3694
+          ],
+          [
+            "isReady @ babylon.js",
+            3312
+          ],
+          [
+            "_setTexture @ babylon.js",
+            3295
+          ],
+          [
+            "setTexture @ babylon.js",
+            3278
+          ]
+        ],
+        "sampledSurvivingAllocationSites": [
+          {
+            "fn": "_boundRenderFunction",
+            "url": "babylon.js",
+            "sampledBytes": 33280
+          },
+          {
+            "fn": "get _drawWrapper",
+            "url": "babylon.js",
+            "sampledBytes": 33152
+          },
+          {
+            "fn": "setFloat",
+            "url": "babylon.js",
+            "sampledBytes": 32900
+          }
+        ],
+        "halfResolutionDiagnostic": {
+          "shadows": false,
+          "variant": "quaternius",
+          "count": 250,
+          "type": "steelMill",
+          "quality": "high",
+          "viewport": [
+            1366,
+            768
+          ],
+          "modelIds": [
+            "steelMill",
+            "precisionElectronicsWorks",
+            "machineWorks",
+            "acidWorks",
+            "glassWorks",
+            "semiconductorFab",
+            "utilityVehicleWorks",
+            "warehouse",
+            "batteryWorks"
+          ],
+          "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+          "camera": {
+            "alpha": -2.120288569796206,
+            "beta": 1.02,
+            "radius": 2880,
+            "target": [
+              0,
+              8,
+              0
+            ]
+          },
+          "startupMs": 2833.3000000000466,
+          "frameSamples": 48,
+          "meanFrameMs": 52.166666666666664,
+          "p95FrameMs": 94.10000000009313,
+          "fps": 19.16932907348243,
+          "longTasks": [],
+          "drawCalls": 46,
+          "sceneMeshes": 222,
+          "activeMeshes": 46,
+          "instancedMeshes": 0,
+          "thinInstances": 1399,
+          "activeTriangles": 34096,
+          "textureEstimateBytes": 43231914.666666664,
+          "totalVertices": 161976,
+          "cpuFrameMs": 0.975510204096838,
+          "cpuActiveMeshesMs": 0.41391304348413227,
+          "pool": {
+            "instances": 250,
+            "templates": 9,
+            "availableTemplates": 9,
+            "lodCounts": [
+              246,
+              0,
+              0
+            ],
+            "visibleRecords": 246,
+            "culledRecords": 4,
+            "configuredTriangles": 33570,
+            "batchMeshes": 218,
+            "activeBatches": 42,
+            "sharedMaterials": 37,
+            "sharedTextureFiles": 19,
+            "estimatedTextureRgbaMipBytes": 42467323,
+            "instanceBufferCapacityBytes": 86016,
+            "bufferUploads": 896,
+            "cullingPasses": 43,
+            "poseRevision": 250
+          },
+          "cpuRenderMs": 0.5142857143037706,
+          "cpuActiveMs": 0.318367346902663,
+          "gpuQuerySupported": true,
+          "gpuFrameMs": 72.81243935555555,
+          "gpuSamples": 45,
+          "bufferUploads": 0,
+          "cullingPasses": 0
+        }
+      }
+    ],
+    "assetLoads": [
+      {
+        "selection": "all",
+        "loadMs": 454.29999999981374,
+        "meshes": 219,
+        "geometryBytes": 6276992,
+        "textureEstimateBytes": 42729472,
+        "textures": 26
+      },
+      {
+        "selection": "steelMill",
+        "loadMs": 314.60000000009313,
+        "meshes": 25,
+        "geometryBytes": 2281136,
+        "textureEstimateBytes": 42467328,
+        "textures": 18
+      },
+      {
+        "selection": "acidWorks",
+        "loadMs": 232.5,
+        "meshes": 23,
+        "geometryBytes": 234224,
+        "textureEstimateBytes": 34078719.99999999,
+        "textures": 15
+      }
+    ]
+  },
+  "captures": [
+    {
+      "id": "steelMill",
+      "view": "close",
+      "file": "steelMill-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 171.1,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "forward": [
+        0.45658230887538404,
+        -0.5233659756411221,
+        0.7194585816871183
+      ],
+      "triangles": 63140,
+      "modelTriangles": 31716
+    },
+    {
+      "id": "steelMill",
+      "view": "overhead",
+      "file": "steelMill-overhead.png",
+      "camera": {
+        "alpha": -1.5707963267948966,
+        "beta": 0,
+        "radius": 171.1,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "forward": [
+        -6.123233938272813e-21,
+        -0.9999999950000003,
+        9.999999697378756e-05
+      ],
+      "triangles": 63140,
+      "modelTriangles": 31716
+    },
+    {
+      "id": "precisionElectronicsWorks",
+      "view": "close",
+      "file": "precisionElectronicsWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 116,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "forward": [
+        0.45658230887538404,
+        -0.5233659756411221,
+        0.7194585816871183
+      ],
+      "triangles": 16620,
+      "modelTriangles": 8384
+    },
+    {
+      "id": "precisionElectronicsWorks",
+      "view": "overhead",
+      "file": "precisionElectronicsWorks-overhead.png",
+      "camera": {
+        "alpha": -1.5707963267948966,
+        "beta": 0,
+        "radius": 116,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "forward": [
+        -6.123233938272813e-21,
+        -0.9999999950000003,
+        9.999999697378756e-05
+      ],
+      "triangles": 16620,
+      "modelTriangles": 8384
+    },
+    {
+      "id": "machineWorks",
+      "view": "close",
+      "file": "machineWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 92.8,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "forward": [
+        0.45658230887538404,
+        -0.5233659756411221,
+        0.7194585816871183
+      ],
+      "triangles": 32852,
+      "modelTriangles": 16498
+    },
+    {
+      "id": "machineWorks",
+      "view": "overhead",
+      "file": "machineWorks-overhead.png",
+      "camera": {
+        "alpha": -1.5707963267948966,
+        "beta": 0,
+        "radius": 92.8,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "forward": [
+        -6.123233938272813e-21,
+        -0.9999999950000003,
+        9.999999697378756e-05
+      ],
+      "triangles": 32852,
+      "modelTriangles": 16498
+    },
+    {
+      "id": "acidWorks",
+      "view": "close",
+      "file": "acidWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 81.2,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "forward": [
+        0.45658230887538404,
+        -0.5233659756411221,
+        0.7194585816871183
+      ],
+      "triangles": 4692,
+      "modelTriangles": 2344
+    },
+    {
+      "id": "acidWorks",
+      "view": "overhead",
+      "file": "acidWorks-overhead.png",
+      "camera": {
+        "alpha": -1.5707963267948966,
+        "beta": 0,
+        "radius": 81.2,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "forward": [
+        -6.123233938272813e-21,
+        -0.9999999950000003,
+        9.999999697378756e-05
+      ],
+      "triangles": 4692,
+      "modelTriangles": 2344
+    },
+    {
+      "id": "glassWorks",
+      "view": "close",
+      "file": "glassWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 81.2,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "forward": [
+        0.45658230887538404,
+        -0.5233659756411221,
+        0.7194585816871183
+      ],
+      "triangles": 13624,
+      "modelTriangles": 6848
+    },
+    {
+      "id": "glassWorks",
+      "view": "overhead",
+      "file": "glassWorks-overhead.png",
+      "camera": {
+        "alpha": -1.5707963267948966,
+        "beta": 0,
+        "radius": 81.2,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "forward": [
+        -6.123233938272813e-21,
+        -0.9999999950000003,
+        9.999999697378756e-05
+      ],
+      "triangles": 13624,
+      "modelTriangles": 6848
+    },
+    {
+      "id": "semiconductorFab",
+      "view": "close",
+      "file": "semiconductorFab-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 81.2,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "forward": [
+        0.45658230887538404,
+        -0.5233659756411221,
+        0.7194585816871183
+      ],
+      "triangles": 5672,
+      "modelTriangles": 2852
+    },
+    {
+      "id": "semiconductorFab",
+      "view": "overhead",
+      "file": "semiconductorFab-overhead.png",
+      "camera": {
+        "alpha": -1.5707963267948966,
+        "beta": 0,
+        "radius": 81.2,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "forward": [
+        -6.123233938272813e-21,
+        -0.9999999950000003,
+        9.999999697378756e-05
+      ],
+      "triangles": 5672,
+      "modelTriangles": 2852
+    },
+    {
+      "id": "utilityVehicleWorks",
+      "view": "close",
+      "file": "utilityVehicleWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 92.8,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "forward": [
+        0.45658230887538404,
+        -0.5233659756411221,
+        0.7194585816871183
+      ],
+      "triangles": 12220,
+      "modelTriangles": 6166
+    },
+    {
+      "id": "utilityVehicleWorks",
+      "view": "overhead",
+      "file": "utilityVehicleWorks-overhead.png",
+      "camera": {
+        "alpha": -1.5707963267948966,
+        "beta": 0,
+        "radius": 92.8,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "forward": [
+        -6.123233938272813e-21,
+        -0.9999999950000003,
+        9.999999697378756e-05
+      ],
+      "triangles": 12220,
+      "modelTriangles": 6166
+    },
+    {
+      "id": "warehouse",
+      "view": "close",
+      "file": "warehouse-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 133.4,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "forward": [
+        0.45658230887538404,
+        -0.5233659756411221,
+        0.7194585816871183
+      ],
+      "triangles": 9476,
+      "modelTriangles": 4772
+    },
+    {
+      "id": "warehouse",
+      "view": "overhead",
+      "file": "warehouse-overhead.png",
+      "camera": {
+        "alpha": -1.5707963267948966,
+        "beta": 0,
+        "radius": 133.4,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "forward": [
+        -6.123233938272813e-21,
+        -0.9999999950000003,
+        9.999999697378756e-05
+      ],
+      "triangles": 9476,
+      "modelTriangles": 4772
+    },
+    {
+      "id": "batteryWorks",
+      "view": "close",
+      "file": "batteryWorks-close.png",
+      "camera": {
+        "alpha": -2.1362830044410597,
+        "beta": 1.02,
+        "radius": 92.8,
+        "target": [
+          0,
+          8,
+          0
+        ]
+      },
+      "forward": [
+        0.45658230887538404,
+        -0.5233659756411221,
+        0.7194585816871183
+      ],
+      "triangles": 8028,
+      "modelTriangles": 4028
+    },
+    {
+      "id": "batteryWorks",
+      "view": "overhead",
+      "file": "batteryWorks-overhead.png",
+      "camera": {
+        "alpha": -1.5707963267948966,
+        "beta": 0,
+        "radius": 92.8,
+        "target": [
+          0,
+          4,
+          0
+        ]
+      },
+      "forward": [
+        -6.123233938272813e-21,
+        -0.9999999950000003,
+        9.999999697378756e-05
+      ],
+      "triangles": 8028,
+      "modelTriangles": 4028
+    }
+  ],
+  "preservedArtifacts": [
+    {
+      "url": "generated/pilots.glb",
+      "sha256": "5499abf38b47eed257b62432331394dab8f9fdf492cbbceb77aa76f941ad0fda"
+    },
+    {
+      "url": "generated/textures/Far-Brick_Plain_3.png",
+      "sha256": "b004135f4201e3b5d119a184a40c966de992a52c18e0529ae5f2e363f2b71f1d"
+    },
+    {
+      "url": "generated/textures/T_Concrete_Normal-normal.png",
+      "sha256": "2dccb9951002d03c7b0d828edc345e85c0002db4af3d69a723b09dba86481b4c"
+    },
+    {
+      "url": "generated/textures/T_Concrete_Asphalt_BaseColor.png",
+      "sha256": "2e011a71153b6b951db97a9cfa08d5044d25f1000a6e29fe0773b2ac56919799"
+    },
+    {
+      "url": "generated/textures/T_Concrete_ORM.png",
+      "sha256": "d14e3e961a259a83f98bef48607284224d1534df4abe9fab6f666227c21fbb29"
+    },
+    {
+      "url": "generated/textures/Far-Brick_Window_Square_Single.png",
+      "sha256": "9a0e6996d122fb9f821bee15f8cbe45a9983a52bfe5ed0698816d7cc0d91f026"
+    },
+    {
+      "url": "generated/textures/T_Ornaments_Normal-normal.png",
+      "sha256": "774e56cd3506010e92a17bc10b92315825eb0583344f4779c166c1612bcf4b3d"
+    },
+    {
+      "url": "generated/textures/T_Ornaments_BaseColor.png",
+      "sha256": "c84658956ef28fd2f8e4fa4533b07499e5d93630f3b8b72011ebfd67fb197338"
+    },
+    {
+      "url": "generated/textures/T_Ornaments_ORM.png",
+      "sha256": "d70d382761b21c4de1f3a3dfe47b319f78073f98a52e49f19daccf6dd9a168b1"
+    },
+    {
+      "url": "generated/textures/T_Trim_Normal-normal.png",
+      "sha256": "3b27354e1348039c911141c5dd41f0540c3ed9768a2e28c6eeed2a3391c4e2e3"
+    },
+    {
+      "url": "generated/textures/T_Trim_BaseColor.png",
+      "sha256": "18a3a3b18ed7f7a6086fa3b25db11b903f80b86176d84fce8fbc4784864b845b"
+    },
+    {
+      "url": "generated/textures/T_Trim_ORM.png",
+      "sha256": "61dd09306e984854e5dabe5b62c4406280ef08097c590796e5cfe066839e2d76"
+    },
+    {
+      "url": "generated/textures/T_RedBrick_Normal-normal.png",
+      "sha256": "c16e0a59bbee285e59461d8f256684710588e4cb980c9cb38a159289cf14abd3"
+    },
+    {
+      "url": "generated/textures/T_RedBrick_BaseColor.png",
+      "sha256": "91e242b1d6c4f83ca092c9d3e5add30a066b446cd1e39857121fae3ae35c013b"
+    },
+    {
+      "url": "generated/textures/T_RedBrick_ORM.png",
+      "sha256": "002eba6fea372f5c559f4c1c80c8a54ac41b03b94dcc20586c21af9f254dfd0c"
+    },
+    {
+      "url": "generated/textures/T_MetalConcrete_Normal-normal.png",
+      "sha256": "7eae1484490980f113e3e0a175b6ee57cd34c828e06558519f35d8324899c7c9"
+    },
+    {
+      "url": "generated/textures/T_MetalConcrete_BaseColor.png",
+      "sha256": "4b1768888a2d2a2e466dacc65783d6c54d97781622fb48c9f80c4a3b7abeb989"
+    },
+    {
+      "url": "generated/textures/T_MetalConcrete_ORM.png",
+      "sha256": "44a54c7fed570988d5acf01e94428e6fd2c950c012d2c3b54e12cd007bdd8a0c"
+    },
+    {
+      "url": "generated/textures/Far-Metal_Plain_3.png",
+      "sha256": "e9573c03ae8cfecdb5444645adb4c9b819abc031123a4ebe5f65c1b886341ca9"
+    },
+    {
+      "url": "generated/textures/Far-Metal_FirstFloor_Window.png",
+      "sha256": "f5f0df316b49e883a6e2b7886378dcd5ce8bcdc1f6e096e4b7fc3bb8630d327a"
+    }
+  ],
+  "localRawEvidence": "evidence/stability-phase2/ (not committed)"
+}
