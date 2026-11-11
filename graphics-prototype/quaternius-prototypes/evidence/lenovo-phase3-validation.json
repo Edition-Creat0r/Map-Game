@@ -1,0 +1,30 @@
+{
+  "sourceCommit": "8b5d6a99967b83a831cd3d640492d7d3b0746ee0",
+  "zip": "Map-Game-Lenovo-8b5d6a9.zip",
+  "sha256": "d6f755711ba9f7643523a8e2b8e1bf08f5591a5cf0d0c594175b21f13bc943b4",
+  "zipBytes": 9698299,
+  "files": 58,
+  "cloudHarnessOnly": true,
+  "lenovoValidated": false,
+  "nodeTestsPassed": 15,
+  "smokeCounts": [
+    10,
+    50,
+    100,
+    250
+  ],
+  "captureChecksPassed": 18,
+  "positiveOverheadChecks": 9,
+  "negativeObliqueChecks": 9,
+  "pageErrors": [],
+  "failedRequests": [],
+  "warnings": [],
+  "sourceModelsPreserved": 9,
+  "approvedTexturesPreserved": 19,
+  "knownSetupCorrections": [
+    "Directory URL index routing fixed after initial smoke failure",
+    "Geometry estimator skips unavailable CPU buffers; GPU memory is not measured"
+  ],
+  "windowsPowerShellExecuted": false,
+  "githubPushPerformed": false
+}

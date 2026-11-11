@@ -1,0 +1,8 @@
+{
+  "name": "map-game-lenovo-validation",
+  "version": "0.0.0",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "dependencies": { "playwright-core": "1.62.1" },
+  "scripts": { "verify": "node verify.cjs", "serve": "node serve.cjs", "test:lenovo": "node run.cjs" }
+}
