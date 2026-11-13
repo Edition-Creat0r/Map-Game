@@ -1,0 +1,39 @@
+{
+  "baseline": "7981452744a5f23016819c45dd521b8f773ceb36",
+  "branch": "feature/0.4.4-infrastructure-local",
+  "scope": "Checkpoint 1 isolated prototype only",
+  "coreTests": {
+    "passed": 30,
+    "failed": 0
+  },
+  "browser": {
+    "checks": 12,
+    "errors": [],
+    "screenshots": [
+      "01-ready.png",
+      "02-obstacle-detour-review.png",
+      "03-compatible-snap.png",
+      "04-confirmed-mock-construction.png",
+      "05-waypoint-review.png",
+      "06-blocked.png",
+      "07-special-crossing.png",
+      "08-insufficient-funds.png",
+      "09-mobile.png"
+    ],
+    "previewTimingMs": {
+      "samples": 40,
+      "median": 15.699999988079071,
+      "p95": 20.099999994039536,
+      "max": 25.599999994039536
+    }
+  },
+  "inheritedTests": {
+    "canonicalBaselinePassed": 172,
+    "canonicalBaselineFailed": 0,
+    "windowsCheckoutPassed": 171,
+    "windowsCheckoutFailed": 1,
+    "note": "Existing CRLF versus LF raw-string immutability assertion; no inherited files altered"
+  },
+  "allNewFilesWithin": "infrastructure-prototype/",
+  "persistence": "none; mock in-memory store only"
+}

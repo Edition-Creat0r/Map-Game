@@ -1,0 +1,9 @@
+{
+  "baseline": "7981452744a5f23016819c45dd521b8f773ceb36",
+  "trackedChanges": [],
+  "canonicalBaselineExit": 0,
+  "manifestCheckoutSha256": "11dcb380dba3afcc09c022dc69f934b9fcf449be1ee6975c42bab1611bf5c98a",
+  "manifestGitSha256": "4968337c667ad4b05737314cd0961fb5c03fa64292de74df2ddc34bd357cf717",
+  "manifestMatchesAfterCRLFNormalization": true,
+  "description": "Direct Windows checkout: 171/172; raw-string manifest comparison fails solely from CRLF conversion. Export with core.autocrlf=false provides exact baseline LF bytes. No inherited files changed; prototype is not loaded by the game."
+}

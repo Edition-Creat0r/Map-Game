@@ -1,0 +1,1 @@
+{"name":"map-game-infrastructure-checkpoint1","private":true,"version":"0.4.4-cp1","scripts":{"test":"node --test tests/core.test.cjs","serve":"node serve.cjs","test:browser":"node tests/browser.cjs"},"devDependencies":{"playwright-core":"1.62.1"}}

@@ -1,0 +1,1164 @@
+Default-seed territory-center distribution: {"taiga":797,"tundra_snow":6842,"grassland":8606,"dry_plains":1990,"coastal":827,"wetlands":1562,"alpine":3760,"temperate_forest":580}
+✔ existing seed, geography and terrain fields are unchanged (85.5564ms)
+✔ same global coordinates agree across reloads and strategic/local interfaces (79.7158ms)
+✔ chunk and territory borders share identical samples; blends remain continuous (93.4317ms)
+✔ all eight families occur; weights are finite, nonnegative and normalized (2208.2032ms)
+✔ representative climate regions classify as the expected biome families (0.8255ms)
+✔ height-only hillshade queries exactly match full terrain elevations (167.3907ms)
+✔ array construction preserves complete pre-optimization results with mixed visibility, sparse resources, shortages and automatic order (131.0729ms)
+✔ fixed resource/population slots retain exact long offline cycles, clamps and empty-city behavior (6.8787ms)
+✔ fixed elapsed steps, 1.2 online production and unboosted upkeep (9.7579ms)
+✔ partitioned ticks and partial visibility boundaries match a continuous deterministic clock (7.7589ms)
+✔ offline catchup has no time cap, reload cannot award it twice; backwards clocks do not pay (3.1259ms)
+✔ growth, housing and workforce constrain operation deterministically (1.8916ms)
+✔ energy deficit pauses consumers; no phantom production in unpowered housing (0.9685ms)
+✔ upkeep insolvency, invalid costs and bad numeric balances cannot create debt or NaN (2.0398ms)
+✔ legacy and versioned saves preserve unknown fields and deduplicate building records (2.4125ms)
+✔ construction footprint, border, rotated overlap and authoritative water rules (2.2282ms)
+✔ atomic purchase is idempotent, cancellation is free and reload restores complete records (62.2992ms)
+✔ failed persistence rolls back both payment and building, without overwriting source saves (52.2383ms)
+✔ writer lock, future versions, malformed saves and external edits fail closed (39.0947ms)
+✔ construction boundary settles the old partial interval without retroactive production (1.0867ms)
+✔ capital reservations, cross-chunk coordinates and old road refund signature remain compatible (21.4413ms)
+✔ legacy migration imports world buildings once, retains legacy rates and unknown data (29.3076ms)
+✔ late matching storage events and Home refresh cannot poison the next writer session (13.6873ms)
+✔ observable clock gaps receive no online bonus and retain elapsed offline time (11.1704ms)
+✔ worker results commit atomically; cancelled or late worker results cannot pay twice (140.1093ms)
+✔ worker startup failure falls back without dropping offline time (202.1079ms)
+✔ purchase cannot race a catch-up started by its own settlement (201.9973ms)
+✔ clock jumps during worker computation remain detectable after worker completion (54.4563ms)
+✔ a suspicious active clock interval pays offline production rather than dropping genuine suspension time (10.5642ms)
+✔ external checkpoint refresh cannot erase the competing-tab read-only warning (9.9129ms)
+✔ local session retry acquires the existing lock and rereads canonical data (16.8174ms)
+✔ cancelled lock callbacks cannot enable a newer session request (12.2373ms)
+✔ raster world coordinates match local samples without a half-cell offset (16.6073ms)
+✔ height halos give identical shade at shared chunk and territory boundaries (338.3694ms)
+✔ incremental raster jobs cancel before publication (0.5176ms)
+✔ drainage is deterministic, descending, joining by node ID and non-narrowing (1030.7724ms)
+✔ query halos include every possible bounded source, including territory borders (0.6977ms)
+✔ all 5000 frozen 0.3.3B forest candidates retain IDs, positions, sizes and species (392.5211ms)
+✔ packed rasters match retained samples without retaining biome objects (20.3645ms)
+✔ padded chunk rasters agree exactly in their shared color texels (108.0095ms)
+✔ drainage survives reloads and query partitions across a territory boundary (295.4157ms)
+✔ published channels terminate naturally instead of at trace-budget cutoffs (1.1272ms)
+Controlled 1600-candidate biome counts: {
+  temperate_forest: 799,
+  grassland: 115,
+  dry_plains: 49,
+  taiga: 745,
+  alpine: 103,
+  tundra_snow: 21,
+  wetlands: 631,
+  coastal: 178
+}
+✔ tree IDs, world positions, species and sizes survive reloads and LOD changes (1151.6358ms)
+✔ half-open chunk queries form a partition with no duplicate or missing roots (91.515ms)
+✔ strategic/local cover potential agrees at identical coordinates (50.2154ms)
+✔ all families have stable species and differentiated density, with water/slope/treeline exclusion (209.8092ms)
+✔ LOD weights are continuous and never depend on panning or candidate identities (3.5777ms)
+✔ real trees respect water and treeline; territory partitions do not lose roots (225.3783ms)
+✔ a zero-valued hash never selects a zero-weight biome family (3.5895ms)
+✔ graphics map uses three exact existing catalog footprints and no new building IDs (21.1471ms)
+✔ Basic and preference-off render paths preserve the original renderer arguments/result (4.2435ms)
+✔ three LOD levels have deterministic hysteresis without camera-driven positions (4.2519ms)
+✔ intersection refuses unsupported geometry before allocation (3.6278ms)
+✔ existing preferences store is extended; no new world-save or settings key is introduced (3.7074ms)
+✔ actual application defers the prototype hook after catalog and existing preferences (1.2752ms)
+✔ retained release stays intact: 139/140/5/118/21/14 and advancedMetallurgy is unchanged (716.5335ms)
+✖ original 100-manifest is byte-immutable; extensions compose deterministically without mutation (163.9895ms)
+✔ acquisition graph includes paid research and construction; no new unused material (19.7911ms)
+✔ new recipe references, amounts and material/research cycles fail closed (52.8317ms)
+✔ four new licenses charge exact material costs once and cannot bypass prerequisites or era (94.2883ms)
+✔ missing research stock prevents payment atomically, including multi-material capstone (5.0382ms)
+✔ all twelve fixed recipes conserve inputs/outputs online and offline exactly (23.5673ms)
+✔ input, upkeep, power and workforce shortages never produce negative or phantom output (3.1871ms)
+✔ mixed retained/new factories match bounded reference during scarcity/growth/online and offline (149.5866ms)
+✔ expanded 1000-year catchup stays uncapped, budgeted, reloadable and replay safe (8.0862ms)
+✔ d62525e saves retain all original stocks, contracts, research, priorities and manufacturing output (701.6203ms)
+✔ unsupported future manifests/research fail closed; manifest migration is idempotent (2.8289ms)
+✔ research after v1/v2 normalization never mutates the original save input (2.5498ms)
+✔ real Singleplayer purchase API enforces licenses, payment, overlap and persistence for twelve sites (65.7696ms)
+✔ worker composes all extensions and preserves exact mixed-chain simulation (39.9042ms)
+✔ canonical JSON and generated browser data agree; sector quotas, IDs, classifications and real model refs validate (34.7327ms)
+✔ registry rejects invalid amounts, unknown references, duplicate IDs and aliases (113.576ms)
+✔ cycles, no-input non-extraction and currency minting are rejected (39.6327ms)
+✔ legacy aliases are single balances; duplicate alias costs cannot overspend (2.8399ms)
+✔ working mine/refinery/foundry chain conserves every input and output online and offline (15.2625ms)
+✔ shortage details identify the missing material; power and population shortages block real recipes (3.7384ms)
+✔ exact accelerated solver agrees with bounded reference and partitions for mixed scarce inputs (867.0386ms)
+✔ uncapped century catch-up handles real mixed recipes and scarce budgets without losing checkpoints (1.7805ms)
+✔ schema-2 migration pins prior economics and preserves unknown fields and exact ledgers (5.6716ms)
+✔ new industrial contracts survive later catalog rate edits; future-locked and definitions-only rows remain inactive (5.3208ms)
+✔ future registry/schema saves fail closed and unknown inventory/precision fields survive migration (1.3541ms)
+✔ registry display order cannot redirect upkeep or production to another stock (10.4799ms)
+✔ a later recipe version receives a new pinned contract without replacing existing factories (0.8245ms)
+✔ collisions with the original catalog fail before registering any industrial entries (6.0321ms)
+✔ unknown rule-table fields do not become a contract for unbound records (0.5663ms)
+✔ bounded expansion preserves every existing material, factory, license and unlock record verbatim (1002.9574ms)
+✔ every new material is unique, produced and consumed by a reachable licensed chain (19.417ms)
+✔ new recipes reject undefined references, unsafe numbers, duplicate recipes and circular/free production (42.2613ms)
+✔ three appended research nodes enforce prerequisites, era, exact costs and idempotency (4.0388ms)
+✔ new factory licenses cannot be bypassed using an old fully researched save (69.4083ms)
+✔ new advancements recognize actual expansion research without changing old goals or awarding resources (69.8253ms)
+✔ expansion licenses cannot prematurely complete the original seven-introductory-research goal (0.3237ms)
+✔ each new recipe conserves exact per-minute inputs/outputs and the online 1.2x bonus (15.256ms)
+✔ input, power, workforce and upkeep shortages block factories without negative or NaN balances (3.5856ms)
+✔ mixed expanded chains agree with bounded reference across scarcity, growth and online/offline intervals (78.8846ms)
+✔ expanded long offline catch-up remains uncapped, incremental and replay safe (2.0216ms)
+✔ worker imports the expanded catalog and returns the same exact industrial ledger (37.8115ms)
+✔ baseline save reload retains unknown fields, inventories, pinned contracts and all earned progress (732.2751ms)
+✔ 1000 years are processed without a cap or tick explosion; same timestamp cannot pay again (9.8012ms)
+✔ exact ledger makes batching, reload and arbitrary callback partitions identical (436.18ms)
+✔ cooperative continuation preserves every outstanding millisecond and blocks no time on reload (5.8577ms)
+✔ money exhaustion and saturated stores stop at the correct operating boundary (3.015ms)
+✔ input/output recipes consume starting stocks; future output cannot fund the same tick (2.7677ms)
+✔ alternating material shortages are cycle-skipped without creating material or waiving inputs (631.3988ms)
+✔ seeded short scenarios match a one-tick reference across cash, inputs, power and population constraints (338.5475ms)
+✔ v1 migration preserves unknown state and pending online time; unsafe timestamps fail closed (2.1139ms)
+✔ online recipe throughput consumes 1.2x inputs as well as producing 1.2x outputs (1.4107ms)
+✔ large integer balances survive numeric projection without artificial fractional drift (1.6639ms)
+✔ frontier backup round trips exact ledger, unknown fields and excludes credentials (3.1119ms)
+✔ backup rejects future schema, unknown keys, unsafe properties, invalid seed and malformed records (1.3301ms)
+✔ restore rolls back all known records on a storage failure (3.5272ms)
+✔ write-ahead journal recovers interrupted import before simulation (0.6263ms)
+✔ advancement DAG completion is deterministic idempotent and grants no economy rewards (1.2252ms)
+✔ prerequisites, prospective exploration and maximum three pinned goals are enforced (0.7526ms)
+✔ future and malformed advancement records fail closed (1.0913ms)
+✔ image header limits reject decompression bombs before image decoding (0.8304ms)
+✔ invalid resource amounts and duplicate or malformed placements cannot be imported (1.0701ms)
+✔ restoring a world never deletes unrelated credentials or private preferences (0.611ms)
+✔ modular graphics map only genuine existing building IDs and exact footprints (3.1256ms)
+✔ static decorations and every quarter turn stay inside logical placement bounds (1.0581ms)
+✔ factory LOD uses hysteresis without changing model positions or economic contracts (7.9572ms)
+✔ all 16 existing achievements retain deterministic rules and presentation tiers (2.2898ms)
+✔ achievement display clamps verified counts and distinguishes progress, locked and complete (0.539ms)
+✔ hidden achievement remains concealed until its existing prerequisites are met (0.7464ms)
+✔ shop presentation distinguishes resources, research, unavailable and ready without changing rules (5.4018ms)
+✔ static previews cover actual 145 economy contracts, escape labels and do not mutate definitions (27.0025ms)
+✔ presentation cannot grant rewards, change records or duplicate goals (5.5174ms)
+✔ frozen JSON and browser mirrors validate exact 118/10/108/21 and six era quotas (20.2159ms)
+✔ invalid manifest IDs, quotas, undefined acquisition and research cycles fail validation (8.8135ms)
+✔ research DAG costs, prerequisites and repeated completion are exact and idempotent (78.9628ms)
+✔ research cannot overdraw balances or fabricate material inputs (2.2955ms)
+✔ starter economy has reachable next goals and acquisition includes research cost dependencies (28.0889ms)
+✔ research does not implicitly unlock referenced dependencies or bypass era gates (0.9415ms)
+✔ all five starter contracts remain available, defense and excluded outputs remain future content (0.7578ms)
+✔ migration preserves all exact balances, pending time, unknown fields and legal factory capabilities without unrelated research (2.0985ms)
+✔ future progression and economy saves fail closed; no silent downgrade (4.5994ms)
+✔ legal pinned factories operate despite new research locks and unmodified legacy economics (46.8573ms)
+✔ automatic priority is optional deterministic persisted configuration, without changing rows/contracts (3.2775ms)
+✔ automatic priority honors workers power upkeep and scarce input constraints under exact accelerated solver (179.8974ms)
+✔ long offline remains uncapped with exact online 1.2 input and output conservation (2.5232ms)
+✔ minigame reservation cannot award rewards or mint Singleplayer or multiplayer resources (0.2358ms)
+✔ economy API rejects locked factories and spoofed definitions, then permits legitimate research unlocks (24.7735ms)
+✔ research and priority transactions persist, replay safely, roll back on storage errors and preserve original future data (21.4394ms)
+✔ previously inactive future definitions stay inactive; only paid C1 advanced rows gain operational eligibility (44.725ms)
+✔ Quaternius pilots only replace nine canonical visual IDs and retain exact footprints (2.6285ms)
+✔ Quaternius artifact hashes and external texture references resolve locally (110.2073ms)
+✔ Quaternius source policy has no Kenney exception, paid shader or live integration (1.6866ms)
+✔ Detailed Quaternius High geometry and PBR semantics are preserved; original equipment is isolated (218.2072ms)
+✔ Every original texture retains its exact bytes; far caches are additive (20.3448ms)
+✔ Low geometry is at least halved without changing canonical footprints or High LOD counts (0.6214ms)
+✔ six requested industrial studies map to existing contracts without unlocking future content (3.2658ms)
+✔ actual Machinery Works door geometry lies inside the preserved native facade (86.2495ms)
+✔ Machinery Works includes transparent CNC guarding and a horizontal lathe shaft (102.7471ms)
+✔ nine models share approved texture files and bounded effective LOD budgets (0.423ms)
+✔ all nineteen approved texture files remain byte-identical to 5b51d3e (222.6467ms)
+✔ warehouse rear pallets and both vehicle wheel sides stay outside their adjacent shells (23.2862ms)
+✔ Quaternius visual plan retains 24 distinct real IDs and canonical footprints without changing catalog (2.3039ms)
+✔ Quaternius-only direction fails closed on Kenney use and pending residential source (0.5961ms)
+✔ previous Kenney prototypes are preserved byte-for-byte solely as comparison references (10.1091ms)
+✔ resource mapping review covers actual 139 materials without invented pack assignments (7.3116ms)
+✔ only original credit artwork is activated; existing money ID is retained (0.8803ms)
+✔ duplicate icon mappings and noncanonical/undefined materials fail closed (0.6216ms)
+✔ unlicensed, remote, traversal and non-original SVG mappings are refused (0.3129ms)
+✔ icon text escaping cannot introduce attributes or executable markup (0.2426ms)
+✔ Easy Craft recipes derive from existing catalog and never invent manual recipes (0.5208ms)
+✔ Easy Craft inventory preserves zero, fractional and legacy balances (0.2241ms)
+✔ Easy Craft exposes pinned contracts without modifying saves or rules (20.3119ms)
+✔ credit artwork contains no executable/remote content (14.8659ms)
+✔ closed recipe planner reuses economy events without a new snapshot or subscription (4.0625ms)
+✔ grandfathered operating factories remain visible when new construction is research-locked (0.3915ms)
+✔ visual restoration preserves all deterministic tree records across real biome territories (436.0395ms)
+✔ default local zoom now displays tree detail with continuous presentation transitions (5.8127ms)
+ℹ tests 172
+ℹ suites 0
+ℹ pass 171
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2793.0308
+
+✖ failing tests:
+
+test at tests\industrial-042a.test.cjs:10:1
+✖ original 100-manifest is byte-immutable; extensions compose deterministically without mutation (163.9895ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + '{\r\n' +
+  +   '  "version": 1,\r\n' +
+  +   '  "registryVersion": 1,\r\n' +
+  +   '  "materials": [\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "money",\r\n' +
+  +   '      "unlockEra": 1,\r\n' +
+  +   '      "unlockRequirements": [],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "cornerStore"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "steel",\r\n' +
+  +   '      "unlockEra": 1,\r\n' +
+  +   '      "unlockRequirements": [],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "steelFoundry"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "carbon",\r\n' +
+  +   '      "unlockEra": 1,\r\n' +
+  +   '      "unlockRequirements": [],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "cokeWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "ironOre",\r\n' +
+  +   '      "unlockEra": 1,\r\n' +
+  +   '      "unlockRequirements": [],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "ironMine"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "coal",\r\n' +
+  +   '      "unlockEra": 1,\r\n' +
+  +   '      "unlockRequirements": [],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "coalMine"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "concrete",\r\n' +
+  +   '      "unlockEra": 1,\r\n' +
+  +   '      "unlockRequirements": [],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "concreteBatchPlant"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "glass",\r\n' +
+  +   '      "unlockEra": 1,\r\n' +
+  +   '      "unlockRequirements": [],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "glassWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "silica",\r\n' +
+  +   '      "unlockEra": 1,\r\n' +
+  +   '      "unlockRequirements": [],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "silicaQuarry"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "copperOre",\r\n' +
+  +   '      "unlockEra": 1,\r\n' +
+  +   '      "unlockRequirements": [],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "copperMine"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "limestone",\r\n' +
+  +   '      "unlockEra": 1,\r\n' +
+  +   '      "unlockRequirements": [],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "limestoneQuarry"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "salt",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "miningRefining"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "saltWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "copper",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "miningRefining"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "copperSmelter"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "iron",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "miningRefining"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "ironSmelter"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "bricks",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "constructionTechnology"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "brickKiln"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "cement",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "constructionTechnology"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "cementKiln"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "wire",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "constructionTechnology"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "wireMill"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "bauxite",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "miningRefining"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "bauxiteMine"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "naturalGas",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "miningRefining"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "gasWell"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "crudeOil",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "miningRefining"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "oilWell"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "phosphate",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "miningRefining"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "phosphateMine"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "sulfur",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "miningRefining"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "sulfurMine"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "aluminum",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "miningRefining"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "aluminumRefinery"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "industrialGas",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "miningRefining"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "gasProcessor"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "fuel",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "miningRefining"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "oilRefinery"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "silicon",\r\n' +
+  +   '      "unlockEra": 2,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "miningRefining"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "siliconRefinery"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "beams",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "constructionTechnology"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "beamMill"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "ceramics",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "constructionTechnology"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "ceramicsWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "pipes",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "constructionTechnology"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "pipeMill"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "steelPlate",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "constructionTechnology"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "plateMill"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "industrialAcid",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "basicIndustry"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "acidWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "coolant",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "basicIndustry"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "coolantWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "fertilizer",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "basicIndustry"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "fertilizerWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "lubricant",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "basicIndustry"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "lubricantWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "paint",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "basicIndustry"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "paintWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "plastic",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "basicIndustry"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "polymerWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "cable",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "constructionTechnology"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "cableWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "insulation",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "constructionTechnology"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "insulationWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "polymerFilm",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "basicIndustry"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "filmWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "industrialResin",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "basicIndustry"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "resinWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "rubber",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "basicIndustry"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "rubberWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "industrialSolvent",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "basicIndustry"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "solventWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "adhesive",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "basicIndustry"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "adhesiveWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "syntheticTextiles",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "basicIndustry"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "progression",\r\n' +
+  +   '      "acquisition": {\r\n' +
+  +   '        "building": "textileWorks"\r\n' +
+  +   '      }\r\n' +
+  +   '    },\r\n' +
+  +   '    {\r\n' +
+  +   '      "id": "semiconductors",\r\n' +
+  +   '      "unlockEra": 3,\r\n' +
+  +   '      "unlockRequirements": [\r\n' +
+  +   '        "electronicsFoundations"\r\n' +
+  +   '      ],\r\n' +
+  +   '      "visibility": "pro'... 16306 more characters
+  - '{\n' +
+  -   '  "version": 1,\n' +
+  -   '  "registryVersion": 1,\n' +
+  -   '  "materials": [\n' +
+  -   '    {\n' +
+  -   '      "id": "money",\n' +
+  -   '      "unlockEra": 1,\n' +
+  -   '      "unlockRequirements": [],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "cornerStore"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "steel",\n' +
+  -   '      "unlockEra": 1,\n' +
+  -   '      "unlockRequirements": [],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "steelFoundry"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "carbon",\n' +
+  -   '      "unlockEra": 1,\n' +
+  -   '      "unlockRequirements": [],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "cokeWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "ironOre",\n' +
+  -   '      "unlockEra": 1,\n' +
+  -   '      "unlockRequirements": [],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "ironMine"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "coal",\n' +
+  -   '      "unlockEra": 1,\n' +
+  -   '      "unlockRequirements": [],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "coalMine"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "concrete",\n' +
+  -   '      "unlockEra": 1,\n' +
+  -   '      "unlockRequirements": [],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "concreteBatchPlant"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "glass",\n' +
+  -   '      "unlockEra": 1,\n' +
+  -   '      "unlockRequirements": [],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "glassWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "silica",\n' +
+  -   '      "unlockEra": 1,\n' +
+  -   '      "unlockRequirements": [],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "silicaQuarry"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "copperOre",\n' +
+  -   '      "unlockEra": 1,\n' +
+  -   '      "unlockRequirements": [],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "copperMine"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "limestone",\n' +
+  -   '      "unlockEra": 1,\n' +
+  -   '      "unlockRequirements": [],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "limestoneQuarry"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "salt",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "miningRefining"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "saltWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "copper",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "miningRefining"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "copperSmelter"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "iron",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "miningRefining"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "ironSmelter"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "bricks",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "constructionTechnology"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "brickKiln"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "cement",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "constructionTechnology"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "cementKiln"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "wire",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "constructionTechnology"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "wireMill"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "bauxite",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "miningRefining"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "bauxiteMine"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "naturalGas",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "miningRefining"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "gasWell"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "crudeOil",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "miningRefining"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "oilWell"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "phosphate",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "miningRefining"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "phosphateMine"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "sulfur",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "miningRefining"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "sulfurMine"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "aluminum",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "miningRefining"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "aluminumRefinery"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "industrialGas",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "miningRefining"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "gasProcessor"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "fuel",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "miningRefining"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "oilRefinery"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "silicon",\n' +
+  -   '      "unlockEra": 2,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "miningRefining"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "siliconRefinery"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "beams",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "constructionTechnology"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "beamMill"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "ceramics",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "constructionTechnology"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "ceramicsWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "pipes",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "constructionTechnology"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "pipeMill"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "steelPlate",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "constructionTechnology"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "plateMill"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "industrialAcid",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "basicIndustry"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "acidWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "coolant",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "basicIndustry"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "coolantWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "fertilizer",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "basicIndustry"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "fertilizerWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "lubricant",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "basicIndustry"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "lubricantWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "paint",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "basicIndustry"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "paintWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "plastic",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "basicIndustry"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "polymerWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "cable",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "constructionTechnology"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "cableWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "insulation",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "constructionTechnology"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "insulationWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "polymerFilm",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "basicIndustry"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "filmWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "industrialResin",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "basicIndustry"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "resinWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "rubber",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "basicIndustry"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "rubberWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "industrialSolvent",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "basicIndustry"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "solventWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "adhesive",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "basicIndustry"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "adhesiveWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "syntheticTextiles",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "basicIndustry"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "textileWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "semiconductors",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "electronicsFoundations"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "semiconductorFab"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "circuitBoards",\n' +
+  -   '      "unlockEra": 3,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "electronicsFoundations"\n' +
+  -   '      ],\n' +
+  -   '      "visibility": "progression",\n' +
+  -   '      "acquisition": {\n' +
+  -   '        "building": "boardWorks"\n' +
+  -   '      }\n' +
+  -   '    },\n' +
+  -   '    {\n' +
+  -   '      "id": "bearings",\n' +
+  -   '      "unlockEra": 4,\n' +
+  -   '      "unlockRequirements": [\n' +
+  -   '        "industrialMachinery"\n' +
+  -   '      ],\n' +
+  -   '      "visibility":'... 15134 more characters
+
+      at TestContext.<anonymous> (C:\Users\ayach\Map-Game-0.4.4-Infrastructure-Local\tests\industrial-042a.test.cjs:11:9)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '{\r\n  "version": 1,\r\n  "registryVersion": 1,\r\n  "materials": [\r\n    {\r\n      "id": "money",\r\n      "unlockEra": 1,\r\n      "unlockRequirements": [],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "cornerStore"\r\n      }\r\n    },\r\n    {\r\n      "id": "steel",\r\n      "unlockEra": 1,\r\n      "unlockRequirements": [],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "steelFoundry"\r\n      }\r\n    },\r\n    {\r\n      "id": "carbon",\r\n      "unlockEra": 1,\r\n      "unlockRequirements": [],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "cokeWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "ironOre",\r\n      "unlockEra": 1,\r\n      "unlockRequirements": [],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "ironMine"\r\n      }\r\n    },\r\n    {\r\n      "id": "coal",\r\n      "unlockEra": 1,\r\n      "unlockRequirements": [],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "coalMine"\r\n      }\r\n    },\r\n    {\r\n      "id": "concrete",\r\n      "unlockEra": 1,\r\n      "unlockRequirements": [],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "concreteBatchPlant"\r\n      }\r\n    },\r\n    {\r\n      "id": "glass",\r\n      "unlockEra": 1,\r\n      "unlockRequirements": [],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "glassWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "silica",\r\n      "unlockEra": 1,\r\n      "unlockRequirements": [],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "silicaQuarry"\r\n      }\r\n    },\r\n    {\r\n      "id": "copperOre",\r\n      "unlockEra": 1,\r\n      "unlockRequirements": [],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "copperMine"\r\n      }\r\n    },\r\n    {\r\n      "id": "limestone",\r\n      "unlockEra": 1,\r\n      "unlockRequirements": [],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "limestoneQuarry"\r\n      }\r\n    },\r\n    {\r\n      "id": "salt",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "miningRefining"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "saltWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "copper",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "miningRefining"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "copperSmelter"\r\n      }\r\n    },\r\n    {\r\n      "id": "iron",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "miningRefining"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "ironSmelter"\r\n      }\r\n    },\r\n    {\r\n      "id": "bricks",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "constructionTechnology"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "brickKiln"\r\n      }\r\n    },\r\n    {\r\n      "id": "cement",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "constructionTechnology"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "cementKiln"\r\n      }\r\n    },\r\n    {\r\n      "id": "wire",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "constructionTechnology"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "wireMill"\r\n      }\r\n    },\r\n    {\r\n      "id": "bauxite",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "miningRefining"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "bauxiteMine"\r\n      }\r\n    },\r\n    {\r\n      "id": "naturalGas",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "miningRefining"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "gasWell"\r\n      }\r\n    },\r\n    {\r\n      "id": "crudeOil",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "miningRefining"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "oilWell"\r\n      }\r\n    },\r\n    {\r\n      "id": "phosphate",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "miningRefining"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "phosphateMine"\r\n      }\r\n    },\r\n    {\r\n      "id": "sulfur",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "miningRefining"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "sulfurMine"\r\n      }\r\n    },\r\n    {\r\n      "id": "aluminum",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "miningRefining"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "aluminumRefinery"\r\n      }\r\n    },\r\n    {\r\n      "id": "industrialGas",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "miningRefining"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "gasProcessor"\r\n      }\r\n    },\r\n    {\r\n      "id": "fuel",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "miningRefining"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "oilRefinery"\r\n      }\r\n    },\r\n    {\r\n      "id": "silicon",\r\n      "unlockEra": 2,\r\n      "unlockRequirements": [\r\n        "miningRefining"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "siliconRefinery"\r\n      }\r\n    },\r\n    {\r\n      "id": "beams",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "constructionTechnology"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "beamMill"\r\n      }\r\n    },\r\n    {\r\n      "id": "ceramics",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "constructionTechnology"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "ceramicsWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "pipes",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "constructionTechnology"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "pipeMill"\r\n      }\r\n    },\r\n    {\r\n      "id": "steelPlate",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "constructionTechnology"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "plateMill"\r\n      }\r\n    },\r\n    {\r\n      "id": "industrialAcid",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "basicIndustry"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "acidWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "coolant",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "basicIndustry"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "coolantWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "fertilizer",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "basicIndustry"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "fertilizerWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "lubricant",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "basicIndustry"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "lubricantWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "paint",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "basicIndustry"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "paintWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "plastic",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "basicIndustry"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "polymerWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "cable",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "constructionTechnology"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "cableWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "insulation",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "constructionTechnology"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "insulationWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "polymerFilm",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "basicIndustry"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "filmWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "industrialResin",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "basicIndustry"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "resinWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "rubber",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "basicIndustry"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "rubberWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "industrialSolvent",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "basicIndustry"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "solventWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "adhesive",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "basicIndustry"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "adhesiveWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "syntheticTextiles",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "basicIndustry"\r\n      ],\r\n      "visibility": "progression",\r\n      "acquisition": {\r\n        "building": "textileWorks"\r\n      }\r\n    },\r\n    {\r\n      "id": "semiconductors",\r\n      "unlockEra": 3,\r\n      "unlockRequirements": [\r\n        "electronicsFoundations"\r\n      ],\r\n      "visibility": "pro'... 16306 more characters,
+    expected: '{\n  "version": 1,\n  "registryVersion": 1,\n  "materials": [\n    {\n      "id": "money",\n      "unlockEra": 1,\n      "unlockRequirements": [],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "cornerStore"\n      }\n    },\n    {\n      "id": "steel",\n      "unlockEra": 1,\n      "unlockRequirements": [],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "steelFoundry"\n      }\n    },\n    {\n      "id": "carbon",\n      "unlockEra": 1,\n      "unlockRequirements": [],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "cokeWorks"\n      }\n    },\n    {\n      "id": "ironOre",\n      "unlockEra": 1,\n      "unlockRequirements": [],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "ironMine"\n      }\n    },\n    {\n      "id": "coal",\n      "unlockEra": 1,\n      "unlockRequirements": [],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "coalMine"\n      }\n    },\n    {\n      "id": "concrete",\n      "unlockEra": 1,\n      "unlockRequirements": [],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "concreteBatchPlant"\n      }\n    },\n    {\n      "id": "glass",\n      "unlockEra": 1,\n      "unlockRequirements": [],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "glassWorks"\n      }\n    },\n    {\n      "id": "silica",\n      "unlockEra": 1,\n      "unlockRequirements": [],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "silicaQuarry"\n      }\n    },\n    {\n      "id": "copperOre",\n      "unlockEra": 1,\n      "unlockRequirements": [],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "copperMine"\n      }\n    },\n    {\n      "id": "limestone",\n      "unlockEra": 1,\n      "unlockRequirements": [],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "limestoneQuarry"\n      }\n    },\n    {\n      "id": "salt",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "miningRefining"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "saltWorks"\n      }\n    },\n    {\n      "id": "copper",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "miningRefining"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "copperSmelter"\n      }\n    },\n    {\n      "id": "iron",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "miningRefining"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "ironSmelter"\n      }\n    },\n    {\n      "id": "bricks",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "constructionTechnology"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "brickKiln"\n      }\n    },\n    {\n      "id": "cement",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "constructionTechnology"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "cementKiln"\n      }\n    },\n    {\n      "id": "wire",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "constructionTechnology"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "wireMill"\n      }\n    },\n    {\n      "id": "bauxite",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "miningRefining"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "bauxiteMine"\n      }\n    },\n    {\n      "id": "naturalGas",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "miningRefining"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "gasWell"\n      }\n    },\n    {\n      "id": "crudeOil",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "miningRefining"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "oilWell"\n      }\n    },\n    {\n      "id": "phosphate",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "miningRefining"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "phosphateMine"\n      }\n    },\n    {\n      "id": "sulfur",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "miningRefining"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "sulfurMine"\n      }\n    },\n    {\n      "id": "aluminum",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "miningRefining"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "aluminumRefinery"\n      }\n    },\n    {\n      "id": "industrialGas",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "miningRefining"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "gasProcessor"\n      }\n    },\n    {\n      "id": "fuel",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "miningRefining"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "oilRefinery"\n      }\n    },\n    {\n      "id": "silicon",\n      "unlockEra": 2,\n      "unlockRequirements": [\n        "miningRefining"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "siliconRefinery"\n      }\n    },\n    {\n      "id": "beams",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "constructionTechnology"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "beamMill"\n      }\n    },\n    {\n      "id": "ceramics",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "constructionTechnology"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "ceramicsWorks"\n      }\n    },\n    {\n      "id": "pipes",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "constructionTechnology"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "pipeMill"\n      }\n    },\n    {\n      "id": "steelPlate",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "constructionTechnology"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "plateMill"\n      }\n    },\n    {\n      "id": "industrialAcid",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "basicIndustry"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "acidWorks"\n      }\n    },\n    {\n      "id": "coolant",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "basicIndustry"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "coolantWorks"\n      }\n    },\n    {\n      "id": "fertilizer",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "basicIndustry"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "fertilizerWorks"\n      }\n    },\n    {\n      "id": "lubricant",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "basicIndustry"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "lubricantWorks"\n      }\n    },\n    {\n      "id": "paint",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "basicIndustry"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "paintWorks"\n      }\n    },\n    {\n      "id": "plastic",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "basicIndustry"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "polymerWorks"\n      }\n    },\n    {\n      "id": "cable",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "constructionTechnology"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "cableWorks"\n      }\n    },\n    {\n      "id": "insulation",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "constructionTechnology"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "insulationWorks"\n      }\n    },\n    {\n      "id": "polymerFilm",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "basicIndustry"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "filmWorks"\n      }\n    },\n    {\n      "id": "industrialResin",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "basicIndustry"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "resinWorks"\n      }\n    },\n    {\n      "id": "rubber",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "basicIndustry"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "rubberWorks"\n      }\n    },\n    {\n      "id": "industrialSolvent",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "basicIndustry"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "solventWorks"\n      }\n    },\n    {\n      "id": "adhesive",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "basicIndustry"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "adhesiveWorks"\n      }\n    },\n    {\n      "id": "syntheticTextiles",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "basicIndustry"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "textileWorks"\n      }\n    },\n    {\n      "id": "semiconductors",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "electronicsFoundations"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "semiconductorFab"\n      }\n    },\n    {\n      "id": "circuitBoards",\n      "unlockEra": 3,\n      "unlockRequirements": [\n        "electronicsFoundations"\n      ],\n      "visibility": "progression",\n      "acquisition": {\n        "building": "boardWorks"\n      }\n    },\n    {\n      "id": "bearings",\n      "unlockEra": 4,\n      "unlockRequirements": [\n        "industrialMachinery"\n      ],\n      "visibility":'... 15134 more characters,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

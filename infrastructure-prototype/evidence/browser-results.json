@@ -1,0 +1,44 @@
+{
+  "errors": [],
+  "requests": [
+    "/",
+    "/style.css",
+    "/core.js",
+    "/app.js",
+    "/",
+    "/style.css",
+    "/core.js",
+    "/app.js"
+  ],
+  "checks": [
+    "Pointer two-click review, live obstacle detour and cancellation do not mutate mock state",
+    "Injected post-graph failure rolls back everything and retains review",
+    "Explicit confirmation publishes geometry and debit together",
+    "Waypoint control, undo and endpoint adjustment share the same draft",
+    "Blocked route is red and cannot be confirmed",
+    "Cross-network crossing is special with an itemized cost",
+    "Funds and stale-revision guards require a refreshed review",
+    "All three fixture types use the shared controls",
+    "Escape cancels via keyboard",
+    "Reload resets fixture; no browser persistence writes",
+    "Narrow viewport has no horizontal overflow",
+    "Only prototype files requested; no external or live-game requests"
+  ],
+  "screenshots": [
+    "01-ready.png",
+    "02-obstacle-detour-review.png",
+    "03-compatible-snap.png",
+    "04-confirmed-mock-construction.png",
+    "05-waypoint-review.png",
+    "06-blocked.png",
+    "07-special-crossing.png",
+    "08-insufficient-funds.png",
+    "09-mobile.png"
+  ],
+  "previewTimingMs": {
+    "samples": 40,
+    "median": 15.699999988079071,
+    "p95": 20.099999994039536,
+    "max": 25.599999994039536
+  }
+}

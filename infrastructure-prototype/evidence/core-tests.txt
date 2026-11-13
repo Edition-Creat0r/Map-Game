@@ -1,0 +1,38 @@
+✔ two-click review has no debit or topology changes until explicit confirmation (104.2502ms)
+✔ smart routing avoids the entire protected footprint and has a repeatable simplified path (33.5944ms)
+✔ straight routes remain straight (0.4474ms)
+✔ full-width clearance blocks a route whose centerline alone fits (0.5391ms)
+✔ an impassable barrier returns blocked without mutation (30.3009ms)
+✔ obstacle endpoints and outside bounds are rejected (0.8169ms)
+✔ compatible snapping uses segment projections and never mutates fixture geometry (0.5576ms)
+✔ compatible mid-segment connection is only split on commit (1.1361ms)
+✔ collinear compatible endpoint extensions connect, duplicate and overlapping routes do not (0.3971ms)
+✔ manual waypoints are preserved exactly, and can be undone or adjusted (1.1553ms)
+✔ blocked waypoints and self-overlapping routes are rejected (0.3197ms)
+✔ different network crossing is special and never splits the other network (0.8395ms)
+✔ special corridor costs are itemized and included in the full quote (0.3049ms)
+✔ insufficient funds rejects confirmation with no state change (55.8309ms)
+✔ failure after-debit rolls back funds, graph, IDs and receipt (47.4255ms)
+✔ failure after-graph rolls back funds, graph, IDs and receipt (44.0588ms)
+✔ failure before-publish rolls back funds, graph, IDs and receipt (49.295ms)
+✔ duplicate operations return the original receipt without charging twice (27.7758ms)
+✔ stale preview is rejected and refreshed review is required (38.1827ms)
+✔ tampered quotes, coordinates and operation identities are refused (24.6278ms)
+✔ cancellation from live preview and review preserves the exact mock world (0.5933ms)
+✔ all corridor fixtures share the framework, without type-specific simulations (0.8032ms)
+✔ snapshots and immutable plans cannot mutate store state (21.6353ms)
+✔ seeded route scenarios repeat and every accepted segment clears all footprints (99.7534ms)
+✔ prototype runtime has no game, persistence or network integration (737.0222ms)
+✔ operation identities stay unique across controllers and refreshed reviews (0.9971ms)
+✔ an actual network commit invalidates another controller review (1.5457ms)
+✔ switching type cancels only the draft and publishes no world change (0.6029ms)
+✔ injected type rules are shared by draft planning and commit revalidation (0.9426ms)
+✔ injected planners cannot mutate the authoritative mock world during validation (13.2921ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1498.6814
