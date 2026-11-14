@@ -15,6 +15,9 @@
     "Injected post-graph failure rolls back everything and retains review",
     "Explicit confirmation publishes geometry and debit together",
     "Waypoint control, undo and endpoint adjustment share the same draft",
+    "Button and Backspace undo retain reviewed endpoints, refresh estimates and identities, and no-op without waypoints",
+    "Adjust retains waypoints; routing Backspace still selects a new endpoint",
+    "Blocked and thrown undo replans show errors, preserve endpoints and disable confirmation",
     "Blocked route is red and cannot be confirmed",
     "Cross-network crossing is special with an itemized cost",
     "Funds and stale-revision guards require a refreshed review",
@@ -37,8 +40,8 @@
   ],
   "previewTimingMs": {
     "samples": 40,
-    "median": 15.699999988079071,
-    "p95": 20.099999994039536,
-    "max": 25.599999994039536
+    "median": 12.699999988079071,
+    "p95": 17,
+    "max": 26.80000001192093
   }
 }

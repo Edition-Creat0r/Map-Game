@@ -94,7 +94,7 @@
   begin(point){this.cancel();this.start=clone(point);this.phase='routing';}
   preview(point){if(!this.start||this.phase==='review')return this.proposal;this.proposal=this.store.propose({kind:this.kind,start:this.start,end:point,waypoints:this.waypoints});return this.proposal;}
   waypoint(point){if(!this.start)throw Error('Select a start first');this.waypoints.push(clone(point));this.phase='routing';this.proposal=null;}
-  undoWaypoint(){this.waypoints.pop();this.proposal=null;this.phase=this.start?'routing':'idle';}
+  undoWaypoint(){if(!this.waypoints.length)return;const review=this.phase==='review';this.waypoints.pop();this.proposal=null;this.operationId=null;if(review)return this.refresh();this.phase=this.start?'routing':'idle';}
   finish(point){if(!this.start)throw Error('Select a start first');this.end=clone(point);this.phase='routing';this.preview(point);this.phase='review';this.operationId=this.store.allocateOperationId();return this.proposal;}
   adjust(){if(this.start){this.phase='routing';this.operationId=null;}}
   confirm(){if(this.phase!=='review'||!this.proposal)throw Error('Review a complete route before confirming');const receipt=this.store.commit(this.proposal,this.operationId);this.cancel();return receipt;}

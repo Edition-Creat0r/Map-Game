@@ -33,10 +33,11 @@
  canvas.addEventListener('click',e=>usePoint(pointFrom(e),e.shiftKey||$('waypoint-mode').checked));
  $('coordinate-form').onsubmit=e=>{e.preventDefault();usePoint({x:Number($('coord-x').value),z:Number($('coord-z').value)},$('waypoint-mode').checked);};
  $('confirm').onclick=()=>act(()=>{store.failAt=$('failure').value||null;try{const receipt=controller.confirm();notice('Committed '+money(receipt.cost)+' in mock funds. Choose a new start.');}finally{store.failAt=null;$('failure').value='';}});
- $('cancel').onclick=()=>{controller.cancel();notice('Cancelled. Mock balance and networks are unchanged.');};$('undo').onclick=()=>{controller.undoWaypoint();notice('Last waypoint removed. Choose the endpoint again.');};$('adjust').onclick=()=>{controller.adjust();notice('Adjust the endpoint. Click again to review.');};
+ function undoWaypoint(){if(!controller.waypoints.length)return;act(()=>{controller.undoWaypoint();notice(controller.phase==='review'?'Last waypoint removed. Route recalculated with the same start and endpoint.':'Last waypoint removed. Choose the endpoint.');});}
+ $('cancel').onclick=()=>{controller.cancel();notice('Cancelled. Mock balance and networks are unchanged.');};$('undo').onclick=undoWaypoint;$('adjust').onclick=()=>{controller.adjust();notice('Adjust the endpoint. Click again to review.');};
  $('refresh').onclick=()=>act(()=>{controller.refresh();notice('Estimate refreshed. Review before confirming.');});
  $('set-funds').onclick=()=>act(()=>{const funds=Number($('funds').value);if(!Number.isFinite(funds)||funds<0||funds>1000000)throw Error('Use mock funds between 0 and 1,000,000');store.state.funds=funds;store.state.revision++;notice('Mock funds updated. Existing estimates require a fresh review.');});
  $('reset').onclick=()=>{store.state=C.fixture();controller.cancel();$('funds').value=15000;notice('Fixture reset. No saved state exists.');};
- window.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;if(e.key==='Escape'){controller.cancel();notice('Cancelled. No world or balance changes.');}if(e.key==='Backspace'){e.preventDefault();controller.undoWaypoint();notice('Waypoint removed.');}});
+ window.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;if(e.key==='Escape'){controller.cancel();notice('Cancelled. No world or balance changes.');}if(e.key==='Backspace'){e.preventDefault();undoWaypoint();}});
  window.addEventListener('resize',draw);window.infrastructureLab={store,controller,update,usePoint};update();
 })();
